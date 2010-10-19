@@ -1,0 +1,64 @@
+#!/usr/bin/awk
+
+function which(c,path) {
+	cmd = "test -x " c;
+
+	if (system(cmd)==0) {
+		return c;
+	} 
+
+	sub(/\/.*\//,"",c);
+  for (dir in path) {
+			cmd = "test -x " path[dir] "/" c;
+			if (system(cmd)==0) {
+					return path[dir] "/" c;
+			} 
+	}
+
+
+	return c;
+}
+
+# used to replace "use lib utils.pm" with "use lib @libexecdir"
+#
+function led() {
+	led1 = "@libexecdir@";
+	led2 = "@exec_prefix@";
+	led3 = "@prefix@";
+	if ( match(led1, /^\$\{exec_prefix\}/ ) != 0 ) {
+		return "\"" led3 "/libexec\" " ;
+	
+	}
+	return "\"" led1 "\"" ;
+}
+
+BEGIN {
+	split(ENVIRON["PATH"] ":/sbin:/usr/sbin",path,/:/);
+
+}
+
+# scripting language (first line)
+
+/^#! ?\/.*\/python/ {sub(/^#! ?\/.*\/python/,"#! @PYTHON@");}
+/^#! ?\/.*\/perl/ {sub(/^#! ?\/.*\/perl/,"#! @PERL@");}
+/^#! ?\/.*\/[a-z]{0,2}awk/ {sub(/^#! ?\/.*\/[a-z]{0,2}awk/,"#! @AWK@");}
+/^#! ?\/.*\/sh/ {sub(/^#! ?\/.*\/sh/,"#! @SHELL@");}
+
+# add to libexecdir to INC for perl utils.pm
+/^use/ { if (/lib/) { if (/utils.pm|"."/ ) {sub(/utils.pm|"."/,led() )} } }
+
+
+# Replace the placeholders with the values from configure
+/#PERL#/ {sub(/#PERL#/,"@PERL@");}
+/my \$NOINSTLEVEL = 'unknown'/ {sub(/unknown/,"@NOINSTLEVEL@");}
+/my \$CELSIUS = 1;/ {sub(/1/,"@CELSIUS@");}
+/my \$PERFDATA = 1;/ {sub(/1/,"@PERFDATA@");}
+/my \$EXTENDEDINFO = 1;/ {sub(/1/,"@EXTENDEDINFO@");}
+/my \$HWINFO = 1;/ {sub(/1/,"@HWINFO@");}
+/my \$HPACUCLI = 1;/ {sub(/1/,"@HPACUCLI@");}
+/version => '.*',/ {sub(/'.*'/,"'@PACKAGE_VERSION@'");}
+
+{
+	print;
+}
+

@@ -1,0 +1,325 @@
+check_nwc_health Nagios Plugin README
+---------------------
+
+This plugin checks the hardware health of HP Proliant servers with the 
+hpasm software installed. It uses the hpasmcli command to acquire the 
+condition of the system's critical components like cpus, power supplies,
+temperatures, fans and memory modules. Newer versions also use SNMP.
+
+* For instructions on installing this plugin for use with Nagios,
+  see below. In addition, generic instructions for the GNU toolchain
+  can be found in the INSTALL file.
+
+* For major changes between releases, read the CHANGES file.
+
+* For information on detailed changes that have been made,
+  read the Changelog file.
+
+* This plugins is self documenting.  All plugins that comply with
+  the basic guidelines for development will provide detailed help when
+  invoked with the '-h' or '--help' options.
+
+You can check for the latest plugin at:
+  http://www.consol.de/opensource/nagios/check-hpasm
+
+Send mail to gerhard.lausser@consol.de for assistance.  
+Please include the OS type and version that you are using.
+Also, run the plugin with the '-v' option and provide the resulting 
+version information.  Of course, there may be additional diagnostic information
+required as well.  Use good judgment.
+
+
+How to "compile" the check_nwc_health script.
+--------------------------------------------------------
+
+1) Run the configure script to initialize variables and create a Makefile, etc.
+
+	./configure --prefix=BASEDIRECTORY --with-nagios-user=SOMEUSER --with-nagios-group=SOMEGROUP --with-perl=PATH_TO_PERL --with-noinst-level=LEVEL --with-degrees=UNIT --with-perfdata --with-hpacucli
+
+   a) Replace BASEDIRECTORY with the path of the directory under which Nagios
+      is installed (default is '/usr/local/nagios')
+   b) Replace SOMEUSER with the name of a user on your system that will be
+      assigned permissions to the installed plugins (default is 'nagios')
+   c) Replace SOMEGRP with the name of a group on your system that will be
+      assigned permissions to the installed plugins (default is 'nagios')
+   d) Replace PATH_TO_PERL with the path where a perl binary can be found.
+      Besides the system wide perl you might have installed a private perl
+      just for the nagios plugins (default is the perl in your path).
+   e) Replace LEVEL with one of ok, warning, critical or unknown.
+      If the required hpasm-rpm is not installed, the check_nwc_health plugin
+      will exit with the level specified. If you chose ok, the message
+      will say "ok - .... hpasm is not installed". This is different from
+      the "ok - hardware working fine" if hpasm was found.
+      The default is to treat a missing hpasm package as ok.
+   f) Replace UNIT with one of celsius or fahrenheit. The hpasmcli "show temp"
+      prints temperatures both in units of celsius and fahrenheit. With the
+      --with-degrees option you can decide which units will be shown in an
+      alarm message.
+      The default is "celsius".
+   g) You can tell check_nwc_health to output performance data by default if
+      you call configure with the --enable-perfdata option.
+   h) You can tell check_nwc_health to check the raid status with the hpacucli command
+      if you call configure with the --enable-hpacucli option.
+      You need the hpacucli rpm.
+
+2) "Compile" the plugin with the following command:
+
+	make
+
+    This will produce a "check_nwc_health" script. You will also find
+    a "check_nwc_health.pl" which you better ignore. It is the base for
+    the compilation filled with placeholders. These will be replaced during
+    the make process.
+
+
+3) Install the compiled plugin script with the following command:
+
+	make install
+
+   The installation procedure will attempt to place the plugin in a 
+   'libexec/' subdirectory in the base directory you specified with
+   the --prefix argument to the configure script.
+
+
+4) Verify that your configuration files for Nagios contains
+   the correct paths to the new plugin.
+
+
+5) Add this line to /etc/sudoers:
+   nagios      ALL=NOPASSWD: /sbin/hpasmcli
+   or ths, if you also installed the hpacu package
+   nagios      ALL=NOPASSWD: /sbin/hpasmcli, /usr/sbin/hpacucli
+  
+
+
+Command line parameters
+-----------------------
+
+-v, --verbose
+   Increased verbosity will print how check_nwc_health communicates with the
+   hpasm daemon and which values were acquired.
+
+-t, --timeout
+   The number of seconds after which the plugin will abort.
+
+-b, --blacklist
+   If some components of your system are missing (mostly the secondary
+   power supply bay is empty) and you tolerate this, then blacklist the
+   missing/failed component to avoid false alarms.
+   The value for this option is a slash-separated list of components to
+   ignore.
+   Example: -b p:1,2/f:2/t:3,4/c:1/d:0-1,0-2
+   means: ignore power supplies #1 and #2, fan #2, temperature #3 and #4,
+   cpu #1 and dimms #1 and #2 in cartridge #0.
+
+-c, --customthresh
+   Override the machine-default temperature thresholds.
+   Example: -c 1:60/4:80/5:50
+   Sets limit for temperature 1 to 60 degrees, temperature 4 to 80 degrees
+   and temperature 5 to 50 degrees. You get the consecutive numbers by
+   calling check_nwc_health -v
+   ...
+      checking temperatures
+       1 processor_zone temperature is 46 (62 max)
+       2 cpu#1 temperature is 43 (73 max)
+       3 i/o_zone temperature is 54 (68 max)
+       4 cpu#2 temperature is 46 (73 max)
+       5 power_supply_bay temperature is 38 (55 max)
+
+-p, --perfdata
+   Add performance data to the output even if you did not compile check_nwc_health
+   with --with-perfdata in step 1.
+
+
+
+SNMP and Memory Modules
+-----------------------
+Older hardware does not always show valuable information when queried for
+the health of memory modules. Maybe it's because older modules do not support
+error checking at all.
+
+
+1. no cpqHeResMemModule
+---------------------------------------------------------------------------
+
+2. collapsed cpqHeResMemModule
+---------------------------------------------------------------------------
+
+Some (older) systems do not support the cpqHeResMemModuleEntry table.
+Either there is no oid with 1.3.6.1.4.1.232.6.2.14.11.1 at all
+or there is a single oid like
+
+Example:
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.1 = INTEGER: 524288
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.2 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.3 = INTEGER: 0
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.4 = INTEGER: 524288
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.5 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.6 = INTEGER: 0
+
+                                ^-- module number
+                              ^-- cartridge number (0 = system board)
+                            ^-- size
+
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.6 = INTEGER: 0
+ 
+I compared 300 systems and found out that with
+1.3.6.1.4.1.232.6.2.14.11.1.<no1>.<no2>.<no3> = <no4>
+no1 is always 1
+no2 is always 0
+no3 is the number of memory slots (including the empty ones).
+no4 is always 0. It is probably the health status of the 
+overall memory subsystem. I don't know.
+I will implement 0 = ok, not 0 = ask compaq
+
+cpqSiMemECCStatus provides no usable information. All my test systems
+showed 0 which is an undocumented value.
+
+function get_size(cpqHeResMemModuleEntry) will return 1.
+
+3. cpqHeResMemModule containing crap
+---------------------------------------------------------------------------
+
+grepping for cpqSiMemBoardSize shows 4 modules
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.1 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.2 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.3 = INTEGER: 0
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.4 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.5 = INTEGER: 262144
+iso.3.6.1.4.1.232.2.2.4.5.1.3.0.6 = INTEGER: 0
+
+grepping for cpqHeResMemEntry shows one module with zero values
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.0 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.2.0.0 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.3.0.0 = ""
+iso.3.6.1.4.1.232.6.2.14.11.1.4.0.0 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.5.0.0 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.6.0.0 = Hex-STRING: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+
+4. cpqHeResMemModuleEntry and cpqSiMemModuleEntry use different table indexes
+---------------------------------------------------------------------------
+
+cpqSiMemBoardIndex      1.3.6.1.4.1.232.2.2.4.5.1.1 
+cpqSiMemModuleIndex     1.3.6.1.4.1.232.2.2.4.5.1.2 
+
+cpqHeResMemBoardIndex   1.3.6.1.4.1.232.6.2.14.11.1.1 
+cpqHeResMemModuleIndex  1.3.6.1.4.1.232.6.2.14.11.1.2 
+
+
+cpqSiMemBoardIndex
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.1 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.2 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.3 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.4 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.5 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.2.2.4.5.1.1.0.6 = INTEGER: 0
+
+cpqHeResMemBoardIndex
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.1 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.2 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.3 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.4 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.5 = INTEGER: 0
+SNMPv2-SMI::enterprises.232.6.2.14.11.1.1.1.6 = INTEGER: 0
+
+It is not possible to use the SNMP-table-indices to identify the 
+corresponding he-entry. Matching is done with nested loops.
+
+5. even worse: cpqHeResMemBoardIndex and cpqSiMemBoardIndex don't match
+---------------------------------------------------------------------------
+
+cpqSiMemBoardIndex
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.1 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.2 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.3 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.4 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.5 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.6 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.7 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.1.8 = INTEGER: 1
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.1 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.2 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.3 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.4 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.5 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.6 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.7 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.2.8 = INTEGER: 2
+iso.3.6.1.4.1.232.2.2.4.5.1.1.3.1 = INTEGER: 3
+
+cpqHeResMemBoardIndex
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.1 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.2 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.3 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.4 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.5 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.6 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.7 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.0.8 = INTEGER: 0
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.1 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.2 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.3 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.4 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.5 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.6 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.7 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.1.8 = INTEGER: 1
+iso.3.6.1.4.1.232.6.2.14.11.1.1.2.1 = INTEGER: 2
+
+
+Redundant fans
+-----------------------
+I saw one old server which had only half of the possible fans installed.
+
+Fan#                               1    2      3    4      5    6
+
+cpqHeFltTolFanPresent              yes  no     yes  no     yes  no
+cpqHeFltTolFanRedundant            no   no     no   no     no   no
+cpqHeFltTolFanRedundantPartner     2    1      4    3      6    5
+cpqHeFltTolFanCondition            ok   other  ok   other  ok   other
+cpqHeFltTolFanLocation             cpu  cpu    cpu  cpu    io   io
+
+Normally this would result in
+...
+fan #1 (cpu) is not redundant
+fan #2 (cpu) is not redundant
+fan #3 (cpu) is not redundant
+fan #4 (cpu) is not redundant
+fan #5 (ioboard) is not redundant
+fan #6 (ioboard) is not redundant
+WARNING - fan #1 (cpu) is not redundant, fan #2 (cpu) is not redundant, fan #3 (cpu) is not redundant, fan #4 (cpu) is not redundant, fan #5 (ioboard) is not redundant, fan #6 (ioboard) is not redundant
+
+However it was the server's owner decision not to install fan pairs but only one fan per location, so for him this is a false alert.
+
+By using --ignore-fan-redundancy check_nwc_health only looks at the cpqHeFltTolFanCondition and ignores dependencies between two fans, so the result is:
+
+fan 1 speed is normal, pctmax is 50%, location is cpu, redundance is no, partner is 2
+fan 3 speed is normal, pctmax is 50%, location is cpu, redundance is no, partner is 4
+fan 5 speed is normal, pctmax is 50%, location is ioboard, redundance is no, partner is 6
+OK - System: 'proliant ml370 g3', ...
+
+
+A snmp forwarding trick 
+-----------------------
+local - where check_nwc_health runs
+remote - where a proliant can be reached
+proliant - where the snmp agent runs
+
+remote:
+ssh -R6667:localhost:6667 local
+socat tcp4-listen:6667,reuseaddr,fork UDP:proliant:161
+
+local:
+socat udp4-listen:161,reuseaddr,fork tcp:localhost:6667
+check_nwc_health --hostname 127.0.0.1
+
+
+Sample data from real machines
+------------------------------
+If you think check_nwc_health is not working correctly, send me the output of snmpwalk
+snmpwalk .... 1.3.6.1.4.1.232
+
+
+--
+Gerhard Lausser <gerhard.lausser@consol.de>

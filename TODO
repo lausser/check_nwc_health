@@ -1,0 +1,6 @@
+- interface up down, operstatus
+- traffic, in, out, 2xthresholds?
+- errors
+- cpu
+- mem
+- load
