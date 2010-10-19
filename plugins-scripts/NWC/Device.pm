@@ -322,15 +322,17 @@ sub set_thresholds {
 
 sub check_thresholds {
   my $self = shift;
+  my @params = @_;
   ($self->{warning}, $self->{critical}) =
-      $NWC::Device::plugin->get_thresholds(@_);
-  return $NWC::Device::plugin->check_thresholds(@_);
+      $NWC::Device::plugin->get_thresholds(@params);
+  return $NWC::Device::plugin->check_thresholds(@params);
 }
 
 sub get_thresholds {
   my $self = shift;
-  my @thresholds = $NWC::Device::plugin->get_thresholds(@_);
-  my($warning, $critical) = $NWC::Device::plugin->get_thresholds(@_);
+  my @params = @_;
+  my @thresholds = $NWC::Device::plugin->get_thresholds(@params);
+  my($warning, $critical) = $NWC::Device::plugin->get_thresholds(@params);
   $self->{warning} = $thresholds[0];
   $self->{critical} = $thresholds[1];
   return @thresholds;

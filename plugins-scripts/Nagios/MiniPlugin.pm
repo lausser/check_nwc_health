@@ -194,15 +194,15 @@ sub check_thresholds {
   my $level = $ERRORS{OK};
   my $warningrange;
   my $criticalrange;
-  if (scalar(@_) > 1) {
-    my %params = @_;
+  if (scalar(@params) > 1) {
+    my %params = @params;
     $value = $params{check};
-    $warningrange = (defined $params{warning}) ? 
+    $warningrange = (defined $params{warning}) ?
         $params{warning} : $self->{mywarning};
-    $criticalrange = (defined $params{critical}) ? 
+    $criticalrange = (defined $params{critical}) ?
         $params{critical} : $self->{mycritical};
   } else {
-    $value = $_;
+    $value = $params[0];
     $warningrange = $self->{mywarning};
     $criticalrange = $self->{mycritical};
   }
