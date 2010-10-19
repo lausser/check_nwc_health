@@ -241,28 +241,24 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
-        uom => '%',
         warning => $self->{warning},
         critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_out',
         value => $self->{outputErrorRate},
-        uom => '%',
         warning => $self->{warning},
         critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_in',
         value => $self->{inputDiscardRate},
-        uom => $self->opts->units,
         warning => $self->{warning},
         critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_out',
         value => $self->{outputDiscardRate},
-        uom => $self->opts->units,
         warning => $self->{warning},
         critical => $self->{critical},
     );
