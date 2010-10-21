@@ -169,6 +169,12 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'lookback=s',
+    help => "--lookback
+   The amount of time you want to look back when calculating average rates",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'critical=s',
     help => '--warning
    The critical threshold',
@@ -183,22 +189,25 @@ $plugin->add_arg(
 
 $plugin->getopts();
 if ($plugin->opts->community) {
- if ($plugin->opts->community =~ /^snmpv3(.)(.+)/) {
-   my $separator = $1;
-   my ($authprotocol, $authpassword, $privprotocol, $privpassword, $username) =
-       split(/$separator/, $2);
-   $plugin->override_opt('authprotocol', $authprotocol) 
-       if defined($authprotocol) && $authprotocol;
-   $plugin->override_opt('authpassword', $authpassword) 
-       if defined($authpassword) && $authpassword;
-   $plugin->override_opt('privprotocol', $privprotocol) 
-       if defined($privprotocol) && $privprotocol;
-   $plugin->override_opt('privpassword', $privpassword) 
-       if defined($privpassword) && $privpassword;
-   $plugin->override_opt('username', $username) 
-       if defined($username) && $username;
-   $plugin->override_opt('protocol', '3') ;
- }
+  if ($plugin->opts->community =~ /^snmpv3(.)(.+)/) {
+    my $separator = $1;
+    my ($authprotocol, $authpassword, $privprotocol, $privpassword, $username) =
+        split(/$separator/, $2);
+    $plugin->override_opt('authprotocol', $authprotocol) 
+        if defined($authprotocol) && $authprotocol;
+    $plugin->override_opt('authpassword', $authpassword) 
+        if defined($authpassword) && $authpassword;
+    $plugin->override_opt('privprotocol', $privprotocol) 
+        if defined($privprotocol) && $privprotocol;
+    $plugin->override_opt('privpassword', $privpassword) 
+        if defined($privpassword) && $privpassword;
+    $plugin->override_opt('username', $username) 
+        if defined($username) && $username;
+    $plugin->override_opt('protocol', '3') ;
+  }
+}
+if ($plugin->opts->snmpwalk) {
+  $plugin->override_opt('hostname', 'snmpwalk.file') 
 }
 if (! $PERFDATA && $plugin->opts->get('perfdata')) {
   $PERFDATA = 1;

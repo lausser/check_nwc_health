@@ -114,7 +114,7 @@ sub check {
 
 sub dump {
   my $self = shift;
-  printf "[FAN_%s]\n", $self->{ciscoEnvMonVoltageStatusIndex};
+  printf "[VOLTAGE_%s]\n", $self->{ciscoEnvMonVoltageStatusIndex};
   foreach (qw(ciscoEnvMonVoltageStatusTable ciscoEnvMonVoltageStatusEntry ciscoEnvMonVoltageStatusIndex ciscoEnvMonVoltageStatusDescr ciscoEnvMonVoltageStatusValue ciscoEnvMonVoltageThresholdLow ciscoEnvMonVoltageThresholdHigh ciscoEnvMonVoltageLastShutdown ciscoEnvMonVoltageState)) {
     printf "%s: %s\n", $_, $self->{$_};
   }

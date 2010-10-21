@@ -116,7 +116,7 @@ sub check {
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{usage}), $info);
   $self->add_perfdata(
-      label => $self->{entPhysicalName}.'_usage',
+      label => 'cpu_'.$self->{entPhysicalName}.'_usage',
       value => $self->{usage},
       uom => '%',
       warning => $self->{warning},

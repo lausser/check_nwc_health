@@ -190,10 +190,11 @@ sub get_thresholds {
 
 sub check_thresholds {
   my $self = shift;
-  my $value;
+  my @params = @_;
   my $level = $ERRORS{OK};
   my $warningrange;
   my $criticalrange;
+  my $value;
   if (scalar(@params) > 1) {
     my %params = @params;
     $value = $params{check};

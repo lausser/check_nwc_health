@@ -14,6 +14,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $extendedinfo = [];
   our $summary = [];
   our $statefilesdir = '/var/tmp/check_nwc_health';
+  our $oidtrace = [];
 }
 
 sub new {
@@ -118,6 +119,7 @@ sub check_snmp_and_model {
       #$params{'-translate'} = [
       #  -all => 0x0
       #];
+      $params{'-timeout'} = $self->opts->timeout;
       $params{'-hostname'} = $self->opts->hostname;
       $params{'-version'} = $self->opts->protocol;
       if ($self->opts->port) {
@@ -142,7 +144,8 @@ sub check_snmp_and_model {
       }
       my ($session, $error) = Net::SNMP->session(%params);
       if (! defined $session) {
-        $self->add_message(CRITICAL, 'cannot create session object');
+        $self->add_message(CRITICAL, 
+            sprintf 'cannot create session object: %s', $error);
         $self->trace(1, Data::Dumper::Dumper(\%params));
       } else {
         $NWC::Device::session = $session;
@@ -153,7 +156,7 @@ sub check_snmp_and_model {
         if (!defined($result)) {
           $self->add_message(CRITICAL,
               'could not contact snmp agent');
-          $session->close;
+          #$session->close;
         } else {
           $self->trace(3, 'snmp agent answered');
           $self->whoami();
@@ -194,7 +197,7 @@ $self->{rawdata}->{$sysDescr} = "bla cisco";
     } else {
       $self->add_message(CRITICAL,
           'snmpwalk returns no product name (cpqsinfo-mib)');
-      $self->{session}->close;
+      $NWC::Device::session->close;
     }
     $self->trace(3, 'whoami: '.$self->{productname});
   }
@@ -405,12 +408,19 @@ sub rawdata {
   return $NWC::Device::rawdata;
 }
 
+sub add_oidtrace {
+  my $self = shift;
+  my $oid = shift;
+  push(@{$NWC::Device::oidtrace}, $oid);
+}
+
 sub get_request {
   my $self = shift;
   my %params = @_;
   my @notcached = ();
   if (exists $params{'-varbindlist'}) {
     foreach my $oid (@{$params{'-varbindlist'}}) {
+      $self->add_oidtrace($oid);
       if (! exists NWC::Device::rawdata->{$oid}) {
         my $result = $NWC::Device::session->get_request(
           -varbindlist => $oid
@@ -430,7 +440,11 @@ sub get_request {
 
 sub get_table {
   my $self = shift;
-  return $NWC::Device::session->get_table(@_);
+  my %params = @_;
+  if (exists $params{'-baseoid'}) {
+    $self->add_oidtrace($params{'-baseoid'});
+  }
+  return $NWC::Device::session->get_table(%params);
 }
 
 sub valdiff {
@@ -451,7 +465,7 @@ sub valdiff {
     $empty_events;
   };
   foreach (@keys) {
-    if ($self->opts->can('lookback')) {
+    if ($self->opts->lookback) {
       # find a last_value in the history which fits lookback best
       # and overwrite $last_values->{$_} with historic data
       if (exists $last_values->{lookback_history}->{$_}) {
@@ -482,7 +496,7 @@ sub valdiff {
       $empty_events->{$_} = $self->{$_};
     }
     $empty_events->{timestamp} = $now;
-    if ($self->opts->can('lookback')) {
+    if ($self->opts->lookback) {
       $empty_events->{lookback_history} = $last_values->{lookback_history};
       foreach (@keys) {
         $empty_events->{lookback_history}->{$_}->{$now} = $self->{$_};

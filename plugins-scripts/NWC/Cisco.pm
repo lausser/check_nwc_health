@@ -20,6 +20,7 @@ sub init {
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
   $self->{romversion} = 'unknown';
+  # serial is 1.3.6.1.2.1.47.1.1.1.1.11.1
   #$self->collect();
   if (! $self->check_messages()) {
     ##$self->set_serial();
