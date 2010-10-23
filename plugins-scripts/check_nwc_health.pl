@@ -51,39 +51,39 @@ $modestring .= sprintf "\n";
 my $plugin = Nagios::MiniPlugin->new(
     shortname => '',
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
-        '--hostname <proliant> --community <snmp-community>'.
+        '--hostname <network-component> --community <snmp-community>'.
         '  ...]',
     version => '4.0',
-    blurb => 'This plugin checks various parameters of cisco network components ',
+    blurb => 'This plugin checks various parameters of network components ',
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
     shortname => '',
 );
-$plugin->add_arg(
-    spec => 'blacklist|b=s',
-    help => '--blacklist
-   Blacklist some (missing/failed) components',
-    required => 0,
-    default => '',
-);
-$plugin->add_arg(
-    spec => 'customthresholds|c=s',
-    help => '--customthresholds
-   Use custom thresholds for certain temperatures',
-    required => 0,
-);
-$plugin->add_arg(
-    spec => 'perfdata=s',
-    help => '--perfdata=[short]
-   Output performance data. If your performance data string becomes
-   too long and is truncated by Nagios, then you can use --perfdata=short
-   instead. This will output temperature tags without location information',
-    required => 0,
-);
+#$plugin->add_arg(
+#    spec => 'blacklist|b=s',
+#    help => '--blacklist
+#   Blacklist some (missing/failed) components',
+#    required => 0,
+#    default => '',
+#);
+#$plugin->add_arg(
+#    spec => 'customthresholds|c=s',
+#    help => '--customthresholds
+#   Use custom thresholds for certain temperatures',
+#    required => 0,
+#);
+#$plugin->add_arg(
+#    spec => 'perfdata=s',
+#    help => '--perfdata=[short]
+#   Output performance data. If your performance data string becomes
+#   too long and is truncated by Nagios, then you can use --perfdata=short
+#   instead. This will output temperature tags without location information',
+#    required => 0,
+#);
 $plugin->add_arg(
     spec => 'hostname|H=s',
     help => '--hostname
-   Hostname or IP-address of the server (SNMP mode only)',
+   Hostname or IP-address of the switch or router',
     required => 0,
 );
 $plugin->add_arg(
@@ -140,7 +140,7 @@ $plugin->add_arg(
 $plugin->add_arg(
     spec => 'snmpwalk=s',
     help => '--snmpwalk
-   A file with the output of snmpwalk 1.3.6.1.4.1.232',
+   A file with the output of a snmpwalk (used for simulation)',
     required => 0,
 );
 $plugin->add_arg(
@@ -165,13 +165,17 @@ $plugin->add_arg(
 $plugin->add_arg(
     spec => 'units=s',
     help => "--units
-   One of %, KB, MB, GB",
+   One of %, KB, MB, GB. (used for e.g. mode interface-usage)",
     required => 0,
 );
 $plugin->add_arg(
     spec => 'lookback=s',
     help => "--lookback
-   The amount of time you want to look back when calculating average rates",
+   The amount of time you want to look back when calculating average rates.
+   Use it for mode interface-errors or interface-usage. Without --lookback
+   the time between two runs of check_nwc_health is the base for calculations.
+   If you want your checkresult to be based for example on the past hour,
+   use --lookback 3600. ",
     required => 0,
 );
 $plugin->add_arg(
@@ -183,7 +187,8 @@ $plugin->add_arg(
 $plugin->add_arg(
     spec => 'servertype=s',
     help => '--servertype
-   The type of the server: proliant (default) or bladesystem',
+   The type of the network device: cisco (default). Use it if auto-detection
+   is not possible',
     required => 0,
 );
 
