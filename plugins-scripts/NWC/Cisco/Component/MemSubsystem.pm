@@ -25,21 +25,9 @@ sub init {
   my %params = @_;
   my $snmpwalk = $params{rawdata};
   my $ignore_redundancy = $params{ignore_redundancy};
-  # ciscoEnvMonMemStatusTable 
-  my $oids = {
-      ciscoMemoryPoolTable => '1.3.6.1.4.1.9.9.48.1.1',
-      ciscoMemoryPoolEntry => '1.3.6.1.4.1.9.9.48.1.1.1',
-      ciscoMemoryPoolType => '1.3.6.1.4.1.9.9.48.1.1.1.1',
-      ciscoMemoryPoolName => '1.3.6.1.4.1.9.9.48.1.1.1.2',
-      ciscoMemoryPoolAlternate => '1.3.6.1.4.1.9.9.48.1.1.1.3',
-      ciscoMemoryPoolValid => '1.3.6.1.4.1.9.9.48.1.1.1.4',
-      ciscoMemoryPoolUsed => '1.3.6.1.4.1.9.9.48.1.1.1.5',
-      ciscoMemoryPoolFree => '1.3.6.1.4.1.9.9.48.1.1.1.6',
-      ciscoMemoryPoolLargestFree => '1.3.6.1.4.1.9.9.48.1.1.1.7',
-  };
-  # INDEX { ciscoMemoryPoolType }
   my $type = 0;
-  foreach ($self->get_entries($oids, 'ciscoMemoryPoolEntry')) {
+  foreach ($self->get_table_entries(
+      'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
     $_->{ciscoMemoryPoolType} ||= $type++;
     push(@{$self->{mems}},
         NWC::Cisco::Component::MemSubsystem::Mem->new(%{$_}));

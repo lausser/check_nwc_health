@@ -23,6 +23,7 @@ EXTRA_MODULES=\
   NWC/Cisco.pm \
   NWC/MIBII/Component/InterfaceSubsystem.pm \
   NWC/MIBII.pm \
+  NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
 

@@ -24,50 +24,9 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $oids = {
-      ifTable => '1.3.6.1.2.1.2.2',
-      ifEntry => '1.3.6.1.2.1.2.2.1',
-      ifIndex => '1.3.6.1.2.1.2.2.1.1',
-      ifDescr => '1.3.6.1.2.1.2.2.1.2',
-      ifType => '1.3.6.1.2.1.2.2.1.3',
-      ifMtu => '1.3.6.1.2.1.2.2.1.4',
-      ifSpeed => '1.3.6.1.2.1.2.2.1.5',
-      ifPhysAddress => '1.3.6.1.2.1.2.2.1.6',
-      ifAdminStatus => '1.3.6.1.2.1.2.2.1.7',
-      ifOperStatus => '1.3.6.1.2.1.2.2.1.8',
-      ifLastChange => '1.3.6.1.2.1.2.2.1.9',
-      ifInOctets => '1.3.6.1.2.1.2.2.1.10',
-      ifInUcastPkts => '1.3.6.1.2.1.2.2.1.11',
-      ifInNUcastPkts => '1.3.6.1.2.1.2.2.1.12',
-      ifInDiscards => '1.3.6.1.2.1.2.2.1.13',
-      ifInErrors => '1.3.6.1.2.1.2.2.1.14',
-      ifInUnknownProtos => '1.3.6.1.2.1.2.2.1.15',
-      ifOutOctets => '1.3.6.1.2.1.2.2.1.16',
-      ifOutUcastPkts => '1.3.6.1.2.1.2.2.1.17',
-      ifOutNUcastPkts => '1.3.6.1.2.1.2.2.1.18',
-      ifOutDiscards => '1.3.6.1.2.1.2.2.1.19',
-      ifOutErrors => '1.3.6.1.2.1.2.2.1.20',
-      ifOutQLen => '1.3.6.1.2.1.2.2.1.21',
-      ifSpecific => '1.3.6.1.2.1.2.2.1.22',
-      ifAdminStatusValue => {
-          1 => 'up',
-          2 => 'down',
-          3 => 'testing',
-      },
-      ifOperStatusValue => {
-          1 => 'up',
-          2 => 'down',
-          3 => 'testing',
-          4 => 'unknown',
-          5 => 'dormant',
-          6 => 'notPresent',
-          7 => 'lowerLayerDown',
-      },
-  };
-  # INDEX { ifIndex }
   my $index_cache = {};
-  foreach ($self->get_entries($oids, 'ifEntry')) {
+  foreach ($self->get_table_entries(
+      'MIB-II', 'ifTable')) {
     next if $self->opts->can('name') && $self->opts->name && 
         $self->opts->name ne $_->{ifDescr};
     push(@{$self->{interfaces}},
@@ -108,7 +67,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
     ifTable => $params{ifTable},
     ifEntry => $params{ifEntry},
     ifIndex => $params{ifIndex},
@@ -137,6 +95,9 @@ sub new {
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $key (keys %params) {
+    $self->{$key} = 0 if ! defined $params{$key};
+  }
   bless $self, $class;
   if ($self->mode =~ /device::interfaces::traffic/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors));

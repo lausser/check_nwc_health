@@ -59,13 +59,13 @@ my $plugin = Nagios::MiniPlugin->new(
     timeout => 60,
     shortname => '',
 );
-#$plugin->add_arg(
-#    spec => 'blacklist|b=s',
-#    help => '--blacklist
-#   Blacklist some (missing/failed) components',
-#    required => 0,
-#    default => '',
-#);
+$plugin->add_arg(
+    spec => 'blacklist|b=s',
+    help => '--blacklist
+   Blacklist some (missing/failed) components',
+    required => 0,
+    default => '',
+);
 #$plugin->add_arg(
 #    spec => 'customthresholds|c=s',
 #    help => '--customthresholds

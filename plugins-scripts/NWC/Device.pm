@@ -188,7 +188,7 @@ $self->{rawdata}->{$sysDescr} = "bla cisco";
   } else {
     my $sysDescr = '1.3.6.1.2.1.1.1.0';
     my $dummy = '1.3.6.1.2.1.1.5.0';
-    if ($productname = $self->valid_response($sysDescr)) {
+    if ($productname = $self->valid_response('MIB-II', 'sysDescr', 0)) {
       if ($productname eq '') {
         $self->{productname} = 'Cisco';
       } else {
@@ -205,7 +205,9 @@ $self->{rawdata}->{$sysDescr} = "bla cisco";
 
 sub valid_response {
   my $self = shift;
+  my $mib = shift;
   my $oid = shift;
+  my $index = shift;
   my $result = $NWC::Device::session->get_request(
       -varbindlist => [$oid]
   );
@@ -572,6 +574,27 @@ sub dumper {
   delete $object->{runtime};
   printf STDERR "%s\n", Data::Dumper::Dumper($object);
   $object->{runtime} = $run;
+}
+
+
+sub get_table_entries {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $elements = shift;
+  my $oids = {};
+  my $entry;
+  if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+      exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
+    foreach my $key (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+      if ($NWC::Device::mibs_and_oids->{$mib}->{$key} =~
+          /^$NWC::Device::mibs_and_oids->{$mib}->{$table}/) {
+        $oids->{$key} = $NWC::Device::mibs_and_oids->{$mib}->{$key};
+      }
+    }
+  }
+  ($entry = $table) =~ s/Table/Entry/g;
+  return $self->get_entries($oids, $entry);
 }
 
 
