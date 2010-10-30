@@ -214,52 +214,45 @@ if ($plugin->opts->community) {
 if ($plugin->opts->snmpwalk) {
   $plugin->override_opt('hostname', 'snmpwalk.file') 
 }
-if (! $PERFDATA && $plugin->opts->get('perfdata')) {
-  $PERFDATA = 1;
-}
-if ($PERFDATA && $plugin->opts->get('perfdata') &&
-    ($plugin->opts->get('perfdata') eq 'short')) {
-  $PERFDATA = 2;
-}
 $plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
 
 $plugin->{info} = []; # gefrickel
 
-if ($plugin->opts->get('mode') =~ /^my-([^\-.]+)/) {
-  my $param = $plugin->opts->get('mode');
+if ($plugin->opts->mode =~ /^my-([^\-.]+)/) {
+  my $param = $plugin->opts->mode;
   $param =~ s/\-/::/g;
-  push(@modes, [$param, $plugin->opts->get('mode'), undef, 'my extension']);
-} elsif ((! grep { $plugin->opts->get('mode') eq $_ } map { $_->[1] } @modes) &&
-    (! grep { $plugin->opts->get('mode') eq $_ } map { defined $_->[2] ? @{$_->[2]} : () } @modes)) {
-  printf "UNKNOWN - mode %s\n", $plugin->opts->get('mode');
+  push(@modes, [$param, $plugin->opts->mode, undef, 'my extension']);
+} elsif ((! grep { $plugin->opts->mode eq $_ } map { $_->[1] } @modes) &&
+    (! grep { $plugin->opts->mode eq $_ } map { defined $_->[2] ? @{$_->[2]} : () } @modes)) {
+  printf "UNKNOWN - mode %s\n", $plugin->opts->mode;
   $plugin->opts->print_help();
   exit 3;
 }
 
 $SIG{'ALRM'} = sub {
   printf "UNKNOWN - check_nwc_health timed out after %d seconds\n", 
-      $plugin->opts->get('timeout');
+      $plugin->opts->timeout;
   exit $ERRORS{UNKNOWN};
 };
-alarm($plugin->opts->get('timeout'));
+alarm($plugin->opts->timeout);
 
 $NWC::Device::plugin = $plugin;
 $NWC::Device::mode = (
     map { $_->[0] }
     grep {
-       ($plugin->opts->get('mode') eq $_->[1]) ||
-       ( defined $_->[2] && grep { $plugin->opts->get('mode') eq $_ } @{$_->[2]})
+       ($plugin->opts->mode eq $_->[1]) ||
+       ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
     } @modes
 )[0];
 my $server = NWC::Device->new( runtime => {
 
     plugin => $plugin,
     options => {
-        servertype => $plugin->opts->get('servertype'),
-        verbose => $plugin->opts->get('verbose'),
+        servertype => $plugin->opts->servertype,
+        verbose => $plugin->opts->verbose,
         scrapiron => 0,
         customthresholds => $plugin->opts->get('customthresholds'),
-        blacklist => $plugin->opts->get('blacklist'),
+        blacklist => $plugin->opts->blacklist,
         celsius => $CELSIUS,
         perfdata => $PERFDATA,
         extendedinfo => $EXTENDEDINFO,
@@ -283,7 +276,7 @@ if (! $plugin->check_messages()) {
 }
 my ($code, $message) = $plugin->check_messages(join => ', ', join_all => ', ');
 $message .= sprintf "\n%s\n", join("\n", @{$NWC::Device::info})
-    if $plugin->opts->get('verbose') >= 1;
+    if $plugin->opts->verbose >= 1;
 #printf "%s\n", Data::Dumper::Dumper($plugin->{info});
 $plugin->nagios_exit($code, $message);
 

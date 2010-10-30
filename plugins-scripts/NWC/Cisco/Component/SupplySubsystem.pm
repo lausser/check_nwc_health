@@ -8,8 +8,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
     supplies => [],
     blacklisted => 0,
     info => undef,
@@ -22,29 +20,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  # ciscoEnvMonSupplyStatusTable 
-  my $oids = {
-      ciscoEnvMonSupplyStatusTable => '1.3.6.1.4.1.9.9.13.1.5',
-      ciscoEnvMonSupplyStatusEntry => '1.3.6.1.4.1.9.9.13.1.5.1',
-      ciscoEnvMonSupplyStatusIndex => '1.3.6.1.4.1.9.9.13.1.5.1.1',
-      ciscoEnvMonSupplyStatusDescr => '1.3.6.1.4.1.9.9.13.1.5.1.2',
-      ciscoEnvMonSupplyState => '1.3.6.1.4.1.9.9.13.1.5.1.3',
-      ciscoEnvMonSupplySource => '1.3.6.1.4.1.9.9.13.1.5.1.4',
-      ciscoEnvMonSupplyStateValue => {
-        1 => 'normal',
-        2 => 'warning',
-        3 => 'critical',
-        4 => 'shutdown',
-        5 => 'notPresent',
-        6 => 'notFunctioning',
-      },
-  };
-  # INDEX { ciscoEnvMonSupplyStatusIndex }
-  foreach ($self->get_entries($oids, 'ciscoEnvMonSupplyStatusEntry')) {
-    #next if ! $_->{cpqHeThermalSupplyPresent};
+  foreach ($self->get_table_entries(
+      'CISCO-ENVMON-MIB', 'ciscoEnvMonFanStatusTable')) {
     push(@{$self->{supplies}},
         NWC::Cisco::Component::SupplySubsystem::Supply->new(%{$_}));
   }
@@ -82,7 +59,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
     ciscoEnvMonSupplyStatusIndex => $params{ciscoEnvMonSupplyStatusIndex} || 0,
     ciscoEnvMonSupplyStatusDescr => $params{ciscoEnvMonSupplyStatusDescr},
     ciscoEnvMonSupplyState => $params{ciscoEnvMonSupplyState},

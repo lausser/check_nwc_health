@@ -8,8 +8,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
     voltages => [],
     blacklisted => 0,
     info => undef,
@@ -22,32 +20,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  # ciscoEnvMonVoltageStatusTable 
-  my $oids = {
-      ciscoEnvMonVoltageStatusTable => '1.3.6.1.4.1.9.9.13.1.2',
-      ciscoEnvMonVoltageStatusEntry => '1.3.6.1.4.1.9.9.13.1.2.1',
-      ciscoEnvMonVoltageStatusIndex => '1.3.6.1.4.1.9.9.13.1.2.1.1',
-      ciscoEnvMonVoltageStatusDescr => '1.3.6.1.4.1.9.9.13.1.2.1.2',
-      ciscoEnvMonVoltageStatusValue => '1.3.6.1.4.1.9.9.13.1.2.1.3',
-      ciscoEnvMonVoltageThresholdLow => '1.3.6.1.4.1.9.9.13.1.2.1.4',
-      ciscoEnvMonVoltageThresholdHigh => '1.3.6.1.4.1.9.9.13.1.2.1.5',
-      ciscoEnvMonVoltageLastShutdown => '1.3.6.1.4.1.9.9.13.1.2.1.6',
-      ciscoEnvMonVoltageState => '1.3.6.1.4.1.9.9.13.1.2.1.7',
-      ciscoEnvMonVoltageStateValue => {
-        1 => 'normal',
-        2 => 'warning',
-        3 => 'critical',
-        4 => 'shutdown',
-        5 => 'notPresent',
-        6 => 'notFunctioning',
-      },
-  };
-  # INDEX { ciscoEnvMonVoltageStatusIndex }
-  foreach ($self->get_entries($oids, 'ciscoEnvMonVoltageStatusEntry')) {
-    #next if ! $_->{cpqHeThermalVoltagePresent};
+  foreach ($self->get_table_entries(
+      'CISCO-ENVMON-MIB', 'ciscoEnvMonVoltageStatusTable')) {
     push(@{$self->{voltages}},
         NWC::Cisco::Component::VoltageSubsystem::Voltage->new(%{$_}));
   }
@@ -85,7 +59,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
     ciscoEnvMonVoltageStatusTable => $params{ciscoEnvMonVoltageStatusTable},
     ciscoEnvMonVoltageStatusEntry => $params{ciscoEnvMonVoltageStatusEntry},
     ciscoEnvMonVoltageStatusIndex => $params{ciscoEnvMonVoltageStatusIndex},
