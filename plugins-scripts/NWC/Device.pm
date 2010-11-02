@@ -80,6 +80,7 @@ sub check_snmp_and_model {
       }
       close WALK;
     } else {
+      $self->opts->override_opt('hostname', 'walkhost');
       open(MESS, $self->opts->snmpwalk);
       while(<MESS>) {
         # SNMPv2-SMI::enterprises.232.6.2.6.7.1.3.1.4 = INTEGER: 6
@@ -420,32 +421,27 @@ sub get_request {
   my $self = shift;
   my %params = @_;
   my @notcached = ();
-  if (exists $params{'-varbindlist'}) {
-    foreach my $oid (@{$params{'-varbindlist'}}) {
-      $self->add_oidtrace($oid);
-      if (! exists NWC::Device::rawdata->{$oid}) {
-        my $result = $NWC::Device::session->get_request(
-          -varbindlist => $oid
-        );
-        foreach my $key (%{$result}) {
-          $self->add_rawdata($key, $result->{$key});
-        }
+  foreach my $oid (@{$params{'-varbindlist'}}) {
+    $self->add_oidtrace($oid);
+    if (! exists NWC::Device::rawdata->{$oid}) {
+      my $result = $NWC::Device::session->get_request(
+        -varbindlist => $oid
+      );
+      foreach my $key (%{$result}) {
+        $self->add_rawdata($key, $result->{$key});
       }
     }
-    my $result = {};
-    map { $result->{$_} = $NWC::Device::rawdata->{$_} }
-        @{$params{'-varbindlist'}};
-    return $result;
   }
-  return {};
+  my $result = {};
+  map { $result->{$_} = $NWC::Device::rawdata->{$_} }
+      @{$params{'-varbindlist'}};
+  return $result;
 }
 
 sub get_table {
   my $self = shift;
   my %params = @_;
-  if (exists $params{'-baseoid'}) {
-    $self->add_oidtrace($params{'-baseoid'});
-  }
+  $self->add_oidtrace($params{'-baseoid'});
   return $NWC::Device::session->get_table(%params);
 }
 
@@ -576,6 +572,10 @@ sub dumper {
   $object->{runtime} = $run;
 }
 
+# get_cached_table_entries
+#   get_table nur die table-basoid
+#   mit liste von indices
+#     get_entries -startindex x -endindex x konsekutive indices oder einzeln
 
 sub get_table_entries {
   my $self = shift;

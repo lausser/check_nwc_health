@@ -10,7 +10,7 @@ sub new {
   my $self = {
     runtime => $params{runtime},
     rawdata => $params{rawdata},
-    interface_indices => [],
+    interface_cache => {},
     interfaces => [],
     blacklisted => 0,
     info => undef,
@@ -24,14 +24,21 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  my $index_cache = {};
-  foreach ($self->get_table_entries(
-      'MIB-II', 'ifTable')) {
-    next if $self->opts->can('name') && $self->opts->name && 
-        $self->opts->name ne $_->{ifDescr};
-    push(@{$self->{interfaces}},
-        NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
-    $index_cache->{$_->{ifIndex}} = $_->{ifDescr};
+  if ($self->mode =~ /device::interfaces::list/) {
+    $self->update_interface_cache(1);
+  } else {
+    $self->update_interface_cache(0);
+    #next if $self->opts->can('name') && $self->opts->name && 
+    #    $self->opts->name ne $_->{ifDescr};
+    # if limited search
+    # name is a number -> get_table with extra param
+    # name is a regexp -> list of names -> list of numbers
+    my @indices = $self->get_interface_indices();
+    foreach ($self->get_table_entries(
+        'MIB-II', 'ifTable', \@indices)) {
+      push(@{$self->{interfaces}},
+          NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
+    }
   }
 }
 
@@ -40,14 +47,86 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
-  if (scalar (@{$self->{interfaces}}) == 0) {
-  } else {
+  if ($self->mode =~ /device::interfaces::list/) {
     foreach (@{$self->{interfaces}}) {
-      $_->check();
+      $_->list();
+    }
+  } else {
+    if (scalar (@{$self->{interfaces}}) == 0) {
+    } else {
+      foreach (@{$self->{interfaces}}) {
+        $_->check();
+      }
     }
   }
 }
 
+sub update_interface_cache {
+  my $self = shift;
+  my $force = shift;
+  my $statefile = lc sprintf "%s/%s_interface_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname;
+  my $update = time - 3600;
+  if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
+    $self->{interface_cache} = {};
+    foreach ($self->get_table_entries( 'MIB-II', 'ifTable')) {
+      $self->{interface_cache}->{$_->{ifDescr}} = $_->{ifIndex};
+    }
+    $self->save_interface_cache();
+  }
+  $self->load_interface_cache();
+}
+
+sub save_interface_cache {
+  my $self = shift;
+  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
+  my $statefile = lc sprintf "%s/%s_interface_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname;
+  open(STATE, ">$statefile");
+  printf STATE Data::Dumper::Dumper($self->{interface_cache});
+  close STATE;
+  $self->debug(sprintf "saved %s to %s",
+      Data::Dumper::Dumper($self->{interface_cache}), $statefile);
+}
+
+sub load_interface_cache {
+  my $self = shift;
+  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
+  my $statefile = lc sprintf "%s/%s_interface_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname;
+  if ( -f $statefile) {
+    our $VAR1;
+    eval {
+      require $statefile;
+    };
+    if($@) {
+      printf "rumms\n";
+    }
+    $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
+    $self->{interface_cache} = $VAR1;
+  }
+}
+
+sub get_interface_indices {
+  my $self = shift;
+  my @indices = ();
+  foreach my $ifdescr (keys %{$self->{interface_cache}}) {
+    if ($self->opts->name) {
+      if ($self->opts->regexp) {
+        if ($ifdescr =~ /$self->opts->name/i) {
+          push(@indices, $self->{interface_cache}->{$ifdescr});
+        }
+      } else {
+        if (lc $ifdescr eq lc $self->opts->name) {
+          push(@indices, $self->{interface_cache}->{$ifdescr});
+        }
+      }
+    } else {
+      push(@indices, $self->{interface_cache}->{$ifdescr});
+    }
+  }
+  return @indices;
+}
 
 sub dump {
   my $self = shift;
@@ -234,6 +313,8 @@ sub check {
     # Admin: admindown,admin
     # Admin: --warning 
     #        --critical admindown
+    # !ad+od  ad+!(od*on)
+    # warn & warnbitfield
 #    if ($self->opts->critical) {
 #      if ($self->opts->critical =~ /^u/) {
 #      } elsif ($self->opts->critical =~ /^u/) {
@@ -254,13 +335,18 @@ sub check {
   }
 }
 
+sub list {
+  my $self = shift;
+  printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
+}
+
 sub dump {
   my $self = shift;
   printf "[IF_%s]\n", $self->{ifIndex};
   foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
-  printf "info: %s\n", $self->{info};
+#  printf "info: %s\n", $self->{info};
   printf "\n";
 }
 

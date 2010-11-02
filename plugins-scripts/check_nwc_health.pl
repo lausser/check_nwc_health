@@ -36,6 +36,9 @@ my @modes = (
   ['device::interfaces::operstatus',
       'interface-status', undef,
       'Check the status of interfaces' ],
+  ['device::interfaces::list',
+      'list-interfaces', undef,
+      'Show the interfaces of the device and update the name cache' ],
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
@@ -160,6 +163,12 @@ $plugin->add_arg(
     spec => 'name=s',
     help => "--name
    The name of an interface",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'regexp',
+    help => "--regexp
+   A flag indicating that --name is a regular expression",
     required => 0,
 );
 $plugin->add_arg(
