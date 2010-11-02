@@ -189,8 +189,9 @@ $self->{rawdata}->{$sysDescr} = "bla cisco";
   } else {
     my $sysDescr = '1.3.6.1.2.1.1.1.0';
     my $dummy = '1.3.6.1.2.1.1.5.0';
-    if ($productname = $self->valid_response('MIB-II', 'sysDescr', 0)) {
-      if ($productname eq '') {
+    if ($productname = $self->get_single_request_iq(
+        -mib => 'MIB-II', -molist => ['sysDescr'], -index => 0)) {
+      if ($productname =~ /Cisco/) {
         $self->{productname} = 'Cisco';
       } else {
         $self->{productname} = $productname;
@@ -204,23 +205,61 @@ $self->{rawdata}->{$sysDescr} = "bla cisco";
   }
 }
 
+sub get_single_request_iq {
+  my $self = shift;
+  my %params = @_;
+  my @oids = ();
+  my $result = $self->get_request_iq(%params);
+  foreach (keys %{$result}) {
+    return $result->{$_};
+  }
+  return undef;
+}
+
+sub get_request_iq {
+  my $self = shift;
+  my %params = @_;
+  my @oids = ();
+  my $mib = $params{'-mib'};
+  foreach my $oid (@{$params{'-molist'}}) {
+    if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+        exists $NWC::Device::mibs_and_oids->{$mib}->{$oid}) {
+      push(@oids, (exists $params{'-index'}) ?
+          $NWC::Device::mibs_and_oids->{$mib}->{$oid}.'.'.$params{'-index'} :
+          $NWC::Device::mibs_and_oids->{$mib}->{$oid});
+    }
+  }
+  return $self->get_request(
+      -varbindlist => \@oids);
+}
+
 sub valid_response {
   my $self = shift;
   my $mib = shift;
   my $oid = shift;
   my $index = shift;
-  my $result = $NWC::Device::session->get_request(
-      -varbindlist => [$oid]
-  );
-  if (!defined($result) ||
-      ! defined $result->{$oid} ||
-      $result->{$oid} eq 'noSuchInstance' ||
-      $result->{$oid} eq 'noSuchObject' ||
-      $result->{$oid} eq 'endOfMibView') {
-    return undef;
+  if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+      exists $NWC::Device::mibs_and_oids->{$mib}->{$oid}) {
+    # make it numerical
+    my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$oid};
+    if (defined $index) {
+      $oid .= '.'.$index;
+    }
+    my $result = $self->get_request(
+        -varbindlist => [$oid]
+    );
+    if (!defined($result) ||
+        ! defined $result->{$oid} ||
+        $result->{$oid} eq 'noSuchInstance' ||
+        $result->{$oid} eq 'noSuchObject' ||
+        $result->{$oid} eq 'endOfMibView') {
+      return undef;
+    } else {
+      $self->add_rawdata($oid, $result->{$oid});
+      return $result->{$oid};
+    }
   } else {
-    $self->add_rawdata($oid, $result->{$oid});
-    return $result->{$oid};
+    return undef;
   }
 }
 
@@ -414,6 +453,7 @@ sub rawdata {
 sub add_oidtrace {
   my $self = shift;
   my $oid = shift;
+printf STDERR "want %s\n", $oid;
   push(@{$NWC::Device::oidtrace}, $oid);
 }
 
@@ -421,20 +461,32 @@ sub get_request {
   my $self = shift;
   my %params = @_;
   my @notcached = ();
+printf STDERR "get_request -> %s\n", Data::Dumper::Dumper(\%params);
   foreach my $oid (@{$params{'-varbindlist'}}) {
     $self->add_oidtrace($oid);
     if (! exists NWC::Device::rawdata->{$oid}) {
-      my $result = $NWC::Device::session->get_request(
-        -varbindlist => $oid
-      );
-      foreach my $key (%{$result}) {
-        $self->add_rawdata($key, $result->{$key});
-      }
+      push(@notcached, $oid);
+    }
+  }
+printf STDERR "get_request nc %s\n", Data::Dumper::Dumper(\@notcached);
+  if ($self->opts->hostname && (scalar(@notcached) > 0)) {
+    my $result = ($NWC::Device::session->version() == 0) ?
+        $NWC::Device::session->get_request(
+            -varbindlist => \@notcached,
+        )
+        :
+        $NWC::Device::session->get_request(  # get_bulk_request liefert next
+            #-nonrepeaters => scalar(@notcached),
+            -varbindlist => \@notcached,
+        );
+    foreach my $key (%{$result}) {
+      $self->add_rawdata($key, $result->{$key});
     }
   }
   my $result = {};
   map { $result->{$_} = $NWC::Device::rawdata->{$_} }
       @{$params{'-varbindlist'}};
+printf STDERR "get_request <- %s\n", Data::Dumper::Dumper($result);
   return $result;
 }
 
@@ -442,7 +494,20 @@ sub get_table {
   my $self = shift;
   my %params = @_;
   $self->add_oidtrace($params{'-baseoid'});
-  return $NWC::Device::session->get_table(%params);
+  if ($self->opts->hostname) {
+    my @notcached = ();
+    my $result = $NWC::Device::session->get_table(%params);
+    foreach my $key (%{$result}) {
+      $self->add_rawdata($key, $result->{$key});
+    }
+  }
+  my $result = {};
+  my $baseoidpattern = $params{'-baseoid'};
+  $baseoidpattern =~ s/\./\\./g;
+printf STDERR "get table base %s\n", $baseoidpattern;
+  map { $result->{$_} = $NWC::Device::rawdata->{$_} }
+      grep /^$baseoidpattern}/, keys %{$NWC::Device::rawdata};
+  return $result;
 }
 
 sub valdiff {
