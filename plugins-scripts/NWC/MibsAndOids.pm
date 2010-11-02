@@ -1,6 +1,7 @@
 $NWC::Device::mibs_and_oids = {
   'MIB-II' => {
-      sysDescr => '1.3.6.1.2.1.1.',
+      sysDescr => '1.3.6.1.2.1.1.1',
+      sysUptime => '1.3.6.1.2.1.1.3',
       #
       ifTable => '1.3.6.1.2.1.2.2',
       ifEntry => '1.3.6.1.2.1.2.2.1',
