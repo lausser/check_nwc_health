@@ -34,8 +34,8 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
-    foreach ($self->get_table_entries(
-        'MIB-II', 'ifTable', \@indices)) {
+    foreach ($self->get_snmp_table_objects(
+        'MIB-II', 'ifTable', 'ifEntry', \@indices)) {
       push(@{$self->{interfaces}},
           NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
     }
@@ -51,6 +51,7 @@ sub check {
     foreach (@{$self->{interfaces}}) {
       $_->list();
     }
+  } if ($self->mode =~ /device::interfaces::shinkenconf/) {
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
@@ -110,6 +111,9 @@ sub load_interface_cache {
 sub get_interface_indices {
   my $self = shift;
   my @indices = ();
+  if (! $self->opts->name) {
+    return @indices;
+  }
   foreach my $ifdescr (keys %{$self->{interface_cache}}) {
     if ($self->opts->name) {
       if ($self->opts->regexp) {

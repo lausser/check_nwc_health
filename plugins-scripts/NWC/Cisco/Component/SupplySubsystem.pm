@@ -20,7 +20,7 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_table_entries(
+  foreach ($self->get_snmp_table_objects(
       'CISCO-ENVMON-MIB', 'ciscoEnvMonFanStatusTable')) {
     push(@{$self->{supplies}},
         NWC::Cisco::Component::SupplySubsystem::Supply->new(%{$_}));

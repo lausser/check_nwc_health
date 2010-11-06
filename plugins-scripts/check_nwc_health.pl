@@ -39,6 +39,9 @@ my @modes = (
   ['device::interfaces::list',
       'list-interfaces', undef,
       'Show the interfaces of the device and update the name cache' ],
+  ['device::interfaces::shinkenconf',
+      'create-shinken-service', undef,
+      'Create a Shinken service definition' ],
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
@@ -274,7 +277,7 @@ if (! $plugin->check_messages()) {
   $server->init();
   #$plugin->add_message(OK, $server->identify()) if $HWINFO;
   if (! $plugin->check_messages()) {
-    $plugin->add_message(OK, 'hardware working fine');
+    #$plugin->add_message(OK, 'hardware working fine');
     $plugin->add_message(OK, $server->get_summary()) 
         if $server->get_summary();
     $plugin->add_message(OK, $server->get_extendedinfo()) 

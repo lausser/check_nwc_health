@@ -20,7 +20,7 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_table_entries(
+  foreach ($self->get_snmp_table_objects(
       'CISCO-ENVMON-MIB', 'ciscoEnvMonVoltageStatusTable')) {
     push(@{$self->{voltages}},
         NWC::Cisco::Component::VoltageSubsystem::Voltage->new(%{$_}));

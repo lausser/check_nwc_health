@@ -26,8 +26,8 @@ sub init {
   my $snmpwalk = $params{rawdata};
   my $ignore_redundancy = $params{ignore_redundancy};
   my $type = 0;
-  foreach ($self->get_table_entries(
-      'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
+  foreach ($self->get_snmp_table_objects(
+     'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
     $_->{ciscoMemoryPoolType} ||= $type++;
     push(@{$self->{mems}},
         NWC::Cisco::Component::MemSubsystem::Mem->new(%{$_}));
