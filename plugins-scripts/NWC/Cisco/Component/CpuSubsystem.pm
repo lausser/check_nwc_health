@@ -24,7 +24,6 @@ sub init {
   my $type = 0;
   foreach ($self->get_snmp_table_objects(
       'CISCO-PROCESS-MIB', 'cpmCPUTotalTable')) {
-      #'CISCO-PROCESS-MIB', 'cpmCPUTotalTable')) {
     $_->{cpmCPUTotalIndex} ||= $type++;
     push(@{$self->{cpus}},
         NWC::Cisco::Component::CpuSubsystem::Cpu->new(%{$_}));

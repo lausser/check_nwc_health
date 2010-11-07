@@ -35,7 +35,7 @@ sub init {
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
     foreach ($self->get_snmp_table_objects(
-        'MIB-II', 'ifTable', 'ifEntry', \@indices)) {
+        'MIB-II', 'ifTable', \@indices)) {
       push(@{$self->{interfaces}},
           NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
     }

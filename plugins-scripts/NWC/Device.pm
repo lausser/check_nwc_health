@@ -213,17 +213,8 @@ sub get_snmp_object {
       exists $NWC::Device::mibs_and_oids->{$mib}->{$mo}) {
     my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$mo}.
         (defined $index ? '.'.$index : '');
-printf "my oid is %s\n", $oid;
     my $response = $self->get_request(-varbindlist => [$oid]);
-if (exists $response->{$oid}) {
- printf "get_object yes $oid\n";
-} else {
- printf "get_object no $oid\n";
-}
     return $response->{$oid};
-  } else {
-printf "%s\n", Data::Dumper::Dumper($NWC::Device::mibs_and_oids->{$mib});
-printf STDERR "no such %s %s\n", $mib, $mo;
   }
   return undef;
 }
@@ -476,7 +467,6 @@ sub rawdata {
 sub add_oidtrace {
   my $self = shift;
   my $oid = shift;
-printf STDERR "want %s\n", $oid;
   push(@{$NWC::Device::oidtrace}, $oid);
 }
 
@@ -484,14 +474,12 @@ sub get_request {
   my $self = shift;
   my %params = @_;
   my @notcached = ();
-printf STDERR "get_request -> %s\n", Data::Dumper::Dumper(\%params);
   foreach my $oid (@{$params{'-varbindlist'}}) {
     $self->add_oidtrace($oid);
     if (! exists NWC::Device::rawdata->{$oid}) {
       push(@notcached, $oid);
     }
   }
-printf STDERR "get_request nc %s\n", Data::Dumper::Dumper(\@notcached);
   if (! $self->opts->snmpwalk && (scalar(@notcached) > 0)) {
     my $result = ($NWC::Device::session->version() == 0) ?
         $NWC::Device::session->get_request(
@@ -509,7 +497,6 @@ printf STDERR "get_request nc %s\n", Data::Dumper::Dumper(\@notcached);
   my $result = {};
   map { $result->{$_} = $NWC::Device::rawdata->{$_} }
       @{$params{'-varbindlist'}};
-printf STDERR "get_request <- %s\n", Data::Dumper::Dumper($result);
   return $result;
 }
 
