@@ -84,7 +84,10 @@ sub check_snmp_and_model {
       open(MESS, $self->opts->snmpwalk);
       while(<MESS>) {
         # SNMPv2-SMI::enterprises.232.6.2.6.7.1.3.1.4 = INTEGER: 6
-        if (/^([\d\.]+) = .*?: (\-*\d+)/) {
+        if (/^([\d\.]+) = .*?INTEGER: .*\((\-*\d+)\)/) {
+          # .1.3.6.1.2.1.2.2.1.8.1 = INTEGER: down(2)
+          $response->{$1} = $2;
+        } elsif (/^([\d\.]+) = .*?: (\-*\d+)/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = .*?: "(.*?)"/) {
           $response->{$1} = $2;
@@ -489,7 +492,7 @@ printf STDERR "get_request -> %s\n", Data::Dumper::Dumper(\%params);
     }
   }
 printf STDERR "get_request nc %s\n", Data::Dumper::Dumper(\@notcached);
-  if ($self->opts->hostname && (scalar(@notcached) > 0)) {
+  if (! $self->opts->snmpwalk && (scalar(@notcached) > 0)) {
     my $result = ($NWC::Device::session->version() == 0) ?
         $NWC::Device::session->get_request(
             -varbindlist => \@notcached,
@@ -519,63 +522,89 @@ sub get_snmp_table_objects {
   my $self = shift;
   my $mib = shift;
   my $table = shift;
-  my $entry = shift;
-  my $indices = shift;
+  my $indices = shift || [];
+  my @entries = ();
+  my $entry = $table;
+  $entry =~ s/Table/Entry/g;
   if (scalar(@{$indices}) > 0) {
+    if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+        exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
+      my $result = $self->get_table(
+          -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+      # now we have numerical_oid+index => value
+      # needs to become symboic_oid => value
+      #my @indices = 
+      #    $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
+      foreach my $idx (@{$indices}) {
+        my $mo = {};
+        foreach my $symoid
+            (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+          my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
+          if (ref($oid) ne 'HASH') {
+            my $fulloid = $oid . '.'.$idx;
+            if (exists $result->{$fulloid}) {
+              if (exists
+                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
+                if (exists 
+                    $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) { 
+                  $mo->{$symoid} = 
+                      $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
+                } else {
+                  $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+                }
+              } else {
+                $mo->{$symoid} = $result->{$fulloid};
+              }
+            }
+          }
+        }
+        push(@entries, $mo);
+      }
+    }
   } else {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
-printf "get_snmp_table_objects get_table %s\n", $NWC::Device::mibs_and_oids->{$mib}->{$table};
       my $result = $self->get_table(
           -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
-printf "get_snmp_table_objects %s\n", Data::Dumper::Dumper($result);
       # now we have numerical_oid+index => value
       # needs to become symboic_oid => value
-#my @indices = $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$table});
-my @indices = $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
-printf "get_snmp_table_objects indices %s\n", Data::Dumper::Dumper(\@indices);
+      my @indices = 
+          $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
       foreach my $idx (@indices) {
-          (keys %{$NWC::Device::mibs_and_oids->{$mib}->{$table}}) {
-        my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$table}->{$symoid};
-        
-
-  foreach (@indices) {
-    my @idx = @{$_};
-    my %params = ();
-    my $maxdimension = scalar(@idx) - 1;
-    foreach my $idxnr (1..scalar(@idx)) {
-      $params{'index'.$idxnr} = $_->[$idxnr - 1];
-    }
-    foreach my $oid (keys %{$oids}) {
-      next if $oid =~ /Table$/;
-      next if $oid =~ /Entry$/;
-      # there may be scalar oids ciscoEnvMonTemperatureStatusValue = curr. temp.
-      next if ($oid =~ /Value$/ && ref ($oids->{$oid}) eq 'HASH');
-      if (exists $oids->{$oid.'Value'}) {
-        $params{$oid} = $self->get_object_value(
-            $oids->{$oid}, $oids->{$oid.'Value'}, @idx);
-      } else {
-        $params{$oid} = $self->get_object($oids->{$oid}, @idx);
+        my $mo = {};
+        foreach my $symoid
+            (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+          my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
+          if (ref($oid) ne 'HASH') {
+            my $fulloid = $oid . '.'.join('.', @{$idx});
+            if (exists $result->{$fulloid}) {
+              if (exists
+                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
+                if (exists 
+                    $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) { 
+                  $mo->{$symoid} = 
+                      $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
+                } else {
+                  $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+                }
+              } else {
+                $mo->{$symoid} = $result->{$fulloid};
+              }
+            }
+          }
+        }
+        push(@entries, $mo);
       }
     }
-    push(@params, \%params);
   }
-
-
-
-
-      }
-    } else {
-printf "get_snmp_table_objects no %s and %s\n", $mib, $table;
-    }
-  }
+  return @entries;
 }
 
 sub get_table {
   my $self = shift;
   my %params = @_;
   $self->add_oidtrace($params{'-baseoid'});
-  if ($self->opts->hostname) {
+  if (! $self->opts->snmpwalk) {
     my @notcached = ();
     my $result = $NWC::Device::session->get_table(%params);
     foreach my $key (keys %{$result}) {

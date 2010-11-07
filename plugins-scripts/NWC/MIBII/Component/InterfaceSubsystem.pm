@@ -36,8 +36,6 @@ sub init {
     my @indices = $self->get_interface_indices();
     foreach ($self->get_snmp_table_objects(
         'MIB-II', 'ifTable', 'ifEntry', \@indices)) {
-    #foreach ($self->get_table_entries(
-    #    'MIB-II', 'ifTable', \@indices)) {
       push(@{$self->{interfaces}},
           NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
     }
@@ -53,6 +51,7 @@ sub check {
     foreach (@{$self->{interfaces}}) {
       $_->list();
     }
+  } if ($self->mode =~ /device::interfaces::shinkenconf/) {
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
