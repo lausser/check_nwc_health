@@ -39,6 +39,9 @@ sub init {
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_interface_subsystem();
       $self->check_interface_subsystem();
+    } elsif ($self->mode =~ /device::shinken::interface/) {
+      $self->analyze_interface_subsystem();
+      $self->shinken_interface_subsystem();
     }
   }
 }
@@ -93,6 +96,45 @@ sub check_mem_subsystem {
   $self->{components}->{mem_subsystem}->check();
   $self->{components}->{mem_subsystem}->dump()
       if $self->opts->verbose >= 2;
+}
+
+sub shinken_interface_subsystem {
+  my $self = shift;
+  my $attr = sprintf "%s", join(',', map {
+      sprintf '%s$(%s)$$()$', $_->{ifDescr}, $_->{ifIndex}
+  } @{$self->{components}->{interface_subsystem}->{interfaces}});
+  printf <<'EOEO', $self->opts->hostname(), $self->opts->hostname(), $attr;
+define host {
+  host_name                     %s
+  address                       %s
+  use                           default-host
+  _interfaces                   %s
+
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_cpu
+  check_command                 check_nwc_health!cpu-load!80%%!90%%
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_mem
+  check_command                 check_nwc_health!memory-usage!80%%!90%%
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_ifusage_$KEY$
+  check_command                 check_nwc_health!interface-usage!$VALUE1$!$VALUE2$
+  duplicate_foreach             _interfaces
+  default_value                 80%%|90%%
+}
+EOEO
 }
 
 

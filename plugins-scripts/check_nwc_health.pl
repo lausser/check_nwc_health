@@ -39,7 +39,7 @@ my @modes = (
   ['device::interfaces::list',
       'list-interfaces', undef,
       'Show the interfaces of the device and update the name cache' ],
-  ['device::interfaces::shinkenconf',
+  ['device::shinken::interface',
       'create-shinken-service', undef,
       'Create a Shinken service definition' ],
 );

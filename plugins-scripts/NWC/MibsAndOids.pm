@@ -42,6 +42,7 @@ $NWC::Device::mibs_and_oids = {
           7 => 'lowerLayerDown',
       },
       # INDEX { ifIndex }
+      #
       ifXTable => '1.3.6.1.2.1.31.1.1',
       ifXEntry => '1.3.6.1.2.1.31.1.1.1',
       ifName => '1.3.6.1.2.1.31.1.1.1.1',
@@ -67,6 +68,8 @@ $NWC::Device::mibs_and_oids = {
           1 => 'enabled',
           2 => 'disabled',
       },
+      # ifXEntry AUGMENTS ifEntry
+      #
   },
   'CISCO-PROCESS-MIB' => {
       cpmCPUTotalTable => '1.3.6.1.4.1.9.9.109.1.1.1',

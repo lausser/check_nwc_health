@@ -26,6 +26,13 @@ sub init {
   my %params = @_;
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
+    foreach my $ifDesc (keys %{$self->{interface_cache}}) {
+      push(@{$self->{interfaces}},
+          NWC::MIBII::Component::InterfaceSubsystem::Interface->new(
+              ifIndex => $self->{interface_cache}->{$ifDesc},
+              ifDescr => $ifDesc,
+          ));
+    }
   } else {
     $self->update_interface_cache(0);
     #next if $self->opts->can('name') && $self->opts->name && 
@@ -34,10 +41,12 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
-    foreach ($self->get_snmp_table_objects(
-        'MIB-II', 'ifTable', \@indices)) {
-      push(@{$self->{interfaces}},
-          NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
+    if (scalar(@indices) > 0) {
+      foreach ($self->get_snmp_table_objects(
+          'MIB-II', 'ifTable+ifXTable', \@indices)) {
+        push(@{$self->{interfaces}},
+            NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
+      }
     }
   }
 }
@@ -47,11 +56,14 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
+  if (scalar(@{$self->{interfaces}}) == 0) {
+    $self->add_message(UNKNOWN, 'no interfaces');
+    return;
+  }
   if ($self->mode =~ /device::interfaces::list/) {
     foreach (@{$self->{interfaces}}) {
       $_->list();
     }
-  } if ($self->mode =~ /device::interfaces::shinkenconf/) {
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
@@ -69,8 +81,10 @@ sub update_interface_cache {
       $NWC::Device::statefilesdir, $self->opts->hostname;
   my $update = time - 3600;
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
+    $self->debug('force update of interface cache');
     $self->{interface_cache} = {};
-    foreach ($self->get_table_entries( 'MIB-II', 'ifTable')) {
+    #foreach ($self->get_table_entries( 'MIB-II', 'ifTable')) {
+    foreach ($self->get_snmp_table_objects( 'MIB-II', 'ifTable')) {
       $self->{interface_cache}->{$_->{ifDescr}} = $_->{ifIndex};
     }
     $self->save_interface_cache();
@@ -111,22 +125,25 @@ sub load_interface_cache {
 sub get_interface_indices {
   my $self = shift;
   my @indices = ();
-  if (! $self->opts->name) {
-    return @indices;
-  }
   foreach my $ifdescr (keys %{$self->{interface_cache}}) {
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         if ($ifdescr =~ /$self->opts->name/i) {
-          push(@indices, $self->{interface_cache}->{$ifdescr});
+          push(@indices, [$self->{interface_cache}->{$ifdescr}]);
         }
       } else {
-        if (lc $ifdescr eq lc $self->opts->name) {
-          push(@indices, $self->{interface_cache}->{$ifdescr});
+        if ($self->opts->name =~ /^\d+$/) {
+          if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
+            push(@indices, [$self->opts->name]);
+          }
+        } else {
+          if (lc $ifdescr eq lc $self->opts->name) {
+            push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+          }
         }
       }
     } else {
-      push(@indices, $self->{interface_cache}->{$ifdescr});
+      push(@indices, [$self->{interface_cache}->{$ifdescr}]);
     }
   }
   return @indices;
@@ -182,6 +199,38 @@ sub new {
     $self->{$key} = 0 if ! defined $params{$key};
   }
   bless $self, $class;
+  if (0) {
+  #if ($params{ifName}) {
+    my $self64 = {
+      ifName => $params{ifName},
+      ifInMulticastPkts => $params{ifInMulticastPkts},
+      ifInBroadcastPkts => $params{ifInBroadcastPkts},
+      ifOutMulticastPkts => $params{ifOutMulticastPkts},
+      ifOutBroadcastPkts => $params{ifOutBroadcastPkts},
+      ifHCInOctets => $params{ifHCInOctets},
+      ifHCInUcastPkts => $params{ifHCInUcastPkts},
+      ifHCInMulticastPkts => $params{ifHCInMulticastPkts},
+      ifHCInBroadcastPkts => $params{ifHCInBroadcastPkts},
+      ifHCOutOctets => $params{ifHCOutOctets},
+      ifHCOutUcastPkts => $params{ifHCOutUcastPkts},
+      ifHCOutMulticastPkts => $params{ifHCOutMulticastPkts},
+      ifHCOutBroadcastPkts => $params{ifHCOutBroadcastPkts},
+      ifLinkUpDownTrapEnable => $params{ifLinkUpDownTrapEnable},
+      ifHighSpeed => $params{ifHighSpeed},
+      ifPromiscuousMode => $params{ifPromiscuousMode},
+      ifConnectorPresent => $params{ifConnectorPresent},
+      ifAlias => $params{ifAlias},
+      ifCounterDiscontinuityTime => $params{ifCounterDiscontinuityTime},
+    };
+    map { $self->{$_} = $self64->{$_} } keys %{$self64};
+    bless $self, 'NWC::MIBII::Component::InterfaceSubsystem::Interface::64bit';
+  }
+  $self->init();
+  return $self;
+}
+
+sub init {
+  my $self = shift;
   if ($self->mode =~ /device::interfaces::traffic/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
@@ -346,11 +395,28 @@ sub list {
 
 sub dump {
   my $self = shift;
-  printf "[IF_%s]\n", $self->{ifIndex};
+  printf "[IF32_%s]\n", $self->{ifIndex};
   foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific)) {
-    printf "%s: %s\n", $_, $self->{$_};
+    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
   }
 #  printf "info: %s\n", $self->{info};
   printf "\n";
 }
+
+package NWC::MIBII::Component::InterfaceSubsystem::Interface::64bit;
+our @ISA = qw(NWC::MIBII::Component::InterfaceSubsystem::Interface);
+
+use strict;
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
+
+sub dump {
+  my $self = shift;
+  printf "[IF64_%s]\n", $self->{ifIndex};
+  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific ifName ifInMulticastPkts ifInBroadcastPkts ifOutMulticastPkts ifOutBroadcastPkts ifHCInOctets ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts ifHCOutOctets ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts ifLinkUpDownTrapEnable ifHighSpeed ifPromiscuousMode ifConnectorPresent ifAlias ifCounterDiscontinuityTime)) {
+    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
+  }
+#  printf "info: %s\n", $self->{info};
+  printf "\n";
+}
+
 

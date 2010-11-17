@@ -36,7 +36,7 @@ sub new {
     if (! $NWC::Device::plugin->check_messages()) {
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
-        $self->trace(3, 'using NWC::Cisco');
+        $self->debug('using NWC::Cisco');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
@@ -115,6 +115,9 @@ sub check_snmp_and_model {
     map { $response->{$_} =~ s/^\s+//; $response->{$_} =~ s/\s+$//; }
         keys %$response;
     $self->set_rawdata($response);
+    if (! $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
+      $self->add_rawdata('1.3.6.1.2.1.1.1.0', 'Cisco');
+    }
     $self->whoami();
   } else {
     if (eval "require Net::SNMP") {
@@ -150,12 +153,12 @@ sub check_snmp_and_model {
       if (! defined $session) {
         $self->add_message(CRITICAL, 
             sprintf 'cannot create session object: %s', $error);
-        $self->trace(1, Data::Dumper::Dumper(\%params));
+        $self->debug(Data::Dumper::Dumper(\%params));
       } else {
         $NWC::Device::session = $session;
         my $sysUpTime = '1.3.6.1.2.1.1.3.0';
         if (my $uptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0)) {
-          $self->trace(3, sprintf 'snmp agent answered: %s', $uptime);
+          $self->debug(sprintf 'snmp agent answered: %s', $uptime);
           $self->whoami();
         } else {
           $self->add_message(CRITICAL,
@@ -173,35 +176,22 @@ sub check_snmp_and_model {
 sub whoami {
   my $self = shift;
   my $productname = undef;
-  if ($self->opts->snmpwalk) {
-    my $sysDescr = '1.3.6.1.2.1.1.1.0';
-$self->{rawdata}->{$sysDescr} = "bla cisco";
-    if ($productname = $self->rawdata->{$sysDescr}) {
-      if (! $productname) {
-        $self->{productname} = 'Cisco';
-      } else {
-        $self->{productname} = $self->rawdata->{$sysDescr};
-      }
+  my $sysDescr = '1.3.6.1.2.1.1.1.0';
+  my $dummy = '1.3.6.1.2.1.1.5.0';
+  if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
+    if ($productname =~ /Cisco/) {
+      $self->{productname} = 'Cisco';
     } else {
-      $self->add_message(CRITICAL,
-          'snmpwalk returns no product name (cpqsinfo-mib)');
+      $self->{productname} = $productname;
     }
   } else {
-    my $sysDescr = '1.3.6.1.2.1.1.1.0';
-    my $dummy = '1.3.6.1.2.1.1.5.0';
-    if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
-      if ($productname =~ /Cisco/) {
-        $self->{productname} = 'Cisco';
-      } else {
-        $self->{productname} = $productname;
-      }
-    } else {
-      $self->add_message(CRITICAL,
-          'snmpwalk returns no product name (cpqsinfo-mib)');
+    $self->add_message(CRITICAL,
+        'snmpwalk returns no product name (sysDescr)');
+    if (! $self->opts->snmpwalk) {
       $NWC::Device::session->close;
     }
-    $self->trace(3, 'whoami: '.$self->{productname});
   }
+  $self->debug('whoami: '.$self->{productname});
 }
 
 sub get_snmp_object {
@@ -279,16 +269,9 @@ sub valid_response {
 
 sub debug {
   my $self = shift;
-  my $msg = shift;
-#    printf "%s %s\n", $msg, ref($self);
-}
-
-sub trace {
-  my $self = shift;
   my $format = shift;
-#return;
   $self->{trace} = -f "/tmp/check_nwc_health.trace" ? 1 : 0;
-  if ($self->opts->verbose) {
+  if ($self->opts->verbose && $self->opts->verbose > 10) {
     printf("%s: ", scalar localtime);
     printf($format, @_);
     printf "\n";
@@ -467,6 +450,7 @@ sub rawdata {
 sub add_oidtrace {
   my $self = shift;
   my $oid = shift;
+  $self->debug("cache: ".$oid);
   push(@{$NWC::Device::oidtrace}, $oid);
 }
 
@@ -500,10 +484,11 @@ sub get_request {
   return $result;
 }
 
-#
+# Level1
 # get_snmp_table_objects('MIB-Name', 'Table-Name', 'Table-Entry', [indices])
 #
 # returns array of hashrefs
+# evt noch ein weiterer parameter fuer ausgewaehlte oids
 #
 sub get_snmp_table_objects {
   my $self = shift;
@@ -511,42 +496,62 @@ sub get_snmp_table_objects {
   my $table = shift;
   my $indices = shift || [];
   my @entries = ();
+  my $augmenting_table;
+  if ($table =~ /^(.*?)\+(.*)/) {
+    $table = $1;
+    $augmenting_table = $2;
+  }
   my $entry = $table;
   $entry =~ s/Table/Entry/g;
-  if (scalar(@{$indices}) > 0) {
+  if (scalar(@{$indices}) == 1) {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
-      my $result = $self->get_table(
+      my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.';
+      my $toidlen = length($toid);
+      my @columns = map {
+          $NWC::Device::mibs_and_oids->{$mib}->{$_}
+      } grep {
+        substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
+            $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.'
+      } keys %{$NWC::Device::mibs_and_oids->{$mib}};
+      if ($augmenting_table && 
+          exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
+        my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.';
+        my $toidlen = length($toid);
+        push(@columns, map {
+            $NWC::Device::mibs_and_oids->{$mib}->{$_}
+        } grep {
+          substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
+              $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.'
+        } keys %{$NWC::Device::mibs_and_oids->{$mib}});
+      }
+      my $result = $self->get_entries(
+          -startindex => $indices->[0]->[0],
+          -endindex => $indices->[0]->[0],
+          -columns => \@columns,
+      );
+      @entries = $self->make_symbolic($mib, $result, $indices);
+    }
+  } elsif (scalar(@{$indices}) > 1) {
+    # man koennte hier pruefen, ob die indices aufeinanderfolgen
+    # und dann get_entries statt get_table aufrufen
+    if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+        exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
+      my $result = {};
+      $result = $self->get_table(
           -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+      if ($augmenting_table && 
+          exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
+        my $augmented_result = $self->get_table(
+            -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table});
+        map { $result->{$_} = $augmented_result->{$_} }
+            keys %{$augmented_result};
+      }
       # now we have numerical_oid+index => value
       # needs to become symboic_oid => value
       #my @indices = 
       #    $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
-      foreach my $idx (@{$indices}) {
-        my $mo = {};
-        foreach my $symoid
-            (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
-          my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
-          if (ref($oid) ne 'HASH') {
-            my $fulloid = $oid . '.'.$idx;
-            if (exists $result->{$fulloid}) {
-              if (exists
-                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
-                if (exists 
-                    $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) { 
-                  $mo->{$symoid} = 
-                      $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
-                } else {
-                  $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
-                }
-              } else {
-                $mo->{$symoid} = $result->{$fulloid};
-              }
-            }
-          }
-        }
-        push(@entries, $mo);
-      }
+      @entries = $self->make_symbolic($mib, $result, $indices);
     }
   } else {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
@@ -556,37 +561,57 @@ sub get_snmp_table_objects {
       # now we have numerical_oid+index => value
       # needs to become symboic_oid => value
       my @indices = 
-          $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
-      foreach my $idx (@indices) {
-        my $mo = {};
-        foreach my $symoid
-            (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
-          my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
-          if (ref($oid) ne 'HASH') {
-            my $fulloid = $oid . '.'.join('.', @{$idx});
-            if (exists $result->{$fulloid}) {
-              if (exists
-                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
-                if (exists 
-                    $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) { 
-                  $mo->{$symoid} = 
-                      $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
-                } else {
-                  $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
-                }
-              } else {
-                $mo->{$symoid} = $result->{$fulloid};
-              }
-            }
-          }
-        }
-        push(@entries, $mo);
-      }
+          $self->get_indices(
+              -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$entry},
+              -oids => [keys %{$result}]);
+      @entries = $self->make_symbolic($mib, $result, \@indices);
     }
   }
   return @entries;
 }
 
+# make_symbolic
+# mib is the name of a mib (must be in mibs_and_oids)
+# result is a hash-key oid->value
+# indices is a array ref of array refs. [[1],[2],...] or [[1,0],[1,1],[2,0]..
+sub make_symbolic {
+  my $self = shift;
+  my $mib = shift;
+  my $result = shift;
+  my $indices = shift;
+  my @entries = ();
+  foreach my $index (@{$indices}) {
+    my $mo = {};
+    my $idx = join('.', @{$index}); # index can be multi-level
+    foreach my $symoid
+        (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+      my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
+      if (ref($oid) ne 'HASH') {
+        my $fulloid = $oid . '.'.$idx;
+        if (exists $result->{$fulloid}) {
+          if (exists
+              $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
+            if (exists
+                $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) {
+              $mo->{$symoid} =
+                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
+            } else {
+              $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+            }
+          } else {
+            $mo->{$symoid} = $result->{$fulloid};
+          }
+        }
+      }
+    }
+    push(@entries, $mo);
+  }
+  return @entries;
+}
+
+# Level2
+# - get_table from Net::SNMP
+# - get all baseoid-matching oids from rawdata
 sub get_table {
   my $self = shift;
   my %params = @_;
@@ -598,11 +623,88 @@ sub get_table {
       $self->add_rawdata($key, $result->{$key});
     }
   }
+  return $self->get_matching_oids(
+      -columns => [$params{'-baseoid'}]);
+}
+
+sub get_entries {
+  my $self = shift;
+  my %params = @_;
+  # [-startindex]
+  # [-endindex]
+  # -columns
   my $result = {};
-  my $baseoidpattern = $params{'-baseoid'};
-  $baseoidpattern =~ s/\./\\./g;
-  map { $result->{$_} = $NWC::Device::rawdata->{$_} }
-      grep /^$baseoidpattern/, keys %{$NWC::Device::rawdata};
+  if (! $self->opts->snmpwalk) {
+    my %newparams = ();
+    $newparams{'-startindex'} = $params{'-startindex'}
+        if defined $params{'-startindex'};
+    $newparams{'-endindex'} = $params{'-endindex'}     
+        if defined $params{'-startindex'};
+    $newparams{'-columns'} = $params{'-columns'};
+    $result = $NWC::Device::session->get_entries(%newparams);
+    foreach my $key (keys %{$result}) {
+      $self->add_rawdata($key, $result->{$key});
+    }
+  } else {
+    my $preresult = $self->get_matching_oids(
+        -columns => $params{'-columns'});
+    foreach (keys %{$preresult}) {
+      $result->{$_} = $preresult->{$_};
+    }
+    my @to_del = ();
+    if ($params{'-startindex'}) {
+      foreach my $resoid (keys %{$result}) {
+        foreach my $oid (@{$params{'-columns'}}) {
+          my $poid = $oid.'.';
+          my $lpoid = length($poid);
+          if (substr($resoid, 0, $lpoid) eq $poid) {
+            my $oidpattern = $poid;
+            $oidpattern =~ s/\./\\./g;
+            if ($resoid =~ /^$oidpattern.(.+)$/) {
+              if ($1 < $params{'-startindex'}) {
+                push(@to_del, $oid);
+              }
+            }
+          }
+        }
+      }
+    }
+    if ($params{'-endindex'}) {
+      foreach my $resoid (keys %{$result}) {
+        foreach my $oid (@{$params{'-columns'}}) {
+          my $poid = $oid.'.';
+          my $lpoid = length($poid);
+          if (substr($resoid, 0, $lpoid) eq $poid) {
+            my $oidpattern = $poid;
+            $oidpattern =~ s/\./\\./g;
+            if ($resoid =~ /^$oidpattern.(.+)$/) {
+              if ($1 > $params{'-endindex'}) {
+                push(@to_del, $oid);
+              }
+            }
+          }
+        }
+      } 
+    }   
+    foreach (@to_del) {
+      delete $result->{$_};
+    }
+  }
+  return $result;
+}
+
+# Level2
+# helper function
+sub get_matching_oids {
+  my $self = shift;
+  my %params = @_;
+  my $result = {};
+  foreach my $oid (@{$params{'-columns'}}) {
+    my $oidpattern = $oid;
+    $oidpattern =~ s/\./\\./g;
+    map { $result->{$_} = $NWC::Device::rawdata->{$_} }
+        grep /^$oidpattern(?=\.|$)/, keys %{$NWC::Device::rawdata};
+  }
   return $result;
 }
 
@@ -759,7 +861,7 @@ sub get_table_entries {
 }
 
 
-sub get_entries {
+sub xget_entries {
   my $self = shift;
   my $oids = shift;
   my $entry = shift;
@@ -808,12 +910,12 @@ sub get_entries {
 
 sub get_indices {
   my $self = shift;
-  my $entry = shift;
-  my $numindices = shift;
+  my %params = @_;
+  # -baseoid : entry
   # find all oids beginning with $entry
   # then skip one field for the sequence
   # then read the next numindices fields
-  my $entrypat = $entry;
+  my $entrypat = $params{'-baseoid'};
   $entrypat =~ s/\./\\\./g;
   my @indices = map {
       /^$entrypat\.\d+\.(.*)/ && $1;
