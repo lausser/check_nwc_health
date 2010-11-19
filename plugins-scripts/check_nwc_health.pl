@@ -42,6 +42,9 @@ my @modes = (
   ['device::shinken::interface',
       'create-shinken-service', undef,
       'Create a Shinken service definition' ],
+  ['device::hsrp::status',
+      'hsrp-status', undef,
+      'Create a Shinken service definition' ],
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);

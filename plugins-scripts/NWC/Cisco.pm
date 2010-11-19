@@ -42,8 +42,17 @@ sub init {
     } elsif ($self->mode =~ /device::shinken::interface/) {
       $self->analyze_interface_subsystem();
       $self->shinken_interface_subsystem();
+    } elsif ($self->mode =~ /device::hsrp/) {
+      $self->analyze_hsrp_subsystem();
+      $self->check_interface_subsystem();
     }
   }
+}
+
+sub analyze_hsrp_subsystem {
+  my $self = shift;
+  $self->{components}->{hsrp} =
+      NWC::HSRP::Component::HSRPSubsystem->new();
 }
 
 sub analyze_environmental_subsystem {
@@ -55,7 +64,7 @@ sub analyze_environmental_subsystem {
 sub analyze_interface_subsystem {
   my $self = shift;
   $self->{components}->{interface_subsystem} =
-      NWC::MIBII::Component::InterfaceSubsystem->new();
+      NWC::IFMIB::Component::InterfaceSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {

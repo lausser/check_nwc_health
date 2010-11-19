@@ -21,8 +21,10 @@ EXTRA_MODULES=\
   NWC/Cisco/Component/VoltageSubsystem.pm \
   NWC/Cisco/Component/FanSubsystem.pm \
   NWC/Cisco.pm \
-  NWC/MIBII/Component/InterfaceSubsystem.pm \
-  NWC/MIBII.pm \
+  NWC/HSRP/Component/HSRPSubsystem.pm \
+  NWC/HSRP.pm \
+  NWC/IFMIB/Component/InterfaceSubsystem.pm \
+  NWC/IFMIB.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)

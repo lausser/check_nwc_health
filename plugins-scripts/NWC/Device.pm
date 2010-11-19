@@ -503,6 +503,7 @@ sub get_snmp_table_objects {
   }
   my $entry = $table;
   $entry =~ s/Table/Entry/g;
+printf "get_snmp_table_objects %s %s\n", $mib, $table;
   if (scalar(@{$indices}) == 1) {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
@@ -589,14 +590,26 @@ sub make_symbolic {
       if (ref($oid) ne 'HASH') {
         my $fulloid = $oid . '.'.$idx;
         if (exists $result->{$fulloid}) {
-          if (exists
-              $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}) {
-            if (exists
-                $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}}) {
-              $mo->{$symoid} =
-                  $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Value'}->{$result->{$fulloid}};
+printf "symoid is %s\n", $symoid;
+          if (exists $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}) {
+            if (ref($NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}) eq 'HASH') {
+              if (exists $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$fulloid}}) {
+                $mo->{$symoid} = $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$fulloid}};
+              } else {
+                $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+              }
+            } elsif ($NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'} =~ /^(.*?)::(.*)/) {
+              my $mib = $1;
+              my $definition = $2;
+              if  (exists $NWC::Device::definitions->{$mib} && exists $NWC::Device::definitions->{$mib}->{$definition}
+                  && exists $NWC::Device::definitions->{$mib}->{$definition}->{$result->{$fulloid}}) {
+                $mo->{$symoid} = $NWC::Device::definitions->{$mib}->{$definition}->{$result->{$fulloid}};
+              } else {
+                $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+              }
             } else {
               $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+              # oder $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}?
             }
           } else {
             $mo->{$symoid} = $result->{$fulloid};

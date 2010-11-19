@@ -22,6 +22,7 @@ sub init {
   my $self = shift;
   foreach ($self->get_snmp_table_objects(
       'CISCO-ENVMON-MIB', 'ciscoEnvMonVoltageStatusTable')) {
+printf "voltage %s\n", Data::Dumper::Dumper($_);
     push(@{$self->{voltages}},
         NWC::Cisco::Component::VoltageSubsystem::Voltage->new(%{$_}));
   }
@@ -59,8 +60,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ciscoEnvMonVoltageStatusTable => $params{ciscoEnvMonVoltageStatusTable},
-    ciscoEnvMonVoltageStatusEntry => $params{ciscoEnvMonVoltageStatusEntry},
     ciscoEnvMonVoltageStatusIndex => $params{ciscoEnvMonVoltageStatusIndex},
     ciscoEnvMonVoltageStatusDescr => $params{ciscoEnvMonVoltageStatusDescr},
     ciscoEnvMonVoltageStatusValue => $params{ciscoEnvMonVoltageStatusValue},

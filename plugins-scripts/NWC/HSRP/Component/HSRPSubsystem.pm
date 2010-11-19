@@ -1,5 +1,5 @@
-package NWC::MIBII::Component::InterfaceSubsystem;
-our @ISA = qw(NWC::MIBII);
+package NWC::HSRP::Component::HSRPSubsystem;
+our @ISA = qw(NWC::HSRP);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -8,10 +8,7 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    interface_cache => {},
-    interfaces => [],
+    groups => [],
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
@@ -24,29 +21,12 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  if ($self->mode =~ /device::interfaces::list/) {
-    $self->update_interface_cache(1);
-    foreach my $ifDesc (keys %{$self->{interface_cache}}) {
-      push(@{$self->{interfaces}},
-          NWC::MIBII::Component::InterfaceSubsystem::Interface->new(
-              ifIndex => $self->{interface_cache}->{$ifDesc},
-              ifDescr => $ifDesc,
-          ));
-    }
-  } else {
-    $self->update_interface_cache(0);
-    #next if $self->opts->can('name') && $self->opts->name && 
-    #    $self->opts->name ne $_->{ifDescr};
-    # if limited search
-    # name is a number -> get_table with extra param
-    # name is a regexp -> list of names -> list of numbers
-    my @indices = $self->get_interface_indices();
-    if (scalar(@indices) > 0) {
-      foreach ($self->get_snmp_table_objects(
-          'MIB-II', 'ifTable+ifXTable', \@indices)) {
-        push(@{$self->{interfaces}},
-            NWC::MIBII::Component::InterfaceSubsystem::Interface->new(%{$_}));
-      }
+  if ($self->mode =~ /device::hsrp::status/) {
+    foreach ($self->get_snmp_table_objects(
+        'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
+printf "%s\n", Data::Dumper::Dumper($_);
+      #push(@{$self->{groups}},
+      #    NWC::HSRP::Component::HSRPSubsystem::Group->new(%{$_}));
     }
   }
 }
@@ -74,91 +54,16 @@ sub check {
   }
 }
 
-sub update_interface_cache {
-  my $self = shift;
-  my $force = shift;
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
-  my $update = time - 3600;
-  if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
-    $self->debug('force update of interface cache');
-    $self->{interface_cache} = {};
-    #foreach ($self->get_table_entries( 'MIB-II', 'ifTable')) {
-    foreach ($self->get_snmp_table_objects( 'MIB-II', 'ifTable')) {
-      $self->{interface_cache}->{$_->{ifDescr}} = $_->{ifIndex};
-    }
-    $self->save_interface_cache();
-  }
-  $self->load_interface_cache();
-}
-
-sub save_interface_cache {
-  my $self = shift;
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
-  open(STATE, ">$statefile");
-  printf STATE Data::Dumper::Dumper($self->{interface_cache});
-  close STATE;
-  $self->debug(sprintf "saved %s to %s",
-      Data::Dumper::Dumper($self->{interface_cache}), $statefile);
-}
-
-sub load_interface_cache {
-  my $self = shift;
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
-  if ( -f $statefile) {
-    our $VAR1;
-    eval {
-      require $statefile;
-    };
-    if($@) {
-      printf "rumms\n";
-    }
-    $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
-    $self->{interface_cache} = $VAR1;
-  }
-}
-
-sub get_interface_indices {
-  my $self = shift;
-  my @indices = ();
-  foreach my $ifdescr (keys %{$self->{interface_cache}}) {
-    if ($self->opts->name) {
-      if ($self->opts->regexp) {
-        if ($ifdescr =~ /$self->opts->name/i) {
-          push(@indices, [$self->{interface_cache}->{$ifdescr}]);
-        }
-      } else {
-        if ($self->opts->name =~ /^\d+$/) {
-          if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
-            push(@indices, [$self->opts->name]);
-          }
-        } else {
-          if (lc $ifdescr eq lc $self->opts->name) {
-            push(@indices, [$self->{interface_cache}->{$ifdescr}]);
-          }
-        }
-      }
-    } else {
-      push(@indices, [$self->{interface_cache}->{$ifdescr}]);
-    }
-  }
-  return @indices;
-}
-
 sub dump {
   my $self = shift;
-  foreach (@{$self->{interfaces}}) {
+  foreach (@{$self->{groups}}) {
     $_->dump();
   }
 }
 
 
-package NWC::MIBII::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(NWC::MIBII::Component::InterfaceSubsystem);
+package NWC::HSRP::Component::HSRPSubsystem::Group;
+our @ISA = qw(NWC::HSRP::Component::HSRPSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -402,21 +307,4 @@ sub dump {
 #  printf "info: %s\n", $self->{info};
   printf "\n";
 }
-
-package NWC::MIBII::Component::InterfaceSubsystem::Interface::64bit;
-our @ISA = qw(NWC::MIBII::Component::InterfaceSubsystem::Interface);
-
-use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub dump {
-  my $self = shift;
-  printf "[IF64_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific ifName ifInMulticastPkts ifInBroadcastPkts ifOutMulticastPkts ifOutBroadcastPkts ifHCInOctets ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts ifHCOutOctets ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts ifLinkUpDownTrapEnable ifHighSpeed ifPromiscuousMode ifConnectorPresent ifAlias ifCounterDiscontinuityTime)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 
