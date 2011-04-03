@@ -95,6 +95,9 @@ sub save_interface_cache {
   my $statefile = lc sprintf "%s/%s_interface_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname;
   open(STATE, ">$statefile");
+############################
+# printf ohne %s ????
+############################
   printf STATE Data::Dumper::Dumper($self->{interface_cache});
   close STATE;
   $self->debug(sprintf "saved %s to %s",

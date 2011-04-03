@@ -37,6 +37,9 @@ sub new {
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
+      } elsif ($self->{productname} =~ /NetScreen/i) {
+        bless $self, 'NWC::NetScreen';
+        $self->debug('using NWC::NetScreen');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
@@ -87,12 +90,12 @@ sub check_snmp_and_model {
         if (/^([\d\.]+) = .*?INTEGER: .*\((\-*\d+)\)/) {
           # .1.3.6.1.2.1.2.2.1.8.1 = INTEGER: down(2)
           $response->{$1} = $2;
-        } elsif (/^([\d\.]+) = .*?: (\-*\d+)/) {
+        } elsif (/^([\d\.]+) = \w+: (\-*\d+)/) {
           $response->{$1} = $2;
-        } elsif (/^([\d\.]+) = .*?: "(.*?)"/) {
+        } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {
           $response->{$1} = $2;
           $response->{$1} =~ s/\s+$//;
-        } elsif (/^([\d\.]+) = .*?: (.*)/) {
+        } elsif (/^([\d\.]+) = \w+: (.*)/) {
           $response->{$1} = $2;
           $response->{$1} =~ s/\s+$//;
         } elsif (/^([\d\.]+) = (\-*\d+)/) {

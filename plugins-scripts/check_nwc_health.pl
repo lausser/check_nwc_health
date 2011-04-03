@@ -195,7 +195,7 @@ $plugin->add_arg(
 );
 $plugin->add_arg(
     spec => 'critical=s',
-    help => '--warning
+    help => '--critical
    The critical threshold',
     required => 0,
 );
