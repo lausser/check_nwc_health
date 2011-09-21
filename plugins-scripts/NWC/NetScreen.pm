@@ -1,4 +1,4 @@
-package NWC::Cisco;
+package NWC::NetScreen;
 
 use strict;
 
