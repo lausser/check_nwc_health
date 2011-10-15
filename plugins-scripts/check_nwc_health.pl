@@ -2,11 +2,13 @@
 
 use strict;
 
-my $CELSIUS = 1;
-my $PERFDATA = 1;
-my $EXTENDEDINFO = 1;
-my $HWINFO = 1;
-my $NOINSTLEVEL = 'unknown';
+use vars qw ($PROGNAME $REVISION $CONTACT $TIMEOUT $STATEFILESDIR $needs_restart %commandline);
+
+$PROGNAME = "check_nwc_health";
+$REVISION = '$Revision: #PACKAGE_VERSION# $';
+$CONTACT = 'gerhard.lausser@consol.de';
+$TIMEOUT = 60;
+$STATEFILESDIR = '#STATEFILES_DIR#';
 
 use constant OK         => 0;
 use constant WARNING    => 1;
@@ -206,6 +208,12 @@ $plugin->add_arg(
    is not possible',
     required => 0,
 );
+$plugin->add_arg(
+    spec => 'statefilesdir=s',
+    help => '--statefilesdir
+   An alternate directory where the plugin can save files',
+    required => 0,
+);
 
 $plugin->getopts();
 if ($plugin->opts->community) {
@@ -229,6 +237,15 @@ if ($plugin->opts->community) {
 if ($plugin->opts->snmpwalk) {
   $plugin->override_opt('hostname', 'snmpwalk.file') 
 }
+if (! $plugin->opts->statefilesdir) {
+  if (exists $ENV{OMD_ROOT}) {
+    $plugin->override_opt('statefilesdir', $ENV{OMD_ROOT}."/var/tmp/check_nwc_health");
+  } else {
+    $plugin->override_opt('statefilesdir', $STATEFILESDIR);
+  }
+}
+
+
 $plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
 
 $plugin->{info} = []; # gefrickel
@@ -265,7 +282,6 @@ my $server = NWC::Device->new( runtime => {
     options => {
         servertype => $plugin->opts->servertype,
         verbose => $plugin->opts->verbose,
-        scrapiron => 0,
         customthresholds => $plugin->opts->get('customthresholds'),
         blacklist => $plugin->opts->blacklist,
         celsius => $CELSIUS,
@@ -278,9 +294,7 @@ my $server = NWC::Device->new( runtime => {
 #$server->dumper();
 if (! $plugin->check_messages()) {
   $server->init();
-  #$plugin->add_message(OK, $server->identify()) if $HWINFO;
   if (! $plugin->check_messages()) {
-    #$plugin->add_message(OK, 'hardware working fine');
     $plugin->add_message(OK, $server->get_summary()) 
         if $server->get_summary();
     $plugin->add_message(OK, $server->get_extendedinfo()) 
