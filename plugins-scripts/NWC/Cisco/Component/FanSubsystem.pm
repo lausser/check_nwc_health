@@ -59,13 +59,15 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ciscoEnvMonFanStatusIndex => $params{ciscoEnvMonFanStatusIndex} || 0,
-    ciscoEnvMonFanStatusDescr => $params{ciscoEnvMonFanStatusDescr},
-    ciscoEnvMonFanState => $params{ciscoEnvMonFanState},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(ciscoEnvMonFanStatusIndex
+      ciscoEnvMonFanStatusDescr ciscoEnvMonFanState)) {
+    $self->{$param} = $params{$param};
+  }
+  $self->{ciscoEnvMonFanStatusIndex} ||= 0;
   bless $self, $class;
   return $self;
 }

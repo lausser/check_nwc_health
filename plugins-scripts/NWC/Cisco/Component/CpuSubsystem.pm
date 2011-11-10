@@ -62,21 +62,17 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    cpmCPUTotalIndex => $params{cpmCPUTotalIndex},
-    cpmCPUTotalPhysicalIndex => $params{cpmCPUTotalPhysicalIndex},
-    cpmCPUTotal5sec => $params{cpmCPUTotal5sec},
-    cpmCPUTotal1min => $params{cpmCPUTotal1min},
-    cpmCPUTotal5min => $params{cpmCPUTotal5min},
-    cpmCPUTotal5secRev => $params{cpmCPUTotal5secRev},
-    cpmCPUTotal1minRev => $params{cpmCPUTotal1minRev},
-    cpmCPUTotal5minRev => $params{cpmCPUTotal5minRev},
-    cpmCPUMonInterval => $params{cpmCPUMonInterval},
-    cpmCPUTotalMonIntervalValue => $params{cpmCPUTotalMonIntervalValue},
-    cpmCPUInterruptMonIntervalValue => $params{cpmCPUInterruptMonIntervalValue},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex
+      cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min
+      cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev
+      cpmCPUMonInterval cpmCPUTotalMonIntervalValue
+      cpmCPUInterruptMonIntervalValue)) {
+    $self->{$param} = $params{$param};
+  }
   bless $self, $class;
   $self->{usage} = $params{cpmCPUTotal5minRev};
   if ($self->{cpmCPUTotalPhysicalIndex}) {

@@ -284,11 +284,11 @@ my $server = NWC::Device->new( runtime => {
         verbose => $plugin->opts->verbose,
         customthresholds => $plugin->opts->get('customthresholds'),
         blacklist => $plugin->opts->blacklist,
-        celsius => $CELSIUS,
-        perfdata => $PERFDATA,
-        extendedinfo => $EXTENDEDINFO,
-        hwinfo => $HWINFO,
-        noinstlevel => $NOINSTLEVEL,
+#        celsius => $CELSIUS,
+#        perfdata => $PERFDATA,
+#        extendedinfo => $EXTENDEDINFO,
+#        hwinfo => $HWINFO,
+#        noinstlevel => $NOINSTLEVEL,
     },
 },);
 #$server->dumper();

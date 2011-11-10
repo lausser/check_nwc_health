@@ -59,14 +59,16 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ciscoEnvMonSupplyStatusIndex => $params{ciscoEnvMonSupplyStatusIndex} || 0,
-    ciscoEnvMonSupplyStatusDescr => $params{ciscoEnvMonSupplyStatusDescr},
-    ciscoEnvMonSupplyState => $params{ciscoEnvMonSupplyState},
-    ciscoEnvMonSupplySource => $params{ciscoEnvMonSupplySource},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(ciscoEnvMonSupplyStatusIndex
+      ciscoEnvMonSupplyStatusDescr ciscoEnvMonSupplyState
+      ciscoEnvMonSupplySource)) {
+    $self->{$param} = $params{$param};
+  }
+  $self->{ciscoEnvMonSupplyStatusIndex} ||= 0;
   bless $self, $class;
   return $self;
 }

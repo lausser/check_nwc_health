@@ -66,20 +66,16 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    runtime => $params{runtime},
-    ciscoMemoryPoolTable => $params{ciscoMemoryPoolTable},
-    ciscoMemoryPoolEntry => $params{ciscoMemoryPoolEntry},
-    ciscoMemoryPoolType => $params{ciscoMemoryPoolType},
-    ciscoMemoryPoolName => $params{ciscoMemoryPoolName},
-    ciscoMemoryPoolAlternate => $params{ciscoMemoryPoolAlternate},
-    ciscoMemoryPoolValid => $params{ciscoMemoryPoolValid},
-    ciscoMemoryPoolUsed => $params{ciscoMemoryPoolUsed},
-    ciscoMemoryPoolFree => $params{ciscoMemoryPoolFree},
-    ciscoMemoryPoolLargestFree => $params{ciscoMemoryPoolLargestFree},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(ciscoMemoryPoolTable ciscoMemoryPoolEntry
+      ciscoMemoryPoolType ciscoMemoryPoolName ciscoMemoryPoolAlternate
+      ciscoMemoryPoolValid ciscoMemoryPoolUsed ciscoMemoryPoolFree
+      ciscoMemoryPoolLargestFree)) {
+    $self->{$param} = $params{$param};
+  }
   bless $self, $class;
   $self->{usage} = 100 * $params{ciscoMemoryPoolUsed} /
       ($params{ciscoMemoryPoolFree} + $params{ciscoMemoryPoolUsed});

@@ -59,16 +59,17 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ciscoEnvMonTemperatureStatusIndex => $params{ciscoEnvMonTemperatureStatusIndex} || 0,
-    ciscoEnvMonTemperatureStatusDescr => $params{ciscoEnvMonTemperatureStatusDescr},
-    ciscoEnvMonTemperatureStatusValue => $params{ciscoEnvMonTemperatureStatusValue},
-    ciscoEnvMonTemperatureThreshold => $params{ciscoEnvMonTemperatureThreshold},
-    ciscoEnvMonTemperatureLastShutdown => $params{ciscoEnvMonTemperatureLastShutdown},
-    ciscoEnvMonTemperatureState => $params{ciscoEnvMonTemperatureState},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(ciscoEnvMonTemperatureStatusIndex
+      ciscoEnvMonTemperatureStatusDescr ciscoEnvMonTemperatureStatusValue
+      ciscoEnvMonTemperatureThreshold ciscoEnvMonTemperatureLastShutdown
+      ciscoEnvMonTemperatureState)) {
+    $self->{$param} = $params{$param};
+  }
+  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
   if ($self->{ciscoEnvMonTemperatureStatusValue}) {
     bless $self, $class;
   } else {

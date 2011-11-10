@@ -60,17 +60,17 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ciscoEnvMonVoltageStatusIndex => $params{ciscoEnvMonVoltageStatusIndex},
-    ciscoEnvMonVoltageStatusDescr => $params{ciscoEnvMonVoltageStatusDescr},
-    ciscoEnvMonVoltageStatusValue => $params{ciscoEnvMonVoltageStatusValue},
-    ciscoEnvMonVoltageThresholdLow => $params{ciscoEnvMonVoltageThresholdLow},
-    ciscoEnvMonVoltageThresholdHigh => $params{ciscoEnvMonVoltageThresholdHigh},
-    ciscoEnvMonVoltageLastShutdown => $params{ciscoEnvMonVoltageLastShutdown},
-    ciscoEnvMonVoltageState => $params{ciscoEnvMonVoltageState},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  foreach my $param (qw(ciscoEnvMonVoltageStatusTable
+      ciscoEnvMonVoltageStatusEntry ciscoEnvMonVoltageStatusIndex
+      ciscoEnvMonVoltageStatusDescr ciscoEnvMonVoltageStatusValue
+      ciscoEnvMonVoltageThresholdLow ciscoEnvMonVoltageThresholdHigh
+      ciscoEnvMonVoltageLastShutdown ciscoEnvMonVoltageState)) {
+    $self->{$param} = $params{$param};
+  }
   bless $self, $class;
   return $self;
 }
