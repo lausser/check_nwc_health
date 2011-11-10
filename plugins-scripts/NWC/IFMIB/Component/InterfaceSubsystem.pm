@@ -236,10 +236,16 @@ sub init {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifOutOctets));
-    $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
-        ($self->{delta_timestamp} * $self->{ifSpeed});
-    $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
-        ($self->{delta_timestamp} * $self->{ifSpeed});
+    if ($self->{ifSpeed} == 0) {
+      # vlan graffl
+      $self->{inputUtilization} = 0;
+      $self->{outputUtilization} = 0;
+    } else {
+      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->{ifSpeed});
+      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->{ifSpeed});
+    }
     $self->{inputRate} = $self->{delta_ifInOctets} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutOctets} / $self->{delta_timestamp};
     my $factor = 1/8; # default Bits
