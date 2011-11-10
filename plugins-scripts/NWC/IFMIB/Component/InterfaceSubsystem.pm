@@ -128,7 +128,8 @@ sub get_interface_indices {
   foreach my $ifdescr (keys %{$self->{interface_cache}}) {
     if ($self->opts->name) {
       if ($self->opts->regexp) {
-        if ($ifdescr =~ /$self->opts->name/i) {
+        my $pattern = $self->opts->name;
+        if ($ifdescr =~ /$pattern/i) {
           push(@indices, [$self->{interface_cache}->{$ifdescr}]);
         }
       } else {

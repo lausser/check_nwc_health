@@ -82,6 +82,10 @@ sub check {
       $self->{ciscoEnvMonVoltageStatusIndex},
       $self->{ciscoEnvMonVoltageStatusDescr},
       $self->{ciscoEnvMonVoltageState});
+  if ($self->{ciscoEnvMonVoltageState} eq 'notPresent') {
+  } elsif ($self->{ciscoEnvMonVoltageState} ne 'normal') {
+    $self->add_message(CRITICAL, $self->{info});
+  }
 }
 
 sub dump {

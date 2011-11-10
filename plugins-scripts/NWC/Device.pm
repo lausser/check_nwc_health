@@ -53,6 +53,7 @@ sub new {
     $self->opts->blacklist = do {
         local (@ARGV, $/) = $self->opts->blacklist; <> };
   }
+  $NWC::Device::statefilesdir = $self->opts->statefilesdir;
   return $self;
 }
 

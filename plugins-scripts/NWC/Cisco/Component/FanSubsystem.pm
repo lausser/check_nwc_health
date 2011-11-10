@@ -79,6 +79,10 @@ sub check {
       $self->{ciscoEnvMonFanStatusIndex},
       $self->{ciscoEnvMonFanStatusDescr},
       $self->{ciscoEnvMonFanState});
+  if ($self->{ciscoEnvMonFanState} eq 'notPresent') {
+  } elsif ($self->{ciscoEnvMonFanState} ne 'normal') {
+    $self->add_message(CRITICAL, $self->{info});
+  }
 }
 
 sub dump {

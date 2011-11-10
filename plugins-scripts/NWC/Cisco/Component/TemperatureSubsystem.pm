@@ -70,6 +70,7 @@ sub new {
     $self->{$param} = $params{$param};
   }
   $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
+  $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
   if ($self->{ciscoEnvMonTemperatureStatusValue}) {
     bless $self, $class;
   } else {
