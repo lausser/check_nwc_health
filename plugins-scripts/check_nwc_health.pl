@@ -8,7 +8,7 @@ $PROGNAME = "check_nwc_health";
 $REVISION = '$Revision: #PACKAGE_VERSION# $';
 $CONTACT = 'gerhard.lausser@consol.de';
 $TIMEOUT = 60;
-$STATEFILESDIR = '#STATEFILES_DIR#';
+$STATEFILESDIR = '/var/tmp/check_nwc_health';
 
 use constant OK         => 0;
 use constant WARNING    => 1;

@@ -50,13 +50,8 @@ BEGIN {
 
 # Replace the placeholders with the values from configure
 /#PERL#/ {sub(/#PERL#/,"@PERL@");}
-/my \$NOINSTLEVEL = 'unknown'/ {sub(/unknown/,"@NOINSTLEVEL@");}
-/my \$CELSIUS = 1;/ {sub(/1/,"@CELSIUS@");}
-/my \$PERFDATA = 1;/ {sub(/1/,"@PERFDATA@");}
-/my \$EXTENDEDINFO = 1;/ {sub(/1/,"@EXTENDEDINFO@");}
-/my \$HWINFO = 1;/ {sub(/1/,"@HWINFO@");}
-/my \$HPACUCLI = 1;/ {sub(/1/,"@HPACUCLI@");}
-/version => '.*',/ {sub(/'.*'/,"'@PACKAGE_VERSION@'");}
+/#STATEFILES_DIR#/ {sub(/#STATEFILES_DIR#/,"@STATEFILES_DIR@");}
+/#PACKAGE_VERSION#/ {sub(/#PACKAGE_VERSION#/,"@PACKAGE_VERSION@");}
 
 {
 	print;
