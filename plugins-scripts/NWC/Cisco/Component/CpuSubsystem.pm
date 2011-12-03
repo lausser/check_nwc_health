@@ -28,6 +28,37 @@ sub init {
     push(@{$self->{cpus}},
         NWC::Cisco::Component::CpuSubsystem::Cpu->new(%{$_}));
   }
+  if (scalar(@{$self->{cpus}}) == 0) {
+    # maybe too old. i fake a cpu. be careful. this is a really bad hack
+    my $response = $self->get_request(
+        -varbindlist => [
+            $NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1},
+            $NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5},
+            $NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{busyPer},
+        ]
+    );
+    if (exists $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{
+avgBusy1}}) {
+      push(@{$self->{cpus}},
+          NWC::Cisco::Component::CpuSubsystem::Cpu->new(
+              cpmCPUTotalPhysicalIndex => 0, #fake
+              cpmCPUTotalIndex => 0, #fake
+              cpmCPUTotal5sec => 0, #fake
+              cpmCPUTotal5secRev => 0, #fake
+              cpmCPUTotal1min => $response->{$NWC::Device::mibs_and_oids->{'OLD-
+CISCO-CPU-MIB'}->{avgBusy1}},
+              cpmCPUTotal1minRev => $response->{$NWC::Device::mibs_and_oids->{'O
+LD-CISCO-CPU-MIB'}->{avgBusy1}},
+              cpmCPUTotal5min => $response->{$NWC::Device::mibs_and_oids->{'OLD-
+CISCO-CPU-MIB'}->{avgBusy5}},
+              cpmCPUTotal5minRev => $response->{$NWC::Device::mibs_and_oids->{'O
+LD-CISCO-CPU-MIB'}->{avgBusy5}},
+              cpmCPUMonInterval => 0, #fake
+              cpmCPUTotalMonIntervalValue => 0, #fake
+              cpmCPUInterruptMonIntervalValue => 0, #fake
+      ));
+    }
+  }
 }
 
 sub check {

@@ -162,6 +162,13 @@ $NWC::Device::mibs_and_oids = {
       cHsrpGrpEntryRowStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
       # INDEX { ifIndex, cHsrpGrpNumber }
   },
+  'OLD-CISCO-CPU-MIB' => {
+      'avgBusy1' => '1.3.6.1.4.1.9.2.1.57.0',
+      'avgBusy5' => '1.3.6.1.4.1.9.2.1.58.0',
+      'busyPer' => '1.3.6.1.4.1.9.2.1.56.0',
+      'idleCount' => '1.3.6.1.4.1.9.2.1.59.0',
+      'idleWired' => '1.3.6.1.4.1.9.2.1.60.0',
+  },
 
 };
 
