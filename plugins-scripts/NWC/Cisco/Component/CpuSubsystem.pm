@@ -37,8 +37,7 @@ sub init {
             $NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{busyPer},
         ]
     );
-    if (exists $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{
-avgBusy1}}) {
+    if (exists $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}}) {
       push(@{$self->{cpus}},
           NWC::Cisco::Component::CpuSubsystem::Cpu->new(
               cpmCPUTotalPhysicalIndex => 0, #fake
