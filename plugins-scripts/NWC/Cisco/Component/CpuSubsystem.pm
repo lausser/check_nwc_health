@@ -44,14 +44,10 @@ sub init {
               cpmCPUTotalIndex => 0, #fake
               cpmCPUTotal5sec => 0, #fake
               cpmCPUTotal5secRev => 0, #fake
-              cpmCPUTotal1min => $response->{$NWC::Device::mibs_and_oids->{'OLD-
-CISCO-CPU-MIB'}->{avgBusy1}},
-              cpmCPUTotal1minRev => $response->{$NWC::Device::mibs_and_oids->{'O
-LD-CISCO-CPU-MIB'}->{avgBusy1}},
-              cpmCPUTotal5min => $response->{$NWC::Device::mibs_and_oids->{'OLD-
-CISCO-CPU-MIB'}->{avgBusy5}},
-              cpmCPUTotal5minRev => $response->{$NWC::Device::mibs_and_oids->{'O
-LD-CISCO-CPU-MIB'}->{avgBusy5}},
+              cpmCPUTotal1min => $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}},
+              cpmCPUTotal1minRev => $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}},
+              cpmCPUTotal5min => $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5}},
+              cpmCPUTotal5minRev => $response->{$NWC::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5}},
               cpmCPUMonInterval => 0, #fake
               cpmCPUTotalMonIntervalValue => 0, #fake
               cpmCPUInterruptMonIntervalValue => 0, #fake
