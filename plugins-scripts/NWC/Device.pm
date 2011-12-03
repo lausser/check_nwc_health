@@ -118,6 +118,7 @@ sub check_snmp_and_model {
     }
     map { $response->{$_} =~ s/^\s+//; $response->{$_} =~ s/\s+$//; }
         keys %$response;
+    #printf "%s\n", Data::Dumper::Dumper($response);
     $self->set_rawdata($response);
     if (! $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
       $self->add_rawdata('1.3.6.1.2.1.1.1.0', 'Cisco');

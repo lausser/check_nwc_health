@@ -149,12 +149,6 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'snmpwalk=s',
-    help => '--snmpwalk
-   A file with the output of a snmpwalk (used for simulation)',
-    required => 0,
-);
-$plugin->add_arg(
     spec => 'warning=s',
     help => '--warning
    The warning threshold',
@@ -214,8 +208,32 @@ $plugin->add_arg(
    An alternate directory where the plugin can save files',
     required => 0,
 );
+$plugin->add_arg(
+    spec => 'snmpwalk=s',
+    help => '--snmpwalk
+   A file with the output of a snmpwalk (used for simulation)
+   Use it instead of --hostname',
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'snmphelp',
+    help => '--snmphelp
+   Output the list of OIDs you need to walk for a simulation file',
+    required => 0,
+);
 
 $plugin->getopts();
+if ($plugin->opts->snmphelp) {
+  my @subtrees = ("1");
+  foreach my $mib (keys %{$NWC::Device::mibs_and_oids}) {
+    foreach my $table (grep {/Table$/} keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+      push(@subtrees, $NWC::Device::mibs_and_oids->{$mib}->{$table});
+    }
+  }
+  printf "snmpwalk -On ... %s\n", join(" ", @subtrees);
+  printf "snmpwalk -On ... %s\n", join(" ", @subtrees);
+  exit 0;
+}
 if ($plugin->opts->community) {
   if ($plugin->opts->community =~ /^snmpv3(.)(.+)/) {
     my $separator = $1;
