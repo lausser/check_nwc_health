@@ -2,4 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-01-04 1.0
+- Nortel devices are recognized. (only interfaces can be queried by now)
+
+
+
 - no official changes yet
