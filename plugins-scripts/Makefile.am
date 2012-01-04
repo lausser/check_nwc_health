@@ -21,6 +21,8 @@ EXTRA_MODULES=\
   NWC/Cisco/Component/VoltageSubsystem.pm \
   NWC/Cisco/Component/FanSubsystem.pm \
   NWC/Cisco.pm \
+  NWC/NetScreen.pm \
+  NWC/Nortel.pm \
   NWC/HSRP/Component/HSRPSubsystem.pm \
   NWC/HSRP.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \

@@ -40,6 +40,9 @@ sub new {
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'NWC::NetScreen';
         $self->debug('using NWC::NetScreen');
+      } elsif ($self->{productname} =~ /Nortel/i) {
+        bless $self, 'NWC::Nortel';
+        $self->debug('using NWC::Nortel');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
@@ -120,9 +123,9 @@ sub check_snmp_and_model {
         keys %$response;
     #printf "%s\n", Data::Dumper::Dumper($response);
     $self->set_rawdata($response);
-    if (! $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
-      $self->add_rawdata('1.3.6.1.2.1.1.1.0', 'Cisco');
-    }
+    #if (! $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
+    #  $self->add_rawdata('1.3.6.1.2.1.1.1.0', 'Cisco');
+    #}
     $self->whoami();
   } else {
     if (eval "require Net::SNMP") {
@@ -184,11 +187,7 @@ sub whoami {
   my $sysDescr = '1.3.6.1.2.1.1.1.0';
   my $dummy = '1.3.6.1.2.1.1.5.0';
   if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
-    if ($productname =~ /Cisco/) {
-      $self->{productname} = 'Cisco';
-    } else {
-      $self->{productname} = $productname;
-    }
+    $self->{productname} = $productname;
   } else {
     $self->add_message(CRITICAL,
         'snmpwalk returns no product name (sysDescr)');
