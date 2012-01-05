@@ -501,6 +501,7 @@ sub get_snmp_table_objects {
   my $indices = shift || [];
   my @entries = ();
   my $augmenting_table;
+  $self->debug(sprintf "get_snmp_table_objects %s %s", $mib, $table);
   if ($table =~ /^(.*?)\+(.*)/) {
     $table = $1;
     $augmenting_table = $2;
@@ -560,14 +561,20 @@ sub get_snmp_table_objects {
   } else {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
+      $self->debug(sprintf "get_snmp_table_objects calls get_table %s",
+          $NWC::Device::mibs_and_oids->{$mib}->{$table});
       my $result = $self->get_table(
           -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+      $self->debug(sprintf "get_snmp_table_objects get_table returns %d oids",
+          scalar(keys %{$result}));
       # now we have numerical_oid+index => value
       # needs to become symboic_oid => value
       my @indices = 
           $self->get_indices(
               -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$entry},
               -oids => [keys %{$result}]);
+      $self->debug(sprintf "get_snmp_table_objects get_table returns %d indices",
+          scalar(@indices));
       @entries = $self->make_symbolic($mib, $result, \@indices);
     }
   }
@@ -633,7 +640,9 @@ sub get_table {
   $self->add_oidtrace($params{'-baseoid'});
   if (! $self->opts->snmpwalk) {
     my @notcached = ();
+    $self->debug(sprintf "get_table %s", Data::Dumper::Dumper(\%params));
     my $result = $NWC::Device::session->get_table(%params);
+    $self->debug(sprintf "get_table returned %d oids", scalar(keys %{$result}));
     foreach my $key (keys %{$result}) {
       $self->add_rawdata($key, $result->{$key});
     }
@@ -714,12 +723,15 @@ sub get_matching_oids {
   my $self = shift;
   my %params = @_;
   my $result = {};
+  $self->debug(sprintf "get_matching_oids %s", Data::Dumper::Dumper(\%params));
   foreach my $oid (@{$params{'-columns'}}) {
     my $oidpattern = $oid;
     $oidpattern =~ s/\./\\./g;
     map { $result->{$_} = $NWC::Device::rawdata->{$_} }
         grep /^$oidpattern(?=\.|$)/, keys %{$NWC::Device::rawdata};
   }
+  $self->debug(sprintf "get_matching_oids returns %d from %d oids", 
+      scalar(keys %{$result}), scalar(keys %{$NWC::Device::rawdata}));
   return $result;
 }
 
