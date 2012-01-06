@@ -643,6 +643,20 @@ sub get_table {
     $self->debug(sprintf "get_table %s", Data::Dumper::Dumper(\%params));
     my $result = $NWC::Device::session->get_table(%params);
     $self->debug(sprintf "get_table returned %d oids", scalar(keys %{$result}));
+    if (scalar(keys %{$result}) == 0) {
+      $self->debug(sprintf "get_table error: %s", 
+          $NWC::Device::session->error());
+      $self->debug("get_table error: try fallback");
+      $params{'-maxrepetitions'} = 1;
+      $self->debug(sprintf "get_table %s", Data::Dumper::Dumper(\%params));
+      $result = $NWC::Device::session->get_table(%params);
+      $self->debug(sprintf "get_table returned %d oids", scalar(keys %{$result}));
+      if (scalar(keys %{$result}) == 0) {
+        $self->debug(sprintf "get_table error: %s", 
+            $NWC::Device::session->error());
+        $self->debug("get_table error: no more fallbacks. Try --protocol 1");
+      }
+    }
     foreach my $key (keys %{$result}) {
       $self->add_rawdata($key, $result->{$key});
     }
