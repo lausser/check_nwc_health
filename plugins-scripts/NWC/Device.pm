@@ -163,6 +163,8 @@ sub check_snmp_and_model {
             sprintf 'cannot create session object: %s', $error);
         $self->debug(Data::Dumper::Dumper(\%params));
       } else {
+        my $max_msg_size = $session->max_msg_size();
+        $session->max_msg_size(4 * $max_msg_size);
         $NWC::Device::session = $session;
         my $sysUpTime = '1.3.6.1.2.1.1.3.0';
         if (my $uptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0)) {
