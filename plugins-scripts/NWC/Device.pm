@@ -460,6 +460,42 @@ sub add_oidtrace {
   push(@{$NWC::Device::oidtrace}, $oid);
 }
 
+sub get_snmp_table_attributes {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $indices = shift || [];
+  my @entries = ();
+  my $augmenting_table;
+  if ($table =~ /^(.*?)\+(.*)/) {
+    $table = $1;
+    $augmenting_table = $2;
+  }
+  my $entry = $table;
+  $entry =~ s/Table/Entry/g;
+  if (exists $NWC::Device::mibs_and_oids->{$mib} &&
+      exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
+    my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.';
+    my $toidlen = length($toid);
+    my @columns = grep {
+      substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
+          $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.'
+    } keys %{$NWC::Device::mibs_and_oids->{$mib}};
+    if ($augmenting_table &&
+        exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
+      my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.';
+      my $toidlen = length($toid);
+      push(@columns, grep {
+        substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
+            $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.'
+      } keys %{$NWC::Device::mibs_and_oids->{$mib}});
+    }
+    return @columns;
+  } else {
+    return ();
+  }
+}
+
 sub get_request {
   my $self = shift;
   my %params = @_;
@@ -578,6 +614,7 @@ sub get_snmp_table_objects {
       $self->debug(sprintf "get_snmp_table_objects get_table returns %d indices",
           scalar(@indices));
       @entries = $self->make_symbolic($mib, $result, \@indices);
+      @entries = map { $_->{indices} = shift @indices; $_ } @entries;
     }
   }
   return @entries;

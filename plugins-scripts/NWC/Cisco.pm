@@ -44,7 +44,7 @@ sub init {
       $self->shinken_interface_subsystem();
     } elsif ($self->mode =~ /device::hsrp/) {
       $self->analyze_hsrp_subsystem();
-      $self->check_interface_subsystem();
+      $self->check_hsrp_subsystem();
     }
   }
 }
@@ -77,6 +77,13 @@ sub analyze_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem} =
       NWC::Cisco::Component::MemSubsystem->new();
+}
+
+sub check_hsrp_subsystem {
+  my $self = shift;
+  $self->{components}->{hsrp}->check();
+  $self->{components}->{hsrp}->dump()
+      if $self->opts->verbose >= 2;
 }
 
 sub check_environmental_subsystem {

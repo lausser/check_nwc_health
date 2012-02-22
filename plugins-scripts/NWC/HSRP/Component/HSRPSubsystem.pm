@@ -21,12 +21,11 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  if ($self->mode =~ /device::hsrp::status/) {
+  if ($self->mode =~ /device::hsrp/) {
     foreach ($self->get_snmp_table_objects(
         'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
-printf "%s\n", Data::Dumper::Dumper($_);
-      #push(@{$self->{groups}},
-      #    NWC::HSRP::Component::HSRPSubsystem::Group->new(%{$_}));
+      push(@{$self->{groups}},
+          NWC::HSRP::Component::HSRPSubsystem::Group->new(%{$_}));
     }
   }
 }
@@ -34,20 +33,17 @@ printf "%s\n", Data::Dumper::Dumper($_);
 sub check {
   my $self = shift;
   my $errorfound = 0;
-  $self->add_info('checking interfaces');
-  $self->blacklist('ff', '');
-  if (scalar(@{$self->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
-    return;
-  }
-  if ($self->mode =~ /device::interfaces::list/) {
-    foreach (@{$self->{interfaces}}) {
+  $self->add_info('checking hsrp groups');
+  $self->blacklist('hhsrp', '');
+  if ($self->mode =~ /device::hsrp::list/) {
+    foreach (@{$self->{groups}}) {
       $_->list();
     }
-  } else {
-    if (scalar (@{$self->{interfaces}}) == 0) {
+  } elsif ($self->mode =~ /device::hsrp/) {
+    if (scalar (@{$self->{groups}}) == 0) {
+      $self->add_message(UNKNOWN, 'no hsrp groups');
     } else {
-      foreach (@{$self->{interfaces}}) {
+      foreach (@{$self->{groups}}) {
         $_->check();
       }
     }
@@ -72,63 +68,20 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    ifTable => $params{ifTable},
-    ifEntry => $params{ifEntry},
-    ifIndex => $params{ifIndex},
-    ifDescr => $params{ifDescr},
-    ifType => $params{ifType},
-    ifMtu => $params{ifMtu},
-    ifSpeed => $params{ifSpeed},
-    ifPhysAddress => $params{ifPhysAddress},
-    ifAdminStatus => $params{ifAdminStatus},
-    ifOperStatus => $params{ifOperStatus},
-    ifLastChange => $params{ifLastChange},
-    ifInOctets => $params{ifInOctets},
-    ifInUcastPkts => $params{ifInUcastPkts},
-    ifInNUcastPkts => $params{ifInNUcastPkts},
-    ifInDiscards => $params{ifInDiscards},
-    ifInErrors => $params{ifInErrors},
-    ifInUnknownProtos => $params{ifInUnknownProtos},
-    ifOutOctets => $params{ifOutOctets},
-    ifOutUcastPkts => $params{ifOutUcastPkts},
-    ifOutNUcastPkts => $params{ifOutNUcastPkts},
-    ifOutDiscards => $params{ifOutDiscards},
-    ifOutErrors => $params{ifOutErrors},
-    ifOutQLen => $params{ifOutQLen},
-    ifSpecific => $params{ifSpecific},
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
   };
+  bless $self, $class;
+  foreach ($self->get_snmp_table_attributes(
+      'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
+    $self->{$_} = $params{$_};
+  }
+  $self->{ifIndex} = $params{indices}->[0];
+  $self->{cHsrpGrpNumber} = $params{indices}->[1];
+  $self->{name} = $self->{cHsrpGrpNumber}.':'.$self->{ifIndex};
   foreach my $key (keys %params) {
     $self->{$key} = 0 if ! defined $params{$key};
-  }
-  bless $self, $class;
-  if (0) {
-  #if ($params{ifName}) {
-    my $self64 = {
-      ifName => $params{ifName},
-      ifInMulticastPkts => $params{ifInMulticastPkts},
-      ifInBroadcastPkts => $params{ifInBroadcastPkts},
-      ifOutMulticastPkts => $params{ifOutMulticastPkts},
-      ifOutBroadcastPkts => $params{ifOutBroadcastPkts},
-      ifHCInOctets => $params{ifHCInOctets},
-      ifHCInUcastPkts => $params{ifHCInUcastPkts},
-      ifHCInMulticastPkts => $params{ifHCInMulticastPkts},
-      ifHCInBroadcastPkts => $params{ifHCInBroadcastPkts},
-      ifHCOutOctets => $params{ifHCOutOctets},
-      ifHCOutUcastPkts => $params{ifHCOutUcastPkts},
-      ifHCOutMulticastPkts => $params{ifHCOutMulticastPkts},
-      ifHCOutBroadcastPkts => $params{ifHCOutBroadcastPkts},
-      ifLinkUpDownTrapEnable => $params{ifLinkUpDownTrapEnable},
-      ifHighSpeed => $params{ifHighSpeed},
-      ifPromiscuousMode => $params{ifPromiscuousMode},
-      ifConnectorPresent => $params{ifConnectorPresent},
-      ifAlias => $params{ifAlias},
-      ifCounterDiscontinuityTime => $params{ifCounterDiscontinuityTime},
-    };
-    map { $self->{$_} = $self64->{$_} } keys %{$self64};
-    bless $self, 'NWC::MIBII::Component::InterfaceSubsystem::Interface::64bit';
   }
   $self->init();
   return $self;
@@ -136,159 +89,31 @@ sub new {
 
 sub init {
   my $self = shift;
-  if ($self->mode =~ /device::interfaces::traffic/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors));
-  } elsif ($self->mode =~ /device::interfaces::usage/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifOutOctets));
-    $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
-        ($self->{delta_timestamp} * $self->{ifSpeed});
-    $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
-        ($self->{delta_timestamp} * $self->{ifSpeed});
-    $self->{inputRate} = $self->{delta_ifInOctets} / $self->{delta_timestamp};
-    $self->{outputRate} = $self->{delta_ifOutOctets} / $self->{delta_timestamp};
-    my $factor = 1/8; # default Bits
-    if ($self->opts->units) {
-      if ($self->opts->units eq "GB") {
-        $factor = 1024 * 1024 * 1024;
-      } elsif ($self->opts->units eq "MB") {
-        $factor = 1024 * 1024;
-      } elsif ($self->opts->units eq "KB") {
-        $factor = 1024;
-      } elsif ($self->opts->units eq "B") {
-        $factor = 1;
-      } elsif ($self->opts->units eq "Bit") {
-        $factor = 1/8;
-      }
+  if ($self->mode =~ /device::hsrp::state/) {
+    if (! $self->opts->state()) {
+      $self->opts->override_opt('state', 'active');
     }
-    $self->{inputRate} /= $factor;
-    $self->{outputRate} /= $factor;
-  } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors ifInDiscards ifOutDiscards));
-    $self->{inputErrorRate} = $self->{delta_ifInErrors} 
-        / $self->{delta_timestamp};
-    $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
-        / $self->{delta_timestamp};
-    $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
-        / $self->{delta_timestamp};
-    $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
-        / $self->{delta_timestamp};
-    $self->{inputRate} = ($self->{delta_ifInErrors} + $self->{delta_ifInDiscards}) 
-        / $self->{delta_timestamp};
-    $self->{outputRate} = ($self->{delta_ifOutErrors} + $self->{delta_ifOutDiscards}) 
-        / $self->{delta_timestamp};
-  } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   }
   return $self;
 }
 
 sub check {
   my $self = shift;
-  $self->blacklist('if', $self->{ifIndex});
-  if ($self->mode =~ /device::interfaces::traffic/) {
-  } elsif ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
-        $self->{ifDescr}, 
-        $self->{inputUtilization}, 
-        sprintf("%.2f%s/s", $self->{inputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits')),
-        $self->{outputUtilization},
-        sprintf("%.2f%s/s", $self->{outputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits'));
+  $self->blacklist('hsrp', $self->{name});
+  if ($self->mode =~ /device::hsrp::state/) {
+    my $info = sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
+        $self->{cHsrpGrpNumber}, $self->{ifIndex},
+        $self->{cHsrpGrpStandbyState},
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
     $self->add_info($info);
-    $self->set_thresholds(warning => 80, critical => 90);
-    my $in = $self->check_thresholds($self->{inputUtilization});
-    my $out = $self->check_thresholds($self->{outputUtilization});
-    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_in',
-        value => $self->{inputUtilization},
-        uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_out',
-        value => $self->{outputUtilization},
-        uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_in',
-        value => $self->{inputRate},
-        uom => $self->opts->units,
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_out',
-        value => $self->{outputRate},
-        uom => $self->opts->units,
-    );
-  } elsif ($self->mode =~ /device::interfaces::errors/) {
-    my $info = sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
-        'discards in:%.2f/s out:%.2f/s',
-        $self->{ifDescr},
-        $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate};
-    $self->add_info($info);
-    $self->set_thresholds(warning => 1, critical => 10);
-    my $in = $self->check_thresholds($self->{inputRate});
-    my $out = $self->check_thresholds($self->{outputRate});
-    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_in',
-        value => $self->{inputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_out',
-        value => $self->{outputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_in',
-        value => $self->{inputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_out',
-        value => $self->{outputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-  } elsif ($self->mode =~ /device::interfaces::operstatus/) {
-    #rfc2863
-    #(1)   if ifAdminStatus is not down and ifOperStatus is down then a
-    #     fault condition is presumed to exist on the interface.
-    #(2)   if ifAdminStatus is down, then ifOperStatus will normally also
-    #     be down (or notPresent) i.e., there is not (necessarily) a
-    #     fault condition on the interface.
-    # --warning onu,anu
-    # Admin: admindown,admin
-    # Admin: --warning 
-    #        --critical admindown
-    # !ad+od  ad+!(od*on)
-    # warn & warnbitfield
-#    if ($self->opts->critical) {
-#      if ($self->opts->critical =~ /^u/) {
-#      } elsif ($self->opts->critical =~ /^u/) {
-#      }
-#    }
-#    if ($self->{ifOperStatus} ne 'up') {
-#      }
-#    } 
-    my $info = sprintf '%s is %s/%s',
-        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus};
-    $self->add_info($info);
-    $self->add_message(OK, $info);
-    if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
+    if ($self->opts->state() eq $self->{cHsrpGrpStandbyState}) {
+        $self->add_message(OK, $info);
+    } else {
       $self->add_message(CRITICAL, 
-          sprintf 'fault condition is presumed to exist on %s',
-          $self->{ifDescr});
+          sprintf 'state in group %s (interface %s) is %s instead of %s',
+              $self->{cHsrpGrpNumber}, $self->{ifIndex},
+              $self->{cHsrpGrpStandbyState},
+              $self->opts->state());
     }
   }
 }
@@ -300,8 +125,8 @@ sub list {
 
 sub dump {
   my $self = shift;
-  printf "[IF32_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific)) {
+  printf "[HSRPGRP_%s]\n", $self->{name};
+  foreach (qw(cHsrpGrpNumber cHsrpGrpVirtualIpAddr cHsrpGrpStandbyState cHsrpGrpActiveRouter cHsrpGrpStandbyRouter cHsrpGrpEntryRowStatus)) {
     printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
   }
 #  printf "info: %s\n", $self->{info};

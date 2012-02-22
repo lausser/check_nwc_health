@@ -44,9 +44,12 @@ my @modes = (
   ['device::shinken::interface',
       'create-shinken-service', undef,
       'Create a Shinken service definition' ],
-  ['device::hsrp::status',
-      'hsrp-status', undef,
-      'Create a Shinken service definition' ],
+  ['device::hsrp::state',
+      'hsrp-state', undef,
+      'Check the state in a HSRP group' ],
+  ['device::hsrp::list',
+      'list-hsrp-groups', undef,
+      'Show the HSRP groups configured on this device' ],
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
@@ -177,6 +180,12 @@ $plugin->add_arg(
     spec => 'units=s',
     help => "--units
    One of %, KB, MB, GB. (used for e.g. mode interface-usage)",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'state=s',
+    help => "--role
+   The role of this device in a hsrp group (active/standby/listen)",
     required => 0,
 );
 $plugin->add_arg(
