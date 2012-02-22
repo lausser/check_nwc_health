@@ -115,6 +115,32 @@ sub check {
               $self->{cHsrpGrpStandbyState},
               $self->opts->state());
     }
+  } elsif ($self->mode =~ /device::hsrp::failover/) {
+    my $info = sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',
+        $self->{cHsrpGrpNumber}, $self->{ifIndex},
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
+    if (my $laststate = $self->load_state( name => $self->{name} )) {
+      if ($laststate->{active} ne $self->{cHsrpGrpActiveRouter}) {
+        $self->add_message(CRITICAL, sprintf 'hsrp group %s/%s: active node %s --> %s',
+            $self->{cHsrpGrpNumber}, $self->{ifIndex},
+            $laststate->{active}, $self->{cHsrpGrpActiveRouter});
+      }
+      if ($laststate->{standby} ne $self->{cHsrpGrpStandbyRouter}) {
+        $self->add_message(WARNING, sprintf 'hsrp group %s/%s: standby node %s --> %s',
+            $self->{cHsrpGrpNumber}, $self->{ifIndex},
+            $laststate->{standby}, $self->{cHsrpGrpStandbyRouter});
+      }
+      if (($laststate->{active} eq $self->{cHsrpGrpActiveRouter}) &&
+          ($laststate->{standby} eq $self->{cHsrpGrpStandbyRouter})) {
+        $self->add_message(OK, $info);
+      }
+    } else {
+      $self->add_message(OK, 'initializing....');
+    }
+    $self->save_state( name => $self->{name}, save => {
+        active => $self->{cHsrpGrpActiveRouter},
+        standby => $self->{cHsrpGrpStandbyRouter},
+    });
   }
 }
 
