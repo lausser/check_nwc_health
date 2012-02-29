@@ -146,7 +146,8 @@ sub check {
 
 sub list {
   my $self = shift;
-  printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
+  printf "%s %s %s %s\n", $self->{name}, $self->{cHsrpGrpVirtualIpAddr},
+      $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
 }
 
 sub dump {

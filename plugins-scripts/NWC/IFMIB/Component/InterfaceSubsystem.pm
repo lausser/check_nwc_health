@@ -256,6 +256,12 @@ sub init {
         $factor = 1024 * 1024;
       } elsif ($self->opts->units eq "KB") {
         $factor = 1024;
+      } elsif ($self->opts->units eq "GBi") {
+        $factor = 1024 * 1024 * 1024 / 8;
+      } elsif ($self->opts->units eq "MBi") {
+        $factor = 1024 * 1024 / 8;
+      } elsif ($self->opts->units eq "KBi") {
+        $factor = 1024 / 8;
       } elsif ($self->opts->units eq "B") {
         $factor = 1;
       } elsif ($self->opts->units eq "Bit") {
