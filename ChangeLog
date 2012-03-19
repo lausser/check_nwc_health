@@ -2,6 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-03-19 1.1.1.1
+- bugfix in list-hsrp-groups
+- --units KBi/MBi/GBi for interface-usage
+
 2012-02-22 1.1.1
 - add mode hsrp-failover (Thanks Munich)
 
