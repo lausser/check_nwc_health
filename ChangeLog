@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012 1.2pre
+- add suopprt for Cisco Nexus (cpu, mem, )
+
 2012-03-19 1.1.1.1
 - bugfix in list-hsrp-groups
 - --units KBi/MBi/GBi for interface-usage

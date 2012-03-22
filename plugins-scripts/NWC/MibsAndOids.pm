@@ -169,7 +169,18 @@ $NWC::Device::mibs_and_oids = {
       'idleCount' => '1.3.6.1.4.1.9.2.1.59.0',
       'idleWired' => '1.3.6.1.4.1.9.2.1.60.0',
   },
-
+  'CISCO-SYSTEM-EXT-MIB' => {
+  	cseSysCPUUtilization => '1.3.6.1.4.1.9.9.305.1.1.1.0',
+  	cseSysMemoryUtilization => '1.3.6.1.4.1.9.9.305.1.1.2.0',
+  	cseSysConfLastChange => '1.3.6.1.4.1.9.9.305.1.1.3.0',
+  	cseSysAutoSync => '1.3.6.1.4.1.9.9.305.1.1.4.0',
+  	cseSysAutoSyncState => '1.3.6.1.4.1.9.9.305.1.1.5.0',
+  	cseWriteErase => '1.3.6.1.4.1.9.9.305.1.1.6.0',
+  	cseSysConsolePortStatus => '1.3.6.1.4.1.9.9.305.1.1.7.0',
+  	cseSysTelnetServiceActivation => '1.3.6.1.4.1.9.9.305.1.1.8.0',
+  	cseSysFIPSModeActivation => '1.3.6.1.4.1.9.9.305.1.1.9.0',
+  	cseSysUpTime => '1.3.6.1.4.1.9.9.305.1.1.10.0',
+  },
 };
 
 $NWC::Device::definitions = {

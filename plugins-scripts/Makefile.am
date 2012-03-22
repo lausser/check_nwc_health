@@ -13,13 +13,17 @@ libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
   Nagios/MiniPlugin.pm \
-  NWC/Cisco/Component/CpuSubsystem.pm \
-  NWC/Cisco/Component/MemSubsystem.pm \
-  NWC/Cisco/Component/EnvironmentalSubsystem.pm \
-  NWC/Cisco/Component/TemperatureSubsystem.pm \
-  NWC/Cisco/Component/SupplySubsystem.pm \
-  NWC/Cisco/Component/VoltageSubsystem.pm \
-  NWC/Cisco/Component/FanSubsystem.pm \
+  NWC/CiscoIOS/Component/CpuSubsystem.pm \
+  NWC/CiscoIOS/Component/MemSubsystem.pm \
+  NWC/CiscoIOS/Component/EnvironmentalSubsystem.pm \
+  NWC/CiscoIOS/Component/TemperatureSubsystem.pm \
+  NWC/CiscoIOS/Component/SupplySubsystem.pm \
+  NWC/CiscoIOS/Component/VoltageSubsystem.pm \
+  NWC/CiscoIOS/Component/FanSubsystem.pm \
+  NWC/CiscoIOS.pm \
+  NWC/CiscoNXOS/Components/CpuSubsystem.pm \
+  NWC/CiscoNXOS/Components/MemSubsystem.pm \
+  NWC/CiscoNXOS.pm \
   NWC/Cisco.pm \
   NWC/NetScreen.pm \
   NWC/Nortel.pm \

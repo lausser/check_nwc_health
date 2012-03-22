@@ -34,6 +34,9 @@ sub new {
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
     }
     if (! $NWC::Device::plugin->check_messages()) {
+      if ($self->opts->verbose && $self->opts->verbose) {
+        printf "I am a %s\n", $self->{productname};
+      }
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
