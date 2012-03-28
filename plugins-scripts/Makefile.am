@@ -21,8 +21,10 @@ EXTRA_MODULES=\
   NWC/CiscoIOS/Component/VoltageSubsystem.pm \
   NWC/CiscoIOS/Component/FanSubsystem.pm \
   NWC/CiscoIOS.pm \
-  NWC/CiscoNXOS/Components/CpuSubsystem.pm \
-  NWC/CiscoNXOS/Components/MemSubsystem.pm \
+  NWC/CiscoNXOS/Component/CpuSubsystem.pm \
+  NWC/CiscoNXOS/Component/MemSubsystem.pm \
+  NWC/CiscoNXOS/Component/EnvironmentalSubsystem.pm \
+  NWC/CiscoNXOS/Component/SensorSubsystem.pm \
   NWC/CiscoNXOS.pm \
   NWC/Cisco.pm \
   NWC/NetScreen.pm \

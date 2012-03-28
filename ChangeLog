@@ -3,7 +3,8 @@
 ############################################
 
 2012 1.2pre
-- add suopprt for Cisco Nexus (cpu, mem, )
+- add support for Cisco Nexus (cpu, mem, )
+- add Nexus sensors
 
 2012-03-19 1.1.1.1
 - bugfix in list-hsrp-groups
