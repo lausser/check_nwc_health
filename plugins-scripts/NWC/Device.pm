@@ -46,6 +46,9 @@ sub new {
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'NWC::Nortel';
         $self->debug('using NWC::Nortel');
+      } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
+        bless $self, 'NWC::AlliedTelesyn';
+        $self->debug('using NWC::AlliedTelesyn');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?

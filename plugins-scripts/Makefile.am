@@ -29,6 +29,7 @@ EXTRA_MODULES=\
   NWC/Cisco.pm \
   NWC/NetScreen.pm \
   NWC/Nortel.pm \
+  NWC/AlliedTelesyn.pm \
   NWC/HSRP/Component/HSRPSubsystem.pm \
   NWC/HSRP.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \

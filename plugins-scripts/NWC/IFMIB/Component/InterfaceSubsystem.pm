@@ -24,10 +24,13 @@ sub init {
   my %params = @_;
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
-    foreach my $ifDesc (keys %{$self->{interface_cache}}) {
+    foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
+      my ($ifIndex, $ifDesc) = split('#', $ifidxdescr, 2);
       push(@{$self->{interfaces}},
           NWC::IFMIB::Component::InterfaceSubsystem::Interface->new(
-              ifIndex => $self->{interface_cache}->{$ifDesc},
+              #ifIndex => $self->{interface_cache}->{$ifDesc},
+              #ifDescr => $ifDesc,
+              ifIndex => $ifIndex,
               ifDescr => $ifDesc,
           ));
     }
@@ -60,6 +63,7 @@ sub check {
   }
   if ($self->mode =~ /device::interfaces::list/) {
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+    #foreach (sort @{$self->{interfaces}}) {
       $_->list();
     }
   } else {
@@ -82,7 +86,10 @@ sub update_interface_cache {
     $self->debug('force update of interface cache');
     $self->{interface_cache} = {};
     foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable')) {
-      $self->{interface_cache}->{$_->{ifDescr}} = $_->{ifIndex};
+      # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
+      # alle gleich heissen
+      $self->{interface_cache}->{$_->{ifIndex}.'#'.$_->{ifDescr}} =
+          $_->{ifIndex};
     }
     $self->save_interface_cache();
   }
@@ -125,26 +132,37 @@ sub load_interface_cache {
 sub get_interface_indices {
   my $self = shift;
   my @indices = ();
-  foreach my $ifdescr (keys %{$self->{interface_cache}}) {
+  foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
+    my ($ifindex, $ifdescr) = split('#', $ifidxdescr, 2);
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
+        #if ($ifdescr =~ /$pattern/i) {
+        #  push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+        #}
         if ($ifdescr =~ /$pattern/i) {
-          push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+          push(@indices, [$ifindex]);
         }
       } else {
         if ($self->opts->name =~ /^\d+$/) {
-          if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
+          #if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
+          #  push(@indices, [$self->opts->name]);
+          #}
+          if ($ifindex == $self->opts->name) {
             push(@indices, [$self->opts->name]);
           }
         } else {
+          #if (lc $ifdescr eq lc $self->opts->name) {
+          #  push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+          #}
           if (lc $ifdescr eq lc $self->opts->name) {
-            push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+            push(@indices, [$ifindex]);
           }
         }
       }
     } else {
-      push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+      #push(@indices, [$self->{interface_cache}->{$ifdescr}]);
+      push(@indices, [$ifindex]);
     }
   }
   return @indices;
@@ -235,7 +253,7 @@ sub init {
   if ($self->mode =~ /device::interfaces::traffic/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifOutOctets));
+    $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInOctets ifOutOctets));
     if ($self->{ifSpeed} == 0) {
       # vlan graffl
       $self->{inputUtilization} = 0;
