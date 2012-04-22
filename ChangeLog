@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012 1.3pre
+- add mode list-interfaces-detail (Cisco only)
+
 2012-03-29 1.2
 - add support for Cisco Nexus (cpu, mem, )
 - add Nexus sensors

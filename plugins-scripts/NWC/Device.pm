@@ -216,6 +216,11 @@ sub get_snmp_object {
     my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$mo}.
         (defined $index ? '.'.$index : '');
     my $response = $self->get_request(-varbindlist => [$oid]);
+    if (defined $response->{$oid}) {
+      if (my @symbols = $self->make_symbolic($mib, $response, [[$index]])) {
+        $response->{$oid} = $symbols[0]->{$mo};
+      }
+    }
     return $response->{$oid};
   }
   return undef;

@@ -421,7 +421,14 @@ sub check {
 
 sub list {
   my $self = shift;
-  printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
+  if ($self->mode =~ /device::interfaces::listdetail/) {
+    my $cL2L3IfModeOper = $self->get_snmp_object('CISCO-L2L3-INTERFACE-CONFIG-MIB', 'cL2L3IfModeOper', $self->{ifIndex}) || "unknown";
+    my $vlanTrunkPortDynamicStatus = $self->get_snmp_object('CISCO-VTP-MIB', 'vlanTrunkPortDynamicStatus', $self->{ifIndex}) || "unknown";
+    printf "%06d %s %s %s\n", $self->{ifIndex}, $self->{ifDescr},
+        $cL2L3IfModeOper, $vlanTrunkPortDynamicStatus;
+  } else {
+    printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
+  }
 }
 
 sub dump {
