@@ -49,6 +49,9 @@ sub new {
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
+      } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?

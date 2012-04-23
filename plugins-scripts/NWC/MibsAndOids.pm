@@ -255,6 +255,78 @@ $NWC::Device::mibs_and_oids = {
       vlanTrunkPortOutJoins => '1.3.6.1.4.1.9.9.46.1.6.1.1.8',
       vlanTrunkPortOldAdverts => '1.3.6.1.4.1.9.9.46.1.6.1.1.9',
   },
+  'SW-MIB' => {
+      swSensorTable => '1.3.6.1.4.1.1588.2.1.1.1.1.22',
+      swSensorEntry => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1',
+      swSensorIndex => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1',
+      swSensorType => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.2',
+      swSensorTypeDefinition => {
+          1 => 'temperature',
+          2 => 'fan',
+          3 => 'power-supply',
+      },
+      swSensorStatus => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.3',
+      swSensorStatusDefinition => {
+          1 => 'unknown',
+          2 => 'faulty',
+          3 => 'below-min',
+          4 => 'nominal',
+          5 => 'above-max',
+          6 => 'absent',
+      },
+      # The value, -2147483648, represents an unknown quantity
+      # In V2.0, the temperature sensor
+      # value will be in Celsius; the fan value will be in RPM
+      # (revoluation per minute); and the power supply sensor reading
+      # will be unknown.
+      swSensorValue => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.4',
+      swSensorInfo => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.5',
+
+      swFwThresholdTable => '1.3.6.1.4.1.1588.2.1.1.1.10.3',
+      swFwThresholdEntry => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1',
+      swFwThresholdIndex => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.1',
+      swFwStatus => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.2',
+      swFwName => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.3',
+      swFwLabel => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.4',
+      swFwCurVal => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.5',
+      swFwLastEvent => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.6',
+      swFwLastEventVal => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.7',
+      swFwLastEventTime => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.8',
+      swFwLastState => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.9',
+      swFwBehaviorType => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.10',
+      swFwBehaviorInt => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.11',
+
+      swCpuOrMemoryUsage => '1.3.6.1.4.1.1588.2.1.1.1.26',
+      swCpuUsage => '1.3.6.1.4.1.1588.2.1.1.1.26.1',
+        # The system's CPU usage.
+      swCpuNoOfRetries => '1.3.6.1.4.1.1588.2.1.1.1.26.2',
+        # The number of times the system should take a CPU utilization sample before sending the CPU utilization trap.
+      swCpuUsageLimit => '1.3.6.1.4.1.1588.2.1.1.1.26.3',
+        # The CPU usage limit.
+      swCpuPollingInterval => '1.3.6.1.4.1.1588.2.1.1.1.26.4',
+        # The time after which the next CPU usage value will be recorded.
+      swCpuAction => '1.3.6.1.4.1.1588.2.1.1.1.26.5',
+        # The action to be taken if the CPU usage exceeds the specified threshold limit.
+      swMemUsage => '1.3.6.1.4.1.1588.2.1.1.1.26.6',
+        # The system's memory usage.
+      swMemNoOfRetries => '1.3.6.1.4.1.1588.2.1.1.1.26.7',
+        # The number of times the system should take a memory usage sample before sending the Fabric Watch trap that indicates the current memory usage.
+      swMemUsageLimit => '1.3.6.1.4.1.1588.2.1.1.1.26.8',
+        # The memory usage limit. This OID specifies the in-between threshold value.
+      swMemPollingInterval => '1.3.6.1.4.1.1588.2.1.1.1.26.9',
+        # The time after which the next memory usage sample will be taken
+      swMemAction => '1.3.6.1.4.1.1588.2.1.1.1.26.10',
+        # The action to be taken if the memory usage exceed the specified threshold limit.
+      swMemUsageLimit1 => '1.3.6.1.4.1.1588.2.1.1.1.26.11',
+        # This OID specifies the low threshold value.
+      swMemUsageLimit3 => '1.3.6.1.4.1.1588.2.1.1.1.26.12',
+        # This OID specifies the high threshold value.
+  },
+  'ENTITY-MIB' => {
+      entPhysicalTable => '1.3.6.1.2.1.47.1.1.1',
+      entPhysicalEntry => '1.3.6.1.2.1.47.1.1.1.1',
+      entPhysicalDescr => '1.3.6.1.2.1.47.1.1.1.1.2',
+  },
 };
 
 $NWC::Device::definitions = {
