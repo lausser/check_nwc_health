@@ -13,6 +13,7 @@ libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
   Nagios/MiniPlugin.pm \
+  Server/Linux.pm \
   NWC/CiscoIOS/Component/CpuSubsystem.pm \
   NWC/CiscoIOS/Component/MemSubsystem.pm \
   NWC/CiscoIOS/Component/EnvironmentalSubsystem.pm \

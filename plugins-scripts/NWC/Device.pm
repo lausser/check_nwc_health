@@ -27,11 +27,15 @@ sub new {
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     die "wie jetzt??!?!";
   } else {
-    $self->check_snmp_and_model();
+    if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
+    } else {
+      $self->check_snmp_and_model();
+    }
     if ($self->opts->servertype) {
       $self->{productname} = 'cisco' if $self->opts->servertype eq 'cisco';
       $self->{productname} = 'huawei' if $self->opts->servertype eq 'huawei';
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
+      $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
     }
     if (! $NWC::Device::plugin->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
@@ -52,6 +56,9 @@ sub new {
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /linuxlocal/i) {
+        bless $self, 'Server::Linux';
+        $self->debug('using Server::Linux');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
@@ -1117,4 +1124,4 @@ sub mib {
       $self->SNMP::Utils::get_object_value($MibRevCondition, $condition));
 };
 
-1;
+;
