@@ -1,4 +1,4 @@
-package NWC::Brocade300;
+package NWC::FabOS;
 
 use strict;
 
@@ -36,19 +36,19 @@ sub init {
 sub analyze_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem} =
-      NWC::Brocade300::Component::EnvironmentalSubsystem->new();
+      NWC::FabOS::Component::EnvironmentalSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
   my $self = shift;
   $self->{components}->{cpu_subsystem} =
-      NWC::Brocade300::Component::CpuSubsystem->new();
+      NWC::FabOS::Component::CpuSubsystem->new();
 }
 
 sub analyze_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem} =
-      NWC::Brocade300::Component::MemSubsystem->new();
+      NWC::FabOS::Component::MemSubsystem->new();
 }
 
 sub check_environmental_subsystem {

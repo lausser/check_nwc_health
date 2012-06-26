@@ -256,6 +256,7 @@ $NWC::Device::mibs_and_oids = {
       vlanTrunkPortOldAdverts => '1.3.6.1.4.1.9.9.46.1.6.1.1.9',
   },
   'SW-MIB' => {
+      swFirmwareVersion => '1.3.6.1.4.1.1588.2.1.1.1.1.6.0',
       swSensorTable => '1.3.6.1.4.1.1588.2.1.1.1.1.22',
       swSensorEntry => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1',
       swSensorIndex => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1',

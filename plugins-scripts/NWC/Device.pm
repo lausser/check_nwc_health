@@ -41,6 +41,9 @@ sub new {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};
       }
+      # Brocade 4100 SilkWorm also sold as IBM 2005-B32 & EMC DS-4100
+      # Brocade 4900 Switch also sold as IBM 2005-B64(3) & EMC DS4900B
+
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
@@ -54,6 +57,12 @@ sub new {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /DS_4100/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /Connectrix DS_4900B/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
@@ -204,6 +213,7 @@ sub whoami {
   my $productname = undef;
   my $sysDescr = '1.3.6.1.2.1.1.1.0';
   my $dummy = '1.3.6.1.2.1.1.5.0';
+printf "i want sysDescr\n";
   if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
     $self->{productname} = $productname;
   } else {
@@ -652,6 +662,14 @@ sub make_symbolic {
   my $indices = shift;
   my @entries = ();
   foreach my $index (@{$indices}) {
+    # skip [], [[]], [[undef]]
+    if (ref($index) eq "ARRAY") {
+      if (scalar(@{$index}) == 0) {
+        next;
+      } elsif (!defined $index->[0]) {
+        next;
+      }
+    }
     my $mo = {};
     my $idx = join('.', @{$index}); # index can be multi-level
     foreach my $symoid
