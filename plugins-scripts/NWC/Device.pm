@@ -81,7 +81,7 @@ sub new {
           $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
           printf "rm -f %s\n", $name;
           foreach ($self->trees) {
-            printf "snmpwalk -v%s -c %s %s %s >> %s\n", 
+            printf "snmpwalk -On -v%s -c %s %s %s >> %s\n", 
                 $self->opts->protocol,
                 $self->opts->community,
                 $self->opts->hostname,
