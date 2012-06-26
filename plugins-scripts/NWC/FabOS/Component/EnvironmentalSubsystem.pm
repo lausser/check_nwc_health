@@ -1,5 +1,5 @@
-package NWC::Brocade300::Component::EnvironmentalSubsystem;
-our @ISA = qw(NWC::Brocade300);
+package NWC::FabOS::Component::EnvironmentalSubsystem;
+our @ISA = qw(NWC::FabOS);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -27,7 +27,7 @@ sub init {
   my $self = shift;
   my %params = @_;
   $self->{sensor_subsystem} =
-      NWC::Brocade300::Component::SensorSubsystem->new(%params);
+      NWC::FabOS::Component::SensorSubsystem->new(%params);
 }
 
 sub check {

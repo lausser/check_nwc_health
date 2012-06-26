@@ -56,6 +56,9 @@ my @modes = (
   ['device::hsrp::list',
       'list-hsrp-groups', undef,
       'Show the HSRP groups configured on this device' ],
+  ['device::walk',
+      'walk', undef,
+      'Show snmpwalk command with the oids necessary for a simulation' ],
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);

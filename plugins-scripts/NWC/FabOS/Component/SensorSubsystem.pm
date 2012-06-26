@@ -1,5 +1,5 @@
-package NWC::Brocade300::Component::SensorSubsystem;
-our @ISA = qw(NWC::Brocade300::Component::EnvironmentalSubsystem);
+package NWC::FabOS::Component::SensorSubsystem;
+our @ISA = qw(NWC::FabOS::Component::EnvironmentalSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -25,7 +25,7 @@ sub init {
   foreach ($self->get_snmp_table_objects(
       'SW-MIB', 'swSensorTable')) {
     push(@{$self->{sensors}}, 
-        NWC::Brocade300::Component::SensorSubsystem::Sensor->new(%{$_}));
+        NWC::FabOS::Component::SensorSubsystem::Sensor->new(%{$_}));
   }
   #foreach ($self->get_snmp_table_objects(
   #    'SW-MIB', 'swFwThresholdTable')) {
@@ -55,8 +55,8 @@ sub dump {
 }
 
 
-package NWC::Brocade300::Component::SensorSubsystem::Sensor;
-our @ISA = qw(NWC::Brocade300::Component::SensorSubsystem);
+package NWC::FabOS::Component::SensorSubsystem::Sensor;
+our @ISA = qw(NWC::FabOS::Component::SensorSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -115,8 +115,8 @@ sub dump {
   printf "\n";
 }
 
-package NWC::Brocade300::Component::SensorSubsystem::SensorThreshold;
-our @ISA = qw(NWC::Brocade300::Component::SensorSubsystem);
+package NWC::FabOS::Component::SensorSubsystem::SensorThreshold;
+our @ISA = qw(NWC::FabOS::Component::SensorSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };

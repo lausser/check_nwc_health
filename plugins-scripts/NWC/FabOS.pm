@@ -12,6 +12,7 @@ sub init {
       powersupply_subsystem => undef,
       fan_subsystem => undef,
       temperature_subsystem => undef,
+      cpu_subsystem => undef,
   };
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
@@ -43,6 +44,7 @@ sub analyze_cpu_subsystem {
   my $self = shift;
   $self->{components}->{cpu_subsystem} =
       NWC::FabOS::Component::CpuSubsystem->new();
+printf "%s\n", Data::Dumper::Dumper($self->{components});
 }
 
 sub analyze_mem_subsystem {

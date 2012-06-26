@@ -1,5 +1,5 @@
-package NWC::Brocade300::Component::MemSubsystem;
-our @ISA = qw(NWC::Brocade300);
+package NWC::FabOS::Component::MemSubsystem;
+our @ISA = qw(NWC::FabOS);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };

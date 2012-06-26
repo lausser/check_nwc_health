@@ -31,11 +31,11 @@ EXTRA_MODULES=\
   NWC/NetScreen.pm \
   NWC/Nortel.pm \
   NWC/AlliedTelesyn.pm \
-  NWC/Brocade300/Component/MemSubsystem.pm \
-  NWC/Brocade300/Component/CpuSubsystem.pm \
-  NWC/Brocade300/Component/EnvironmentalSubsystem.pm \
-  NWC/Brocade300/Component/SensorSubsystem.pm \
-  NWC/Brocade300.pm \
+  NWC/FabOS/Component/MemSubsystem.pm \
+  NWC/FabOS/Component/CpuSubsystem.pm \
+  NWC/FabOS/Component/EnvironmentalSubsystem.pm \
+  NWC/FabOS/Component/SensorSubsystem.pm \
+  NWC/FabOS.pm \
   NWC/Brocade.pm \
   NWC/HSRP/Component/HSRPSubsystem.pm \
   NWC/HSRP.pm \

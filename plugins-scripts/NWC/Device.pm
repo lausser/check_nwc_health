@@ -73,6 +73,23 @@ sub new {
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
                 '' : '('.$self->{productname}.')'));
       }
+      if ($self->mode =~ /device::walk/) {
+        if ($self->can("trees")) {
+          my @trees = $self->trees;
+          my $name = $0;
+          $name =~ s/.*\///g;
+          $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
+          printf "rm -f %s\n", $name;
+          foreach ($self->trees) {
+            printf "snmpwalk -v%s -c %s %s %s >> %s\n", 
+                $self->opts->protocol,
+                $self->opts->community,
+                $self->opts->hostname,
+                $_, $name;
+          }
+        }
+        exit 0;
+      }
       $self->{method} = 'snmp';
     }
   }
@@ -213,7 +230,6 @@ sub whoami {
   my $productname = undef;
   my $sysDescr = '1.3.6.1.2.1.1.1.0';
   my $dummy = '1.3.6.1.2.1.1.5.0';
-printf "i want sysDescr\n";
   if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
     $self->{productname} = $productname;
   } else {
