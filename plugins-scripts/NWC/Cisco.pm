@@ -28,7 +28,6 @@ use constant trees => (
   '1.3.6.1.4.1.9.17',      # ciscoPolicy
   '1.3.6.1.4.1.9.18',      # ciscoPolicyAuto
   '1.3.6.1.4.1.9.19',      # ciscoDomains
-  '1.3.6.1.4.1.9.20',      # ciscoCIB
 );
 
 sub init {
