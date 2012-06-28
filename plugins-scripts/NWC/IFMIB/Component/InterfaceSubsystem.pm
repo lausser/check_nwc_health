@@ -214,7 +214,8 @@ sub new {
     info => undef,
     extendedinfo => undef,
   };
-  foreach my $key (keys %params) {
+  foreach my $key (keys %{$self}) {
+    next if $key !~ /^if/;
     $self->{$key} = 0 if ! defined $params{$key};
   }
   bless $self, $class;

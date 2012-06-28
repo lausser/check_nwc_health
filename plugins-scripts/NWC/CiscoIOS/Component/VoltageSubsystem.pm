@@ -20,9 +20,10 @@ sub new {
 
 sub init {
   my $self = shift;
+  my $index = 0;
   foreach ($self->get_snmp_table_objects(
       'CISCO-ENVMON-MIB', 'ciscoEnvMonVoltageStatusTable')) {
-printf "voltage %s\n", Data::Dumper::Dumper($_);
+    $_->{ciscoEnvMonVoltageStatusIndex} ||= $index++;
     push(@{$self->{voltages}},
         NWC::CiscoIOS::Component::VoltageSubsystem::Voltage->new(%{$_}));
   }
@@ -77,8 +78,8 @@ sub new {
 
 sub check {
   my $self = shift;
-  $self->blacklist('f', $self->{ciscoEnvMonVoltageStatusIndex});
-  $self->add_info(sprintf 'fan %d (%s) is %s',
+  $self->blacklist('v', $self->{ciscoEnvMonVoltageStatusIndex});
+  $self->add_info(sprintf 'voltage %d (%s) is %s',
       $self->{ciscoEnvMonVoltageStatusIndex},
       $self->{ciscoEnvMonVoltageStatusDescr},
       $self->{ciscoEnvMonVoltageState});
@@ -86,6 +87,12 @@ sub check {
   } elsif ($self->{ciscoEnvMonVoltageState} ne 'normal') {
     $self->add_message(CRITICAL, $self->{info});
   }
+  $self->add_perfdata(
+      label => sprintf('mvolt_%s', $self->{ciscoEnvMonVoltageStatusIndex}),
+      value => $self->{ciscoEnvMonVoltageStatusValue},
+      warning => $self->{ciscoEnvMonVoltageThresholdLow},
+      critical => $self->{ciscoEnvMonVoltageThresholdHigh},
+  );
 }
 
 sub dump {
