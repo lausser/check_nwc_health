@@ -97,10 +97,16 @@ sub new {
       cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev
       cpmCPUMonInterval cpmCPUTotalMonIntervalValue
       cpmCPUInterruptMonIntervalValue)) {
-    $self->{$param} = $params{$param};
+    if (exists $params{$param}) {
+      $self->{$param} = $params{$param};
+    }
   }
   bless $self, $class;
-  $self->{usage} = $params{cpmCPUTotal5minRev};
+  if (exists $params{cpmCPUTotal5minRev}) {
+    $self->{usage} = $params{cpmCPUTotal5minRev};
+  } else {
+    $self->{usage} = $params{cpmCPUTotal5min};
+  }
   if ($self->{cpmCPUTotalPhysicalIndex}) {
     my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
     $self->{entPhysicalName} = $self->get_request(
@@ -134,7 +140,9 @@ sub dump {
   my $self = shift;
   printf "[CPU_%s]\n", $self->{cpmCPUTotalPhysicalIndex};
   foreach (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev cpmCPUMonInterval cpmCPUTotalMonIntervalValue cpmCPUInterruptMonIntervalValue)) {
-    printf "%s: %s\n", $_, $self->{$_};
+    if (exists $self->{$_}) {
+      printf "%s: %s\n", $_, $self->{$_};
+    }
   }
   printf "info: %s\n", $self->{info};
   printf "\n";
