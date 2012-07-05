@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-07-05 1.4.1
+- add --ifspeedin, --ifspeedout, --ifspeed (used for asymmetric mpls)
+
 2012-06-22 1.4
 - add linux local interfaces (interface-usage/errors only) with --servertype linuxlocal
 - add mode walk

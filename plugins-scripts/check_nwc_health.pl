@@ -186,9 +186,27 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'ifspeedin=i',
+    help => "--ifspeedin
+   Override the ifspeed oid of an interface (only inbound)",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'ifspeedout=i',
+    help => "--ifspeedout
+   Override the ifspeed oid of an interface (only outbound)",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'ifspeed=i',
+    help => "--ifspeed
+   Override the ifspeed oid of an interface",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'units=s',
     help => "--units
-   One of %, KB, MB, GB. (used for e.g. mode interface-usage)",
+   One of %, B, KB, MB, GB, Bit, KBi, MBi, GBi. (used for e.g. mode interface-usage)",
     required => 0,
 );
 $plugin->add_arg(

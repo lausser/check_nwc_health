@@ -265,6 +265,20 @@ sub init {
       $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
           ($self->{delta_timestamp} * $self->{ifSpeed});
     }
+    if (defined $self->opts->ifspeedin) {
+      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->opts->ifspeedin);
+    }
+    if (defined $self->opts->ifspeedout) {
+      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->opts->ifspeedout);
+    }
+    if (defined $self->opts->ifspeed) {
+      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->opts->ifspeed);
+      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
+          ($self->{delta_timestamp} * $self->opts->ifspeed);
+    }
     $self->{inputRate} = $self->{delta_ifInOctets} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutOctets} / $self->{delta_timestamp};
     my $factor = 1/8; # default Bits
