@@ -308,11 +308,22 @@ if ($plugin->opts->mode =~ /^my-([^\-.]+)/) {
   my $param = $plugin->opts->mode;
   $param =~ s/\-/::/g;
   push(@modes, [$param, $plugin->opts->mode, undef, 'my extension']);
+} elsif ($plugin->opts->mode eq 'encode') {
+  my $input = <>;
+  chomp $input;
+  $input =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
+  printf "%s\n", $input;
+  exit 0;
 } elsif ((! grep { $plugin->opts->mode eq $_ } map { $_->[1] } @modes) &&
     (! grep { $plugin->opts->mode eq $_ } map { defined $_->[2] ? @{$_->[2]} : () } @modes)) {
   printf "UNKNOWN - mode %s\n", $plugin->opts->mode;
   $plugin->opts->print_help();
   exit 3;
+}
+if ($plugin->opts->name && $plugin->opts->name =~ /(%22)|(%27)/) {
+  my $name = $plugin->opts->name;
+  $name =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
+  $plugin->override_opt('name', $name);
 }
 
 $SIG{'ALRM'} = sub {

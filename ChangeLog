@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-07-05 1.4.2
+- add mode encode for interface names with ' or "
+
 2012-07-05 1.4.1
 - add --ifspeedin, --ifspeedout, --ifspeed (used for asymmetric mpls)
 
