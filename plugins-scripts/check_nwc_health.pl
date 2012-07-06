@@ -332,7 +332,6 @@ $SIG{'ALRM'} = sub {
   exit $ERRORS{UNKNOWN};
 };
 alarm($plugin->opts->timeout);
-alarm(10000);
 
 $NWC::Device::plugin = $plugin;
 $NWC::Device::mode = (
