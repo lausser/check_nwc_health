@@ -90,8 +90,8 @@ sub new {
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::hsrp::state/) {
-    if (! $self->opts->state()) {
-      $self->opts->override_opt('state', 'active');
+    if (! $self->opts->role()) {
+      $self->opts->override_opt('role', 'active');
     }
   }
   return $self;
@@ -106,14 +106,14 @@ sub check {
         $self->{cHsrpGrpStandbyState},
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
     $self->add_info($info);
-    if ($self->opts->state() eq $self->{cHsrpGrpStandbyState}) {
+    if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
         $self->add_message(OK, $info);
     } else {
       $self->add_message(CRITICAL, 
           sprintf 'state in group %s (interface %s) is %s instead of %s',
               $self->{cHsrpGrpNumber}, $self->{ifIndex},
               $self->{cHsrpGrpStandbyState},
-              $self->opts->state());
+              $self->opts->role());
     }
   } elsif ($self->mode =~ /device::hsrp::failover/) {
     my $info = sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',

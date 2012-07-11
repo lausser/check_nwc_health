@@ -210,7 +210,7 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'state=s',
+    spec => 'role=s',
     help => "--role
    The role of this device in a hsrp group (active/standby/listen)",
     required => 0,

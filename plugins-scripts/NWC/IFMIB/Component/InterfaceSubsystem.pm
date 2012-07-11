@@ -148,8 +148,8 @@ sub get_interface_indices {
           #if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
           #  push(@indices, [$self->opts->name]);
           #}
-          if ($ifindex == $self->opts->name) {
-            push(@indices, [$self->opts->name]);
+          if ($ifindex == 1 * $self->opts->name) {
+            push(@indices, [1 * $self->opts->name]);
           }
         } else {
           #if (lc $ifdescr eq lc $self->opts->name) {

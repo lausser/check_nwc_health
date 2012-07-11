@@ -2,6 +2,8 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+- fix a bug in the role parameter for hsrp
+
 2012-07-05 1.4.2
 - add mode encode for interface names with ' or "
 
