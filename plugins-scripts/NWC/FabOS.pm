@@ -30,6 +30,9 @@ sub init {
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
+    } elsif ($self->mode =~ /device::interfaces/) {
+      $self->analyze_interface_subsystem();
+      $self->check_interface_subsystem();
     }
   }
 }
@@ -44,13 +47,19 @@ sub analyze_cpu_subsystem {
   my $self = shift;
   $self->{components}->{cpu_subsystem} =
       NWC::FabOS::Component::CpuSubsystem->new();
-printf "%s\n", Data::Dumper::Dumper($self->{components});
+#printf "%s\n", Data::Dumper::Dumper($self->{components});
 }
 
 sub analyze_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem} =
       NWC::FabOS::Component::MemSubsystem->new();
+}
+
+sub analyze_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem} =
+      NWC::IFMIB::Component::InterfaceSubsystem->new();
 }
 
 sub check_environmental_subsystem {
@@ -73,3 +82,11 @@ sub check_mem_subsystem {
   $self->{components}->{mem_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }
+
+sub check_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem}->check();
+  $self->{components}->{interface_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+

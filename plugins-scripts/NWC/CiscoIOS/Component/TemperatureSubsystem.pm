@@ -20,8 +20,10 @@ sub new {
 
 sub init {
   my $self = shift;
+  my $tempcnt = 0;
   foreach ($self->get_snmp_table_objects(
       'CISCO-ENVMON-MIB', 'ciscoEnvMonTemperatureStatusTable')) {
+    $_->{ciscoEnvMonTemperatureStatusIndex} = $tempcnt++ if (! exists $_->{ciscoEnvMonTemperatureStatusIndex});
     push(@{$self->{temperatures}},
         NWC::CiscoIOS::Component::TemperatureSubsystem::Temperature->new(%{$_}));
   }

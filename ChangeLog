@@ -2,7 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-07-12 1.4.3
 - fix a bug in the role parameter for hsrp
+- fix a temperature index where ios doesn't set the counter itself
+- add mib2-interface-modes to brocade fabos
 
 2012-07-05 1.4.2
 - add mode encode for interface names with ' or "
