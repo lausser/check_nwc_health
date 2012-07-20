@@ -25,13 +25,13 @@ sub init {
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
-      my ($ifIndex, $ifDesc) = split('#', $ifidxdescr, 2);
+      my ($ifIndex, $ifDescr) = split('#', $ifidxdescr, 2);
       push(@{$self->{interfaces}},
           NWC::IFMIB::Component::InterfaceSubsystem::Interface->new(
-              #ifIndex => $self->{interface_cache}->{$ifDesc},
-              #ifDescr => $ifDesc,
+              #ifIndex => $self->{interface_cache}->{$ifDescr},
+              #ifDescr => $ifDescr,
               ifIndex => $ifIndex,
-              ifDescr => $ifDesc,
+              ifDescr => $ifDescr,
           ));
     }
   } else {
@@ -69,7 +69,18 @@ sub check {
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
+      my $unique = {};
       foreach (@{$self->{interfaces}}) {
+        if (exists $unique->{$_->{ifDescr}}) {
+          $unique->{$_->{ifDescr}}++;
+        } else {
+          $unique->{$_->{ifDescr}} = 0;
+        }
+      }
+      foreach (@{$self->{interfaces}}) {
+        if ($unique->{$_->{ifDescr}}) {
+          $_->{ifDescr} .= ' '.$_->{ifIndex};
+        }
         $_->check();
       }
     }

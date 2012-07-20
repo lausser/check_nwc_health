@@ -35,6 +35,8 @@ sub new {
       $self->{productname} = 'cisco' if $self->opts->servertype eq 'cisco';
       $self->{productname} = 'huawei' if $self->opts->servertype eq 'huawei';
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
+      $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
+      $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
     }
     if (! $NWC::Device::plugin->check_messages()) {
@@ -43,7 +45,7 @@ sub new {
       }
       # Brocade 4100 SilkWorm also sold as IBM 2005-B32 & EMC DS-4100
       # Brocade 4900 Switch also sold as IBM 2005-B64(3) & EMC DS4900B
-
+      # Brocade M4700 (McData name Sphereon 4700) also sold as IBM 2026-432 & EMC DS-4700M
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
@@ -56,15 +58,21 @@ sub new {
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
-      } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
-        bless $self, 'NWC::Brocade';
-        $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /DS_4100/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /Connectrix DS_4900B/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /EMC\s*DS.*4700M/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /^(GS|FS)/i) {
+        bless $self, 'NWC::Netscreen';
+        $self->debug('using NWC::Netscreen');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
@@ -968,6 +976,14 @@ sub dumper {
   delete $object->{runtime};
   printf STDERR "%s\n", Data::Dumper::Dumper($object);
   $object->{runtime} = $run;
+}
+
+sub no_such_mode {
+  my $self = shift;
+  my %params = @_;
+  printf "Mode %s is not implemented for this type of device\n",
+      $self->opts->mode;
+  exit 0;
 }
 
 # get_cached_table_entries

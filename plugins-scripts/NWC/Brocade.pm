@@ -27,7 +27,11 @@ sub init {
   if ($swFirmwareVersion && $swFirmwareVersion =~ /^v6/) {
     $self->{productname} = "FabOS"
   }
-  if ($self->{productname} =~ /FabOS/i) {
+  if ($self->{productname} =~ /EMC\s*DS.*4700M/i) {
+    bless $self, 'NWC::MEOS';
+    $self->debug('using NWC::MEOS');
+    $self->init();
+  } elsif ($self->{productname} =~ /FabOS/i) {
     bless $self, 'NWC::FabOS';
     $self->debug('using NWC::FabOS');
     $self->init();
