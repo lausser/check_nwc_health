@@ -77,7 +77,7 @@ sub check {
           $unique->{$_->{ifDescr}} = 0;
         }
       }
-      foreach (@{$self->{interfaces}}) {
+      foreach (sort { $a->{ifDescr}.$a->{ifIndex} cmp $b->{ifDescr}.$b->{ifIndex} } @{$self->{interfaces}}) {
         if ($unique->{$_->{ifDescr}}) {
           $_->{ifDescr} .= ' '.$_->{ifIndex};
         }
