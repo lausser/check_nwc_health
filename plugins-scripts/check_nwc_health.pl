@@ -76,7 +76,7 @@ my $plugin = Nagios::MiniPlugin->new(
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
         '--hostname <network-component> --community <snmp-community>'.
         '  ...]',
-    version => '4.0',
+    version => $REVISION,
     blurb => 'This plugin checks various parameters of network components ',
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
