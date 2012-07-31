@@ -43,6 +43,9 @@ EXTRA_MODULES=\
   NWC/HSRP.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \
   NWC/IFMIB.pm \
+  NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
+  NWC/FCMGMT/Component/SensorSubsystem.pm \
+  NWC/FCMGMT.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)

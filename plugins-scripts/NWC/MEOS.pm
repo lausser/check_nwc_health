@@ -39,7 +39,8 @@ sub init {
 sub analyze_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem} =
-      NWC::MEOS::Component::EnvironmentalSubsystem->new();
+      #NWC::MEOS::Component::EnvironmentalSubsystem->new();
+      NWC::FCMGMT::Component::EnvironmentalSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
