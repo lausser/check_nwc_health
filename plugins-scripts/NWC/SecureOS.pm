@@ -1,17 +1,15 @@
-package NWC::MEOS;
+package NWC::SecureOS;
 
 use strict;
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-our @ISA = qw(NWC::Brocade);
+our @ISA = qw(NWC::Device);
 
 sub init {
   my $self = shift;
   $self->{components} = {
-      powersupply_subsystem => undef,
-      fan_subsystem => undef,
-      temperature_subsystem => undef,
+      mem_subsystem => undef,
       cpu_subsystem => undef,
   };
   $self->{serial} = 'unknown';
@@ -38,14 +36,14 @@ sub init {
 
 sub analyze_environmental_subsystem {
   my $self = shift;
+  $self->no_such_mode();
   $self->{components}->{environmental_subsystem} =
-      #NWC::MEOS::Component::EnvironmentalSubsystem->new();
+      #NWC::SecureOS::Component::EnvironmentalSubsystem->new();
       NWC::FCMGMT::Component::EnvironmentalSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
   my $self = shift;
-  #$self->no_such_mode();
   $self->{components}->{cpu_subsystem} =
       NWC::UCDMIB::Component::CpuSubsystem->new();
 }

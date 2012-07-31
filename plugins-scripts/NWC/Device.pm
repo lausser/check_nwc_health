@@ -67,12 +67,18 @@ sub new {
       } elsif ($self->{productname} =~ /EMC\s*DS.*4700M/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         bless $self, 'NWC::Netscreen';
         $self->debug('using NWC::Netscreen');
+      } elsif ($self->{productname} =~ /SecureOS/i) {
+        bless $self, 'NWC::SecureOS';
+        $self->debug('using NWC::SecureOS');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
@@ -144,6 +150,11 @@ sub check_snmp_and_model {
         if (/^([\d\.]+) = .*?INTEGER: .*\((\-*\d+)\)/) {
           # .1.3.6.1.2.1.2.2.1.8.1 = INTEGER: down(2)
           $response->{$1} = $2;
+        } elsif (/^([\d\.]+) = .*?Opaque:.*?Float:.*?([\-\.\d]+)/) {
+          # .1.3.6.1.4.1.2021.10.1.6.1 = Opaque: Float: 0.938965
+          $response->{$1} = $2;
+        } elsif (/^([\d\.]+) = STRING:\s*$/) {
+          $response->{$1} = "";
         } elsif (/^([\d\.]+) = \w+: (\-*\d+)/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {

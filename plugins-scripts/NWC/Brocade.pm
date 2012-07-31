@@ -31,6 +31,10 @@ sub init {
     bless $self, 'NWC::MEOS';
     $self->debug('using NWC::MEOS');
     $self->init();
+  } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
+    bless $self, 'NWC::MEOS';
+    $self->debug('using NWC::MEOS');
+    $self->init();
   } elsif ($self->{productname} =~ /FabOS/i) {
     bless $self, 'NWC::FabOS';
     $self->debug('using NWC::FabOS');

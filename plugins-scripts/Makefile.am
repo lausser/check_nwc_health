@@ -39,6 +39,7 @@ EXTRA_MODULES=\
   NWC/FabOS.pm \
   NWC/MEOS.pm \
   NWC/Brocade.pm \
+  NWC/SecureOS.pm \
   NWC/HSRP/Component/HSRPSubsystem.pm \
   NWC/HSRP.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \
@@ -46,6 +47,9 @@ EXTRA_MODULES=\
   NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
   NWC/FCMGMT/Component/SensorSubsystem.pm \
   NWC/FCMGMT.pm \
+  NWC/UCDMIB/Components/MemSubsystem.pm \
+  NWC/UCDMIB/Components/CpuSubsystem.pm \
+  NWC/UCDMIB.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)

@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-07-31 1.4.5
+- add UCD-MIB for SecureOS (McAfee Sidewinder)
+
 2012-07-31 1.4.4
 - add fibre alliance mib sensor table for MeOS/DS-4700M
 
