@@ -22,36 +22,6 @@ sub init {
   my $self = shift;
   my %params = @_;
   my $type = 0;
-  foreach ($self->get_snmp_table_objects(
-     'UCD-SNMP-MIB', 'laTable')) {
-    push(@{$self->{loads}},
-        NWC::UCDMIB::Component::CpuSubsystem::Load->new(%{$_}));
-  }
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking loads');
-  $self->blacklist('c', '');
-  foreach (@{$self->{loads}}) {
-    $_->check();
-  }
-}
-
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{loads}}) {
-    $_->dump();
-  }
-}
-
-
-sub other_init {
-  my $self = shift;
-  my %params = @_;
-  my $type = 0;
   foreach (qw(ssCpuUser ssCpuSystem ssCpuIdle
       ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)) {
     $self->{$_} = $self->get_snmp_object('UCD-SNMP-MIB', $_, 0);
@@ -66,7 +36,7 @@ sub other_init {
   }
 }
 
-sub other_check {
+sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking cpus');
@@ -84,7 +54,7 @@ sub other_check {
   );
 }
 
-sub other_dump {
+sub dump {
   my $self = shift;
   printf "[CPU]\n";
   foreach (qw(ssCpuUser ssCpuSystem ssCpuIdle
@@ -94,6 +64,35 @@ sub other_dump {
   printf "info: %s\n", $self->{info};
   printf "\n";
 }
+
+sub unix_init {
+  my $self = shift;
+  my %params = @_;
+  my $type = 0;
+  foreach ($self->get_snmp_table_objects(
+     'UCD-SNMP-MIB', 'laTable')) {
+    push(@{$self->{loads}},
+        NWC::UCDMIB::Component::CpuSubsystem::Load->new(%{$_}));
+  }
+}
+
+sub unix_check {
+  my $self = shift;
+  my $errorfound = 0;
+  $self->add_info('checking loads');
+  $self->blacklist('c', '');
+  foreach (@{$self->{loads}}) {
+    $_->check();
+  }
+}
+
+sub unix_dump {
+  my $self = shift;
+  foreach (@{$self->{loads}}) {
+    $_->dump();
+  }
+}
+
 
 package NWC::UCDMIB::Component::CpuSubsystem::Load;
 our @ISA = qw(NWC::UCDMIB::Component::CpuSubsystem);
