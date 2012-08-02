@@ -569,6 +569,71 @@ $NWC::Device::mibs_and_oids = {
       fcConnUnitSnsSymbolicPortName => '1.3.6.1.2.1.8888.1.4.1.1.13',
       fcConnUnitSnsSymbolicNodeName => '1.3.6.1.2.1.8888.1.4.1.1.14',
   },
+  'FCEOS-MIB' => {
+      fcEosSysCurrentDate => '1.3.6.1.4.1.289.2.1.1.2.1.1.0',
+      fcEosSysBootDate => '1.3.6.1.4.1.289.2.1.1.2.1.2.0',
+      fcEosSysFirmwareVersion => '1.3.6.1.4.1.289.2.1.1.2.1.3.0',
+      fcEosSysTypeNum => '1.3.6.1.4.1.289.2.1.1.2.1.4.0',
+      fcEosSysModelNum => '1.3.6.1.4.1.289.2.1.1.2.1.5.0',
+      fcEosSysMfg => '1.3.6.1.4.1.289.2.1.1.2.1.6.0',
+      fcEosSysPlantOfMfg => '1.3.6.1.4.1.289.2.1.1.2.1.7.0',
+      fcEosSysEcLevel => '1.3.6.1.4.1.289.2.1.1.2.1.8.0',
+      fcEosSysSerialNum => '1.3.6.1.4.1.289.2.1.1.2.1.9.0',
+      fcEosSysOperStatus => '1.3.6.1.4.1.289.2.1.1.2.1.10.0',
+      fcEosSysState => '1.3.6.1.4.1.289.2.1.1.2.1.11.0',
+      fcEosSysAdmStatus => '1.3.6.1.4.1.289.2.1.1.2.1.12.0',
+      fcEosSysConfigSpeed => '1.3.6.1.4.1.289.2.1.1.2.1.13.0',
+      fcEosSysOpenTrunking => '1.3.6.1.4.1.289.2.1.1.2.1.14.0',
+
+      fcEosFruTable => '1.3.6.1.4.1.289.2.1.1.2.2.1',
+      fcEosFruEntry => '1.3.6.1.4.1.289.2.1.1.2.2.1.1',
+      fcEosFruCode => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.1',
+      fcEosFruCodeDefinition => {
+          1 => 'fru-bkplane', # Backplane 
+          2 => 'fru-ctp', # Control Processor card 
+          3 => 'fru-sbar', # Serial Crossbar 
+          4 => 'fru-fan2', # Center fan module 
+          5 => 'fru-fan', # Fan module 
+          6 => 'fru-power', # Power supply module 
+          7 => 'fru-reserved', # Reserved, not used 
+          8 => 'fru-glsl', # Longwave, Single-Mode, LC connector, 1 Gig 
+          9 => 'fru-gsml', # Shortwave, Multi-Mode, LC connector, 1 Gig 
+          10 => 'fru-gxxl', # Mixed, LC connector, 1 Gig 
+          11 => 'fru-gsf1', # SFO pluggable, 1 Gig 
+          12 => 'fru-gsf2', # SFO pluggable, 2 Gig 
+          13 => 'fru-glsr', # Longwave, Single-Mode, MT-RJ connector, 1 Gig 
+          14 => 'fru-gsmr', # Shortwave, Multi-Mode, MT-RJ connector, 1 Gig 
+          15 => 'fru-gxxr', # Mixed, MT-RJ connector, 1 Gig 
+          16 => 'fru-fint1', # F-Port, internal, 1 Gig 
+      },
+      fcEosFruPosition => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.2',
+      fcEosFruStatus => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.3',
+      fcEosFruStatusDefinition => {
+          0 => 'unknown',
+          1 => 'active',
+          2 => 'backup',
+          3 => 'update-busy',
+          4 => 'failed',
+      },
+      fcEosFruPartNumber => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.4',
+      fcEosFruSerialNumber => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.5',
+      fcEosFruPowerOnHours => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.6',
+      fcEosFruTestDate => '1.3.6.1.4.1.289.2.1.1.2.2.1.1.7',
+
+      fcEosTATable => '1.3.6.1.4.1.289.2.1.1.2.6.1',
+      fcEosTAEntry => '1.3.6.1.4.1.289.2.1.1.2.6.1.1',
+      fcEosTAIndex => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.1',
+      fcEosTAName => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.2',
+      fcEosTAState => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.3',
+      fcEosTAType => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.4',
+      fcEosTAPortType => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.5',
+      fcEosTAPortList => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.6',
+      fcEosTAInterval => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.7',
+      fcEosTATriggerValue => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.8',
+      fcEosTTADirection => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.9',
+      fcEosTTATriggerDuration => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.10',
+      fcEosCTACounter => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.11',
+  },
 };
 
 $NWC::Device::definitions = {

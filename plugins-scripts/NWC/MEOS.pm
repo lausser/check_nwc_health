@@ -38,20 +38,22 @@ sub init {
 
 sub analyze_environmental_subsystem {
   my $self = shift;
-  $self->{components}->{environmental_subsystem} =
-      #NWC::MEOS::Component::EnvironmentalSubsystem->new();
+  $self->{components}->{environmental_subsystem1} =
       NWC::FCMGMT::Component::EnvironmentalSubsystem->new();
+  $self->{components}->{environmental_subsystem2} =
+      NWC::FCEOS::Component::EnvironmentalSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
   my $self = shift;
-  #$self->no_such_mode();
+  $self->no_such_mode();
   $self->{components}->{cpu_subsystem} =
       NWC::UCDMIB::Component::CpuSubsystem->new();
 }
 
 sub analyze_mem_subsystem {
   my $self = shift;
+  $self->no_such_mode();
   $self->{components}->{mem_subsystem} =
       NWC::UCDMIB::Component::MemSubsystem->new();
 }
@@ -64,8 +66,11 @@ sub analyze_interface_subsystem {
 
 sub check_environmental_subsystem {
   my $self = shift;
-  $self->{components}->{environmental_subsystem}->check();
-  $self->{components}->{environmental_subsystem}->dump()
+  $self->{components}->{environmental_subsystem1}->check();
+  $self->{components}->{environmental_subsystem2}->check();
+  $self->{components}->{environmental_subsystem1}->dump()
+      if $self->opts->verbose >= 2;
+  $self->{components}->{environmental_subsystem2}->dump()
       if $self->opts->verbose >= 2;
 }
 

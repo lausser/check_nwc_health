@@ -47,6 +47,9 @@ EXTRA_MODULES=\
   NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
   NWC/FCMGMT/Component/SensorSubsystem.pm \
   NWC/FCMGMT.pm \
+  NWC/FCEOS/Components/EnvironmentalSubsystem.pm \
+  NWC/FCEOS/Components/FruSubsystem.pm \
+  NWC/FCEOS.pm \
   NWC/UCDMIB/Components/MemSubsystem.pm \
   NWC/UCDMIB/Components/CpuSubsystem.pm \
   NWC/UCDMIB.pm \

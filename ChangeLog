@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-08-02 1.4.5.1
+- add more hardware info for EMC-DS24M2 (McData Sphereon 4500)
+
 2012-07-31 1.4.5
 - add UCD-MIB for SecureOS (McAfee Sidewinder)
 
