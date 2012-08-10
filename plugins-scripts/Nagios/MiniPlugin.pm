@@ -100,6 +100,13 @@ sub add_perfdata {
   push @{$self->{perfdata}}, $str;
 }
 
+sub clear_messages {
+  my $self = shift;
+  my $code = shift;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = lc $code;
+  $self->{messages}->{$code} = [];
+}
 
 sub check_messages {
   my $self = shift;

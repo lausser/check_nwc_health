@@ -109,7 +109,7 @@ sub update_interface_cache {
 
 sub save_interface_cache {
   my $self = shift;
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
+  $self->create_statefilesdir();
   my $statefile = lc sprintf "%s/%s_interface_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname;
   open(STATE, ">$statefile");
@@ -124,7 +124,6 @@ sub save_interface_cache {
 
 sub load_interface_cache {
   my $self = shift;
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
   my $statefile = lc sprintf "%s/%s_interface_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname;
   if ( -f $statefile) {

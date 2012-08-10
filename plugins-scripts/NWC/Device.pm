@@ -79,6 +79,9 @@ sub new {
       } elsif ($self->{productname} =~ /SecureOS/i) {
         bless $self, 'NWC::SecureOS';
         $self->debug('using NWC::SecureOS');
+      } elsif ($self->{productname} =~ /Linux.*el6.f5.x86_64 .*/i) {
+        bless $self, 'NWC::F5';
+        $self->debug('using NWC::F5');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
@@ -422,6 +425,11 @@ sub add_message {
 sub check_messages {
   my $self = shift;
   return $NWC::Device::plugin->check_messages(@_);
+}
+
+sub clear_messages {
+  my $self = shift;
+  return $NWC::Device::plugin->clear_messages(@_);
 }
 
 sub add_perfdata {
@@ -922,10 +930,28 @@ sub valdiff {
   $self->save_state(%params);
 }
 
+sub create_statefilesdir {
+  my $self = shift;
+  if (! -d $NWC::Device::statefilesdir) {
+    if (! -d dirname($NWC::Device::statefilesdir)) {
+      mkdir dirname($NWC::Device::statefilesdir);
+    }
+    mkdir $NWC::Device::statefilesdir;
+  } elsif (! -w $NWC::Device::statefilesdir) {
+    $self->schimpf();
+  }
+}
+
+sub schimpf {
+  my $self = shift;
+  printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $NWC::Device::statefilesdir;
+}
+
 sub save_state {
   my $self = shift;
   my %params = @_;
   my $extension = "";
+  $self->create_statefilesdir();
   mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
   my $statefile = sprintf "%s/%s_%s", 
       $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode;
@@ -952,7 +978,6 @@ sub load_state {
   my $self = shift;
   my %params = @_;
   my $extension = "";
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
   my $statefile = sprintf "%s/%s_%s", 
       $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode;
   #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";

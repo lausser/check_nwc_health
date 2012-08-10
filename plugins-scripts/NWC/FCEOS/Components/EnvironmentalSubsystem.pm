@@ -19,8 +19,16 @@ sub new {
     extendedinfo => undef,
   };
   bless $self, $class;
+  $self->overall_init(%params);
   $self->init(%params);
   return $self;
+}
+
+
+sub overall_init {
+  my $self = shift;
+  my %params = @_;
+  $self->{oper_status} = $self->get_snmp_object('FCEOS-MIB', 'fcEosSysOperStatus');
 }
 
 sub init {
@@ -36,6 +44,15 @@ sub check {
   $self->{fru_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_message(OK, "environmental hardware working fine");
+  } else {
+    if ($self->{oper_status} eq "operational") {
+      $self->clear_messages(CRITICAL);
+      $self->clear_messages(WARNING);
+    } elsif ($self->{oper_status} eq "major-failure") {
+      $self->add_message(CRITICAL, "major device failure");
+    } else {
+      $self->add_message(WARNING, $self->{oper_status});
+    }
   }
 }
 

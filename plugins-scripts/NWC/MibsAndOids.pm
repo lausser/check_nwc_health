@@ -580,6 +580,13 @@ $NWC::Device::mibs_and_oids = {
       fcEosSysEcLevel => '1.3.6.1.4.1.289.2.1.1.2.1.8.0',
       fcEosSysSerialNum => '1.3.6.1.4.1.289.2.1.1.2.1.9.0',
       fcEosSysOperStatus => '1.3.6.1.4.1.289.2.1.1.2.1.10.0',
+      fcEosSysOperStatusDefinition => {
+          1 => 'operational',
+          2 => 'redundant-failure',
+          3 => 'minor-failure',
+          4 => 'major-failure',
+          5 => 'not-operational',
+      },
       fcEosSysState => '1.3.6.1.4.1.289.2.1.1.2.1.11.0',
       fcEosSysAdmStatus => '1.3.6.1.4.1.289.2.1.1.2.1.12.0',
       fcEosSysConfigSpeed => '1.3.6.1.4.1.289.2.1.1.2.1.13.0',
