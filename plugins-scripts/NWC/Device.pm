@@ -107,6 +107,17 @@ sub new {
           }
         }
         exit 0;
+      } elsif ($self->mode =~ /device::uptime/) {
+        $self->{uptime} = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
+        if ($self->{uptime} =~ /\((\d+)\)/) {
+          $self->{uptime} = $1 / (100 * 60);
+        }
+        my $info = sprintf 'device is up since %d minutes', $self->{uptime};
+        $self->add_info($info);
+        $self->set_thresholds(warning => '15:', critical => '5:');
+        $self->add_message($self->check_thresholds($self->{uptime}), $info);
+        my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+        $NWC::Device::plugin->nagios_exit($code, $message);
       }
       $self->{method} = 'snmp';
     }

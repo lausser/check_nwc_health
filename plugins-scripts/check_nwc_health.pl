@@ -17,6 +17,9 @@ use constant UNKNOWN    => 3;
 use constant DEPENDENT  => 4;
 
 my @modes = (
+  ['device::uptime',
+      'uptime', undef,
+      'Check the uptime of the device' ],
   ['device::hardware::health',
       'hardware-health', undef,
       'Check the status of environmental equipment (fans, temperatures, power)' ],
