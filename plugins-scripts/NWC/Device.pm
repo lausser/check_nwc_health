@@ -2,6 +2,7 @@ package NWC::Device;
 
 use strict;
 use IO::File;
+use File::Basename;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 {
