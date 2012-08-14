@@ -110,8 +110,16 @@ sub new {
       } elsif ($self->mode =~ /device::uptime/) {
         $self->{uptime} = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
         if ($self->{uptime} =~ /\((\d+)\)/) {
-          $self->{uptime} = $1 / (100 * 60);
+          # Timeticks: (20718727) 2 days, 9:33:07.27
+          $self->{uptime} = $1 / 100;
+        } elsif ($self->{uptime} =~ /(\d+)\s*days.*(\d+):(\d+):(\d+)\.(\d+)/) {
+          # Timeticks: 2 days, 9:33:07.27
+          $self->{uptime} = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
+        } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
+          # Timeticks: 9:33:07.27
+          $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
         }
+        $self->{uptime} /= 60;
         my $info = sprintf 'device is up since %d minutes', $self->{uptime};
         $self->add_info($info);
         $self->set_thresholds(warning => '15:', critical => '5:');
