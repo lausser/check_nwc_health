@@ -112,7 +112,7 @@ sub new {
         if ($self->{uptime} =~ /\((\d+)\)/) {
           # Timeticks: (20718727) 2 days, 9:33:07.27
           $self->{uptime} = $1 / 100;
-        } elsif ($self->{uptime} =~ /(\d+)\s*days.*(\d+):(\d+):(\d+)\.(\d+)/) {
+        } elsif ($self->{uptime} =~ /(\d+)\s*days.*?(\d+):(\d+):(\d+)\.(\d+)/) {
           # Timeticks: 2 days, 9:33:07.27
           $self->{uptime} = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
         } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
