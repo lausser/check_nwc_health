@@ -641,6 +641,77 @@ $NWC::Device::mibs_and_oids = {
       fcEosTTATriggerDuration => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.10',
       fcEosCTACounter => '1.3.6.1.4.1.289.2.1.1.2.6.1.1.11',
   },
+  'F5-BIGIP-SYSTEM-MIB' => {
+# http://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip9_2_2mgmt/BIG-IP_9_2_2nsm_guide-16-1.html
+# http://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/tmos_management_guide_10_0_0/tmos_appendix_a_traps.html
+# http://support.f5.com/kb/en-us/solutions/public/9000/400/sol9476.html
+      sysCpuNumber => '1.3.6.1.4.1.3375.2.1.3.1.1.0',
+      sysCpuTable => '1.3.6.1.4.1.3375.2.1.3.1.2',
+      sysCpuEntry => '1.3.6.1.4.1.3375.2.1.3.1.2.1',
+      sysCpuIndex => '1.3.6.1.4.1.3375.2.1.3.1.2.1.1',
+      sysCpuTemperature => '1.3.6.1.4.1.3375.2.1.3.1.2.1.2',
+      sysCpuFanSpeed => '1.3.6.1.4.1.3375.2.1.3.1.2.1.3',
+      sysCpuName => '1.3.6.1.4.1.3375.2.1.3.1.2.1.4',
+      sysCpuSlot => '1.3.6.1.4.1.3375.2.1.3.1.2.1.5',
+
+      sysChassisFan => '1.3.6.1.4.1.3375.2.1.3.2.1',
+      sysChassisFanNumber => '1.3.6.1.4.1.3375.2.1.3.2.1.1.0',
+      sysChassisFanTable => '1.3.6.1.4.1.3375.2.1.3.2.1.2',
+      sysChassisFanEntry => '1.3.6.1.4.1.3375.2.1.3.2.1.2.1',
+      sysChassisFanIndex => '1.3.6.1.4.1.3375.2.1.3.2.1.2.1.1',
+      sysChassisFanStatus => '1.3.6.1.4.1.3375.2.1.3.2.1.2.1.2',
+      sysChassisFanStatusDefinition => {
+          0 => 'bad',
+          1 => 'good',
+          2 => 'notpresent',
+      },
+      sysChassisFanSpeed => '1.3.6.1.4.1.3375.2.1.3.2.1.2.1.3',
+
+      sysChassisPowerSupply => '1.3.6.1.4.1.3375.2.1.3.2.2',
+      sysChassisPowerSupplyNumber => '1.3.6.1.4.1.3375.2.1.3.2.2.1.0',
+      sysChassisPowerSupplyTable => '1.3.6.1.4.1.3375.2.1.3.2.2.2',
+      sysChassisPowerSupplyEntry => '1.3.6.1.4.1.3375.2.1.3.2.2.2.1',
+      sysChassisPowerSupplyIndex => '1.3.6.1.4.1.3375.2.1.3.2.2.2.1.1',
+      sysChassisPowerSupplyStatus => '1.3.6.1.4.1.3375.2.1.3.2.2.2.1.2',
+      sysChassisPowerSupplyStatusDefinition => {
+          0 => 'bad',
+          1 => 'good',
+          2 => 'notpresent',
+      },
+
+      sysChassisTemp => '1.3.6.1.4.1.3375.2.1.3.2.3',
+      sysChassisTempNumber => '1.3.6.1.4.1.3375.2.1.3.2.3.1.0',
+      sysChassisTempTable => '1.3.6.1.4.1.3375.2.1.3.2.3.2',
+      sysChassisTempEntry => '1.3.6.1.4.1.3375.2.1.3.2.3.2.1',
+      sysChassisTempIndex => '1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1',
+      sysChassisTempTemperature => '1.3.6.1.4.1.3375.2.1.3.2.3.2.1.2',
+
+      sysProduct => '1.3.6.1.4.1.3375.2.1.4',
+      sysProductName => '1.3.6.1.4.1.3375.2.1.4.1.0',
+      sysProductVersion => '1.3.6.1.4.1.3375.2.1.4.2.0',
+      sysProductBuild => '1.3.6.1.4.1.3375.2.1.4.3.0',
+      sysProductEdition => '1.3.6.1.4.1.3375.2.1.4.4.0',
+      sysProductDate => '1.3.6.1.4.1.3375.2.1.4.5.0',
+
+      sysSubMemory => '1.3.6.1.4.1.3375.2.1.5',
+      sysSubMemoryResetStats => '1.3.6.1.4.1.3375.2.1.5.1.0',
+      sysSubMemoryNumber => '1.3.6.1.4.1.3375.2.1.5.2.0',
+      sysSubMemoryTable => '1.3.6.1.4.1.3375.2.1.5.3',
+      sysSubMemoryEntry => '1.3.6.1.4.1.3375.2.1.5.3.1',
+      sysSubMemoryName => '1.3.6.1.4.1.3375.2.1.5.3.1.1',
+      sysSubMemoryAllocated => '1.3.6.1.4.1.3375.2.1.5.3.1.2',
+      sysSubMemoryMaxAllocated => '1.3.6.1.4.1.3375.2.1.5.3.1.3',
+      sysSubMemorySize => '1.3.6.1.4.1.3375.2.1.5.3.1.4',
+
+      sysSystem => '1.3.6.1.4.1.3375.2.1.6',
+      sysSystemName => '1.3.6.1.4.1.3375.2.1.6.1.0',
+      sysSystemNodeName => '1.3.6.1.4.1.3375.2.1.6.2.0',
+      sysSystemRelease => '1.3.6.1.4.1.3375.2.1.6.3.0',
+      sysSystemVersion => '1.3.6.1.4.1.3375.2.1.6.4.0',
+      sysSystemMachine => '1.3.6.1.4.1.3375.2.1.6.5.0',
+      sysSystemUptime => '1.3.6.1.4.1.3375.2.1.6.6.0',
+      bigipSystemGroups => '1.3.6.1.4.1.3375.2.5.2.1',
+  },
 };
 
 $NWC::Device::definitions = {

@@ -80,7 +80,7 @@ sub new {
       } elsif ($self->{productname} =~ /SecureOS/i) {
         bless $self, 'NWC::SecureOS';
         $self->debug('using NWC::SecureOS');
-      } elsif ($self->{productname} =~ /Linux.*el6.f5.x86_64 .*/i) {
+      } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'NWC::F5';
         $self->debug('using NWC::F5');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
@@ -116,6 +116,12 @@ sub new {
         $self->add_info($info);
         $self->set_thresholds(warning => '15:', critical => '5:');
         $self->add_message($self->check_thresholds($self->{uptime}), $info);
+        $self->add_perfdata(
+            label => 'uptime',
+            value => $self->{uptime},
+            warning => $self->{warning},
+            critical => $self->{critical},
+        );
         my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
         $NWC::Device::plugin->nagios_exit($code, $message);
       }

@@ -53,6 +53,13 @@ EXTRA_MODULES=\
   NWC/UCDMIB/Components/MemSubsystem.pm \
   NWC/UCDMIB/Components/CpuSubsystem.pm \
   NWC/UCDMIB.pm \
+  NWC/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
+  NWC/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
+  NWC/F5/F5BIGIP/Component/CpuSubsystem.pm \
+  NWC/F5/F5BIGIP/Component/FanSubsystem.pm \
+  NWC/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
+  NWC/F5/F5BIGIP.pm \
+  NWC/F5.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
