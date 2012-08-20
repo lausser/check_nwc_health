@@ -2,8 +2,8 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
-1.4.7
-- add f5 bigip hardware
+2012-08-21 1.4.7
+- add f5 bigip
 - bugfix in mode uptime
 
 2012-08-10 1.4.6

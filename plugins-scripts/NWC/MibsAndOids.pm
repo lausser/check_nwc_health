@@ -645,6 +645,15 @@ $NWC::Device::mibs_and_oids = {
 # http://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/bigip9_2_2mgmt/BIG-IP_9_2_2nsm_guide-16-1.html
 # http://support.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/tmos_management_guide_10_0_0/tmos_appendix_a_traps.html
 # http://support.f5.com/kb/en-us/solutions/public/9000/400/sol9476.html
+      sysStatMemoryTotal => '1.3.6.1.4.1.3375.2.1.1.2.1.44.0',
+      sysStatMemoryUsed => '1.3.6.1.4.1.3375.2.1.1.2.1.45.0',
+      sysHostMemoryTotal => '1.3.6.1.4.1.3375.2.1.7.1.1.0',
+      sysHostMemoryUsed => '1.3.6.1.4.1.3375.2.1.7.1.2.0',
+# http://www.midnight-visions.de/f5-bigip-und-snmp/
+      sysStatTmTotalCycles => '1.3.6.1.4.1.3375.2.1.1.2.1.41.0',
+      sysStatTmIdleCycles => '1.3.6.1.4.1.3375.2.1.1.2.1.42.0',
+      sysStatTmSleepCycles => '1.3.6.1.4.1.3375.2.1.1.2.1.43.0',
+
       sysCpuNumber => '1.3.6.1.4.1.3375.2.1.3.1.1.0',
       sysCpuTable => '1.3.6.1.4.1.3375.2.1.3.1.2',
       sysCpuEntry => '1.3.6.1.4.1.3375.2.1.3.1.2.1',

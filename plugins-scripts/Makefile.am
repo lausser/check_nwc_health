@@ -53,6 +53,7 @@ EXTRA_MODULES=\
   NWC/UCDMIB/Components/MemSubsystem.pm \
   NWC/UCDMIB/Components/CpuSubsystem.pm \
   NWC/UCDMIB.pm \
+  NWC/F5/F5BIGIP/Component/MemSubsystem.pm \
   NWC/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   NWC/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
   NWC/F5/F5BIGIP/Component/CpuSubsystem.pm \
