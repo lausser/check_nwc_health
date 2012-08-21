@@ -147,31 +147,21 @@ sub get_interface_indices {
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
-        #if ($ifdescr =~ /$pattern/i) {
-        #  push(@indices, [$self->{interface_cache}->{$ifdescr}]);
-        #}
         if ($ifdescr =~ /$pattern/i) {
           push(@indices, [$ifindex]);
         }
       } else {
         if ($self->opts->name =~ /^\d+$/) {
-          #if ($self->{interface_cache}->{$ifdescr} == $self->opts->name) {
-          #  push(@indices, [$self->opts->name]);
-          #}
           if ($ifindex == 1 * $self->opts->name) {
             push(@indices, [1 * $self->opts->name]);
           }
         } else {
-          #if (lc $ifdescr eq lc $self->opts->name) {
-          #  push(@indices, [$self->{interface_cache}->{$ifdescr}]);
-          #}
           if (lc $ifdescr eq lc $self->opts->name) {
             push(@indices, [$ifindex]);
           }
         }
       }
     } else {
-      #push(@indices, [$self->{interface_cache}->{$ifdescr}]);
       push(@indices, [$ifindex]);
     }
   }

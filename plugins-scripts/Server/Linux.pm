@@ -72,7 +72,16 @@ sub init {
     foreach (glob "/sys/class/net/*") {
       my $name = $_;
       $name =~ s/.*\///g;
-
+      if ($self->opts->name) {
+        if ($self->opts->regexp) {
+          my $pattern = $self->opts->name;
+          if ($ifdescr !~ /$pattern/i) {
+            next;
+          }
+        } elsif (lc $name ne lc $self->opts->name) {
+          next;
+        }
+      }
       my $tmpif = {
         ifDescr => $name,
         ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x} * 1024*1024 : 1024*1024*1024),
