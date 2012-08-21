@@ -75,7 +75,7 @@ sub init {
       if ($self->opts->name) {
         if ($self->opts->regexp) {
           my $pattern = $self->opts->name;
-          if ($ifdescr !~ /$pattern/i) {
+          if ($name !~ /$pattern/i) {
             next;
           }
         } elsif (lc $name ne lc $self->opts->name) {

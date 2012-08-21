@@ -61,7 +61,7 @@ sub analyze_interface_subsystem {
 sub analyze_cpu_subsystem {
   my $self = shift;
   $self->{components}->{cpu_subsystem} =
-      NWC::F5::F5BIGIP::Component::CpuSubsystem->new(mode => $self->mode);
+      NWC::F5::F5BIGIP::Component::CpuSubsystem->new();
 }
 
 sub analyze_mem_subsystem {
@@ -86,7 +86,7 @@ sub check_interface_subsystem {
 
 sub check_cpu_subsystem {
   my $self = shift;
-  $self->{components}->{cpu_subsystem}->check(mode => $self->mode);
+  $self->{components}->{cpu_subsystem}->check();
   $self->{components}->{cpu_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }

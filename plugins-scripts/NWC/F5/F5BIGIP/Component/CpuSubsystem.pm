@@ -14,7 +14,7 @@ sub new {
     extendedinfo => undef,
   };
   bless $self, $class;
-  if ($params{mode} =~ /load/) {
+  if ($self->mode =~ /load/) {
     $self->overall_init(%params);
   } else {
     $self->init(%params);
@@ -52,7 +52,7 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('cc', '');
-  if ($params{mode} =~ /load/) {
+  if ($self->mode =~ /load/) {
     my $info = sprintf 'tmm cpu usage is %.2f%%',
         $self->{cpu_usage};
     $self->add_info($info);
