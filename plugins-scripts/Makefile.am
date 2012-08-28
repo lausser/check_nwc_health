@@ -28,7 +28,6 @@ EXTRA_MODULES=\
   NWC/CiscoNXOS/Component/SensorSubsystem.pm \
   NWC/CiscoNXOS.pm \
   NWC/Cisco.pm \
-  NWC/NetScreen.pm \
   NWC/Nortel.pm \
   NWC/Netscreen.pm \
   NWC/AlliedTelesyn.pm \
