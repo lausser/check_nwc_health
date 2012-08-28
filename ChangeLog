@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-08-28 1.4.8
+- add hp procurve hardware
+
 2012-08-21 1.4.7.1
 - fix a bug in servertype locallinux, interfaces and --name (Thanks Simon Meggle)
 
