@@ -39,6 +39,7 @@ sub new {
       $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
       $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
+      $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
     }
     if (! $NWC::Device::plugin->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
@@ -82,6 +83,9 @@ sub new {
         $self->debug('using NWC::SecureOS');
       } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'NWC::F5';
+        $self->debug('using NWC::F5');
+      } elsif ($self->{productname} =~ /Procurve/i) {
+        bless $self, 'NWC::HP';
         $self->debug('using NWC::F5');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';

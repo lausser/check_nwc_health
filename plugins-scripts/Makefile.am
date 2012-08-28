@@ -37,6 +37,10 @@ EXTRA_MODULES=\
   NWC/FabOS/Component/EnvironmentalSubsystem.pm \
   NWC/FabOS/Component/SensorSubsystem.pm \
   NWC/FabOS.pm \
+  NWC/HP/Procurve/Component/EnvironmentalSubsystem.pm \
+  NWC/HP/Procurve/Component/SensorSubsystem.pm \
+  NWC/HP/Procurve.pm \
+  NWC/HP.pm \
   NWC/MEOS.pm \
   NWC/Brocade.pm \
   NWC/SecureOS.pm \

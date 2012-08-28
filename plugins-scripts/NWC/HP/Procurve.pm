@@ -1,10 +1,97 @@
-hpicfSensorObjectId.1 = icfFanSensor
-hpicfSensorObjectId.2 = icfPowerSupplySensor
-hpicfSensorObjectId.3 = icfPowerSupplySensor
-hpicfSensorObjectId.4 = icfTemperatureSensor
+package NWC::HP::Procurve;
 
-hpicfSensorDescr.1 = Fan Sensor
-hpicfSensorDescr.2 = Power Supply Sensor
-hpicfSensorDescr.3 = Redundant Power Supply Sensor
-hpicfSensorDescr.4 = Over-temperature Sensor
+use strict;
+
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
+
+our @ISA = qw(NWC::F5);
+
+sub init {
+  my $self = shift;
+  $self->{components} = {
+      cpu_subsystem => undef,
+      memory_subsystem => undef,
+      environmental_subsystem => undef,
+  };
+  $self->{serial} = 'unknown';
+  $self->{product} = 'unknown';
+  $self->{romversion} = 'unknown';
+  # serial is 1.3.6.1.2.1.47.1.1.1.1.11.1
+  #$self->collect();
+  if (! $self->check_messages()) {
+    ##$self->set_serial();
+    if ($self->mode =~ /device::hardware::health/) {
+      $self->analyze_environmental_subsystem();
+      #$self->auto_blacklist();
+      $self->check_environmental_subsystem();
+    } elsif ($self->mode =~ /device::hardware::load/) {
+      $self->analyze_cpu_subsystem();
+      #$self->auto_blacklist();
+      $self->check_cpu_subsystem();
+    } elsif ($self->mode =~ /device::hardware::memory/) {
+      $self->analyze_mem_subsystem();
+      #$self->auto_blacklist();
+      $self->check_mem_subsystem();
+    } elsif ($self->mode =~ /device::interfaces/) {
+      $self->analyze_interface_subsystem();
+      $self->check_interface_subsystem();
+    } elsif ($self->mode =~ /device::shinken::interface/) {
+      $self->analyze_interface_subsystem();
+      $self->shinken_interface_subsystem();
+    }
+  }
+}
+
+sub analyze_environmental_subsystem {
+  my $self = shift;
+  $self->{components}->{environmental_subsystem} =
+      NWC::HP::Procurve::Component::EnvironmentalSubsystem->new();
+}
+
+sub analyze_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem} =
+      NWC::IFMIB::Component::InterfaceSubsystem->new();
+}
+
+sub analyze_cpu_subsystem {
+  my $self = shift;
+  $self->{components}->{cpu_subsystem} =
+      NWC::HP::Procurve::Component::CpuSubsystem->new();
+}
+
+sub analyze_mem_subsystem {
+  my $self = shift;
+  $self->{components}->{mem_subsystem} =
+      NWC::HP::Procurve::Component::MemSubsystem->new();
+}
+
+sub check_environmental_subsystem {
+  my $self = shift;
+  $self->{components}->{environmental_subsystem}->check();
+  $self->{components}->{environmental_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem}->check();
+  $self->{components}->{interface_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_cpu_subsystem {
+  my $self = shift;
+  $self->{components}->{cpu_subsystem}->check();
+  $self->{components}->{cpu_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_mem_subsystem {
+  my $self = shift;
+  $self->{components}->{mem_subsystem}->check();
+  $self->{components}->{mem_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
 
