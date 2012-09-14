@@ -755,6 +755,55 @@ $NWC::Device::mibs_and_oids = {
 #hpicfSensorDescr.4 = Over-temperature Sensor
 
   },
+  'STATISTICS-MIB' => {
+      hpSwitchCpuStat => '1.3.6.1.2.1.1.7.11.12.9.6.1.0',  # "The CPU utilization in percent(%)."
+  },
+  'ODER_STATISTICS-MIB' => {
+      hpSwitchCpuStat => '1.3.6.1.4.1.11.2.14.11.5.1.9.6.1.0',  # "The CPU utilization in percent(%)."
+  },
+  'NETSWITCH-MIB' => {
+      # hpLocalMemTotalBytes   1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.5
+      # hpLocalMemFreeBytes    1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.6
+      # hpLocalMemAllocBytes   1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.7
+      hpLocalMemTable => '1.3.6.1.2.1.1.7.11.12.1.2.1.1',
+      hpLocalMemEntry => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1',
+      hpLocalMemSlotIndex => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.1',
+      hpLocalMemSlabCnt => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.2',
+      hpLocalMemFreeSegCnt => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.3',
+      hpLocalMemAllocSegCnt => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.4',
+      hpLocalMemTotalBytes => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.5',
+      hpLocalMemFreeBytes => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.6',
+      hpLocalMemAllocBytes => '1.3.6.1.2.1.1.7.11.12.1.2.1.1.1.7',
+      hpGlobalMemTable => '1.3.6.1.2.1.1.7.11.12.1.2.2.1',
+      hpGlobalMemEntry => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1',
+      hpGlobalMemSlotIndex => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.1',
+      hpGlobalMemSlabCnt => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.2',
+      hpGlobalMemFreeSegCnt => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.3',
+      hpGlobalMemAllocSegCnt => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.4',
+      hpGlobalMemTotalBytes => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.5',
+      hpGlobalMemFreeBytes => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.6',
+      hpGlobalMemAllocBytes => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.7',
+  },
+  'ODER_NETSWITCH-MIB' => { #evt moderner
+      hpLocalMemTable => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1',
+      hpLocalMemEntry => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1',
+      hpLocalMemSlotIndex => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.1',
+      hpLocalMemSlabCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.2',
+      hpLocalMemFreeSegCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.3',
+      hpLocalMemAllocSegCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.4',
+      hpLocalMemTotalBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.5',
+      hpLocalMemFreeBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.6',
+      hpLocalMemAllocBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.7',
+      hpGlobalMemTable => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1',
+      hpGlobalMemEntry => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1',
+      hpGlobalMemSlotIndex => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.1',
+      hpGlobalMemSlabCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.2',
+      hpGlobalMemFreeSegCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.3',
+      hpGlobalMemAllocSegCnt => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.4',
+      hpGlobalMemTotalBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.5',
+      hpGlobalMemFreeBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.6',
+      hpGlobalMemAllocBytes => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.2.1.1.7',
+  },
 };
 
 $NWC::Device::definitions = {
