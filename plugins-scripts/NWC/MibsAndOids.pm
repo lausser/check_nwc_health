@@ -755,13 +755,13 @@ $NWC::Device::mibs_and_oids = {
 #hpicfSensorDescr.4 = Over-temperature Sensor
 
   },
-  'STATISTICS-MIB' => {
+  'OLD-STATISTICS-MIB' => {
       hpSwitchCpuStat => '1.3.6.1.2.1.1.7.11.12.9.6.1.0',  # "The CPU utilization in percent(%)."
   },
-  'ODER_STATISTICS-MIB' => {
+  'STATISTICS-MIB' => {
       hpSwitchCpuStat => '1.3.6.1.4.1.11.2.14.11.5.1.9.6.1.0',  # "The CPU utilization in percent(%)."
   },
-  'NETSWITCH-MIB' => {
+  'OLD-NETSWITCH-MIB' => {
       # hpLocalMemTotalBytes   1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.5
       # hpLocalMemFreeBytes    1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.6
       # hpLocalMemAllocBytes   1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.7
@@ -784,7 +784,7 @@ $NWC::Device::mibs_and_oids = {
       hpGlobalMemFreeBytes => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.6',
       hpGlobalMemAllocBytes => '1.3.6.1.2.1.1.7.11.12.1.2.2.1.1.7',
   },
-  'ODER_NETSWITCH-MIB' => { #evt moderner
+  'NETSWITCH-MIB' => { #evt moderner
       hpLocalMemTable => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1',
       hpLocalMemEntry => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1',
       hpLocalMemSlotIndex => '1.3.6.1.4.1.11.2.14.11.5.1.1.2.1.1.1.1',

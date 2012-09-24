@@ -77,8 +77,7 @@ sub new {
 sub check {
   my $self = shift;
   $self->blacklist('se', $self->{hpicfSensorIndex});
-  $self->add_info(sprintf '%s %s (%s) is %s',
-      $self->{hpicfSensorObjectId},
+  $self->add_info(sprintf 'sensor %s (%s) is %s',
       $self->{hpicfSensorIndex},
       $self->{hpicfSensorDescr},
       $self->{hpicfSensorStatus});
@@ -88,7 +87,7 @@ sub check {
   } elsif ($self->{hpicfSensorStatus} eq "warning") {
     $self->add_message(WARNING, $self->{info});
   } elsif ($self->{hpicfSensorStatus} eq "good") {
-    $self->add_message(OK, $self->{info});
+    #$self->add_message(OK, $self->{info});
   } else {
     $self->add_message(UNKNOWN, $self->{info});
   }
@@ -96,8 +95,8 @@ sub check {
 
 sub dump {
   my $self = shift;
-  printf "[SENSOR_%s_%s]\n", $self->{hpicfSensorObjectId}, $self->{hpicfSensorIndex};
-  foreach my $param (qw(hpicfSensorIndex hpicfSensorObjectId 
+  printf "[SENSOR_%s]\n", $self->{hpicfSensorIndex};
+  foreach (qw(hpicfSensorIndex hpicfSensorObjectId 
       hpicfSensorNumber hpicfSensorStatus hpicfSensorWarnings
       hpicfSensorFailures hpicfSensorDescr)) {
     printf "%s: %s\n", $_, $self->{$_};
