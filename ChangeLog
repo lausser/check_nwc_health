@@ -2,8 +2,8 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
-2012-09-15 1.4.9
-- add hp procurve cpu-load
+2012-09-24 1.4.9
+- add hp procurve cpu-load and memory-usage
 
 2012-08-28 1.4.8
 - add hp procurve hardware

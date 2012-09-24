@@ -36,6 +36,7 @@ EXTRA_MODULES=\
   NWC/FabOS/Component/EnvironmentalSubsystem.pm \
   NWC/FabOS/Component/SensorSubsystem.pm \
   NWC/FabOS.pm \
+  NWC/HP/Procurve/Component/MemSubsystem.pm \
   NWC/HP/Procurve/Component/CpuSubsystem.pm \
   NWC/HP/Procurve/Component/EnvironmentalSubsystem.pm \
   NWC/HP/Procurve/Component/SensorSubsystem.pm \
