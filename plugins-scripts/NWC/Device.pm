@@ -122,6 +122,9 @@ sub new {
         } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
           # Timeticks: 9:33:07.27
           $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
+        } elsif ($self->{uptime} =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
+          # Timeticks: 3 hours, 42:17.98
+          $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
         }
         $self->{uptime} /= 60;
         my $info = sprintf 'device is up since %d minutes', $self->{uptime};

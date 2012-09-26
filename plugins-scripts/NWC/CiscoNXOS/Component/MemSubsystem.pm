@@ -44,8 +44,8 @@ sub check {
         label => 'memory_usage',
         value => $self->{cseSysMemoryUtilization},
         uom => '%',
-        warning => $self->{warningthreshold},
-        critical => $self->{criticalthreshold}
+        warning => $self->{warning},
+        critical => $self->{critical}
     );
   } else {
     $self->add_message(UNKNOWN, 'cannot aquire momory usage');

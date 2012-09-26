@@ -95,8 +95,8 @@ sub check {
       label => $self->{ciscoMemoryPoolName}.'_usage',
       value => $self->{usage},
       uom => '%',
-      warning => $self->{warningthreshold},
-      critical => $self->{criticalthreshold}
+      warning => $self->{warning},
+      critical => $self->{critical}
   );
 }
 
