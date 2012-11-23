@@ -219,8 +219,8 @@ sub new {
     $self->{$key} = 0 if ! defined $params{$key};
   }
   bless $self, $class;
-  if (0) {
-  #if ($params{ifName}) {
+  #if (0) {
+  if ($params{ifName}) {
     my $self64 = {
       ifName => $params{ifName},
       ifInMulticastPkts => $params{ifInMulticastPkts},
