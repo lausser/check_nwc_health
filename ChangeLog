@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2012-11-23 1.5
+- add 64bit interfaces
+
 2012-09-26 1.4.9.1
 - fix a bug in uptime calculation
 
