@@ -24,7 +24,7 @@ my @modes = (
       'hardware-health', undef,
       'Check the status of environmental equipment (fans, temperatures, power)' ],
   ['device::hardware::load',
-      'cpu-load', undef,
+      'cpu-load', ['cpu-usage'],
       'Check the CPU load of the device' ],
   ['device::hardware::memory',
       'memory-usage', undef,
@@ -59,9 +59,25 @@ my @modes = (
   ['device::hsrp::list',
       'list-hsrp-groups', undef,
       'Show the HSRP groups configured on this device' ],
+  ['device::ha::role',
+      'ha-role', undef,
+      'Check the role in a ha group' ],
+  ['device::svn::status',
+      'svn-status', undef,
+      'Check the status of the svn subsystem' ],
+  ['device::mngmt::status',
+      'mngmt-status', undef,
+      'Check the status of the management subsystem' ],
+  ['device::fw::policy::installed',
+      'fw-policy', undef,
+      'Check the installed firewall policy' ],
+  ['device::fw::policy::connections',
+      'fw-connections', undef,
+      'Check the number of firewall policy connections' ],
   ['device::walk',
       'walk', undef,
       'Show snmpwalk command with the oids necessary for a simulation' ],
+  # todo device::modules::{filtering,management,ha,svn}
 );
 my $modestring = "";
 my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
@@ -232,6 +248,12 @@ $plugin->add_arg(
     spec => 'critical=s',
     help => '--critical
    The critical threshold',
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'mitigation=s',
+    help => "--mitigation
+   The parameter allows you to change a critical error to a warning.",
     required => 0,
 );
 $plugin->add_arg(

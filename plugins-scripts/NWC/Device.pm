@@ -87,6 +87,9 @@ sub new {
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'NWC::HP';
         $self->debug('using NWC::F5');
+      } elsif ($self->{productname} =~ /Check\s*Point/i) {
+        bless $self, 'NWC::CheckPoint';
+        $self->debug('using NWC::CheckPoint');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');

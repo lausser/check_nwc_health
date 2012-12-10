@@ -66,6 +66,13 @@ EXTRA_MODULES=\
   NWC/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
   NWC/F5/F5BIGIP.pm \
   NWC/F5.pm \
+  NWC/CheckPoint/Firewall1/Component/MngmtSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/SvnSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/FwSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/HaSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
+  NWC/CheckPoint/Firewall1.pm \
+  NWC/CheckPoint.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
