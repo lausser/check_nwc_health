@@ -74,6 +74,9 @@ my @modes = (
   ['device::fw::policy::connections',
       'fw-connections', undef,
       'Check the number of firewall policy connections' ],
+  ['device::lb::pool::completeness',
+      'pool-completeness', undef,
+      'Check the members of a load balancer pool' ],
   ['device::walk',
       'walk', undef,
       'Show snmpwalk command with the oids necessary for a simulation' ],
@@ -282,8 +285,19 @@ $plugin->add_arg(
    Output the list of OIDs you need to walk for a simulation file',
     required => 0,
 );
+$plugin->add_arg(
+    spec => 'multiline',
+    help => '--multiline
+   Multiline output',
+    required => 0,
+);
 
 $plugin->getopts();
+if ($plugin->opts->multiline) {
+  $ENV{NRPE_MULTILINESUPPORT} = 1;
+} else {
+  $ENV{NRPE_MULTILINESUPPORT} = 0;
+}
 if ($plugin->opts->snmphelp) {
   my @subtrees = ("1");
   foreach my $mib (keys %{$NWC::Device::mibs_and_oids}) {
@@ -393,7 +407,9 @@ if (! $plugin->check_messages()) {
 } else {
   $plugin->add_message(CRITICAL, 'wrong device');
 }
-my ($code, $message) = $plugin->check_messages(join => ', ', join_all => ', ');
+my ($code, $message) = $plugin->opts->multiline ? 
+    $plugin->check_messages(join => "\n", join_all => ', ') :
+    $plugin->check_messages(join => ', ', join_all => ', ');
 $message .= sprintf "\n%s\n", join("\n", @{$NWC::Device::info})
     if $plugin->opts->verbose >= 1;
 #printf "%s\n", Data::Dumper::Dumper($plugin->{info});

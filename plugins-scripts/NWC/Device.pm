@@ -86,7 +86,7 @@ sub new {
         $self->debug('using NWC::F5');
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'NWC::HP';
-        $self->debug('using NWC::F5');
+        $self->debug('using NWC::HP');
       } elsif ($self->{productname} =~ /Check\s*Point/i) {
         bless $self, 'NWC::CheckPoint';
         $self->debug('using NWC::CheckPoint');
@@ -397,6 +397,26 @@ sub debug {
       $logfh->close();
     }
   }
+}
+
+sub filter_name {
+  my $self = shift;
+  my $name = shift;
+  if ($self->opts->name) {
+    if ($self->opts->regexp) {
+      my $pattern = $self->opts->name;
+      if ($name =~ /$pattern/i) {
+        return 1;
+      }
+    } else {
+      if (lc $self->opts->name eq lc $name) {
+        return 1;
+      }
+    }
+  } else {
+    return 1;
+  }
+  return 0;
 }
 
 sub blacklist {

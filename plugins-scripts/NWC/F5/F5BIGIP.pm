@@ -16,14 +16,10 @@ sub init {
       memory_subsystem => undef,
       disk_subsystem => undef,
       environmental_subsystem => undef,
+      ltm_subsystem => undef,
   };
-  $self->{serial} = 'unknown';
-  $self->{product} = 'unknown';
-  $self->{romversion} = 'unknown';
-  # serial is 1.3.6.1.2.1.47.1.1.1.1.11.1
-  #$self->collect();
+  $self->{productversion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
   if (! $self->check_messages()) {
-    ##$self->set_serial();
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
       #$self->auto_blacklist();
@@ -39,6 +35,9 @@ sub init {
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_interface_subsystem();
       $self->check_interface_subsystem();
+    } elsif ($self->mode =~ /device::lb/) {
+      $self->analyze_ltm_subsystem();
+      $self->check_ltm_subsystem();
     } elsif ($self->mode =~ /device::shinken::interface/) {
       $self->analyze_interface_subsystem();
       $self->shinken_interface_subsystem();
@@ -70,6 +69,12 @@ sub analyze_mem_subsystem {
       NWC::F5::F5BIGIP::Component::MemSubsystem->new();
 }
 
+sub analyze_ltm_subsystem {
+  my $self = shift;
+  $self->{components}->{ltm_subsystem} =
+      NWC::F5::F5BIGIP::Component::LTMSubsystem->new();
+}
+
 sub check_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem}->check();
@@ -95,6 +100,13 @@ sub check_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem}->check();
   $self->{components}->{mem_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_ltm_subsystem {
+  my $self = shift;
+  $self->{components}->{ltm_subsystem}->check();
+  $self->{components}->{ltm_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }
 
