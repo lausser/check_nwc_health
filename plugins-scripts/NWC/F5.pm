@@ -17,10 +17,11 @@ use constant trees => (
 
 sub init {
   my $self = shift;
+  my %params = @_;
   if ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
     bless $self, 'NWC::F5::F5BIGIP';
     $self->debug('using NWC::F5::F5BIGIP');
   }
-  $self->init();
+  $self->init(%params);
 }
 

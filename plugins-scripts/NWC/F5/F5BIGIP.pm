@@ -8,6 +8,7 @@ our @ISA = qw(NWC::F5);
 
 sub init {
   my $self = shift;
+  my %params = @_;
   $self->{components} = {
       powersupply_subsystem => undef,
       fan_subsystem => undef,
@@ -19,6 +20,12 @@ sub init {
       ltm_subsystem => undef,
   };
   $self->{productversion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
+  if (! defined $self->{productversion} &&
+      $self->{productversion} !~ /^11/ &&
+      $self->{productversion} !~ /^9/) {
+    $self->{productversion} = "4";
+  }
+  $params{productversion} = $self->{productversion};
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
@@ -36,7 +43,7 @@ sub init {
       $self->analyze_interface_subsystem();
       $self->check_interface_subsystem();
     } elsif ($self->mode =~ /device::lb/) {
-      $self->analyze_ltm_subsystem();
+      $self->analyze_ltm_subsystem(%params);
       $self->check_ltm_subsystem();
     } elsif ($self->mode =~ /device::shinken::interface/) {
       $self->analyze_interface_subsystem();
@@ -71,8 +78,9 @@ sub analyze_mem_subsystem {
 
 sub analyze_ltm_subsystem {
   my $self = shift;
+  my %params = @_;
   $self->{components}->{ltm_subsystem} =
-      NWC::F5::F5BIGIP::Component::LTMSubsystem->new();
+      NWC::F5::F5BIGIP::Component::LTMSubsystem->new(%params);
 }
 
 sub check_environmental_subsystem {
