@@ -18,6 +18,7 @@ sub init {
       environmental_subsystem => undef,
       ltm_subsystem => undef,
   };
+  # gets 11.* and 9.*
   $self->{productversion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
