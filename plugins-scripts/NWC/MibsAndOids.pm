@@ -831,6 +831,16 @@ $NWC::Device::mibs_and_oids = {
     ltmPoolMbrStatusParentType => '1.3.6.1.4.1.3375.2.2.5.6.2.1.7',
     ltmPoolMbrStatusDetailReason => '1.3.6.1.4.1.3375.2.2.5.6.2.1.8',
     ltmPoolMbrStatusNodeName => '1.3.6.1.4.1.3375.2.2.5.6.2.1.9',
+
+    ltmNodeAddrStatusTable => '1.3.6.1.4.1.3375.2.2.4.3.2',
+    ltmNodeAddrStatusEntry => '1.3.6.1.4.1.3375.2.2.4.3.2.1',
+    ltmNodeAddrStatusAddrType => '1.3.6.1.4.1.3375.2.2.4.3.2.1.1',
+    ltmNodeAddrStatusAddr => '1.3.6.1.4.1.3375.2.2.4.3.2.1.2',
+    ltmNodeAddrStatusAvailState => '1.3.6.1.4.1.3375.2.2.4.3.2.1.3',
+    ltmNodeAddrStatusEnabledState => '1.3.6.1.4.1.3375.2.2.4.3.2.1.4',
+    ltmNodeAddrStatusParentType => '1.3.6.1.4.1.3375.2.2.4.3.2.1.5',
+    ltmNodeAddrStatusDetailReason => '1.3.6.1.4.1.3375.2.2.4.3.2.1.6',
+    ltmNodeAddrStatusName => '1.3.6.1.4.1.3375.2.2.4.3.2.1.7',
   },
   'LOAD-BAL-SYSTEM-MIB' => {
     poolTable => '1.3.6.1.4.1.3375.1.1.7.2',

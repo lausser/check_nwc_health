@@ -209,6 +209,11 @@ sub check {
             $self->{ltmPoolMinActiveMembers})
     );
   }
+  if ($self->check_messages()) {
+  foreach my $member (@{$self->{members}}) {
+    $member->check();
+  }
+  }
   $self->add_perfdata(
       label => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
       value => $self->{completeness},
