@@ -4,6 +4,7 @@
 
 2013-01-07 1.7
 - add f5 bigip pool completeness
+- add member info for failed f5 pools
 
 2012-12-10 1.6
 - add checkpoint firewall-1
