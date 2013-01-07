@@ -17,8 +17,7 @@ sub new {
   #bless $self, $class;
   # tables can be huge
   if ($NWC::Device::session) {
-    my $max_msg_size = $NWC::Device::session->max_msg_size();
-    $NWC::Device::session->max_msg_size() = 10 * $max_msg_size;
+    $NWC::Device::session->max_msg_size(10 * $NWC::Device::session->max_msg_size());
   }
   if ($params{productversion} =~ /^4/) {
     bless $self, "NWC::F5::F5BIGIP::Component::LTMSubsystem4";
@@ -109,6 +108,11 @@ sub init {
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable')) {
     push(@auxmembers, $_);
   }
+  my @auxaddrs = ();
+  foreach ($self->get_snmp_table_objects(
+      'F5-BIGIP-LOCAL-MIB', 'ltmNodeAddrStatusTable')) {
+    push(@auxaddrs, $_);
+  }
   foreach ($self->get_snmp_table_objects(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable')) {
     if ($self->filter_name($_->{ltmPoolMemberPoolName})) {
@@ -119,6 +123,12 @@ sub init {
           foreach my $key (keys %{$auxmember}) {
             $_->{$key} = $auxmember->{$key};
           }
+        }
+      }
+      foreach my $auxaddr (@auxaddrs) {
+        if ($_->{ltmPoolMemberAddrType} eq $auxaddr->{ltmNodeAddrStatusAddrType} &&
+            $_->{ltmPoolMemberAddr} eq $auxaddr->{ltmNodeAddrStatusAddr}) {
+          $_->{ltmNodeAddrStatusName} = $auxaddr->{ltmNodeAddrStatusName};
         }
       }
       push(@{$self->{poolmembers}},
@@ -133,6 +143,7 @@ sub assign_members_to_pools {
   foreach my $pool (@{$self->{pools}}) {
     foreach my $poolmember (@{$self->{poolmembers}}) {
       if ($poolmember->{ltmPoolMemberPoolName} eq $pool->{ltmPoolName}) {
+        $poolmember->{ltmPoolMonitorRule} = $pool->{ltmPoolMonitorRule};
         push(@{$pool->{members}}, $poolmember);
       }
     }
@@ -165,6 +176,7 @@ sub new {
   foreach(keys %params) {
     $self->{$_} = $params{$_};
   }
+  $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
   $self->{name} = $self->{ltmPoolName};
   bless $self, $class;
   return $self;
@@ -174,19 +186,20 @@ sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('po', $self->{ltmPoolName});
-  my $info = sprintf 'pool %s active members: %d of %d', $self->{ltmPoolName},
-      $self->{ltmPoolActiveMemberCnt},
-      $self->{ltmPoolMemberCnt};
-  $self->add_info($info);
-  $self->add_info(sprintf "pool %s is %s, avail state is %s", 
-      $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState});
+  $self->add_info(sprintf "pool %s is %s, avail state is %s, active members: %d of %d", 
+      $self->{ltmPoolName},
+      $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState},
+      $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt});
   if ($self->{ltmPoolActiveMemberCnt} == 1) {
     # only one member left = no more redundancy!!
     $self->set_thresholds(warning => "100:", critical => "51:");
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  $self->add_message($self->check_thresholds($self->{completeness}), $info);
+  $self->add_message($self->check_thresholds($self->{completeness}),
+      sprintf ("pool %s has %d active members (of %d)",
+          $self->{ltmPoolName},
+          $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt}));
   if ($self->{ltmPoolMinActiveMembers} > 0 &&
       $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
     $self->add_message(
@@ -238,14 +251,38 @@ sub new {
   foreach(keys %params) {
     $self->{$_} = $params{$_};
   }
+  if ($self->{ltmPoolMemberAddr} =~ /^0x([0-9a-zA-Z]{8})/) {
+    $self->{ltmPoolMemberAddr} = join(".", unpack "C*", pack "H*", $1);
+  }
+  $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
+  if ($self->{ltmPoolMemberNodeName} eq $self->{ltmPoolMemberAddr} &&
+      $self->{ltmNodeAddrStatusName}) {
+    $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
+  }
   bless $self, $class;
   return $self;
+}
+
+sub check {
+  my $self = shift;
+  if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
+    if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
+      $self->add_message(CRITICAL, sprintf
+          "member %s is %s/%s (%s)",
+          $self->{ltmPoolMemberNodeName},
+          $self->{ltmPoolMemberMonitorState},
+          $self->{ltmPoolMbrStatusAvailState},
+          $self->{ltmPoolMbrStatusDetailReason});
+    }
+  }
 }
 
 sub dump { 
   my $self = shift;
   printf "[POOL_%s_MEMBER]\n", $self->{ltmPoolMemberPoolName};
-  foreach(qw(ltmPoolMemberPoolName ltmPoolMbrStatusAddr ltmPoolMbrStatusPort
+  foreach(qw(ltmPoolMemberPoolName ltmPoolMemberNodeName
+      ltmPoolMemberAddr ltmPoolMemberPort
+      ltmPoolMemberMonitorRule
       ltmPoolMemberMonitorState ltmPoolMemberMonitorStatus
       ltmPoolMbrStatusAvailState  ltmPoolMbrStatusEnabledState ltmPoolMbrStatusDetailReason)) {
     printf "%s: %s\n", $_, $self->{$_};
