@@ -15,17 +15,53 @@ sub new {
     extendedinfo => undef,
   };
   #bless $self, $class;
+  # tables can be huge
+  if ($NWC::Device::session) {
+    my $max_msg_size = $NWC::Device::session->max_msg_size();
+    $NWC::Device::session->max_msg_size() = 10 * $max_msg_size;
+  }
   if ($params{productversion} =~ /^4/) {
     bless $self, "NWC::F5::F5BIGIP::Component::LTMSubsystem4";
+    $self->debug("use NWC::F5::F5BIGIP::Component::LTMSubsystem4");
+  #} elsif ($params{productversion} =~ /^9/) {
   } else {
     bless $self, "NWC::F5::F5BIGIP::Component::LTMSubsystem9";
+    $self->debug("use NWC::F5::F5BIGIP::Component::LTMSubsystem9");
   }
   $self->init(%params);
   return $self;
 }
 
+sub check {
+  my $self = shift;
+  my $errorfound = 0;
+  $self->add_info('checking ltm pools');
+  $self->blacklist('poo', '');
+  if (scalar(@{$self->{pools}}) == 0) {
+    $self->add_message(UNKNOWN, 'no pools');
+    return;
+  }
+  if ($self->mode =~ /pool::list/) {
+    foreach (sort {$a->{name} cmp $b->{name}} @{$self->{pools}}) {
+      printf "%s\n", $_->{name};
+      #$_->list();
+    }
+  } else {
+    foreach (@{$self->{pools}}) {
+      $_->check();
+    }
+  }
+}
+
+sub dump {
+  my $self = shift;
+  foreach (@{$self->{pools}}) {
+    $_->dump();
+  }
+}
+
 package NWC::F5::F5BIGIP::Component::LTMSubsystem9;
-our @ISA = qw(NWC::F5::F5BIGIP);
+our @ISA = qw(NWC::F5::F5BIGIP::Component::LTMSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -48,41 +84,48 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
+  # ! merge ltmPoolStatus, ltmPoolMemberStatus, bec. ltmPoolAvailabilityState is deprecated
+  my @auxpools = ();
+  foreach ($self->get_snmp_table_objects(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable')) {
+    push(@auxpools, $_);
+  }
   foreach ($self->get_snmp_table_objects(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable')) {
     if ($self->filter_name($_->{ltmPoolName})) {
+      foreach my $auxpool (@auxpools) {
+        if ($_->{ltmPoolName} eq $auxpool->{ltmPoolStatusName}) {
+          foreach my $key (keys %{$auxpool}) {
+            $_->{$key} = $auxpool->{$key};
+          }
+        }
+      }
       push(@{$self->{pools}},
           NWC::F5::F5BIGIP::Component::LTMSubsystem9::LTMPool->new(%{$_}));
     }
   }
+  my @auxmembers = ();
+  foreach ($self->get_snmp_table_objects(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable')) {
+    push(@auxmembers, $_);
+  }
   foreach ($self->get_snmp_table_objects(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable')) {
     if ($self->filter_name($_->{ltmPoolMemberPoolName})) {
+      foreach my $auxmember (@auxmembers) {
+        if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMbrStatusPoolName} &&
+            $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMbrStatusAddrType} &&
+            $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMbrStatusAddr}) {
+          foreach my $key (keys %{$auxmember}) {
+            $_->{$key} = $auxmember->{$key};
+          }
+        }
+      }
       push(@{$self->{poolmembers}},
           NWC::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember->new(%{$_}));
     }
   }
   $self->assign_members_to_pools();
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking ltm pools');
-  $self->blacklist('poo', '');
-  if (scalar (@{$self->{pools}}) == 0) {
-  } else {
-    foreach (@{$self->{pools}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{pools}}) {
-    $_->dump();
-  }
 }
 
 sub assign_members_to_pools {
@@ -119,11 +162,10 @@ sub new {
     extendedinfo => undef,
     members => [],
   };
-  foreach(qw(ltmPoolName ltmPoolLbMode ltmPoolMinActiveMembers 
-      ltmPoolActiveMemberCnt ltmPoolMemberCnt 
-      ltmPoolAvailabilityState ltmPoolEnabledState ltmPoolStatusReason)) {
+  foreach(keys %params) {
     $self->{$_} = $params{$_};
   }
+  $self->{name} = $self->{ltmPoolName};
   bless $self, $class;
   return $self;
 }
@@ -136,6 +178,8 @@ sub check {
       $self->{ltmPoolActiveMemberCnt},
       $self->{ltmPoolMemberCnt};
   $self->add_info($info);
+  $self->add_info(sprintf "pool %s is %s, avail state is %s", 
+      $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState});
   if ($self->{ltmPoolActiveMemberCnt} == 1) {
     # only one member left = no more redundancy!!
     $self->set_thresholds(warning => "100:", critical => "51:");
@@ -145,7 +189,7 @@ sub check {
   $self->add_message($self->check_thresholds($self->{completeness}), $info);
   if ($self->{ltmPoolMinActiveMembers} > 0 &&
       $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
-    $self->add_nagios(
+    $self->add_message(
         defined $params{mitigation} ? $params{mitigation} : 2,
         sprintf("pool %s has not enough active members (%d, min is %d)", 
             $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt}, 
@@ -166,7 +210,7 @@ sub dump {
   printf "[POOL_%s]\n", $self->{ltmPoolName};
   foreach(qw(ltmPoolName ltmPoolLbMode ltmPoolMinActiveMembers
       ltmPoolActiveMemberCnt ltmPoolMemberCnt
-      ltmPoolAvailabilityState ltmPoolEnabledState ltmPoolStatusReason)) {
+      ltmPoolStatusAvailState ltmPoolStatusEnabledState ltmPoolStatusDetailReason)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
   foreach my $member (@{$self->{members}}) {
@@ -191,8 +235,7 @@ sub new {
     info => undef,
     extendedinfo => undef,
   };
-  foreach(qw(ltmPoolMemberPoolName ltmPoolMemberMonitorState ltmPoolMemberAvailabilityState
-      ltmPoolMemberEnabledState ltmPoolMemberStatusReason)) {
+  foreach(keys %params) {
     $self->{$_} = $params{$_};
   }
   bless $self, $class;
@@ -202,15 +245,16 @@ sub new {
 sub dump { 
   my $self = shift;
   printf "[POOL_%s_MEMBER]\n", $self->{ltmPoolMemberPoolName};
-  foreach(qw(ltmPoolMemberPoolName ltmPoolMemberMonitorState ltmPoolMemberAvailabilityState
-      ltmPoolMemberEnabledState ltmPoolMemberStatusReason)) {
+  foreach(qw(ltmPoolMemberPoolName ltmPoolMbrStatusAddr ltmPoolMbrStatusPort
+      ltmPoolMemberMonitorState ltmPoolMemberMonitorStatus
+      ltmPoolMbrStatusAvailState  ltmPoolMbrStatusEnabledState ltmPoolMbrStatusDetailReason)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
 }
 
 
 package NWC::F5::F5BIGIP::Component::LTMSubsystem4;
-our @ISA = qw(NWC::F5::F5BIGIP);
+our @ISA = qw(NWC::F5::F5BIGIP::Component::LTMSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -248,26 +292,6 @@ sub init {
     }
   }
   $self->assign_members_to_pools();
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking ltm pools');
-  $self->blacklist('poo', '');
-  if (scalar (@{$self->{pools}}) == 0) {
-  } else {
-    foreach (@{$self->{pools}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{pools}}) {
-    $_->dump();
-  }
 }
 
 sub assign_members_to_pools {
@@ -308,6 +332,7 @@ sub new {
       poolActiveMemberCount poolMemberQty)) {
     $self->{$_} = $params{$_};
   }
+  $self->{name} = $self->{poolName};
   bless $self, $class;
   return $self;
 }
@@ -388,4 +413,6 @@ sub dump {
     printf "%s: %s\n", $_, $self->{$_};
   }
 }
+
+
 

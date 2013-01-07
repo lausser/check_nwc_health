@@ -22,6 +22,7 @@ sub init {
   $self->{productversion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
   if (! defined $self->{productversion} &&
       $self->{productversion} !~ /^11/ &&
+      $self->{productversion} !~ /^10/ &&
       $self->{productversion} !~ /^9/) {
     $self->{productversion} = "4";
   }
