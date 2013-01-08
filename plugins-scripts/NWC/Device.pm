@@ -128,6 +128,9 @@ sub new {
         } elsif ($self->{uptime} =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
           # Timeticks: 3 hours, 42:17.98
           $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
+        } elsif ($self->{uptime} =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
+          # Timeticks: 36 minutes, 01.96
+          $self->{uptime} = $1 * 60 + $2;
         }
         $self->{uptime} /= 60;
         my $info = sprintf 'device is up since %d minutes', $self->{uptime};
@@ -194,6 +197,11 @@ sub check_snmp_and_model {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = STRING:\s*$/) {
           $response->{$1} = "";
+        } elsif (/^([\d\.]+) = Network Address: (.*)/) {
+          $response->{$1} = $2;
+        } elsif (/^([\d\.]+) = Hex-STRING: (.*)/) {
+          $response->{$1} = "0x".$2;
+          $response->{$1} =~ s/\s+$//;
         } elsif (/^([\d\.]+) = \w+: (\-*\d+)/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {
