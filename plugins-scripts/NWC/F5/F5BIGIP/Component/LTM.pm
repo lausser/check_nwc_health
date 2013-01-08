@@ -256,6 +256,7 @@ sub new {
   foreach(keys %params) {
     $self->{$_} = $params{$_};
   }
+  $self->{ltmPoolMemberAddr} =~ s/ //g;
   if ($self->{ltmPoolMemberAddr} =~ /^0x([0-9a-zA-Z]{8})/) {
     $self->{ltmPoolMemberAddr} = join(".", unpack "C*", pack "H*", $1);
   }
