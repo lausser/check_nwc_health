@@ -242,7 +242,7 @@ sub check_snmp_and_model {
       #$params{'-translate'} = [
       #  -all => 0x0
       #];
-      $params{'-timeout'} = $self->opts->timeout;
+      #lausser#$params{'-timeout'} = $self->opts->timeout;
       $params{'-hostname'} = $self->opts->hostname;
       $params{'-version'} = $self->opts->protocol;
       if ($self->opts->port) {
@@ -675,8 +675,9 @@ sub get_snmp_table_objects_with_cache {
   my $mib = shift;
   my $table = shift;
   my $key_attr = shift;
+  #return $self->get_snmp_table_objects($mib, $table);
   $self->update_entry_cache(0, $mib, $table, $key_attr);
-  my @indices = $self->get_cache_indices();
+  my @indices = $self->get_cache_indices($mib, $table, $key_attr);
   my @entries = ();
   foreach ($self->get_snmp_table_objects($mib, $table, \@indices)) {
     push(@entries, $_);
@@ -1328,37 +1329,50 @@ sub update_entry_cache {
   if (ref($key_attr) ne "ARRAY") {
     $key_attr = [$key_attr];
   }
-  my $statefile = lc sprintf "%s/%s_%s_%s-%s_cache",
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname,
-      $self->opts->mode, $mib, $table;
-  #my $update = time - 3600;
-  my $update = time - 1;
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  my $update = time - 3600;
+  #my $update = time - 1;
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
     $self->debug(sprintf 'force update of %s %s %s %s cache',
         $self->opts->hostname, $self->opts->mode, $mib, $table);
-    $self->{cache} = {};
+    $self->{$cache} = {};
     foreach my $entry ($self->get_snmp_table_objects($mib, $table)) {
-      # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
-      # alle gleich heissen
       my $key = join('#', map { $entry->{$_} } @{$key_attr});
       my $hash = $key . '-//-' . join('.', @{$entry->{indices}});
-      $self->{cache}->{$hash} = $entry->{indices};
+      $self->{$cache}->{$hash} = $entry->{indices};
     }
-    #$self->save_interface_cache();
+printf "set_cache %d\n", scalar(keys %{$self->{$cache}});
+    $self->save_cache($mib, $table, $key_attr);
   }
-  #$self->load_interface_cache();
+  $self->load_cache($mib, $table, $key_attr);
 }
 
+#  $self->update_entry_cache(0, $mib, $table, $key_attr);
+#  my @indices = $self->get_cache_indices();
 sub get_cache_indices {
   my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
   my @indices = ();
-  foreach my $key (keys %{$self->{cache}}) {
+printf "get_cache_indices %s\n", $cache;
+printf "get_cache %d\n", scalar(keys %{$self->{$cache}});
+  foreach my $key (keys %{$self->{$cache}}) {
     my ($descr, $index) = split('-//-', $key, 2);
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
         if ($descr =~ /$pattern/i) {
-          push(@indices, $self->{cache}->{$key});
+          push(@indices, $self->{$cache}->{$key});
         }
       } else {
         if ($self->opts->name =~ /^\d+$/) {
@@ -1367,18 +1381,82 @@ sub get_cache_indices {
           }
         } else {
           if (lc $descr eq lc $self->opts->name) {
-            push(@indices, $self->{cache}->{$key});
+            push(@indices, $self->{$cache}->{$key});
           }
         }
       }
     } else {
-      push(@indices, $self->{cache}->{$key});
+      push(@indices, $self->{$cache}->{$key});
     }
   }
   return @indices;
   return map { join('.', ref($_) eq "ARRAY" ? @{$_} : $_) } @indices;
 }
 
+sub save_cache {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  $self->create_statefilesdir();
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+printf "save_cache %s\n", $cache;
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname,
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  open(STATE, ">$statefile");
+  printf STATE Data::Dumper::Dumper($self->{$cache});
+  close STATE;
+  printf "save_cache %d\n", scalar(keys %{$self->{$cache}});
+printf "save_cache %s\n", $statefile;
+system("ls -l ".$statefile);
+  $self->debug(sprintf "saved %s to %s",
+      Data::Dumper::Dumper($self->{$cache}), $statefile);
+}
+
+sub load_cache {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+printf "load_cache %s\n", $cache;
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname,
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+printf "load_cache %s\n", $statefile;
+system("ls -l ".$statefile);
+  $self->{$cache} = {};
+  if ( -f $statefile) {
+    our $VAR1;
+    eval {
+      require $statefile;
+    printf "preload_cache %d\n", scalar(keys %{$VAR1});
+    };
+    if($@) {
+      printf "rumms\n";
+    }
+    $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
+    $self->{$cache} = $VAR1;
+    printf "load_cache %d\n", scalar(keys %{$self->{$cache}});
+    my @keys = sort keys %{$self->{$cache}};
+    printf "load_cache %s\n", ${sort keys %{$self->{$cache}}}[0];
+my $cnt = 1;
+foreach my $pool (sort keys %{$self->{$cache}}) {
+# printf "->%03d %s\n", $cnt++, $pool;
+}
+  } else {
+printf "miss_cache %s\n", $cache;
+  }
+}
 
 
 
