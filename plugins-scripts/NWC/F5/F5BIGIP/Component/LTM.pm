@@ -85,12 +85,12 @@ sub init {
   my %params = @_;
   # ! merge ltmPoolStatus, ltmPoolMemberStatus, bec. ltmPoolAvailabilityState is deprecated
   my @auxpools = ();
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName')) {
     push(@auxpools, $_);
   }
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName')) {
     if ($self->filter_name($_->{ltmPoolName})) {
       foreach my $auxpool (@auxpools) {
         if ($_->{ltmPoolName} eq $auxpool->{ltmPoolStatusName}) {
