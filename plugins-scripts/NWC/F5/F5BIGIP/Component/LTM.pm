@@ -84,13 +84,19 @@ sub init {
   my $self = shift;
   my %params = @_;
   # ! merge ltmPoolStatus, ltmPoolMemberStatus, bec. ltmPoolAvailabilityState is deprecated
+  if ($self->mode =~ /pool::list/) {
+    $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName');
+    $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName');
+    $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName');
+    $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName');
+  }
   my @auxpools = ();
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName')) {
     push(@auxpools, $_);
   }
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName')) {
     if ($self->filter_name($_->{ltmPoolName})) {
       foreach my $auxpool (@auxpools) {
         if ($_->{ltmPoolName} eq $auxpool->{ltmPoolStatusName}) {
@@ -104,8 +110,8 @@ sub init {
     }
   }
   my @auxmembers = ();
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName')) {
     push(@auxmembers, $_);
   }
   my @auxaddrs = ();
@@ -113,8 +119,8 @@ sub init {
       'F5-BIGIP-LOCAL-MIB', 'ltmNodeAddrStatusTable')) {
     push(@auxaddrs, $_);
   }
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable')) {
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
     if ($self->filter_name($_->{ltmPoolMemberPoolName})) {
       foreach my $auxmember (@auxmembers) {
         if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMbrStatusPoolName} &&

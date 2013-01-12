@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-01-12 1.7.1
+- add a name caching mechanism for f5 bigip pools
+
 2013-01-08 1.7
 - add f5 bigip pool completeness
 - add member info for failed f5 pools

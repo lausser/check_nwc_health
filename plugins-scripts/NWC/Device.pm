@@ -242,7 +242,7 @@ sub check_snmp_and_model {
       #$params{'-translate'} = [
       #  -all => 0x0
       #];
-      $params{'-timeout'} = $self->opts->timeout;
+      #lausser#$params{'-timeout'} = $self->opts->timeout;
       $params{'-hostname'} = $self->opts->hostname;
       $params{'-version'} = $self->opts->protocol;
       if ($self->opts->port) {
@@ -670,6 +670,21 @@ sub get_request {
 # returns array of hashrefs
 # evt noch ein weiterer parameter fuer ausgewaehlte oids
 #
+sub get_snmp_table_objects_with_cache {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  #return $self->get_snmp_table_objects($mib, $table);
+  $self->update_entry_cache(0, $mib, $table, $key_attr);
+  my @indices = $self->get_cache_indices($mib, $table, $key_attr);
+  my @entries = ();
+  foreach ($self->get_snmp_table_objects($mib, $table, \@indices)) {
+    push(@entries, $_);
+  }
+  return @entries;
+}
+
 sub get_snmp_table_objects {
   my $self = shift;
   my $mib = shift;
@@ -687,28 +702,31 @@ sub get_snmp_table_objects {
   if (scalar(@{$indices}) == 1) {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
-      my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.';
-      my $toidlen = length($toid);
+      my $eoid = $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.';
+      my $eoidlen = length($eoid);
       my @columns = map {
           $NWC::Device::mibs_and_oids->{$mib}->{$_}
       } grep {
-        substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
-            $NWC::Device::mibs_and_oids->{$mib}->{$table}.'.'
+        substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
+            $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.'
       } keys %{$NWC::Device::mibs_and_oids->{$mib}};
+      my $index = join('.', @{$indices->[0]});
       if ($augmenting_table && 
           exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
-        my $toid = $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.';
-        my $toidlen = length($toid);
+        my $augmenting_entry = $augmenting_table;
+        $augmenting_entry =~ s/Table/Entry/g;
+        my $eoid = $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_entry}.'.';
+        my $eoidlen = length($eoid);
         push(@columns, map {
             $NWC::Device::mibs_and_oids->{$mib}->{$_}
         } grep {
-          substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $toidlen) eq
+          substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
               $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}.'.'
         } keys %{$NWC::Device::mibs_and_oids->{$mib}});
       }
-      my $result = $self->get_entries(
-          -startindex => $indices->[0]->[0],
-          -endindex => $indices->[0]->[0],
+      my  $result = $self->get_entries(
+          -startindex => $index,
+          -endindex => $index,
           -columns => \@columns,
       );
       @entries = $self->make_symbolic($mib, $result, $indices);
@@ -719,8 +737,31 @@ sub get_snmp_table_objects {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
         exists $NWC::Device::mibs_and_oids->{$mib}->{$table}) {
       my $result = {};
-      $result = $self->get_table(
-          -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+      my $eoid = $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.';
+      my $eoidlen = length($eoid);
+      my @columns = map {
+          $NWC::Device::mibs_and_oids->{$mib}->{$_}
+      } grep {
+        substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
+            $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.'
+      } keys %{$NWC::Device::mibs_and_oids->{$mib}};
+      my @sortedindices = map { $_->[0] }
+          sort { $a->[1] cmp $b->[1] }
+              map { [$_,
+                  join '', map { sprintf("%30d",$_) } split( /\./, $_)
+              ] } map { join('.', @{$_})} @{$indices};
+      my $startindex = $sortedindices[0];
+      my $endindex = $sortedindices[$#sortedindices];
+      if (1) {
+        $result = $self->get_entries(
+            -startindex => $startindex,
+            -endindex => $endindex,
+            -columns => \@columns,
+        );
+      } else {
+        $result = $self->get_table(
+            -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+      }
       if ($augmenting_table && 
           exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
         my $augmented_result = $self->get_table(
@@ -862,7 +903,7 @@ sub get_entries {
     $newparams{'-startindex'} = $params{'-startindex'}
         if defined $params{'-startindex'};
     $newparams{'-endindex'} = $params{'-endindex'}     
-        if defined $params{'-startindex'};
+        if defined $params{'-endindex'};
     $newparams{'-columns'} = $params{'-columns'};
     $result = $NWC::Device::session->get_entries(%newparams);
     foreach my $key (keys %{$result}) {
@@ -874,18 +915,23 @@ sub get_entries {
     foreach (keys %{$preresult}) {
       $result->{$_} = $preresult->{$_};
     }
+    my @sortedkeys = map { $_->[0] }
+        sort { $a->[1] cmp $b->[1] }
+            map { [$_,
+                    join '', map { sprintf("%30d",$_) } split( /\./, $_)
+                  ] } keys %{$result};
     my @to_del = ();
     if ($params{'-startindex'}) {
-      foreach my $resoid (keys %{$result}) {
+      foreach my $resoid (@sortedkeys) {
         foreach my $oid (@{$params{'-columns'}}) {
           my $poid = $oid.'.';
           my $lpoid = length($poid);
           if (substr($resoid, 0, $lpoid) eq $poid) {
             my $oidpattern = $poid;
             $oidpattern =~ s/\./\\./g;
-            if ($resoid =~ /^$oidpattern.(.+)$/) {
-              if ($1 < $params{'-startindex'}) {
-                push(@to_del, $oid);
+            if ($resoid =~ /^$oidpattern(.+)$/) {
+              if ($1 lt $params{'-startindex'}) {
+                push(@to_del, $oid.'.'.$1);
               }
             }
           }
@@ -893,22 +939,22 @@ sub get_entries {
       }
     }
     if ($params{'-endindex'}) {
-      foreach my $resoid (keys %{$result}) {
+      foreach my $resoid (@sortedkeys) {
         foreach my $oid (@{$params{'-columns'}}) {
           my $poid = $oid.'.';
           my $lpoid = length($poid);
           if (substr($resoid, 0, $lpoid) eq $poid) {
             my $oidpattern = $poid;
             $oidpattern =~ s/\./\\./g;
-            if ($resoid =~ /^$oidpattern.(.+)$/) {
-              if ($1 > $params{'-endindex'}) {
-                push(@to_del, $oid);
+            if ($resoid =~ /^$oidpattern(.+)$/) {
+              if ($1 gt $params{'-endindex'}) {
+                push(@to_del, $oid.'.'.$1);
               }
             }
           }
         }
       } 
-    }   
+    }
     foreach (@to_del) {
       delete $result->{$_};
     }
@@ -1273,5 +1319,158 @@ sub mib {
       $self->SNMP::Utils::get_object($MibRevMinor),
       $self->SNMP::Utils::get_object_value($MibRevCondition, $condition));
 };
+
+sub update_entry_cache {
+  my $self = shift;
+  my $force = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname,
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  my $update = time - 3600;
+  #my $update = time - 1;
+  if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
+    $self->debug(sprintf 'force update of %s %s %s %s cache',
+        $self->opts->hostname, $self->opts->mode, $mib, $table);
+    $self->{$cache} = {};
+    foreach my $entry ($self->get_snmp_table_objects($mib, $table)) {
+      my $key = join('#', map { $entry->{$_} } @{$key_attr});
+      my $hash = $key . '-//-' . join('.', @{$entry->{indices}});
+      $self->{$cache}->{$hash} = $entry->{indices};
+    }
+    $self->save_cache($mib, $table, $key_attr);
+  }
+  $self->load_cache($mib, $table, $key_attr);
+}
+
+#  $self->update_entry_cache(0, $mib, $table, $key_attr);
+#  my @indices = $self->get_cache_indices();
+sub get_cache_indices {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+  my @indices = ();
+  foreach my $key (keys %{$self->{$cache}}) {
+    my ($descr, $index) = split('-//-', $key, 2);
+    if ($self->opts->name) {
+      if ($self->opts->regexp) {
+        my $pattern = $self->opts->name;
+        if ($descr =~ /$pattern/i) {
+          push(@indices, $self->{$cache}->{$key});
+        }
+      } else {
+        if ($self->opts->name =~ /^\d+$/) {
+          if ($index == 1 * $self->opts->name) {
+            push(@indices, [1 * $self->opts->name]);
+          }
+        } else {
+          if (lc $descr eq lc $self->opts->name) {
+            push(@indices, $self->{$cache}->{$key});
+          }
+        }
+      }
+    } else {
+      push(@indices, $self->{$cache}->{$key});
+    }
+  }
+  return @indices;
+  return map { join('.', ref($_) eq "ARRAY" ? @{$_} : $_) } @indices;
+}
+
+sub save_cache {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  $self->create_statefilesdir();
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname,
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  open(STATE, ">$statefile");
+  printf STATE Data::Dumper::Dumper($self->{$cache});
+  close STATE;
+  $self->debug(sprintf "saved %s to %s",
+      Data::Dumper::Dumper($self->{$cache}), $statefile);
+}
+
+sub load_cache {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache", 
+      $mib, $table, join('#', @{$key_attr});
+  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
+      $NWC::Device::statefilesdir, $self->opts->hostname,
+      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  $self->{$cache} = {};
+  if ( -f $statefile) {
+    our $VAR1;
+    our $VAR2;
+    eval {
+      require $statefile;
+    };
+    if($@) {
+      printf "rumms\n";
+    }
+    # keinesfalls mehr require verwenden!!!!!!
+    # beim require enthaelt VAR1 andere werte als beim slurp
+    # und zwar diejenigen, die beim letzten save_cache geschrieben wurden.
+    my $content = do { local (@ARGV, $/) = $statefile; my $x = <>; close ARGV; $x };
+    $VAR1 = eval "$content";
+    $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
+    $self->{$cache} = $VAR1;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;
