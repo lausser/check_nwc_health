@@ -90,15 +90,11 @@ sub init {
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName');
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName');
   }
-printf "get_snmp_table_objects_with_cache ltmPoolStatusTable\n";
   my @auxpools = ();
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName')) {
     push(@auxpools, $_);
-printf "%s\n", Data::Dumper::Dumper($_);
   }
-printf "get_snmp_table_objects_with_cache ltmPoolStatusTable %d\n", scalar(@auxpools);
-die;
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName')) {
     if ($self->filter_name($_->{ltmPoolName})) {

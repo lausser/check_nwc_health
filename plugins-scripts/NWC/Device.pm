@@ -1345,7 +1345,6 @@ sub update_entry_cache {
       my $hash = $key . '-//-' . join('.', @{$entry->{indices}});
       $self->{$cache}->{$hash} = $entry->{indices};
     }
-printf "set_cache %d\n", scalar(keys %{$self->{$cache}});
     $self->save_cache($mib, $table, $key_attr);
   }
   $self->load_cache($mib, $table, $key_attr);
@@ -1364,8 +1363,6 @@ sub get_cache_indices {
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
   my @indices = ();
-printf "get_cache_indices %s\n", $cache;
-printf "get_cache %d\n", scalar(keys %{$self->{$cache}});
   foreach my $key (keys %{$self->{$cache}}) {
     my ($descr, $index) = split('-//-', $key, 2);
     if ($self->opts->name) {
@@ -1404,16 +1401,12 @@ sub save_cache {
   $self->create_statefilesdir();
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
-printf "save_cache %s\n", $cache;
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
   open(STATE, ">$statefile");
   printf STATE Data::Dumper::Dumper($self->{$cache});
   close STATE;
-  printf "save_cache %d\n", scalar(keys %{$self->{$cache}});
-printf "save_cache %s\n", $statefile;
-system("ls -l ".$statefile);
   $self->debug(sprintf "saved %s to %s",
       Data::Dumper::Dumper($self->{$cache}), $statefile);
 }
@@ -1428,33 +1421,26 @@ sub load_cache {
   }
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
-printf "load_cache %s\n", $cache;
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
-printf "load_cache %s\n", $statefile;
-system("ls -l ".$statefile);
   $self->{$cache} = {};
   if ( -f $statefile) {
     our $VAR1;
+    our $VAR2;
     eval {
       require $statefile;
-    printf "preload_cache %d\n", scalar(keys %{$VAR1});
     };
     if($@) {
       printf "rumms\n";
     }
+    # keinesfalls mehr require verwenden!!!!!!
+    # beim require enthaelt VAR1 andere werte als beim slurp
+    # und zwar diejenigen, die beim letzten save_cache geschrieben wurden.
+    my $content = do { local (@ARGV, $/) = $statefile; my $x = <>; close ARGV; $x };
+    $VAR1 = eval "$content";
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{$cache} = $VAR1;
-    printf "load_cache %d\n", scalar(keys %{$self->{$cache}});
-    my @keys = sort keys %{$self->{$cache}};
-    printf "load_cache %s\n", ${sort keys %{$self->{$cache}}}[0];
-my $cnt = 1;
-foreach my $pool (sort keys %{$self->{$cache}}) {
-# printf "->%03d %s\n", $cnt++, $pool;
-}
-  } else {
-printf "miss_cache %s\n", $cache;
   }
 }
 
