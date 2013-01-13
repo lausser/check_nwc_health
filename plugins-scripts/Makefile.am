@@ -29,7 +29,10 @@ EXTRA_MODULES=\
   NWC/CiscoNXOS.pm \
   NWC/Cisco.pm \
   NWC/Nortel.pm \
-  NWC/Netscreen.pm \
+  NWC/Juniper/NetScreen/Component/CpuSubsystem.pm \
+  NWC/Juniper/NetScreen/Component/MemSubsystem.pm \
+  NWC/Juniper/NetScreen.pm \
+  NWC/Juniper.pm \
   NWC/AlliedTelesyn.pm \
   NWC/FabOS/Component/MemSubsystem.pm \
   NWC/FabOS/Component/CpuSubsystem.pm \

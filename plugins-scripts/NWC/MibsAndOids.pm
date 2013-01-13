@@ -986,6 +986,18 @@ $NWC::Device::mibs_and_oids = {
       mgStatShortDescr => '1.3.6.1.4.1.2620.1.7.102.0',
       mgStatLongDescr => '1.3.6.1.4.1.2620.1.7.103.0',
   },
+  'NETSCREEN-RESOURCE-MIB' => {
+      nsResCpuAvg => '1.3.6.1.4.1.3224.16.1.1.0',
+      nsResCpuLast15Min => '1.3.6.1.4.1.3224.16.1.4.0',
+      nsResCpuLast1Min => '1.3.6.1.4.1.3224.16.1.2.0',
+      nsResCpuLast5Min => '1.3.6.1.4.1.3224.16.1.3.0',
+      nsResMemAllocate => '1.3.6.1.4.1.3224.16.2.1.0',
+      nsResMemFrag => '1.3.6.1.4.1.3224.16.2.3.0',
+      nsResMemLeft => '1.3.6.1.4.1.3224.16.2.2.0',
+      nsResSessAllocate => '1.3.6.1.4.1.3224.16.3.2.0',
+      nsResSessFailed => '1.3.6.1.4.1.3224.16.3.4.0',
+      nsResSessMaxium => '1.3.6.1.4.1.3224.16.3.3.0',
+  },
 };
 
 $NWC::Device::definitions = {

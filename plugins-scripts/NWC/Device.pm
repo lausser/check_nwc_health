@@ -51,9 +51,6 @@ sub new {
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
-      } elsif ($self->{productname} =~ /NetScreen/i) {
-        bless $self, 'NWC::NetScreen';
-        $self->debug('using NWC::NetScreen');
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'NWC::Nortel';
         $self->debug('using NWC::Nortel');
@@ -75,9 +72,12 @@ sub new {
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /NetScreen/i) {
+        bless $self, 'NWC::Juniper';
+        $self->debug('using NWC::Juniper');
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
-        bless $self, 'NWC::Netscreen';
-        $self->debug('using NWC::Netscreen');
+        bless $self, 'NWC::Juniper';
+        $self->debug('using NWC::Juniper');
       } elsif ($self->{productname} =~ /SecureOS/i) {
         bless $self, 'NWC::SecureOS';
         $self->debug('using NWC::SecureOS');
