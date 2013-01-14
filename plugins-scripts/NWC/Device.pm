@@ -1404,9 +1404,10 @@ sub save_cache {
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
       $NWC::Device::statefilesdir, $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
-  open(STATE, ">$statefile");
+  open(STATE, ">".$statefile.".".$PID);
   printf STATE Data::Dumper::Dumper($self->{$cache});
   close STATE;
+  rename $statefile.".".$PID, $statefile;
   $self->debug(sprintf "saved %s to %s",
       Data::Dumper::Dumper($self->{$cache}), $statefile);
 }
