@@ -15,16 +15,28 @@ sub init {
   $self->{product} = 'unknown';
   $self->{romversion} = 'unknown';
   if (eval "require SOAP::Lite") {
+    require XML::LibXML;
   } else {
     $self->add_message(CRITICAL,
         'could not find SOAP::Lite module');
   }
   if (! $self->check_messages()) {
-    $self->{productname} = 'AVM Fritz 7390';
-    if ($self->{productname} =~ /AVM/) {
-      bless $self, 'UPNP::AVM';
-      $self->debug('using UPNP::AVM');
-    } elsif ($self->mode =~ /device::uptime/) {
+    eval {
+      my $igddesc = sprintf "http://%s:%s/igddesc.xml",
+          $self->opts->hostname, $self->opts->port;
+      my $parser = XML::LibXML->new();
+      my $doc = $parser->parse_file($igddesc);
+      my $root = $doc->documentElement();
+      my $xpc = XML::LibXML::XPathContext->new( $root );
+      $xpc->registerNs('n', 'urn:schemas-upnp-org:device-1-0');
+      $self->{productname} = $xpc->findvalue('(//n:device)[position()=1]/n:friendlyName' );
+    };
+    if ($@) {
+      $self->add_message(CRITICAL, $@);
+    }
+  }
+  if (! $self->check_messages()) {
+    if ($self->mode =~ /device::uptime/) {
       my $som = SOAP::Lite
           -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
           -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
@@ -43,6 +55,11 @@ sub init {
       );
       my ($code, $message) = $self->check_messages(join => ', ', join_all => ' , ');
       $NWC::Device::plugin->nagios_exit($code, $message);
+    } elsif ($self->{productname} =~ /Fritz/i) {
+      bless $self, 'UPNP::AVM';
+      $self->debug('using UPNP::AVM');
+    } else {
+      $self->no_such_mode();
     }
     $self->init();
   }

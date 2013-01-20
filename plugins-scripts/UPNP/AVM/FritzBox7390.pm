@@ -150,6 +150,10 @@ sub init {
       }
       $self->{inputRate} /= $factor;
       $self->{outputRate} /= $factor;
+      $self->{Layer1DownstreamMaxKBRate} =
+          ($self->{Layer1DownstreamMaxBitRate} / 8) / 1024;
+      $self->{Layer1UpstreamMaxKBRate} =
+          ($self->{Layer1UpstreamMaxBitRate} / 8) / 1024;
     }
   }
 }
@@ -197,13 +201,12 @@ sub check {
         uom => $self->opts->units,
     );
   }
-  $self->dump()
-      if $self->opts->verbose >= 2;
 }
 
 sub dump {
   my $self = shift;
-  foreach (qw(TotalBytesSent TotalBytesReceived Layer1DownstreamMaxBitRate Layer1UpstreamMaxBitRate)) {
+  printf "[WAN]\n";
+  foreach (qw(TotalBytesSent TotalBytesReceived Layer1DownstreamMaxBitRate Layer1UpstreamMaxBitRate Layer1DownstreamMaxKBRate Layer1UpstreamMaxKBRate)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
 }

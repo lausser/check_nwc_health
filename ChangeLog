@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+3013-01 1.9
+- add uptime and interface-uage for AVM FRITZ!Box 7390
+
 2013-01-13 1.8
 -add cpu&memory check for juniper netscreen
 
