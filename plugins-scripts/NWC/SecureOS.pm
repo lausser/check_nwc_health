@@ -8,6 +8,8 @@ our @ISA = qw(NWC::Device);
 
 sub init {
   my $self = shift;
+  my %params = @_;
+  $self->SUPER::init(%params);
   $self->{components} = {
       mem_subsystem => undef,
       cpu_subsystem => undef,

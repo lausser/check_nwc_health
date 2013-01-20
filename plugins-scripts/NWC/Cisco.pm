@@ -32,6 +32,8 @@ use constant trees => (
 
 sub init {
   my $self = shift;
+  my %params = @_;
+  $self->SUPER::init(%params);
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     bless $self, 'NWC::CiscoNXOS';
     $self->debug('using NWC::CiscoNXOS');

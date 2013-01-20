@@ -17,6 +17,8 @@ use constant trees => (
 
 sub init {
   my $self = shift;
+  my %params = @_;
+  $self->SUPER::init(%params);
   foreach ($self->get_snmp_table_objects(
       'ENTITY-MIB', 'entPhysicalTable')) {
     if ($_->{entPhysicalDescr} =~ /Brocade/) {

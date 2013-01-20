@@ -17,6 +17,8 @@ use constant trees => (
 
 sub init {
   my $self = shift;
+  my %params = @_;
+  $self->SUPER::init(%params);
   if ($self->{productname} =~ /Procurve/i) {
     bless $self, 'NWC::HP::Procurve';
     $self->debug('using NWC::HP::Procurve');

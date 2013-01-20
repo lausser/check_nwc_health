@@ -29,6 +29,8 @@ sub new {
     die "wie jetzt??!?!";
   } else {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
+    } elsif ($self->opts->port && $self->opts->port == 49000) {
+      $self->{productname} = 'upnp';
     } else {
       $self->check_snmp_and_model();
     }
@@ -93,69 +95,76 @@ sub new {
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
+      } elsif ($self->{productname} =~ /upnp/i) {
+        bless $self, 'UPNP';
+        $self->debug('using UPNP');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
                 '' : '('.$self->{productname}.')'));
       }
-      if ($self->mode =~ /device::walk/) {
-        if ($self->can("trees")) {
-          my @trees = $self->trees;
-          my $name = $0;
-          $name =~ s/.*\///g;
-          $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
-          printf "rm -f %s\n", $name;
-          foreach ($self->trees) {
-            printf "snmpwalk -On -v%s -c %s %s %s >> %s\n", 
-                $self->opts->protocol,
-                $self->opts->community,
-                $self->opts->hostname,
-                $_, $name;
-          }
-        }
-        exit 0;
-      } elsif ($self->mode =~ /device::uptime/) {
-        $self->{uptime} = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
-        if ($self->{uptime} =~ /\((\d+)\)/) {
-          # Timeticks: (20718727) 2 days, 9:33:07.27
-          $self->{uptime} = $1 / 100;
-        } elsif ($self->{uptime} =~ /(\d+)\s*days.*?(\d+):(\d+):(\d+)\.(\d+)/) {
-          # Timeticks: 2 days, 9:33:07.27
-          $self->{uptime} = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
-        } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
-          # Timeticks: 9:33:07.27
-          $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
-        } elsif ($self->{uptime} =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
-          # Timeticks: 3 hours, 42:17.98
-          $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
-        } elsif ($self->{uptime} =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
-          # Timeticks: 36 minutes, 01.96
-          $self->{uptime} = $1 * 60 + $2;
-        }
-        $self->{uptime} /= 60;
-        my $info = sprintf 'device is up since %d minutes', $self->{uptime};
-        $self->add_info($info);
-        $self->set_thresholds(warning => '15:', critical => '5:');
-        $self->add_message($self->check_thresholds($self->{uptime}), $info);
-        $self->add_perfdata(
-            label => 'uptime',
-            value => $self->{uptime},
-            warning => $self->{warning},
-            critical => $self->{critical},
-        );
-        my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
-        $NWC::Device::plugin->nagios_exit($code, $message);
-      }
-      $self->{method} = 'snmp';
     }
   }
+  return $self;
+}
+
+sub init {
+  my $self = shift;
+  if ($self->mode =~ /device::walk/) {
+    if ($self->can("trees")) {
+      my @trees = $self->trees;
+      my $name = $0;
+      $name =~ s/.*\///g;
+      $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
+      printf "rm -f %s\n", $name;
+      foreach ($self->trees) {
+        printf "snmpwalk -On -v%s -c %s %s %s >> %s\n", 
+            $self->opts->protocol,
+            $self->opts->community,
+            $self->opts->hostname,
+            $_, $name;
+      }
+    }
+    exit 0;
+  } elsif ($self->mode =~ /device::uptime/) {
+    $self->{uptime} = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
+    if ($self->{uptime} =~ /\((\d+)\)/) {
+      # Timeticks: (20718727) 2 days, 9:33:07.27
+      $self->{uptime} = $1 / 100;
+    } elsif ($self->{uptime} =~ /(\d+)\s*days.*?(\d+):(\d+):(\d+)\.(\d+)/) {
+      # Timeticks: 2 days, 9:33:07.27
+      $self->{uptime} = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
+    } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
+      # Timeticks: 9:33:07.27
+      $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
+    } elsif ($self->{uptime} =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
+      # Timeticks: 3 hours, 42:17.98
+      $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
+    } elsif ($self->{uptime} =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
+      # Timeticks: 36 minutes, 01.96
+      $self->{uptime} = $1 * 60 + $2;
+    }
+    $self->{uptime} /= 60;
+    my $info = sprintf 'device is up since %d minutes', $self->{uptime};
+    $self->add_info($info);
+    $self->set_thresholds(warning => '15:', critical => '5:');
+    $self->add_message($self->check_thresholds($self->{uptime}), $info);
+    $self->add_perfdata(
+        label => 'uptime',
+        value => $self->{uptime},
+        warning => $self->{warning},
+        critical => $self->{critical},
+    );
+    my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+    $NWC::Device::plugin->nagios_exit($code, $message);
+  }
+  $self->{method} = 'snmp';
   if ($self->opts->blacklist &&
       -f $self->opts->blacklist) {
     $self->opts->blacklist = do {
         local (@ARGV, $/) = $self->opts->blacklist; <> };
   }
   $NWC::Device::statefilesdir = $self->opts->statefilesdir;
-  return $self;
 }
 
 sub check_snmp_and_model {
