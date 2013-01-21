@@ -86,7 +86,7 @@ sub analyze_cpu_subsystem {
   my $html = $resp->as_string();
   my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
   my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{cpu_usage} = $cpu[-1];
+  $self->{cpu_usage} = $cpu[0];
 }
 
 sub check_cpu_subsystem {
