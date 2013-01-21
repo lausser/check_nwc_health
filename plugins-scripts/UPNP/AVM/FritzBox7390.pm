@@ -45,6 +45,72 @@ sub check_interface_subsystem {
       if $self->opts->verbose >= 2;
 }
 
+sub analyze_cpu_subsystem {
+  my $self = shift;
+  require LWP::UserAgent;
+  require Encode;
+  require Digest::MD5;
+  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
+  my $ecourl = sprintf "http://%s/system/ecostat.lua", $self->opts->hostname;
+  my $ua = LWP::UserAgent->new;
+  #printf "login %s\n", $loginurl;
+  my $resp = $ua->get($loginurl);
+  my $content = $resp->content();
+  #  <SessionInfo>
+  #  <iswriteaccess>0</iswriteaccess>
+  #  <SID>0000000000000000</SID>
+  #  <Challenge>eb6422fa</Challenge>
+  #  </SessionInfo>
+  my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
+  #printf "chall %s\n", $challenge;
+  my $input = $challenge . '-' . $self->opts->community;
+  Encode::from_to($input, 'ascii', 'utf16le');
+  my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
+  #printf "chare %s\n", $challengeresponse;
+  $resp = HTTP::Request->new(POST => $loginurl);
+  $resp->content_type("application/x-www-form-urlencoded");
+  $resp->content("response=$challengeresponse");
+  my $loginresp = $ua->request($resp);
+  $content = $loginresp->content();
+  my $sid = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
+  #printf "sid %s\n", $sid;
+  if (! $loginresp->is_success()) {
+    $self->add_message(CRITICAL, $loginresp->status_line());
+  }
+  $resp = $ua->post($ecourl, [
+      'sid' => [ undef, undef, 'Content' => "$sid", ],
+  ]);
+  if (! $resp->is_success()) {
+    $self->add_message(CRITICAL, $resp->status_line());
+  }
+  my $html = $resp->as_string();
+  my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
+  my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{cpu_usage} = $cpu[-1];
+}
+
+sub check_cpu_subsystem {
+  my $self = shift;
+  $self->add_info('checking cpus');
+  $self->blacklist('c', undef);
+  my $info = sprintf 'cpu usage is %.2f%%', $self->{cpu_usage};
+  $self->add_info($info);
+  $self->set_thresholds(warning => 40, critical => 60);
+  $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+  $self->add_perfdata(
+      label => 'cpu_usage',
+      value => $self->{cpu_usage},
+      uom => '%',
+      warning => $self->{warning},
+      critical => $self->{critical},
+  );
+}
+
+
+
+
+
+
 
 package UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem;
 our @ISA = qw(NWC::IFMIB);
