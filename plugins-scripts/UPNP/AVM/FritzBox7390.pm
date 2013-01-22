@@ -32,6 +32,39 @@ sub init {
   }
 }
 
+sub http_get {
+  my $self = shift;
+  my $page = shift;
+  require LWP::UserAgent;
+  require Encode;
+  require Digest::MD5;
+  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
+  my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
+  my $ua = LWP::UserAgent->new;
+  my $resp = $ua->get($loginurl);
+  my $content = $resp->content();
+  my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
+  my $input = $challenge . '-' . $self->opts->community;
+  Encode::from_to($input, 'ascii', 'utf16le');
+  my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
+  $resp = HTTP::Request->new(POST => $loginurl);
+  $resp->content_type("application/x-www-form-urlencoded");
+  $resp->content("response=$challengeresponse");
+  my $loginresp = $ua->request($resp);
+  $content = $loginresp->content();
+  my $sid = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
+  if (! $loginresp->is_success()) {
+    $self->add_message(CRITICAL, $loginresp->status_line());
+  }
+  $resp = $ua->post($ecourl, [
+      'sid' => [ undef, undef, 'Content' => "$sid", ],
+  ]);
+  if (! $resp->is_success()) {
+    $self->add_message(CRITICAL, $resp->status_line());
+  }
+  return $resp->as_string();
+}
+
 sub analyze_interface_subsystem {
   my $self = shift;
   $self->{components}->{interface_subsystem} =
@@ -47,43 +80,7 @@ sub check_interface_subsystem {
 
 sub analyze_cpu_subsystem {
   my $self = shift;
-  require LWP::UserAgent;
-  require Encode;
-  require Digest::MD5;
-  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
-  my $ecourl = sprintf "http://%s/system/ecostat.lua", $self->opts->hostname;
-  my $ua = LWP::UserAgent->new;
-  #printf "login %s\n", $loginurl;
-  my $resp = $ua->get($loginurl);
-  my $content = $resp->content();
-  #  <SessionInfo>
-  #  <iswriteaccess>0</iswriteaccess>
-  #  <SID>0000000000000000</SID>
-  #  <Challenge>eb6422fa</Challenge>
-  #  </SessionInfo>
-  my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
-  #printf "chall %s\n", $challenge;
-  my $input = $challenge . '-' . $self->opts->community;
-  Encode::from_to($input, 'ascii', 'utf16le');
-  my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
-  #printf "chare %s\n", $challengeresponse;
-  $resp = HTTP::Request->new(POST => $loginurl);
-  $resp->content_type("application/x-www-form-urlencoded");
-  $resp->content("response=$challengeresponse");
-  my $loginresp = $ua->request($resp);
-  $content = $loginresp->content();
-  my $sid = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
-  #printf "sid %s\n", $sid;
-  if (! $loginresp->is_success()) {
-    $self->add_message(CRITICAL, $loginresp->status_line());
-  }
-  $resp = $ua->post($ecourl, [
-      'sid' => [ undef, undef, 'Content' => "$sid", ],
-  ]);
-  if (! $resp->is_success()) {
-    $self->add_message(CRITICAL, $resp->status_line());
-  }
-  my $html = $resp->as_string();
+  my $html = $self->http_get('system/ecostat.lua');
   my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
   my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
   $self->{cpu_usage} = $cpu[0];
@@ -100,6 +97,38 @@ sub check_cpu_subsystem {
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{cpu_usage},
+      uom => '%',
+      warning => $self->{warning},
+      critical => $self->{critical},
+  );
+}
+
+sub analyze_mem_subsystem {
+  my $self = shift;
+  my $html = $self->http_get('system/ecostat.lua');
+  my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
+  my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_cache_used} = $ramcacheused[0];
+  my $ramphysfree = (grep /StatRAMPhysFree/, split(/\n/, $html))[0];
+  my @ramphysfree = ($ramphysfree =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_phys_free} = $ramphysfree[0];
+  my $ramstrictlyused = (grep /StatRAMStrictlyUsed/, split(/\n/, $html))[0];
+  my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_strictly_used} = $ramstrictlyused[0];
+  $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
+}
+
+sub check_mem_subsystem {
+  my $self = shift;
+  $self->add_info('checking memory');
+  $self->blacklist('m', undef);
+  my $info = sprintf 'memory usage is %.2f%%', $self->{ram_used};
+  $self->add_info($info);
+  $self->set_thresholds(warning => 80, critical => 90);
+  $self->add_message($self->check_thresholds($self->{ram_used}), $info);
+  $self->add_perfdata(
+      label => 'memory_usage',
+      value => $self->{ram_used},
       uom => '%',
       warning => $self->{warning},
       critical => $self->{critical},
