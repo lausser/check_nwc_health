@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-01- 1.9.1
+- fixed a bug in FFritz!BOX uptime (Thanks Lars Urban)
+
 3013-01 1.9
 - add uptime and interface-usage for AVM FRITZ!Box 7390
 - add cpu-load and memory-usage for AVM FRITZ!Box 7390

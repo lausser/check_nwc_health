@@ -38,7 +38,8 @@ sub init {
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::uptime/) {
       my $som = SOAP::Lite
-          -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+          -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+              $self->opts->hostname, $self->opts->port)
           -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
           -> GetStatusInfo();
       $self->{uptime} = $som->valueof("//GetStatusInfoResponse/NewUptime");
