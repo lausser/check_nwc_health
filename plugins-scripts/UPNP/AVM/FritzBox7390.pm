@@ -180,37 +180,44 @@ sub init {
   } else {
     $self->{ifDescr} = "WAN";
     $self->{ExternalIPAddress} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
       -> GetExternalIPAddress()
       -> result;
     $self->{ConnectionStatus} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
       -> GetStatusInfo()
       -> valueof("//GetStatusInfoResponse/NewConnectionStatus");;
     $self->{PhysicalLinkStatus} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewPhysicalLinkStatus");
     $self->{Layer1UpstreamMaxBitRate} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1UpstreamMaxBitRate");
     $self->{Layer1DownstreamMaxBitRate} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1DownstreamMaxBitRate");
     $self->{TotalBytesSent} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
       -> GetTotalBytesSent()
       -> result;
     $self->{TotalBytesReceived} = SOAP::Lite
-      -> proxy('http://192.168.1.1:49000/upnp/control/WANCommonIFC1')
+      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
+        $self->opts->hostname, $self->opts->port)
       -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
       -> GetTotalBytesReceived()
       -> result;

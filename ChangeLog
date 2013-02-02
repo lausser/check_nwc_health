@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-02-02 1.9.2
+- removed my static ip from FRITZ!BOX interface-usage (Thanks Stef)
+
 2013-01- 1.9.1
 - fixed a bug in FFritz!BOX uptime (Thanks Lars Urban)
 
