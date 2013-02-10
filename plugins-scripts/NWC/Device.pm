@@ -16,6 +16,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $summary = [];
   our $statefilesdir = '/var/tmp/check_nwc_health';
   our $oidtrace = [];
+  our $uptime = 0;
 }
 
 sub new {
@@ -131,23 +132,6 @@ sub init {
     }
     exit 0;
   } elsif ($self->mode =~ /device::uptime/) {
-    $self->{uptime} = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
-    if ($self->{uptime} =~ /\((\d+)\)/) {
-      # Timeticks: (20718727) 2 days, 9:33:07.27
-      $self->{uptime} = $1 / 100;
-    } elsif ($self->{uptime} =~ /(\d+)\s*days.*?(\d+):(\d+):(\d+)\.(\d+)/) {
-      # Timeticks: 2 days, 9:33:07.27
-      $self->{uptime} = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
-    } elsif ($self->{uptime} =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
-      # Timeticks: 9:33:07.27
-      $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
-    } elsif ($self->{uptime} =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
-      # Timeticks: 3 hours, 42:17.98
-      $self->{uptime} = $1 * 3600 + $2 * 60 + $3;
-    } elsif ($self->{uptime} =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
-      # Timeticks: 36 minutes, 01.96
-      $self->{uptime} = $1 * 60 + $2;
-    }
     $self->{uptime} /= 60;
     my $info = sprintf 'device is up since %d minutes', $self->{uptime};
     $self->add_info($info);
@@ -311,6 +295,12 @@ sub whoami {
   my $dummy = '1.3.6.1.2.1.1.5.0';
   if ($productname = $self->get_snmp_object('MIB-II', 'sysDescr', 0)) {
     $self->{productname} = $productname;
+    $self->{uptime} = $self->timeticks(
+        $self->get_snmp_object('MIB-II', 'sysUpTime', 0));
+    $self->debug(sprintf 'uptime: %s', $self->{uptime});
+    $self->debug(sprintf 'up since: %s',
+        scalar localtime (time - $self->{uptime}));
+    $NWC::Device::uptime = $self->{uptime};
   } else {
     $self->add_message(CRITICAL,
         'snmpwalk returns no product name (sysDescr)');
@@ -319,6 +309,28 @@ sub whoami {
     }
   }
   $self->debug('whoami: '.$self->{productname});
+}
+
+sub timeticks {
+  my $self = shift;
+  my $timestr = shift;
+  if ($timestr =~ /\((\d+)\)/) {
+    # Timeticks: (20718727) 2 days, 9:33:07.27
+    $timestr = $1 / 100;
+  } elsif ($timestr =~ /(\d+)\s*days.*?(\d+):(\d+):(\d+)\.(\d+)/) {
+    # Timeticks: 2 days, 9:33:07.27
+    $timestr = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
+  } elsif ($timestr =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
+    # Timeticks: 9:33:07.27
+    $timestr = $1 * 3600 + $2 * 60 + $3;
+  } elsif ($timestr =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
+    # Timeticks: 3 hours, 42:17.98
+    $timestr = $1 * 3600 + $2 * 60 + $3;
+  } elsif ($timestr =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
+    # Timeticks: 36 minutes, 01.96
+    $timestr = $1 * 60 + $2;
+  }
+  return $timestr;
 }
 
 sub get_snmp_object {
@@ -482,6 +494,11 @@ sub is_blacklisted {
 sub mode {
   my $self = shift;
   return $NWC::Device::mode;
+}
+
+sub uptime {
+  my $self = shift;
+  return $NWC::Device::uptime;
 }
 
 sub add_message {

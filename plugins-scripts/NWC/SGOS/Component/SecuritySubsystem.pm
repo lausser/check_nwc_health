@@ -36,11 +36,12 @@ sub check {
   if (scalar (@{$self->{securitys}}) == 0) {
     $self->add_message(OK, 'no security incidents');
   } else {
-    $self->add_message(OK, sprintf '%d security incidents (probably harmless)',
-        scalar(@{$self->{securitys}}));
     foreach (@{$self->{securitys}}) {
       $_->check();
     }
+    $self->add_message(OK, sprintf '%d serious incidents (of %d)',
+        scalar(grep { $_->{count_me} == 1 } @{$self->{securitys}}),
+        scalar(@{$self->{securitys}}));
   }
 }
 
@@ -74,6 +75,9 @@ sub new {
   }
   $self->{deviceAttackIndex} = join(".", @{$params{indices}});
   bless $self, $class;
+  $self->{deviceAttackTime} = $self->timeticks(
+      $self->{deviceAttackTime});
+  $self->{count_me} = 0;
   return $self;
 }
 
@@ -81,11 +85,15 @@ sub check {
   my $self = shift;
   $self->blacklist('s', $self->{deviceAttackIndex});
   my $info = sprintf '%s %s %s',
-      $self->{deviceAttackTime}, $self->{deviceAttackName},
-      $self->{deviceAttackStatus};
+      scalar localtime (time - $self->uptime() + $self->{deviceAttackTime}),
+      $self->{deviceAttackName}, $self->{deviceAttackStatus};
   $self->add_info($info);
-  if ($self->{deviceAttackStatus} eq 'under-attack') {
+  my $lookback = $self->opts->lookback() ? 
+      $self->opts->lookback() : 3600;
+  if (($self->{deviceAttackStatus} eq 'under-attack') &&
+      ($lookback - $self->uptime() + $self->{deviceAttackTime} > 0)) {
     $self->add_message(CRITICAL, $info);
+    $self->{count_me}++;
   }
 }
 
