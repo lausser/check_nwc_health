@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-02-10 1.9.3
+- add blue coat sg600
+
 2013-02-02 1.9.2
 - removed my static ip from FRITZ!BOX interface-usage (Thanks Stef)
 

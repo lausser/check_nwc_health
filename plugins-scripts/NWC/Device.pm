@@ -42,6 +42,7 @@ sub new {
       $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
       $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
+      $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
     }
     if (! $NWC::Device::plugin->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
@@ -92,6 +93,9 @@ sub new {
       } elsif ($self->{productname} =~ /Check\s*Point/i) {
         bless $self, 'NWC::CheckPoint';
         $self->debug('using NWC::CheckPoint');
+      } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
+        bless $self, 'NWC::Bluecoat';
+        $self->debug('using NWC::Bluecoat');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');

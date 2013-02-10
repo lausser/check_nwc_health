@@ -80,6 +80,14 @@ EXTRA_MODULES=\
   NWC/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
   NWC/CheckPoint/Firewall1.pm \
   NWC/CheckPoint.pm \
+  NWC/SGOS/Component/MemSubsystem.pm \
+  NWC/SGOS/Component/CpuSubsystem.pm \
+  NWC/SGOS/Component/EnvironmentalSubsystem.pm \
+  NWC/SGOS/Component/SensorSubsystem.pm \
+  NWC/SGOS/Component/DiskSubsystem.pm \
+  NWC/SGOS/Component/SecuritySubsystem.pm \
+  NWC/SGOS.pm \
+  NWC/Bluecoat.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
