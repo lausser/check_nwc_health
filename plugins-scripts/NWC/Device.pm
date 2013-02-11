@@ -1093,8 +1093,6 @@ sub save_state {
   my $extension = "";
   $self->create_statefilesdir();
   mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
-  my $statefile = sprintf "%s/%s_%s", 
-      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode;
   #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
   $extension .= $params{name} ? '_'.$params{name} : '';
   $extension =~ s/\//_/g;
@@ -1102,8 +1100,8 @@ sub save_state {
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  $statefile .= $extension;
-  $statefile = lc $statefile;
+  my $statefile = sprintf "%s/%s_%s%s", 
+      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode, lc $extension;
   open(STATE, ">$statefile");
   if ((ref($params{save}) eq "HASH") && exists $params{save}->{timestamp}) {
     $params{save}->{localtime} = scalar localtime $params{save}->{timestamp};
@@ -1118,8 +1116,6 @@ sub load_state {
   my $self = shift;
   my %params = @_;
   my $extension = "";
-  my $statefile = sprintf "%s/%s_%s", 
-      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode;
   #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
   $extension .= $params{name} ? '_'.$params{name} : '';
   $extension =~ s/\//_/g;
@@ -1127,8 +1123,8 @@ sub load_state {
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  $statefile .= $extension;
-  $statefile = lc $statefile;
+  my $statefile = sprintf "%s/%s_%s%s", 
+      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode, lc $extension;
   if ( -f $statefile) {
     our $VAR1;
     eval {
