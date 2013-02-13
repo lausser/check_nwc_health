@@ -28,6 +28,8 @@ use constant trees => (
   '1.3.6.1.4.1.9.17',      # ciscoPolicy
   '1.3.6.1.4.1.9.18',      # ciscoPolicyAuto
   '1.3.6.1.4.1.9.19',      # ciscoDomains
+  '1.3.6.1.4.1.14179.1',   # airespace-switching-mib
+  '1.3.6.1.4.1.14179.2',   # airespace-wireless-mib
 );
 
 sub init {
@@ -37,6 +39,9 @@ sub init {
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     bless $self, 'NWC::CiscoNXOS';
     $self->debug('using NWC::CiscoNXOS');
+  } elsif ($self->{productname} =~ /Cisco Controller/i) {
+    bless $self, 'NWC::CiscoWLC';
+    $self->debug('using NWC::WLC');
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'NWC::CiscoIOS';
     $self->debug('using NWC::CiscoIOS');

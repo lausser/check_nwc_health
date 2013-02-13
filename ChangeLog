@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-02-11 1.9.4
+- add Cisco Wireless LAN Controller 5500 
+
 2013-02-11 1.9.3.1
 - fixed a bug in statefiles with uppercase directory names. (Thanks Matthias Gallinger)
 

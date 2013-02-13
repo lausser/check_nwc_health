@@ -826,6 +826,7 @@ sub get_snmp_table_objects {
       @entries = map { $_->{indices} = shift @indices; $_ } @entries;
     }
   }
+  @entries = map { $_->{flat_indices} = join(".", @{$_->{indices}}); $_ } @entries;
   return @entries;
 }
 
@@ -1019,7 +1020,11 @@ sub valdiff {
   my $last_values = $self->load_state(%params) || eval {
     my $empty_events = {};
     foreach (@keys) {
-      $empty_events->{$_} = 0;
+      if (ref($self->{$_}) eq "ARRAY") {
+        $empty_events->{$_} = [];
+      } else {
+        $empty_events->{$_} = 0;
+      }
     }
     $empty_events->{timestamp} = 0;
     if ($self->opts->lookback) {
@@ -1043,14 +1048,25 @@ sub valdiff {
         }
       }
     }
-    $last_values->{$_} = 0 if ! exists $last_values->{$_};
-    if ($self->{$_} >= $last_values->{$_}) {
-      $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
-    } else {
-      # vermutlich db restart und zaehler alle auf null
-      $self->{'delta_'.$_} = $self->{$_};
+    if ($self->{$_} =~ /^\d+$/) {
+      $last_values->{$_} = 0 if ! exists $last_values->{$_};
+      if ($self->{$_} >= $last_values->{$_}) {
+        $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
+      } else {
+        # vermutlich db restart und zaehler alle auf null
+        $self->{'delta_'.$_} = $self->{$_};
+      }
+      $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
+    } elsif (ref($self->{$_}) eq "ARRAY") {
+      $last_values->{$_} = [] if ! exists $last_values->{$_};
+#printf "2last (%s) %s\n", $_, Data::Dumper::Dumper($last_values);
+      my %saved = map { $_ => 1 } @{$last_values->{$_}};
+      my %current = map { $_ => 1 } @{$self->{$_}};
+      my @found = grep(!defined $saved{$_}, @{$self->{$_}});
+      my @lost = grep(!defined $current{$_}, @{$last_values->{$_}});
+      $self->{'delta_found_'.$_} = \@found;
+      $self->{'delta_lost_'.$_} = \@lost;
     }
-    $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
   }
   $self->{'delta_timestamp'} = $now - $last_values->{timestamp};
   $params{save} = eval {
