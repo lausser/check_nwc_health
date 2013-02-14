@@ -1017,6 +1017,7 @@ sub valdiff {
   my %params = %{$pparams};
   my @keys = @_;
   my $now = time;
+  my $newest_history_set = {};
   my $last_values = $self->load_state(%params) || eval {
     my $empty_events = {};
     foreach (@keys) {
@@ -1038,6 +1039,10 @@ sub valdiff {
       # and overwrite $last_values->{$_} with historic data
       if (exists $last_values->{lookback_history}->{$_}) {
         foreach my $date (sort {$a <=> $b} keys %{$last_values->{lookback_history}->{$_}}) {
+            $newest_history_set->{$_} = $last_values->{lookback_history}->{$_}->{$date};
+            $newest_history_set->{timestamp} = $date;
+        }
+        foreach my $date (sort {$a <=> $b} keys %{$last_values->{lookback_history}->{$_}}) {
           if ($date >= ($now - $self->opts->lookback)) {
             $last_values->{$_} = $last_values->{lookback_history}->{$_}->{$date};
             $last_values->{timestamp} = $date;
@@ -1058,7 +1063,25 @@ sub valdiff {
       }
       $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
     } elsif (ref($self->{$_}) eq "ARRAY") {
-      $last_values->{$_} = [] if ! exists $last_values->{$_};
+      if ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && exists $params{lastarray}) {
+        # innerhalb der lookback-zeit wurde nichts in der lookback_history
+        # gefunden. allenfalls irgendwas aelteres. normalerweise
+        # wuerde jetzt das array als [] initialisiert.
+        # d.h. es wuerde ein delta geben, @found s.u.
+        # wenn man das nicht will, sondern einfach aktuelles array mit
+        # dem array des letzten laufs vergleichen will, setzt man lastarray
+        $last_values->{$_} = %{$newest_history_set} ?
+            $newest_history_set->{$_} : []
+      } elsif ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && ! exists $params{lastarray}) {
+        $last_values->{$_} = [] if ! exists $last_values->{$_};
+      } elsif (exists $last_values->{$_} && ! defined $last_values->{$_}) {
+        # $_ kann es auch ausserhalb des lookback_history-keys als normalen
+        # key geben. der zeigt normalerweise auf den entspr. letzten 
+        # lookback_history eintrag. wurde der wegen ueberalterung abgeschnitten
+        # ist der hier auch undef.
+        $last_values->{$_} = %{$newest_history_set} ?
+            $newest_history_set->{$_} : []
+      }
 #printf "2last (%s) %s\n", $_, Data::Dumper::Dumper($last_values);
       my %saved = map { $_ => 1 } @{$last_values->{$_}};
       my %current = map { $_ => 1 } @{$self->{$_}};

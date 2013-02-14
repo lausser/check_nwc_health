@@ -65,11 +65,11 @@ sub check {
       $_->check();
     }
     if ($self->mode =~ /device::wlan::aps::watch/) {
-      $self->valdiff({name => $self->{name}},
+      $self->override_opt('lookback', 1800) if ! $self->opts->lookback;
+      $self->valdiff({name => $self->{name}, lastarray => 1},
           qw(apNameList numOfAPs));
       if (scalar(@{$self->{delta_found_apNameList}}) > 0 &&
-          1 # initial
-          ) {
+          $self->{delta_timestamp} > $self->opts->lookback) {
         $self->add_message(WARNING, sprintf '%d new access points (%s)',
             scalar(@{$self->{delta_found_apNameList}}),
             join(", ", @{$self->{delta_found_apNameList}}));
@@ -79,8 +79,7 @@ sub check {
             scalar(@{$self->{delta_lost_apNameList}}),
             join(", ", @{$self->{delta_lost_apNameList}}));
       }
-      $self->add_message($self->check_thresholds(
-          scalar (@{$self->{aps}})), 
+      $self->add_message(OK,
           sprintf 'found %d access points', scalar (@{$self->{aps}}));
       $self->add_perfdata(
           label => 'num_aps',
@@ -97,6 +96,11 @@ sub check {
           warning => $self->{warning},
           critical => $self->{critical},
       );
+    } elsif ($self->mode =~ /device::wlan::aps::status/) {
+      if ($self->opts->report eq "short") {
+        $self->clear_messages(OK);
+        $self->add_message(OK, 'no problems') if ! $self->check_messages();
+      }
     }
   }
 }
@@ -205,17 +209,22 @@ sub new {
 sub check {
   my $self = shift;
   $self->blacklist('ap', $self->{bsnAPName});
-  my $info = sprintf 'access point %s has %d interfaces with %d clients',
-      $self->{bsnAPName}, scalar(@{$self->{interfaces}}),
-      $self->{NumOfClients};
+  my $info = sprintf 'access point %s is %s (%d interfaces with %d clients)',
+      $self->{bsnAPName}, $self->{bsnAPOperationStatus},
+      scalar(@{$self->{interfaces}}), $self->{NumOfClients};
   $self->add_info($info);
   if ($self->mode =~ /device::wlan::aps::status/) {
-  
-  } else {
+    if ($self->{bsnAPOperationStatus} eq 'disassociating') {
+      $self->add_message(CRITICAL, $info);
+    } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
+      # das verschwindet hoffentlich noch vor dem HARD-state
+      $self->add_message(WARNING, $info);
+    } elsif ($self->{bsnAPOperationStatus} eq 'associated') {
+      $self->add_message(OK, $info);
+    } else {
+      $self->add_message(UNKNOWN, $info);
+    }
   }
-  #$self->add_message(OK, $info);
-  #$self->set_thresholds(warning => 80, critical => 90);
-  #$self->add_message($self->check_thresholds($self->{usage}), $info);
 }
 
 sub dump {
@@ -229,42 +238,4 @@ sub dump {
   printf "info: %s\n", $self->{info};
   printf "\n";
 }
-
-my $remarks =<<'EORR';
-
-
-#  APs auslesen mit:  snmpwalk -c public hostadresse -v 2c 1.3.6.1.4.1.14179.2.2.1.1.3
-#  Read out the APs OID with : snmpwalk -c public hostadresse -v 2c 1.3.6.1.4.1.14179.2.2.1.1.3
-#
-#  und unten in liste definieren als APid[10] - APid[11] -APid12[] .....
-#  insert the oids in the list and  add ".0" ad the end of the oid.
-
-
-APid[1]=".0.14.132.171.8.128.0"			# dlbruap002
-APid[2]=".0.15.247.235.80.0"			# dlbruap007
-APid[3]=".0.24.186.50.191.16"			# dlbruap005
-APid[4]=".0.31.157.33.45.48.0"			# dlbruap006
-APid[5]=".0.31.157.33.52.16.0"			# dlbruap009	
-APid[6]=".0.31.157.33.76.112.0"			# dlbruap008
-APid[7]=".0.31.157.33.68.192.0"			# dlbruap001	
-APid[8]=".44.63.56.49.84.176"      		# dlbruap010
-APid[9]=".100.160.231.248.169.160.0"	# dlbruap011
-APid[10]=".0.26.48.231.24.32.0"			# dlbruap003
-APid[11]=".44.63.56.43.167.96.0"		# bruap013 
-maxind=11
-
-#
-#
-## End APs definition
-
-
- 
-
-oid_AP_NumOfClients="1.3.6.1.4.1.14179.2.2.13.1.4"
-oid_AP_Name="1.3.6.1.4.1.14179.2.2.1.1.3"
-oid_AP_Place="1.3.6.1.4.1.14179.2.2.1.1.4"
-oid_AP_Firmware="1.3.6.1.4.1.14179.2.2.1.1.16"
-oid_AP_IP="1.3.6.1.4.1.14179.2.2.1.1.19"
-
-EORR
 

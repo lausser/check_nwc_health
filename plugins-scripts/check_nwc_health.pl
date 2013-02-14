@@ -256,6 +256,13 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'report=s',
+    help => "--report
+   Can be used to shorten the output",
+    required => 0,
+    default => 'long',
+);
+$plugin->add_arg(
     spec => 'lookback=s',
     help => "--lookback
    The amount of time you want to look back when calculating average rates.
