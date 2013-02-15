@@ -65,11 +65,12 @@ sub check {
       $_->check();
     }
     if ($self->mode =~ /device::wlan::aps::watch/) {
-      $self->override_opt('lookback', 1800) if ! $self->opts->lookback;
+      $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
       $self->valdiff({name => $self->{name}, lastarray => 1},
           qw(apNameList numOfAPs));
-      if (scalar(@{$self->{delta_found_apNameList}}) > 0 &&
-          $self->{delta_timestamp} > $self->opts->lookback) {
+      if (scalar(@{$self->{delta_found_apNameList}}) > 0) {
+      #if (scalar(@{$self->{delta_found_apNameList}}) > 0 &&
+      #    $self->{delta_timestamp} > $self->opts->lookback) {
         $self->add_message(WARNING, sprintf '%d new access points (%s)',
             scalar(@{$self->{delta_found_apNameList}}),
             join(", ", @{$self->{delta_found_apNameList}}));
@@ -122,7 +123,7 @@ sub assign_ifs_to_aps {
       }
     }
     $ap->{NumOfClients} = 0;
-    map { $ap->{NumOfClients} += $_->{bsnAPIfLoadNumOfClients} }
+    map {$ap->{NumOfClients} += $_->{bsnAPIfLoadNumOfClients} }
         @{$ap->{interfaces}};
   }
 }

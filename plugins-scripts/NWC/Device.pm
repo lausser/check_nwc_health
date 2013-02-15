@@ -760,6 +760,7 @@ sub get_snmp_table_objects {
           -columns => \@columns,
       );
       @entries = $self->make_symbolic($mib, $result, $indices);
+      @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
     }
   } elsif (scalar(@{$indices}) > 1) {
     # man koennte hier pruefen, ob die indices aufeinanderfolgen
@@ -804,6 +805,7 @@ sub get_snmp_table_objects {
       #my @indices = 
       #    $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
       @entries = $self->make_symbolic($mib, $result, $indices);
+      @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
     }
   } else {
     if (exists $NWC::Device::mibs_and_oids->{$mib} &&
@@ -1082,7 +1084,6 @@ sub valdiff {
         $last_values->{$_} = %{$newest_history_set} ?
             $newest_history_set->{$_} : []
       }
-#printf "2last (%s) %s\n", $_, Data::Dumper::Dumper($last_values);
       my %saved = map { $_ => 1 } @{$last_values->{$_}};
       my %current = map { $_ => 1 } @{$self->{$_}};
       my @found = grep(!defined $saved{$_}, @{$self->{$_}});
