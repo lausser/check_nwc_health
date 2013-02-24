@@ -66,6 +66,69 @@ sub check {
     #foreach (sort @{$self->{interfaces}}) {
       $_->list();
     }
+  } elsif ($self->mode =~ /device::interfaces::availability/) {
+    foreach (@{$self->{interfaces}}) {
+      $_->check();
+    }
+    my $num_interfaces = scalar(@{$self->{interfaces}});
+    my $available_interfaces = scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
+    my $info = sprintf "%d of %d interfaces are available",
+        $num_interfaces, $available_interfaces;
+    $self->add_info($info);
+    $self->set_thresholds(warning => "3:", critical => "2:");
+    $self->add_message($self->check_thresholds($available_interfaces), $info);
+    $self->add_perfdata(
+        label => 'num_interfaces',
+        value => $num_interfaces,
+    );
+    $self->add_perfdata(
+        label => 'available_interfaces',
+        value => $available_interfaces,
+        warning => $self->{warning},
+        critical => $self->{critical},
+    );
+
+    printf "%s\n", $info;
+    printf "<table>";
+    printf "<tr>";
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+      printf "<th align=\"right\">%s</th>", $_;
+    }
+    printf "</tr>";
+    my $unique = {};
+    foreach (@{$self->{interfaces}}) {
+      if (exists $unique->{$_->{ifDescr}}) {
+        $unique->{$_->{ifDescr}}++;
+      } else {
+        $unique->{$_->{ifDescr}} = 0;
+      }
+    }
+    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+      if ($unique->{$_->{ifDescr}}) {
+        $_->{ifDescr} .= ' '.$_->{ifIndex};
+      }
+      printf "<tr>";
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+        printf "<td align=\"right\">%s</td>", $_->{$attr};
+      }
+      printf "</tr>";
+    }
+    printf "</table>\n";
+    printf "<!--\nASCII_NOTIFICATION_START\n";
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+      printf "%20s", $_;
+    }
+    printf "\n";
+    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+      if ($unique->{$_->{ifDescr}}) {
+        $_->{ifDescr} .= ' '.$_->{ifIndex};
+      }
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+        printf "%20s", $_->{$attr};
+      }
+      printf "\n";
+    }
+    printf "ASCII_NOTIFICATION_END\n--!>\n";
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
@@ -318,6 +381,15 @@ sub init {
     $self->{outputRate} = ($self->{delta_ifOutErrors} + $self->{delta_ifOutDiscards}) 
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
+  } elsif ($self->mode =~ /device::interfaces::availability/) {
+    if ($self->{ifAdminStatus} eq "up" && $self->{ifOperStatus} ne "up") {
+      # and ifLastChange schon ein wenig laenger her
+      $self->{ifAvailable} = "false";
+    } else {
+      $self->{ifAvailable} = "true";
+    }
+    $self->{ifStatusDuration} = time - (
+        $NWC::Device::uptime + $self->timeticks($self->{ifLastChange}));
   }
   return $self;
 }
@@ -431,6 +503,13 @@ sub check {
           sprintf 'fault condition is presumed to exist on %s',
           $self->{ifDescr});
     }
+  } elsif ($self->mode =~ /device::interfaces::availability/) {
+    my $info = sprintf '%s is %savailable (%s/%s, since %s)',
+        $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
+        $self->{ifOperStatus}, $self->{ifAdminStatus},
+        scalar localtime ();
+    $self->add_info($info);
+    $self->{ifStatusDuration} = $NWC::Device::uptime - $self->timeticks($self->{ifLastChange});
   }
 }
 
