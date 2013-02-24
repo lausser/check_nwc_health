@@ -333,6 +333,19 @@ sub timeticks {
   return $timestr;
 }
 
+sub human_timeticks {
+  my $self = shift;
+  my $timeticks = shift;
+  my $days = int($timeticks / 86400); 
+  $timeticks -= ($days * 86400); 
+  my $hours = int($timeticks / 3600); 
+  $timeticks -= ($hours * 3600); 
+  my $minutes = int($timeticks / 60); 
+  my $seconds = $timeticks % 60; 
+  $days = $days < 1 ? '' : $days .'d '; 
+  return $days . sprintf "%02d:%02d:%02d", $hours, $minutes, $seconds;
+}
+
 sub get_snmp_object {
   my $self = shift;
   my $mib = shift;

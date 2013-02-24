@@ -71,9 +71,12 @@ sub check {
       $_->check();
     }
     my $num_interfaces = scalar(@{$self->{interfaces}});
-    my $available_interfaces = scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
-    my $info = sprintf "%d of %d interfaces are available",
-        $num_interfaces, $available_interfaces;
+    my $up_interfaces =
+        scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
+    my $available_interfaces =
+        scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
+    my $info = sprintf "%d of %d (%d adm. up) interfaces are available",
+        $available_interfaces, $num_interfaces, $up_interfaces;
     $self->add_info($info);
     $self->set_thresholds(warning => "3:", critical => "2:");
     $self->add_message($self->check_thresholds($available_interfaces), $info);
@@ -89,10 +92,10 @@ sub check {
     );
 
     printf "%s\n", $info;
-    printf "<table>";
+    printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
-    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
-      printf "<th align=\"right\">%s</th>", $_;
+    foreach (qw(Index Descr Type Speed AdminStatus OperStatus Duration Available)) {
+      printf "<th style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
     }
     printf "</tr>";
     my $unique = {};
@@ -108,14 +111,19 @@ sub check {
         $_->{ifDescr} .= ' '.$_->{ifIndex};
       }
       printf "<tr>";
-      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
-        printf "<td align=\"right\">%s</td>", $_->{$attr};
+      printf "<tr style=\"border: 1px solid black;\">";
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
+        if ($_->{ifAvailable} eq "false") {
+          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</td>", $_->{$attr};
+        } else {
+          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #00ff33;\">%s</td>", $_->{$attr};
+        }
       }
       printf "</tr>";
     }
     printf "</table>\n";
     printf "<!--\nASCII_NOTIFICATION_START\n";
-    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable)) {
       printf "%20s", $_;
     }
     printf "\n";
@@ -123,7 +131,7 @@ sub check {
       if ($unique->{$_->{ifDescr}}) {
         $_->{ifDescr} .= ' '.$_->{ifIndex};
       }
-      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus ifLastChange)) {
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
         printf "%20s", $_->{$attr};
       }
       printf "\n";
@@ -382,14 +390,33 @@ sub init {
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
-    if ($self->{ifAdminStatus} eq "up" && $self->{ifOperStatus} ne "up") {
-      # and ifLastChange schon ein wenig laenger her
-      $self->{ifAvailable} = "false";
-    } else {
+    $self->{ifStatusDuration} = 
+        $NWC::Device::uptime - $self->timeticks($self->{ifLastChange});
+    $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
+    if ($self->{ifAdminStatus} eq "down") {
       $self->{ifAvailable} = "true";
+    } elsif ($self->{ifAdminStatus} eq "up" && $self->{ifOperStatus} ne "up" &&
+        $self->{ifStatusDuration} > $self->opts->lookback) {
+      # and ifLastChange schon ein wenig laenger her
+      $self->{ifAvailable} = "true";
+    } else {
+      $self->{ifAvailable} = "false";
     }
-    $self->{ifStatusDuration} = time - (
-        $NWC::Device::uptime + $self->timeticks($self->{ifLastChange}));
+    my $gb = 1000 * 1000 * 1000;
+    my $mb = 1000 * 1000;
+    my $kb = 1000;
+    my $speed = $self->{ifHighSpeed} ? 
+        ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
+    if ($speed >= $gb) {
+      $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
+    } elsif ($speed >= $mb) {
+      $self->{ifSpeedText} = sprintf "%.2fMB", $speed / $mb;
+    } elsif ($speed >= $kb) {
+      $self->{ifSpeedText} = sprintf "%.2fKB", $speed / $kb;
+    } else {
+      $self->{ifSpeedText} = sprintf "%.2fB", $speed;
+    }
+    $self->{ifSpeedText} =~ s/\.00//g;
   }
   return $self;
 }
@@ -504,12 +531,13 @@ sub check {
           $self->{ifDescr});
     }
   } elsif ($self->mode =~ /device::interfaces::availability/) {
+    $self->{ifStatusDuration} = 
+        $self->human_timeticks($self->{ifStatusDuration});
     my $info = sprintf '%s is %savailable (%s/%s, since %s)',
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
         $self->{ifOperStatus}, $self->{ifAdminStatus},
-        scalar localtime ();
+        $self->{ifStatusDuration};
     $self->add_info($info);
-    $self->{ifStatusDuration} = $NWC::Device::uptime - $self->timeticks($self->{ifLastChange});
   }
 }
 
