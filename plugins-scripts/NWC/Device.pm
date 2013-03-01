@@ -58,6 +58,9 @@ sub new {
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'NWC::Nortel';
         $self->debug('using NWC::Nortel');
+      } elsif ($self->{productname} =~ /AT-GS/i) {
+        bless $self, 'NWC::AlliedTelesyn';
+        $self->debug('using NWC::AlliedTelesyn');
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
@@ -323,7 +326,7 @@ sub timeticks {
   } elsif ($timestr =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
     # Timeticks: 9:33:07.27
     $timestr = $1 * 3600 + $2 * 60 + $3;
-  } elsif ($timestr =~ /(\d+)\s*hours.*?(\d+):(\d+)\.(\d+)/) {
+  } elsif ($timestr =~ /(\d+)\s*hour[s]*.*?(\d+):(\d+)\.(\d+)/) {
     # Timeticks: 3 hours, 42:17.98
     $timestr = $1 * 3600 + $2 * 60 + $3;
   } elsif ($timestr =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
