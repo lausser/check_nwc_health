@@ -810,6 +810,14 @@ sub get_snmp_table_objects {
             -endindex => $endindex,
             -columns => \@columns,
         );
+        if (! $result) {
+          $result = $self->get_entries(
+              -startindex => $startindex,
+              -endindex => $endindex,
+              -columns => \@columns,
+              -maxrepetitions => 0,
+          );
+        }
       } else {
         foreach my $ifidx (@sortedindices) {
           my $ifresult = $self->get_entries(
@@ -982,6 +990,10 @@ sub get_entries {
         if defined $params{'-endindex'};
     $newparams{'-columns'} = $params{'-columns'};
     $result = $NWC::Device::session->get_entries(%newparams);
+    if (! $result) {
+      $newparams{'-maxrepetitions'} = 0;
+      $result = $NWC::Device::session->get_entries(%newparams);
+    }
     foreach my $key (keys %{$result}) {
       $self->add_rawdata($key, $result->{$key});
     }
