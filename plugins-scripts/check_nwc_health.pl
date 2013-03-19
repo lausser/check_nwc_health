@@ -1,6 +1,7 @@
 #! /usr/bin/perl
 
 use strict;
+use Digest::MD5 qw(md5_hex);;
 
 use vars qw ($PROGNAME $REVISION $CONTACT $TIMEOUT $STATEFILESDIR $needs_restart %commandline);
 
@@ -356,7 +357,7 @@ if ($plugin->opts->community) {
   }
 }
 if ($plugin->opts->snmpwalk) {
-  $plugin->override_opt('hostname', 'snmpwalk.file') 
+  $plugin->override_opt('hostname', 'snmpwalk.file'.md5_hex($plugin->opts->snmpwalk)) 
 }
 if (! $plugin->opts->statefilesdir) {
   if (exists $ENV{OMD_ROOT}) {

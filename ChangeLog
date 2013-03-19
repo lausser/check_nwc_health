@@ -2,6 +2,11 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-03-19 1.9.6
+- fixed a bug in interface-*
+- speedup in interface-* (with --name and 64bit)
+- added a hostname/community hash to statefiles
+
 2013-02-24 1.9.5
 - add interface-availability
 

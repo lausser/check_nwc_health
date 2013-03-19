@@ -3,6 +3,8 @@ package NWC::Device;
 use strict;
 use IO::File;
 use File::Basename;
+use Digest::MD5  qw(md5_hex);
+
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 {
@@ -799,27 +801,52 @@ sub get_snmp_table_objects {
               ] } map { join('.', @{$_})} @{$indices};
       my $startindex = $sortedindices[0];
       my $endindex = $sortedindices[$#sortedindices];
-      if (1) {
+      if (0) {
+        # holzweg. dicke ciscos liefern unvollstaendiges resultat, d.h.
+        # bei 138,19,157 kommt nur 138..144, dann ist schluss.
+        # maxrepetitions bringt nichts.
         $result = $self->get_entries(
             -startindex => $startindex,
             -endindex => $endindex,
             -columns => \@columns,
         );
       } else {
-        $result = $self->get_table(
-            -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$table});
+        foreach my $ifidx (@sortedindices) {
+          my $ifresult = $self->get_entries(
+              -startindex => $ifidx,
+              -endindex => $ifidx,
+              -columns => \@columns,
+          );
+          map { $result->{$_} = $ifresult->{$_} }
+              keys %{$ifresult};
+        }
       }
-      if ($augmenting_table && 
+      if ($augmenting_table &&
           exists $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table}) {
-        my $augmented_result = $self->get_table(
-            -baseoid => $NWC::Device::mibs_and_oids->{$mib}->{$augmenting_table});
-        map { $result->{$_} = $augmented_result->{$_} }
-            keys %{$augmented_result};
+        my $entry = $augmenting_table;
+        $entry =~ s/Table/Entry/g;
+        my $eoid = $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.';
+        my $eoidlen = length($eoid);
+        my @columns = map {
+            $NWC::Device::mibs_and_oids->{$mib}->{$_}
+        } grep {
+          substr($NWC::Device::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
+              $NWC::Device::mibs_and_oids->{$mib}->{$entry}.'.'
+        } keys %{$NWC::Device::mibs_and_oids->{$mib}};
+        foreach my $ifidx (@sortedindices) {
+          my $ifresult = $self->get_entries(
+              -startindex => $ifidx,
+              -endindex => $ifidx,
+              -columns => \@columns,
+          );
+          map { $result->{$_} = $ifresult->{$_} }
+              keys %{$ifresult};
+        }
       }
       # now we have numerical_oid+index => value
       # needs to become symboic_oid => value
-      #my @indices = 
-      #    $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
+      #my @indices =
+      # $self->get_indices($NWC::Device::mibs_and_oids->{$mib}->{$entry});
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
     }
@@ -1138,6 +1165,28 @@ sub create_statefilesdir {
   }
 }
 
+sub create_statefile {
+  my $self = shift;
+  my %params = @_;
+  my $extension = "";
+  if ($self->opts->snmpwalk) {
+    $self->override_opt('hostname',
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
+  }
+  #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
+  $extension .= $params{name} ? '_'.$params{name} : '';
+  if ($self->opts->community) { 
+    $extension .= md5_hex($self->opts->community);
+  }
+  $extension =~ s/\//_/g;
+  $extension =~ s/\(/_/g;
+  $extension =~ s/\)/_/g;
+  $extension =~ s/\*/_/g;
+  $extension =~ s/\s/_/g;
+  return sprintf "%s/%s_%s%s", $NWC::Device::statefilesdir,
+      $self->opts->hostname, $self->opts->mode, lc $extension;
+}
+
 sub schimpf {
   my $self = shift;
   printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $NWC::Device::statefilesdir;
@@ -1146,18 +1195,8 @@ sub schimpf {
 sub save_state {
   my $self = shift;
   my %params = @_;
-  my $extension = "";
   $self->create_statefilesdir();
-  mkdir $NWC::Device::statefilesdir unless -d $NWC::Device::statefilesdir;
-  #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
-  $extension .= $params{name} ? '_'.$params{name} : '';
-  $extension =~ s/\//_/g;
-  $extension =~ s/\(/_/g;
-  $extension =~ s/\)/_/g;
-  $extension =~ s/\*/_/g;
-  $extension =~ s/\s/_/g;
-  my $statefile = sprintf "%s/%s_%s%s", 
-      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode, lc $extension;
+  my $statefile = $self->create_statefile(%params);
   open(STATE, ">$statefile");
   if ((ref($params{save}) eq "HASH") && exists $params{save}->{timestamp}) {
     $params{save}->{localtime} = scalar localtime $params{save}->{timestamp};
@@ -1171,16 +1210,7 @@ sub save_state {
 sub load_state {
   my $self = shift;
   my %params = @_;
-  my $extension = "";
-  #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
-  $extension .= $params{name} ? '_'.$params{name} : '';
-  $extension =~ s/\//_/g;
-  $extension =~ s/\(/_/g;
-  $extension =~ s/\)/_/g;
-  $extension =~ s/\*/_/g;
-  $extension =~ s/\s/_/g;
-  my $statefile = sprintf "%s/%s_%s%s", 
-      $NWC::Device::statefilesdir, $self->opts->hostname, $self->opts->mode, lc $extension;
+  my $statefile = $self->create_statefile(%params);
   if ( -f $statefile) {
     our $VAR1;
     eval {
@@ -1196,6 +1226,24 @@ sub load_state {
   }
 }
 
+sub create_interface_cache_file {
+  my $self = shift;
+  my $extension = "";
+  if ($self->opts->snmpwalk) {
+    $self->override_opt('hostname',
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
+  }
+  if ($self->opts->community) { 
+    $extension .= md5_hex($self->opts->community);
+  }
+  $extension =~ s/\//_/g;
+  $extension =~ s/\(/_/g;
+  $extension =~ s/\)/_/g;
+  $extension =~ s/\*/_/g;
+  $extension =~ s/\s/_/g;
+  return sprintf "%s/%s_interface_cache_%s", $NWC::Device::statefilesdir,
+      $self->opts->hostname, lc $extension;
+}
 
 sub dumper {
   my $self = shift;

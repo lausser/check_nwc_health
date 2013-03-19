@@ -161,8 +161,7 @@ sub check {
 sub update_interface_cache {
   my $self = shift;
   my $force = shift;
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
+  my $statefile = $self->create_interface_cache_file();
   my $update = time - 3600;
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
     $self->debug('force update of interface cache');
@@ -181,8 +180,7 @@ sub update_interface_cache {
 sub save_interface_cache {
   my $self = shift;
   $self->create_statefilesdir();
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
+  my $statefile = $self->create_interface_cache_file();
   open(STATE, ">$statefile");
 ############################
 # printf ohne %s ????
@@ -195,8 +193,7 @@ sub save_interface_cache {
 
 sub load_interface_cache {
   my $self = shift;
-  my $statefile = lc sprintf "%s/%s_interface_cache",
-      $NWC::Device::statefilesdir, $self->opts->hostname;
+  my $statefile = $self->create_interface_cache_file();
   if ( -f $statefile) {
     our $VAR1;
     eval {
