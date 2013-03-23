@@ -115,6 +115,13 @@ sub new {
       }
     }
   }
+  $self->{method} = 'snmp';
+  if ($self->opts->blacklist &&
+      -f $self->opts->blacklist) {
+    $self->opts->blacklist = do {
+        local (@ARGV, $/) = $self->opts->blacklist; <> };
+  }
+  $NWC::Device::statefilesdir = $self->opts->statefilesdir;
   return $self;
 }
 
@@ -150,14 +157,14 @@ sub init {
     );
     my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
     $NWC::Device::plugin->nagios_exit($code, $message);
+  } elsif ($self->mode =~ /device::interfaces::aggregation::availability/) {
+    my $aggregation = NWC::IFMIB::Component::LinkAggregation->new();
+    #$self->analyze_interface_subsystem();
+    $aggregation->check();
+  } elsif ($self->mode =~ /device::interfaces/) {
+    $self->analyze_interface_subsystem();
+    $self->check_interface_subsystem();
   }
-  $self->{method} = 'snmp';
-  if ($self->opts->blacklist &&
-      -f $self->opts->blacklist) {
-    $self->opts->blacklist = do {
-        local (@ARGV, $/) = $self->opts->blacklist; <> };
-  }
-  $NWC::Device::statefilesdir = $self->opts->statefilesdir;
 }
 
 sub check_snmp_and_model {
@@ -1585,6 +1592,58 @@ sub load_cache {
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{$cache} = $VAR1;
   }
+}
+
+sub analyze_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem} =
+      NWC::IFMIB::Component::InterfaceSubsystem->new();
+}
+
+sub check_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem}->check();
+  $self->{components}->{interface_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub shinken_interface_subsystem {
+  my $self = shift;
+  my $attr = sprintf "%s", join(',', map {
+      sprintf '%s$(%s)$$()$', $_->{ifDescr}, $_->{ifIndex}
+  } @{$self->{components}->{interface_subsystem}->{interfaces}});
+  printf <<'EOEO', $self->opts->hostname(), $self->opts->hostname(), $attr;
+define host {
+  host_name                     %s
+  address                       %s
+  use                           default-host
+  _interfaces                   %s
+
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_cpu
+  check_command                 check_nwc_health!cpu-load!80%%!90%%
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_mem
+  check_command                 check_nwc_health!memory-usage!80%%!90%%
+}
+EOEO
+  printf <<'EOEO', $self->opts->hostname();
+define service {
+  host_name                     %s
+  service_description           net_ifusage_$KEY$
+  check_command                 check_nwc_health!interface-usage!$VALUE1$!$VALUE2$
+  duplicate_foreach             _interfaces
+  default_value                 80%%|90%%
+}
+EOEO
 }
 
 

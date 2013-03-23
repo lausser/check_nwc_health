@@ -58,6 +58,7 @@ EXTRA_MODULES=\
   NWC/SecureOS.pm \
   NWC/HSRP/Component/HSRPSubsystem.pm \
   NWC/HSRP.pm \
+  NWC/IFMIB/Component/LinkAggregation.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \
   NWC/IFMIB.pm \
   NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
