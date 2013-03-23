@@ -164,6 +164,13 @@ $plugin->add_arg(
     default => 161,
 );
 $plugin->add_arg(
+    spec => 'domain=s',
+    help => '--domain
+   The transport domain to use (default: udp/ipv4, other possible values: udp6, udp/ipv6, tcp, tcp4, tcp/ipv4, tcp6, tcp/ipv6)',
+    required => 0,
+    default => 'udp',
+);
+$plugin->add_arg(
     spec => 'protocol|P=s',
     help => '--protocol
    The SNMP protocol to use (default: 2c, other possibilities: 1,3)',
