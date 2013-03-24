@@ -164,6 +164,13 @@ $plugin->add_arg(
     default => 161,
 );
 $plugin->add_arg(
+    spec => 'domain=s',
+    help => '--domain
+   The transport domain to use (default: udp/ipv4, other possible values: udp6, udp/ipv6, tcp, tcp4, tcp/ipv4, tcp6, tcp/ipv6)',
+    required => 0,
+    default => 'udp',
+);
+$plugin->add_arg(
     spec => 'protocol|P=s',
     help => '--protocol
    The SNMP protocol to use (default: 2c, other possibilities: 1,3)',
@@ -223,7 +230,13 @@ $modestring",
 $plugin->add_arg(
     spec => 'name=s',
     help => "--name
-   The name of an interface",
+   The name of an interface (ifDescr)",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'alias=s',
+    help => "--alias
+   The alias name of a 64bit-interface (ifAlias)",
     required => 0,
 );
 $plugin->add_arg(

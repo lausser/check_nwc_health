@@ -8,7 +8,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    interface_cache => {},
     interfaces => [],
     blacklisted => 0,
     info => undef,
@@ -24,14 +23,16 @@ sub init {
   my %params = @_;
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
-    foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
-      my ($ifIndex, $ifDescr) = split('#', $ifidxdescr, 2);
+    foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+      my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
+      my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
+      my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
       push(@{$self->{interfaces}},
           NWC::IFMIB::Component::InterfaceSubsystem::Interface->new(
-              #ifIndex => $self->{interface_cache}->{$ifDescr},
-              #ifDescr => $ifDescr,
               ifIndex => $ifIndex,
               ifDescr => $ifDescr,
+              ifName => $ifName,
+              ifAlias => $ifAlias,
           ));
     }
   } else {
@@ -166,11 +167,11 @@ sub update_interface_cache {
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
     $self->debug('force update of interface cache');
     $self->{interface_cache} = {};
-    foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable')) {
+    foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable+ifXTable')) {
       # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
       # alle gleich heissen
-      $self->{interface_cache}->{$_->{ifIndex}.'#'.$_->{ifDescr}} =
-          $_->{ifIndex};
+      $self->{interface_cache}->{$_->{ifIndex}}->{ifDescr} = $_->{ifDescr};
+      $self->{interface_cache}->{$_->{ifIndex}}->{ifAlias} = $_->{ifAlias} if exists $_->{ifAlias};;
     }
     $self->save_interface_cache();
   }
@@ -181,14 +182,16 @@ sub save_interface_cache {
   my $self = shift;
   $self->create_statefilesdir();
   my $statefile = $self->create_interface_cache_file();
-  open(STATE, ">$statefile");
-############################
-# printf ohne %s ????
-############################
-  printf STATE Data::Dumper::Dumper($self->{interface_cache});
-  close STATE;
+  my $tmpfile = $NWC::Device::statefilesdir.'/check_nwc_health_tmp_'.$$;
+  my $fh = IO::File->new();
+  $fh->open(">$tmpfile");
+  $fh->print(Data::Dumper::Dumper($self->{interface_cache}));
+  $fh->flush();
+  $fh->close();
+  my $ren = rename $tmpfile, $statefile;
   $self->debug(sprintf "saved %s to %s",
       Data::Dumper::Dumper($self->{interface_cache}), $statefile);
+
 }
 
 sub load_interface_cache {
@@ -204,33 +207,45 @@ sub load_interface_cache {
     }
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{interface_cache} = $VAR1;
+    eval {
+      foreach (keys %{$self->{interface_cache}}) {
+        /^\d+$/ || die "newrelease";
+      }
+    };
+    if($@) {
+      $self->{interface_cache} = {};
+      unlink $statefile;
+      delete $INC{$statefile};
+      $self->update_interface_cache(1);
+    }
   }
 }
 
 sub get_interface_indices {
   my $self = shift;
   my @indices = ();
-  foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
-    my ($ifindex, $ifdescr) = split('#', $ifidxdescr, 2);
+  foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
+    my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
-        if ($ifdescr =~ /$pattern/i) {
-          push(@indices, [$ifindex]);
+        if ($ifDescr =~ /$pattern/i) {
+          push(@indices, [$ifIndex]);
         }
       } else {
         if ($self->opts->name =~ /^\d+$/) {
-          if ($ifindex == 1 * $self->opts->name) {
+          if ($ifIndex == 1 * $self->opts->name) {
             push(@indices, [1 * $self->opts->name]);
           }
         } else {
-          if (lc $ifdescr eq lc $self->opts->name) {
-            push(@indices, [$ifindex]);
+          if (lc $ifDescr eq lc $self->opts->name) {
+            push(@indices, [$ifIndex]);
           }
         }
       }
     } else {
-      push(@indices, [$ifindex]);
+      push(@indices, [$ifIndex]);
     }
   }
   return @indices;

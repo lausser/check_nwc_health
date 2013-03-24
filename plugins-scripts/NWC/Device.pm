@@ -257,6 +257,9 @@ sub check_snmp_and_model {
       if ($self->opts->port) {
         $params{'-port'} = $self->opts->port;
       }
+      if ($self->opts->domain) {
+        $params{'-domain'} = $self->opts->domain;
+      }
       if ($self->opts->protocol eq '3') {
         $params{'-username'} = $self->opts->username;
         if ($self->opts->authpassword) {
