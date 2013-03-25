@@ -39,15 +39,9 @@ sub init {
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->{num_if} = scalar(@{$self->{components}->{interface_subsystem}->{interfaces}});
-foreach (@{$self->{components}->{interface_subsystem}->{interfaces}}) {
- printf "->%s\n", $_->{ifOperStatus};
-}
     $self->{num_up_if} = scalar(grep { $_->{ifOperStatus} eq "up" } @{$self->{components}->{interface_subsystem}->{interfaces}});
     $self->{num_down_if} = $self->{num_if} - $self->{num_up_if};
     $self->{availability} = $self->{num_if} ? int(100 * $self->{num_up_if} / $self->{num_if}) : 0;
-printf "avai %d\n", $self->{availability};
-printf "found %d interfaces\n", scalar(@{$self->{components}->{interface_subsystem}->{interfaces}});
-
   }
 }
 

@@ -1884,7 +1884,7 @@ $NWC::Device::mibs_and_oids = {
           5 => 'above-max',
           6 => 'absent',
       },
-      # tHE VALUe, -2147483648, represents an unknown quantity
+      # the value, -2147483648, represents an unknown quantity
       # In V2.0, the temperature sensor
       # value will be in Celsius; the fan value will be in RPM
       # (revoluation per minute); and the power supply sensor reading
@@ -1971,8 +1971,8 @@ $NWC::Device::mibs_and_oids = {
         systemStatsGroup => '1.3.6.1.4.1.2021.11',
         ssIndex => '1.3.6.1.4.1.2021.11.1',
         ssErrorName => '1.3.6.1.4.1.2021.11.2',
-        ssSwapIn => '1.3',
-        SSsWApOut => '1.3.6.1.4.1.2021.11.4',
+        ssSwapIn => '1.3.6.1.4.1.2021.11.3',
+        ssSwapOut => '1.3.6.1.4.1.2021.11.4',
         ssIOSent => '1.3.6.1.4.1.2021.11.5',
         ssIOReceive => '1.3.6.1.4.1.2021.11.6',
         ssSysInterrupts => '1.3.6.1.4.1.2021.11.7',
