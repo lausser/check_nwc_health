@@ -63,6 +63,9 @@ sub new {
       } elsif ($self->{productname} =~ /AT-GS/i) {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
+      } elsif ($self->{productname} =~ /AT-\d+GB/i) {
+        bless $self, 'NWC::AlliedTelesyn';
+        $self->debug('using NWC::AlliedTelesyn');
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'NWC::AlliedTelesyn';
         $self->debug('using NWC::AlliedTelesyn');
