@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-03-26 1.9.7.1
+- set automatic thresholds for link-aggregation-availability
+
 2013-03-25 1.9.7
 - added link-aggregation-availability
 

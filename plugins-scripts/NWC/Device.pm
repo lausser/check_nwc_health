@@ -995,6 +995,7 @@ sub get_entries {
   # [-endindex]
   # -columns
   my $result = {};
+  $self->debug(sprintf "get_entries %s", Data::Dumper::Dumper(\%params));
   if (! $self->opts->snmpwalk) {
     my %newparams = ();
     $newparams{'-startindex'} = $params{'-startindex'}

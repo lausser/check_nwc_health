@@ -39,9 +39,11 @@ sub init {
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->{num_if} = scalar(@{$self->{components}->{interface_subsystem}->{interfaces}});
-    $self->{num_up_if} = scalar(grep { $_->{ifOperStatus} eq "up" } @{$self->{components}->{interface_subsystem}->{interfaces}});
-    $self->{num_down_if} = $self->{num_if} - $self->{num_up_if};
-    $self->{availability} = $self->{num_if} ? int(100 * $self->{num_up_if} / $self->{num_if}) : 0;
+$self->{num_if} = 3;
+    $self->{down_if} = [grep { $_->{ifOperStatus} eq "down" } @{$self->{components}->{interface_subsystem}->{interfaces}}];
+    $self->{num_down_if} = scalar(@{$self->{down_if}});
+    $self->{num_up_if} = $self->{num_if} - $self->{num_down_if};
+    $self->{availability} = $self->{num_if} ? (100 * $self->{num_up_if} / $self->{num_if}) : 0;
   }
 }
 
@@ -54,11 +56,16 @@ sub check {
     return;
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
-    my $info = sprintf 'aggregation %s availability is %.2f%%',
+    my $down_info = scalar(@{$self->{down_if}}) ?
+        sprintf " (down: %s)", join(", ", map { $_->{ifDescr} } @{$self->{down_if}}) : "";
+    my $info = sprintf 'aggregation %s availability is %.2f%% (%d of %d)%s',
         $self->{name},
-        $self->{availability};
+        $self->{availability}, $self->{num_up_if}, $self->{num_if},
+        $down_info;
     $self->add_info($info);
-    $self->set_thresholds(warning => 80, critical => 90);
+    my $cavailability = $self->{num_if} ? (100 * 1 / $self->{num_if}) : 0;
+    $cavailability = $cavailability == int($cavailability) ? $cavailability : int($cavailability + 1.0);
+    $self->set_thresholds(warning => '100:', critical => $cavailability.':');
     $self->add_message($self->check_thresholds($self->{availability}), $info);
     $self->add_perfdata(
         label => 'aggr_'.$self->{name}.'_availability',
