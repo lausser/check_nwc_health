@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-04-08 1.9.7.2
+- bugfix, interfaces were shown twice in list-interfaces
+
 2013-03-26 1.9.7.1
 - set automatic thresholds for link-aggregation-availability
 

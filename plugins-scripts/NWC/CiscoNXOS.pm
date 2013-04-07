@@ -36,9 +36,6 @@ sub init {
       $self->analyze_mem_subsystem();
       #$self->auto_blacklist();
       $self->check_mem_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
     } elsif ($self->mode =~ /device::shinken::interface/) {
       $self->analyze_interface_subsystem();
       $self->shinken_interface_subsystem();

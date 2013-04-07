@@ -35,9 +35,6 @@ sub init {
     } elsif ($self->mode =~ /device::security/) {
       $self->analyze_security_subsystem();
       $self->check_security_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
     }
   }
 }

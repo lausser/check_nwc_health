@@ -31,9 +31,6 @@ sub init {
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
     }
   }
 }
