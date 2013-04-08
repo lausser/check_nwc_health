@@ -63,7 +63,7 @@ sub check {
         $down_info;
     $self->add_info($info);
     my $cavailability = $self->{num_if} ? (100 * 1 / $self->{num_if}) : 0;
-    $cavailability = $cavailability == int($cavailability) ? $cavailability : int($cavailability + 1.0);
+    $cavailability = $cavailability == int($cavailability) ? $cavailability + 1: int($cavailability + 1.0);
     $self->set_thresholds(warning => '100:', critical => $cavailability.':');
     $self->add_message($self->check_thresholds($self->{availability}), $info);
     $self->add_perfdata(
