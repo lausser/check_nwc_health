@@ -39,7 +39,6 @@ sub init {
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->{num_if} = scalar(@{$self->{components}->{interface_subsystem}->{interfaces}});
-$self->{num_if} = 3;
     $self->{down_if} = [grep { $_->{ifOperStatus} eq "down" } @{$self->{components}->{interface_subsystem}->{interfaces}}];
     $self->{num_down_if} = scalar(@{$self->{down_if}});
     $self->{num_up_if} = $self->{num_if} - $self->{num_down_if};
