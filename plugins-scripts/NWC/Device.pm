@@ -1196,7 +1196,7 @@ sub create_statefile {
   my %params = @_;
   my $extension = "";
   if ($self->opts->snmpwalk) {
-    $self->override_opt('hostname',
+    $self->opts->override_opt('hostname',
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
   }
   #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
@@ -1256,7 +1256,7 @@ sub create_interface_cache_file {
   my $self = shift;
   my $extension = "";
   if ($self->opts->snmpwalk) {
-    $self->override_opt('hostname',
+    $self->opts->override_opt('hostname',
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
   }
   if ($self->opts->community) { 
