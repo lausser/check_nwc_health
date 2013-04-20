@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-04-20 1.9.7.3
+- fixed a bug in snmpwalk simulation and savestate
+
 2013-04-08 1.9.7.2
 - bugfix, interfaces were shown twice in list-interfaces
 
