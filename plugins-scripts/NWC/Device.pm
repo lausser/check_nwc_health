@@ -344,9 +344,12 @@ sub timeticks {
   } elsif ($timestr =~ /(\d+)\s*hour[s]*.*?(\d+):(\d+)\.(\d+)/) {
     # Timeticks: 3 hours, 42:17.98
     $timestr = $1 * 3600 + $2 * 60 + $3;
-  } elsif ($timestr =~ /(\d+)\s*minutes.*?(\d+)\.(\d+)/) {
+  } elsif ($timestr =~ /(\d+)\s*minute[s]*.*?(\d+)\.(\d+)/) {
     # Timeticks: 36 minutes, 01.96
     $timestr = $1 * 60 + $2;
+  } elsif ($timestr =~ /(\d+)\.\d+\s*second[s]/) {
+    # Timeticks: 01.02 seconds
+    $timestr = $1;
   }
   return $timestr;
 }
