@@ -1007,6 +1007,13 @@ sub get_entries {
     if (! $result) {
       $newparams{'-maxrepetitions'} = 0;
       $result = $NWC::Device::session->get_entries(%newparams);
+      if (! $result) {
+        $self->debug(sprintf "get_entries tries last fallback");
+        delete $newparams{'-endindex'};
+        delete $newparams{'-startindex'};
+        delete $newparams{'-maxrepetitions'};
+        $result = $NWC::Device::session->get_entries(%newparams);
+      }
     }
     foreach my $key (keys %{$result}) {
       $self->add_rawdata($key, $result->{$key});

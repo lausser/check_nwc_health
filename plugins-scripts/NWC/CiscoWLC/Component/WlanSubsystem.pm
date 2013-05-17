@@ -102,6 +102,10 @@ sub check {
         $self->clear_messages(OK);
         $self->add_message(OK, 'no problems') if ! $self->check_messages();
       }
+    } elsif ($self->mode =~ /device::wlan::aps::list/) {
+      foreach (@{$self->{aps}}) {
+        printf "%s\n", $_->{bsnAPName};
+      }
     }
   }
 }
