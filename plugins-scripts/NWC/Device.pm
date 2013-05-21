@@ -81,6 +81,9 @@ sub new {
       } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /Brocade.*ICX/i) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');

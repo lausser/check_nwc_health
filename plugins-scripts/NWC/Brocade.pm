@@ -41,6 +41,10 @@ sub init {
     bless $self, 'NWC::FabOS';
     $self->debug('using NWC::FabOS');
     $self->init();
+  } elsif ($self->{productname} =~ /ICX6/i) {
+    bless $self, 'NWC::Foundry';
+    $self->debug('using NWC::Foundry');
+    $self->init();
   }
 }
 

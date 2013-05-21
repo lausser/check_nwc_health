@@ -93,6 +93,9 @@ EXTRA_MODULES=\
   NWC/SGOS/Component/DiskSubsystem.pm \
   NWC/SGOS/Component/SecuritySubsystem.pm \
   NWC/SGOS.pm \
+  NWC/Foundry/Component/MemSubsystem.pm \
+  NWC/Foundry/Component/CpuSubsystem.pm \
+  NWC/Foundry.pm \
   NWC/Bluecoat.pm \
   NWC/MibsAndOids.pm \
   NWC/Device.pm
