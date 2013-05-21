@@ -30,30 +30,28 @@ sub init {
       snAgGblCpuUtil1MinAvg)) {
     $self->{$_} = $self->get_snmp_object('FOUNDRY-SN-AGENT-MIB', $_);
   }
-  if (scalar(@{$self->{cpus}}) == 0) {
-  }
 }
 
 sub check {
   my $self = shift;
-  $self->overall_check();
-  #if (scalar (@{$self->{cpus}}) == 0) {
-  #} else {
-  #  foreach (@{$self->{cpus}}) {
-  #    $_->check();
-  #  }
-  #}
+  if (scalar (@{$self->{cpus}}) == 0) {
+    $self->overall_check();
+  } else {
+    # snAgentCpuUtilInterval = 1, 5, 60, 300
+    # --lookback can be one of these values, default is 300 (1,5 is a stupid choice)
+    $self->opts->override_opt('lookback', 300) if ! $self->opts->lookback;
+    foreach (grep { $_->{snAgentCpuUtilInterval} eq $self->opts->lookback} @{$self->{cpus}}) {
+      $_->check();
+    }
+  }
 }
 
 sub dump {
   my $self = shift;
   $self->overall_dump();
-  #if (scalar (@{$self->{cpus}}) == 0) {
-  #} else {
-  #  foreach (@{$self->{cpus}}) {
-  #    $_->dump();
-  #  }
-  #}
+  foreach (@{$self->{cpus}}) {
+    $_->dump();
+  }
 }
 
 sub overall_check {
@@ -82,7 +80,6 @@ sub overall_dump {
       snAgGblCpuUtil1MinAvg)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
-  printf "info: %s\n", $self->{info};
   printf "\n";
 }
 
@@ -130,10 +127,19 @@ sub new {
     extendedinfo => undef,
   };
   foreach (qw(snAgentCpuUtilSlotNum snAgentCpuUtilCpuId 
-      snAgentCpuUtilInterval snAgentCpuUtilValue)) {
+      snAgentCpuUtilInterval snAgentCpuUtilValue
+      snAgentCpuUtilPercent snAgentCpuUtil100thPercent)) {
     $self->{$_} = $params{$_};
   }
   bless $self, $class;
+  # newer mibs have snAgentCpuUtilPercent and snAgentCpuUtil100thPercent
+  # snAgentCpuUtilValue is deprecated
+  $self->{snAgentCpuUtilValue} = $self->{snAgentCpuUtil100thPercent} / 100
+      if defined $self->{snAgentCpuUtil100thPercent};
+  # if it is an old mib, watch out. snAgentCpuUtilValue is 100th of a percent
+  # but it seems that sometimes in reality it is percent
+  $self->{snAgentCpuUtilValue} = $self->{snAgentCpuUtilValue} / 100
+      if $self->{snAgentCpuUtilValue} > 100;
   return $self;
 }
 
@@ -141,7 +147,7 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu %s is %.2f', $self->{snAgentCpuUtilSlotNum}, $self->{snAgentCpuUtilValue};
+  my $info = sprintf 'cpu %s usage is %.2f', $self->{snAgentCpuUtilSlotNum}, $self->{snAgentCpuUtilValue};
   $self->add_info($info);
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{snAgentCpuUtilValue}), $info);
@@ -158,10 +164,11 @@ sub dump {
   my $self = shift;
   printf "[CPU_%s]\n", $self->{snAgentCpuUtilSlotNum};
   foreach (qw(snAgentCpuUtilSlotNum snAgentCpuUtilCpuId 
-      snAgentCpuUtilInterval snAgentCpuUtilValue)) {
+      snAgentCpuUtilInterval snAgentCpuUtilValue
+      snAgentCpuUtilPercent snAgentCpuUtil100thPercent)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
-  printf "info: %s\n", $self->{info};
+  printf "info: %s\n", $self->{info} || "unchecked";
   printf "\n";
 }
 

@@ -1,5 +1,5 @@
-package NWC::FabOS::Component::EnvironmentalSubsystem;
-our @ISA = qw(NWC::FabOS);
+package NWC::Foundry::Component::EnvironmentalSubsystem;
+our @ISA = qw(NWC::Foundry);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -13,7 +13,8 @@ sub new {
     method => $params{method},
     condition => $params{condition},
     status => $params{status},
-    sensor_subsystem => undef,
+    powersupply_subsystem => undef,
+    fan_subsystem => undef,
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
@@ -26,14 +27,17 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->{sensor_subsystem} =
-      NWC::FabOS::Component::SensorSubsystem->new(%params);
+  $self->{powersupply_subsystem} =
+      NWC::Foundry::Component::PowersupplySubsystem->new(%params);
+  $self->{fan_subsystem} =
+      NWC::Foundry::Component::FanSubsystem->new(%params);
 }
 
 sub check {
   my $self = shift;
   my $errorfound = 0;
-  $self->{sensor_subsystem}->check();
+  $self->{powersupply_subsystem}->check();
+  $self->{fan_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_message(OK, "environmental hardware working fine");
   }
@@ -41,7 +45,8 @@ sub check {
 
 sub dump {
   my $self = shift;
-  $self->{sensor_subsystem}->dump();
+  $self->{powersupply_subsystem}->dump();
+  $self->{fan_subsystem}->dump();
 }
 
 1;
