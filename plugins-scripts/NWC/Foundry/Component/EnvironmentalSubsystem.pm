@@ -15,6 +15,7 @@ sub new {
     status => $params{status},
     powersupply_subsystem => undef,
     fan_subsystem => undef,
+    temperature_subsystem => undef,
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
@@ -31,6 +32,8 @@ sub init {
       NWC::Foundry::Component::PowersupplySubsystem->new(%params);
   $self->{fan_subsystem} =
       NWC::Foundry::Component::FanSubsystem->new(%params);
+  $self->{temperature_subsystem} =
+      NWC::Foundry::Component::TemperatureSubsystem->new(%params);
 }
 
 sub check {
@@ -38,6 +41,7 @@ sub check {
   my $errorfound = 0;
   $self->{powersupply_subsystem}->check();
   $self->{fan_subsystem}->check();
+  $self->{temperature_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_message(OK, "environmental hardware working fine");
   }
@@ -47,6 +51,7 @@ sub dump {
   my $self = shift;
   $self->{powersupply_subsystem}->dump();
   $self->{fan_subsystem}->dump();
+  $self->{temperature_subsystem}->dump();
 }
 
 1;

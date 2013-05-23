@@ -2860,12 +2860,13 @@ $NWC::Device::mibs_and_oids = {
           3 => 'failure',
       },
       snAgentTempTable => '1.3.6.1.4.1.1991.1.1.2.13.1',
-      snAgentTempSlotNum => '1.3.6.1.4.1.1991.1.1.2.13.1',
+      snAgentTempEntry => '1.3.6.1.4.1.1991.1.1.2.13.1.1',
+      snAgentTempSlotNum => '1.3.6.1.4.1.1991.1.1.2.13.1.1.1',
       # sensor 1 - intake temperature, sensor 2 - exhaust-side temperature
-      snAgentTempSensorId => '1.3.6.1.4.1.1991.1.1.2.13.1',
-      snAgentTempSensorDescr => '1.3.6.1.4.1.1991.1.1.2.13.1',
+      snAgentTempSensorId => '1.3.6.1.4.1.1991.1.1.2.13.1.1.2',
+      snAgentTempSensorDescr => '1.3.6.1.4.1.1991.1.1.2.13.1.1.3',
       # This value is displayed in units of 0.5 Celsius. Valid: 110 - 250
-      snAgentTempValue => '1.3.6.1.4.1.1991.1.1.2.13.1',
+      snAgentTempValue => '1.3.6.1.4.1.1991.1.1.2.13.1.1.4',
   },
 
 

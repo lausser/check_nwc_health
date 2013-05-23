@@ -98,6 +98,7 @@ EXTRA_MODULES=\
   NWC/Foundry/Component/EnvironmentalSubsystem.pm \
   NWC/Foundry/Component/PowersupplySubsystem.pm \
   NWC/Foundry/Component/FanSubsystem.pm \
+  NWC/Foundry/Component/TemperatureSubsystem.pm \
   NWC/Foundry.pm \
   NWC/Bluecoat.pm \
   NWC/MibsAndOids.pm \
