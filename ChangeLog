@@ -4,6 +4,7 @@
 
 2013-05-23 1.9.8
 - add Brocade Communications Systems, Inc. ICX6610-24-HPOE, IronWare 
+- bugfix in commandline options (Thanks TheCry)
 
 2013-05-17 1.9.7.4
 - added another fallback for snmp-get_entries

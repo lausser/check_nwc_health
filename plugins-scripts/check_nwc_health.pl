@@ -121,6 +121,7 @@ $modestring .= sprintf "\n";
 my $plugin = Nagios::MiniPlugin->new(
     shortname => '',
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
+        '--mode <what-to-do> '.
         '--hostname <network-component> --community <snmp-community>'.
         '  ...]',
     version => $REVISION,
@@ -387,6 +388,8 @@ if (! $plugin->opts->statefilesdir) {
 $plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
 
 $plugin->{info} = []; # gefrickel
+printf "%s\n", Data::Dumper::Dumper($plugin->{opts}->{opts});
+exit;
 
 if ($plugin->opts->mode =~ /^my-([^\-.]+)/) {
   my $param = $plugin->opts->mode;
