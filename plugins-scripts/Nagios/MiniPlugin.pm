@@ -373,10 +373,10 @@ sub getopts {
         return $self->{opts}->{$field};
       };
     }
-    foreach (grep { exists $_->{required} && $_->{required} } @{$self->{_args}}) {
+    foreach (map { $_->{spec} =~ /^([\w\-]+)/; $1; }
+        grep { exists $_->{required} && $_->{required} } @{$self->{_args}}) {
       do { $self->print_usage(); exit 0 } if ! exists $commandline{$_};
     }
-exit;
     foreach (grep { exists $_->{default} } @{$self->{_args}}) {
       $_->{spec} =~ /^([\w\-]+)/;
       my $spec = $1;

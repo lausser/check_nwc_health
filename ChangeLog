@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-05-27 1.9.8.1
+- bugfix for the bugfix in commandline options (Thanks webspace Mario)
+
 2013-05-23 1.9.8
 - add Brocade Communications Systems, Inc. ICX6610-24-HPOE, IronWare 
 - bugfix in commandline options (Thanks TheCry)

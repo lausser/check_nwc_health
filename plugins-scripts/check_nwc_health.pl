@@ -388,8 +388,6 @@ if (! $plugin->opts->statefilesdir) {
 $plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
 
 $plugin->{info} = []; # gefrickel
-printf "%s\n", Data::Dumper::Dumper($plugin->{opts}->{opts});
-exit;
 
 if ($plugin->opts->mode =~ /^my-([^\-.]+)/) {
   my $param = $plugin->opts->mode;
