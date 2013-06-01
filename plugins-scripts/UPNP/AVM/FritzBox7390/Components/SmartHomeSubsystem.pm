@@ -249,7 +249,6 @@ sub check {
       $self->add_message(OK, sprintf "device %s ok", $self->{name});
     }
   } elsif ($self->mode =~ /smarthome::device::energy/) {
-printf "%s\n", Data::Dumper::Dumper($self);
     my $info = sprintf "device %s consumes %.2f watts at %.2f volts",
         $self->{name}, $self->{last_watt}, $self->{last_volt};
     $self->add_info($info);
