@@ -27,35 +27,15 @@ sub init {
       my $name = $self->{device_cache}->{$id}->{name};
       printf "%02d %s\n", $id, $name;
     }
-  } elsif ($self->mode =~ /smarthome::device::status/) {
+  } elsif ($self->mode =~ /smarthome::device/) {
     $self->update_device_cache(0);
     my @indices = $self->get_device_indices();
-printf "indices:%s\n", Data::Dumper::Dumper(\@indices);
     foreach my $id (map {$_->[0]} @indices) {
-      my $html = $self->http_get(
-          sprintf '/net/home_auto_energy_view.lua?device=%d&sub_tab=10', $id);
-#printf "%s\n", $html;
-if ($html =~ /0024498/) {
- printf "i gounf ain\n";
-my $x = '
-<h4>FRITZ!-Aktor</h4><div class="formular"><label style="width:250px;" for="uiULEDeviceUleID" id="LabeluiULEDeviceUleID" >Modell</label><span class="output" style="width: 254px;"><nobr>FRITZ!DECT 200</nobr></span></div><div class="formular"><label style="width:250px;" for="uiULEDeviceUleID" id="LabeluiULEDeviceUleID" >Aktor Identifikationsnummer (AIN)</label><span class="output" style="width: 254px;"><nobr>08441 0044448</nobr></span></div><div class="formular" id="uiShow_Description"><label style="width:250px;" for="uiULEDeviceName" id="LabeluiULEDeviceName" >Name</label><span class="output" style="width: 254px;"><nobr>FRITZ!DECT 200 #1 WZ</nobr></span></div><div class="formular" id="uiShow_Connection"><label style="width:250px;" for="uiULEDeviceConnectState" id="LabeluiULEDeviceConnectState" >Verbindungszustand zur FRITZ!Box</label><nobr><img id="uiDeviceConnectState_16" src="/css/default/images/led_green.gif"  title="Verbunden" style="vertical-align: middle;"></nobr><span id="uiDeviceConnectStateText_"16 class="" style="padding: 0px 100px 0px 5px;vertical-align: middle;">Verbunden</span><span class="" style="padding-right: 20px;vertical-align: middle;">Schaltzustand der Steckdose</span><nobr><img id="uiDeviceSwitchState_16" src="/css/default/images/led_green.gif"  title="an" style="vertical-align: middle;"></nobr><span id="uiDeviceSwitchStateText_16" class="" style="padding-left: 5px;vertical-align: middle;">an</span></div><hr><h4>Energieanzeige für "FRITZ!DECT 200 #1 WZ"</h4>
-';
-# /net/home_auto_query.lua?command=OutletStates&id=id
-# /net/home_auto_query.lua?command=EnergyStats_10&id=id
-printf "my id is %d\n", $id;
-      $html = $self->http_get(
-          sprintf '/net/home_auto_query.lua?id=%d&command=OutletStates', $id);
-printf "%s\n", $html;
-      $html = $self->http_get(
-          sprintf '/net/home_auto_query.lua?id=%d&command=EnergyStats_10&xhr=1&t%d=nocache', $id, time);
-printf "%s\n", $html;
-}
-
+      my %tmp_dev = (id => $id, name => $self->{device_cache}->{$id}->{name});
+      push(@{$self->{smart_home_devices}},
+          UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem::Device->new(%tmp_dev));
     }
-    #push(@{$self->{smart_home_devices}},
-    #    UPNP::AVM::FritzBox7390::Component::SmartHome::Device->new(%tmp_device));
   }
-printf "root:%s\n", Data::Dumper::Dumper($self->{smart_home_devices});
 }
 
 sub check {
@@ -182,9 +162,9 @@ sub get_device_indices {
 }
 
 
-package UPNP::AVM::FritzBox7390::Component::SmartHome::Device;
+package UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem::Device;
 
-our @ISA = qw(UPNP::AVM::FritzBox7390::Component::SmartHome);
+our @ISA = qw(UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -197,8 +177,7 @@ sub new {
     info => undef,
     extendedinfo => undef,
   };
-printf "och %s\n", Data::Dumper::Dumper(\%params);
-  foreach my $param (qw(id on manual connected ain name)) {
+  foreach my $param (qw(id model switched connected ain name)) {
     $self->{$param} = $params{$param};
   }
   bless $self, $class;
@@ -208,4 +187,122 @@ printf "och %s\n", Data::Dumper::Dumper(\%params);
 
 sub init {
   my $self = shift;
+  if ($self->mode =~ /smarthome::device::status/) {
+    my $device = $self->http_get(
+        sprintf '/net/home_auto_energy_view.lua?device=%d&sub_tab=10', $self->{id});
+    $device =~ /Modell<.*?><nobr>(.*?)<\/nobr>/; $self->{model} = $1;
+    $device =~ /\(AIN\)<.*?><nobr>(.*?)<\/nobr>/; $self->{ain} = $1;
+    $device =~ /Name<.*?><nobr>(.*?)<\/nobr>/; $self->{name} = $1;
+    $device =~ /<img id="uiDeviceConnectState.*?\/images\/led_(.*?)\.gif"/; $self->{connected} = $1 eq "green" ? 1 : 0;
+    $device =~ /<img id="uiDeviceSwitchState.*?\/images\/led_(.*?)\.gif"/; $self->{switched} = $1 eq "green" ? 1 : 0;
+  } elsif ($self->mode =~ /smarthome::device::energy/) {
+    my $json = JSON->new->allow_nonref;
+    my $html = $self->http_get(
+        sprintf '/net/home_auto_query.lua?id=%d&command=OutletStates', $self->{id});
+    my $energy = $self->http_get(
+        sprintf '/net/home_auto_query.lua?id=%d&command=EnergyStats_10&xhr=1&t%d=nocache', $self->{id}, time);
+    $energy = $json->decode($energy);
+    my @watts = map { /value_(\d+)/; [$1, $energy->{$_}] } grep /watt_value/, keys %{$energy}; @watts = ([0, 0]) if $#watts == -1;
+    $self->{last_watt} = (map { $_->[1] / 100; } sort { $a->[0] <=> $b->[0] } @watts)[0];
+    my @volts = map { /value_(\d+)/; [$1, $energy->{$_}] } grep /volt_value/, keys %{$energy}; @volts = ([0, 0]) if $#volts == -1;
+    $self->{last_volt} = (map { $_->[1] / 1000; } sort { $a->[0] <=> $b->[0] } @volts)[0];
+    $self->{max_watt} = $energy->{EnStats_max_value} / 100;
+    $self->{min_watt} = $energy->{EnStats_min_value} / 100;
+  } elsif ($self->mode =~ /smarthome::device::consumption/) {
+    my $html = $self->http_get(
+        sprintf '/net/home_auto_energy_view.lua?device=%d&sub_tab=10', $self->{id});
+    my $tree  = HTML::TreeBuilder->new_from_content(Encode::decode_utf8($html));
+    my $table = $tree->look_down(_tag => 'table', id => 'tHAconsumption');
+    my @rows = @{$table->content()};
+    foreach (map {$_->as_HTML();} @rows[1..$#rows]) {
+      if (/Pro Tag.*?>([\d,]+)<.*?>([\d,]+)<.*?>([\d,]+)</) {
+        $self->{d}->{euro} = $1;
+        $self->{d}->{kwh} = $2;
+        $self->{d}->{kgco2} = $3;
+      } elsif (/Pro Monat.*?>([\d,]+)<.*?>([\d,]+)<.*?>([\d,]+)</) {
+        $self->{m}->{euro} = $1;
+        $self->{m}->{kwh} = $2;
+        $self->{m}->{kgco2} = $3;
+      } elsif (/Pro Jahr.*?>([\d,]+)<.*?>([\d,]+)<.*?>([\d,]+)</) {
+        $self->{y}->{euro} = $1;
+        $self->{y}->{kwh} = $2;
+        $self->{y}->{kgco2} = $3;
+      }
+    }
+    foreach my $t (qw(d m y)) {
+      foreach my $u (qw(kwh euro kgco2)) {
+        $self->{$t}->{$u} =~ s/,/./g;
+      }
+    }
+  }
+}
+
+sub check {
+  my $self = shift;
+  if ($self->mode =~ /smarthome::device::status/) {
+    my $info = sprintf "device %s is %sconnected and switched %s",
+        $self->{name}, $self->{connected} ? "" : "not ", $self->{switched} ? "on" : "off";
+    $self->add_info($info);
+    if (! $self->{connected} || ! $self->{switched}) {
+      $self->add_message(CRITICAL, $info);
+    } else {
+      $self->add_message(OK, sprintf "device %s ok", $self->{name});
+    }
+  } elsif ($self->mode =~ /smarthome::device::energy/) {
+printf "%s\n", Data::Dumper::Dumper($self);
+    my $info = sprintf "device %s consumes %.2f watts at %.2f volts",
+        $self->{name}, $self->{last_watt}, $self->{last_volt};
+    $self->add_info($info);
+    $self->set_thresholds(
+        warning => 80 / 100 * 220 * 10, 
+        critical => 90 / 100 * 220 * 10);
+    $self->add_message($self->check_thresholds($self->{last_watt}), $info);
+    $self->add_perfdata(
+        label => 'watt',
+        value => $self->{last_watt},
+        warning => $self->{warning},
+        critical => $self->{critical},
+    );
+    $self->add_perfdata(
+        label => 'watt_min',
+        value => $self->{min_watt},
+    );
+    $self->add_perfdata(
+        label => 'watt_max',
+        value => $self->{max_watt},
+    );
+    $self->add_perfdata(
+        label => 'volt',
+        value => $self->{last_volt},
+    );
+  } elsif ($self->mode =~ /smarthome::device::consumption/) {
+    my $i = 'kwh';
+    my $info = '';
+    $self->set_thresholds(warning => 1000, critical => 1000);
+    if (! $self->opts->units || $self->opts->units eq 'kwh') {
+      $i = 'kwh';
+      $info = sprintf '%s consumes %.2f kwh per day', $self->{name}, $self->{d}->{kwh};
+    } elsif ($self->opts->units eq 'euro') {
+      $i = 'euro';
+      $info = sprintf '%s costs %.2f euro per day', $self->{name}, $self->{d}->{euro};
+    } elsif ($self->opts->units eq 'kgco2') {
+      $i = 'kgco2';
+      $info = sprintf '%s produces %.2f kg co2 per day', $self->{name}, $self->{d}->{kgco2};
+    }
+    $self->add_message($self->check_thresholds($self->{m}->{$i}), $info);
+    foreach (qw(day)) {
+      $self->add_perfdata(
+          label => $i.'_'.$_,
+          value => $self->{substr($_,0,1)}->{$i},
+          warning => $self->{warning},
+          critical => $self->{critical},
+      );
+    }
+    foreach (qw(month year)) {
+      $self->add_perfdata(
+          label => $i.'_'.$_,
+          value => $self->{substr($_,0,1)}->{$i},
+      );
+    }
+  }
 }

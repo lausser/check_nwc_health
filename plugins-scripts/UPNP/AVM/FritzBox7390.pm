@@ -8,7 +8,7 @@ our @ISA = qw(UPNP::AVM);
 
 sub init {
   my $self = shift;
-  foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5)) {
+  foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
     if (! eval "require $module") {
       $self->add_message(UNKNOWN,
           "could not find $module module");
@@ -47,8 +47,6 @@ sub http_get {
   my $self = shift;
   my $page = shift;
   my $ua = LWP::UserAgent->new;
-printf "get poahe%s\n", $page;
-printf "haa %s\n", $page;
   if (! $self->{sid}) {
     my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
     my $resp = $ua->get($loginurl);
@@ -73,16 +71,11 @@ printf "haa %s\n", $page;
     $page .= "?sid=$self->{sid}";
   }
   my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
-printf "poo %s\n", $ecourl;
   my $resp = $ua->get($ecourl);
-#    $resp = $ua->post($ecourl, [
-#        'sid' => [ undef, undef, 'Content' => "$self->{sid}", ],
-#    ]);
   if (! $resp->is_success()) {
     $self->add_message(CRITICAL, $resp->status_line());
   }
-printf "resp is %s\n", $resp;
-  return $resp->as_string();
+  return $resp->content();
 }
 
 sub analyze_smarthome_subsystem {
