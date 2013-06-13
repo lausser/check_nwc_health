@@ -2,8 +2,11 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
-2013-06-12 2.0
+2013-06-12 2.1
 - added "--servertype ifmib" so you can use "--mode interface*" with every kind of ifmib-capable device
+
+2013-06-01 2.0
+- added support for AVM FRITZ!DECT 200 smart plug
 
 2013-05-27 1.9.8.1
 - bugfix for the bugfix in commandline options (Thanks webspace Mario)

@@ -13,6 +13,8 @@ libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
   Nagios/MiniPlugin.pm \
+  UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
+  UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
   UPNP/AVM/FritzBox7390.pm \
   UPNP/AVM.pm \
   UPNP.pm \

@@ -8,8 +8,16 @@ our @ISA = qw(UPNP::AVM);
 
 sub init {
   my $self = shift;
+  foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
+    if (! eval "require $module") {
+      $self->add_message(UNKNOWN,
+          "could not find $module module");
+    }
+  }
+  $self->{sid} = undef;
   $self->{components} = {
-      interface_subsystem => undef,
+    interface_subsystem => undef,
+    smarthome_subsystem => undef,
   };
   if (! $self->check_messages()) {
     ##$self->set_serial();
@@ -28,6 +36,9 @@ sub init {
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_interface_subsystem();
       $self->check_interface_subsystem();
+    } elsif ($self->mode =~ /device::smarthome/) {
+      $self->analyze_smarthome_subsystem();
+      $self->check_smarthome_subsystem();
     }
   }
 }
@@ -35,34 +46,42 @@ sub init {
 sub http_get {
   my $self = shift;
   my $page = shift;
-  require LWP::UserAgent;
-  require Encode;
-  require Digest::MD5;
-  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
-  my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
   my $ua = LWP::UserAgent->new;
-  my $resp = $ua->get($loginurl);
-  my $content = $resp->content();
-  my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
-  my $input = $challenge . '-' . $self->opts->community;
-  Encode::from_to($input, 'ascii', 'utf16le');
-  my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
-  $resp = HTTP::Request->new(POST => $loginurl);
-  $resp->content_type("application/x-www-form-urlencoded");
-  $resp->content("response=$challengeresponse");
-  my $loginresp = $ua->request($resp);
-  $content = $loginresp->content();
-  my $sid = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
-  if (! $loginresp->is_success()) {
-    $self->add_message(CRITICAL, $loginresp->status_line());
+  if (! $self->{sid}) {
+    my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
+    my $resp = $ua->get($loginurl);
+    my $content = $resp->content();
+    my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
+    my $input = $challenge . '-' . $self->opts->community;
+    Encode::from_to($input, 'ascii', 'utf16le');
+    my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
+    $resp = HTTP::Request->new(POST => $loginurl);
+    $resp->content_type("application/x-www-form-urlencoded");
+    $resp->content("response=$challengeresponse");
+    my $loginresp = $ua->request($resp);
+    $content = $loginresp->content();
+    $self->{sid} = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
+    if (! $loginresp->is_success()) {
+      $self->add_message(CRITICAL, $loginresp->status_line());
+    }
   }
-  $resp = $ua->post($ecourl, [
-      'sid' => [ undef, undef, 'Content' => "$sid", ],
-  ]);
+  if ($page =~ /\?/) {
+    $page .= "&sid=$self->{sid}";
+  } else {
+    $page .= "?sid=$self->{sid}";
+  }
+  my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
+  my $resp = $ua->get($ecourl);
   if (! $resp->is_success()) {
     $self->add_message(CRITICAL, $resp->status_line());
   }
-  return $resp->as_string();
+  return $resp->content();
+}
+
+sub analyze_smarthome_subsystem {
+  my $self = shift;
+  $self->{components}->{smarthome_subsystem} =
+      UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem->new();
 }
 
 sub analyze_interface_subsystem {
@@ -71,19 +90,41 @@ sub analyze_interface_subsystem {
       UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem->new();
 }
 
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 sub analyze_cpu_subsystem {
   my $self = shift;
   my $html = $self->http_get('system/ecostat.lua');
   my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
   my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
   $self->{cpu_usage} = $cpu[0];
+}
+
+sub analyze_mem_subsystem {
+  my $self = shift;
+  my $html = $self->http_get('system/ecostat.lua');
+  my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
+  my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_cache_used} = $ramcacheused[0];
+  my $ramphysfree = (grep /StatRAMPhysFree/, split(/\n/, $html))[0];
+  my @ramphysfree = ($ramphysfree =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_phys_free} = $ramphysfree[0];
+  my $ramstrictlyused = (grep /StatRAMStrictlyUsed/, split(/\n/, $html))[0];
+  my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
+  $self->{ram_strictly_used} = $ramstrictlyused[0];
+  $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
+}
+
+sub check_smarthome_subsystem {
+  my $self = shift;
+  $self->{components}->{smarthome_subsystem}->check();
+  $self->{components}->{smarthome_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem}->check();
+  $self->{components}->{interface_subsystem}->dump()
+      if $self->opts->verbose >= 2;
 }
 
 sub check_cpu_subsystem {
@@ -101,21 +142,6 @@ sub check_cpu_subsystem {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub analyze_mem_subsystem {
-  my $self = shift;
-  my $html = $self->http_get('system/ecostat.lua');
-  my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
-  my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_cache_used} = $ramcacheused[0];
-  my $ramphysfree = (grep /StatRAMPhysFree/, split(/\n/, $html))[0];
-  my @ramphysfree = ($ramphysfree =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_phys_free} = $ramphysfree[0];
-  my $ramstrictlyused = (grep /StatRAMStrictlyUsed/, split(/\n/, $html))[0];
-  my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_strictly_used} = $ramstrictlyused[0];
-  $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
 }
 
 sub check_mem_subsystem {
@@ -138,178 +164,4 @@ sub check_mem_subsystem {
 
 
 
-
-
-
-package UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem;
-our @ISA = qw(NWC::IFMIB);
-
-use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    interface_cache => {},
-    interfaces => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  $self->init(%params);
-  return $self;
-}
-
-sub init {
-  my $self = shift;
-  my %params = @_;
-  if ($self->mode =~ /device::interfaces::list/) {
-    $self->update_interface_cache(1);
-    foreach my $ifidxdescr (keys %{$self->{interface_cache}}) {
-      my ($ifIndex, $ifDescr) = split('#', $ifidxdescr, 2);
-      push(@{$self->{interfaces}},
-          NWC::IFMIB::Component::InterfaceSubsystem::Interface->new(
-              #ifIndex => $self->{interface_cache}->{$ifDescr},
-              #ifDescr => $ifDescr,
-              ifIndex => $ifIndex,
-              ifDescr => $ifDescr,
-          ));
-    }
-  } else {
-    $self->{ifDescr} = "WAN";
-    $self->{ExternalIPAddress} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
-      -> GetExternalIPAddress()
-      -> result;
-    $self->{ConnectionStatus} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
-      -> GetStatusInfo()
-      -> valueof("//GetStatusInfoResponse/NewConnectionStatus");;
-    $self->{PhysicalLinkStatus} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
-      -> GetCommonLinkProperties()
-      -> valueof("//GetCommonLinkPropertiesResponse/NewPhysicalLinkStatus");
-    $self->{Layer1UpstreamMaxBitRate} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
-      -> GetCommonLinkProperties()
-      -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1UpstreamMaxBitRate");
-    $self->{Layer1DownstreamMaxBitRate} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
-      -> GetCommonLinkProperties()
-      -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1DownstreamMaxBitRate");
-    $self->{TotalBytesSent} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
-      -> GetTotalBytesSent()
-      -> result;
-    $self->{TotalBytesReceived} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
-      -> GetTotalBytesReceived()
-      -> result;
-  
-    if ($self->mode =~ /device::interfaces::usage/) {
-      $self->valdiff({name => $self->{ifDescr}}, qw(TotalBytesSent TotalBytesReceived));
-      $self->{inputUtilization} = $self->{delta_TotalBytesReceived} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->{Layer1DownstreamMaxBitRate});
-      $self->{outputUtilization} = $self->{delta_TotalBytesSent} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->{Layer1UpstreamMaxBitRate});
-      $self->{inputRate} = $self->{delta_TotalBytesReceived} / $self->{delta_timestamp};
-      $self->{outputRate} = $self->{delta_TotalBytesSent} / $self->{delta_timestamp};
-      my $factor = 1/8; # default Bits
-      if ($self->opts->units) {
-        if ($self->opts->units eq "GB") {
-          $factor = 1024 * 1024 * 1024;
-        } elsif ($self->opts->units eq "MB") {
-          $factor = 1024 * 1024;
-        } elsif ($self->opts->units eq "KB") {
-          $factor = 1024;
-        } elsif ($self->opts->units eq "GBi") {
-          $factor = 1024 * 1024 * 1024 / 8;
-        } elsif ($self->opts->units eq "MBi") {
-          $factor = 1024 * 1024 / 8;
-        } elsif ($self->opts->units eq "KBi") {
-          $factor = 1024 / 8;
-        } elsif ($self->opts->units eq "B") {
-          $factor = 1;
-        } elsif ($self->opts->units eq "Bit") {
-          $factor = 1/8;
-        }
-      }
-      $self->{inputRate} /= $factor;
-      $self->{outputRate} /= $factor;
-      $self->{Layer1DownstreamMaxKBRate} =
-          ($self->{Layer1DownstreamMaxBitRate} / 8) / 1024;
-      $self->{Layer1UpstreamMaxKBRate} =
-          ($self->{Layer1UpstreamMaxBitRate} / 8) / 1024;
-    }
-  }
-}
-
-sub check {
-  my $self = shift;
-  $self->add_info('checking interfaces');
-  if ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
-        $self->{ifDescr},
-        $self->{inputUtilization},
-        sprintf("%.2f%s/s", $self->{inputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits')),
-        $self->{outputUtilization},
-        sprintf("%.2f%s/s", $self->{outputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits'));
-    $self->add_info($info);
-    $self->set_thresholds(warning => 80, critical => 90);
-    my $in = $self->check_thresholds($self->{inputUtilization});
-    my $out = $self->check_thresholds($self->{outputUtilization});
-    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_in',
-        value => $self->{inputUtilization},
-        uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_out',
-        value => $self->{outputUtilization},
-        uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_in',
-        value => $self->{inputRate},
-        uom => $self->opts->units,
-    );
-    $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_out',
-        value => $self->{outputRate},
-        uom => $self->opts->units,
-    );
-  }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[WAN]\n";
-  foreach (qw(TotalBytesSent TotalBytesReceived Layer1DownstreamMaxBitRate Layer1UpstreamMaxBitRate Layer1DownstreamMaxKBRate Layer1UpstreamMaxKBRate)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
 
