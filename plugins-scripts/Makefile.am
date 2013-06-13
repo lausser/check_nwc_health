@@ -102,6 +102,7 @@ EXTRA_MODULES=\
   NWC/Foundry.pm \
   NWC/Bluecoat.pm \
   NWC/MibsAndOids.pm \
+  NWC/Generic.pm \
   NWC/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
 

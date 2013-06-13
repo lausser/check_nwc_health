@@ -46,6 +46,7 @@ sub new {
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
       $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
       $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
+      $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
     if (! $NWC::Device::plugin->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
@@ -114,6 +115,9 @@ sub new {
       } elsif ($self->{productname} =~ /upnp/i) {
         bless $self, 'UPNP';
         $self->debug('using UPNP');
+      } elsif ($self->{productname} eq "ifmib") {
+        bless $self, 'NWC::Generic';
+        $self->debug('using NWC::Generic');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
