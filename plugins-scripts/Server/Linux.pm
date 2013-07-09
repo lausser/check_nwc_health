@@ -61,6 +61,7 @@ sub init {
   if ($self->mode =~ /device::interfaces::list/) {
     foreach (glob "/sys/class/net/*") {
       my $name = $_;
+      next if ! -d $name;
       $name =~ s/.*\///g;
       my $tmpif = {
         ifDescr => $name,
