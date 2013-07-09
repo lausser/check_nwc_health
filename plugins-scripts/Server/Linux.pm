@@ -83,6 +83,9 @@ sub init {
           next;
         }
       }
+      *SAVEERR = *STDERR;
+      open ERR ,'>/dev/null';
+      *STDERR = *ERR;
       my $tmpif = {
         ifDescr => $name,
         ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x} * 1024*1024 : 1024*1024*1024),
@@ -93,8 +96,12 @@ sub init {
         ifOutDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_dropped"; my $x = <>; close ARGV; $x},
         ifOutErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_errors"; my $x = <>; close ARGV; $x},
       };
+      *STDERR = *SAVEERR;
       foreach (keys %{$tmpif}) {
         chomp($tmpif->{$_});
+      }
+      if (defined $self->opts->ifspeed) {
+        $tmpif->{ifSpeed} = $self->opts->ifspeed * 1024*1024;
       }
       push(@{$self->{interfaces}},
         Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
