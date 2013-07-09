@@ -4,6 +4,7 @@
 
 2013-07-09 2.1.1
 - skip non-interface files in /sys/class/net for servertype linuxlocal (Thanks Sven Nierlein)
+- better error handling on unwritable statefiles/dirs
 
 2013-06-12 2.1
 - added "--servertype ifmib" so you can use "--mode interface*" with every kind of ifmib-capable device

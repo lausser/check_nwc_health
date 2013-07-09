@@ -1199,12 +1199,17 @@ sub valdiff {
 sub create_statefilesdir {
   my $self = shift;
   if (! -d $NWC::Device::statefilesdir) {
-    if (! -d dirname($NWC::Device::statefilesdir)) {
-      mkdir dirname($NWC::Device::statefilesdir);
+    eval {
+      use File::Path;
+      mkpath $NWC::Device::statefilesdir;
+    };
+    if ($@ || ! -w $NWC::Device::statefilesdir) {
+      $self->add_message(UNKNOWN,
+        sprintf "cannot create status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $NWC::Device::statefilesdir);
     }
-    mkdir $NWC::Device::statefilesdir;
   } elsif (! -w $NWC::Device::statefilesdir) {
-    $self->schimpf();
+    $self->add_message(UNKNOWN,
+        sprintf "cannot write status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $NWC::Device::statefilesdir);
   }
 }
 
@@ -1240,14 +1245,19 @@ sub save_state {
   my %params = @_;
   $self->create_statefilesdir();
   my $statefile = $self->create_statefile(%params);
-  open(STATE, ">$statefile");
   if ((ref($params{save}) eq "HASH") && exists $params{save}->{timestamp}) {
     $params{save}->{localtime} = scalar localtime $params{save}->{timestamp};
   } 
-  printf STATE Data::Dumper::Dumper($params{save});
-  close STATE; 
-  $self->debug(sprintf "saved %s to %s",
-      Data::Dumper::Dumper($params{save}), $statefile);
+  my $seekfh = new IO::File;
+  if ($seekfh->open($statefile, "w")) {
+    $seekfh->printf("%s", Data::Dumper::Dumper($params{save}));
+    $seekfh->close();
+    $self->debug(sprintf "saved %s to %s",
+        Data::Dumper::Dumper($params{save}), $statefile);
+  } else {
+    $self->add_message(UNKNOWN,
+        sprintf "cannot write status file %s! check your filesystem (permissions/usage/integrity) and disk devices", $statefile);
+  }
 }
 
 sub load_state {
