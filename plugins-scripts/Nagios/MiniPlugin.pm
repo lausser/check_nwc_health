@@ -366,7 +366,7 @@ sub getopts {
     no strict 'refs';
     do { $self->print_help(); exit 0; } if $commandline{help};
     do { $self->print_version(); exit 0 } if $commandline{version};
-    do { $self->print_usage(); exit 0 } if $commandline{usage};
+    do { $self->print_usage(); exit 3 } if $commandline{usage};
     foreach (map { $_->{spec} =~ /^([\w\-]+)/; $1; } @{$self->{_args}}) {
       my $field = $_;
       *{"$field"} = sub {
