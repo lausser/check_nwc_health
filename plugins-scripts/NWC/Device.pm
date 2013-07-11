@@ -46,6 +46,7 @@ sub new {
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
       $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
       $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
+      $self->{productname} = 'checkpoint' if $self->opts->servertype eq 'checkpoint';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
     if (! $NWC::Device::plugin->check_messages()) {
@@ -103,7 +104,7 @@ sub new {
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'NWC::HP';
         $self->debug('using NWC::HP');
-      } elsif ($self->{productname} =~ /Check\s*Point/i) {
+      } elsif ($self->{productname} =~ /(cpx86_64)|(Check\s*Point)/i) {
         bless $self, 'NWC::CheckPoint';
         $self->debug('using NWC::CheckPoint');
       } elsif ($self->{productname} =~ /Blue\s*Coat/i) {

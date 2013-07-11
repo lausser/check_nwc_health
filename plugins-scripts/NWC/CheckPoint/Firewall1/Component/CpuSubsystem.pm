@@ -22,7 +22,7 @@ sub init {
   my $self = shift;
   my %params = @_;
   $self->{procUsage} = $self->get_snmp_object('CHECKPOINT-MIB', 'procUsage');
-  $self->{procQueue} = $self->get_snmp_object('CHECKPOINT-MIB', 'procQueue');
+  $self->{procQueue} = $self->valid_request('CHECKPOINT-MIB', 'procQueue');
 }
 
 sub check {
