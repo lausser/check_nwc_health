@@ -86,6 +86,7 @@ EXTRA_MODULES=\
   NWC/CheckPoint/Firewall1/Component/FwSubsystem.pm \
   NWC/CheckPoint/Firewall1/Component/HaSubsystem.pm \
   NWC/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/MemSubsystem.pm \
   NWC/CheckPoint/Firewall1.pm \
   NWC/CheckPoint.pm \
   NWC/SGOS/Component/MemSubsystem.pm \

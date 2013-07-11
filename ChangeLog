@@ -2,6 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-07-11 2.2
+- add memory-usage for checkpoint
+- add detection for cpx
+
 2013-07-09 2.1.1
 - skip non-interface files in /sys/class/net for servertype linuxlocal (Thanks Sven Nierlein)
 - better error handling on unwritable statefiles/dirs

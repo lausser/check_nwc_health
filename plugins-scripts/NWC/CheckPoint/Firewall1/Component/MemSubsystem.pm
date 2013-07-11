@@ -1,5 +1,5 @@
-package NWC::HP::Procurve::Component::MemSubsystem;
-our @ISA = qw(NWC::HP::Procurve::Component::EnvironmentalSubsystem);
+package NWC::CheckPoint::Firewall1::Component::MemSubsystem;
+our @ISA = qw(NWC::CheckPoint::Firewall1);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
@@ -8,8 +8,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    sensors => [],
-    sensorthresholds => [],
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
@@ -21,89 +19,41 @@ sub new {
 
 sub init {
   my $self = shift;
-  my $sensors = {};
-  foreach ($self->get_snmp_table_objects(
-      'NETSWITCH-MIB', 'hpLocalMemTable')) {
-    push(@{$self->{mem}}, 
-        NWC::HP::Procurve::Component::MemSubsystem::Memory->new(%{$_}));
-  }
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking memory');
-  $self->blacklist('m', '');
-  if (scalar (@{$self->{mem}}) == 0) {
-  } else {
-    foreach (@{$self->{mem}}) {
-      $_->check();
-    }
-  }
-}
-
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{mem}}) {
-    $_->dump();
-  }
-}
-
-
-package NWC::HP::Procurve::Component::MemSubsystem::Memory;
-our @ISA = qw(NWC::HP::Procurve::Component::MemSubsystem);
-
-use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(hpLocalMemSlotIndex  hpLocalMemSlabCnt
-      hpLocalMemFreeSegCnt hpLocalMemAllocSegCnt hpLocalMemTotalBytes
-      hpLocalMemFreeBytes hpLocalMemAllocBytes)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
+  my $type = 0;
+  $self->{total_memory} = $self->get_snmp_object(
+      'CHECKPOINT-MIB', 'memTotalReal64');
+  $self->{free_memory} = $self->get_snmp_object(
+      'CHECKPOINT-MIB', 'memFreeReal64');
+  $self->{memory_usage} = $self->{free_memory} ? 
+      ($self->{free_memory} / $self->{total_memory} * 100) : 100;
 }
 
 sub check {
   my $self = shift;
-  $self->blacklist('m', $self->{hpicfMemIndex});
-  $self->{usage} = $self->{hpLocalMemAllocBytes} / 
-      $self->{hpLocalMemTotalBytes} * 100;
-  my $info = sprintf 'memory %s usage is %.2f',
-      $self->{hpLocalMemSlotIndex},
-      $self->{usage};
+  my $info = sprintf 'memory usage is %.2f%%',
+      $self->{memory_usage};
   $self->add_info($info);
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{usage}), $info);
+  $self->add_message($self->check_thresholds($self->{memory_usage}), $info);
   $self->add_perfdata(
-      label => 'memory_'.$self->{hpLocalMemSlotIndex}.'_usage',
-      value => $self->{usage},
+      label => 'memory_usage',
+      value => $self->{memory_usage},
       uom => '%',
       warning => $self->{warning},
-      critical => $self->{critical}
+      critical => $self->{critical},
   );
 }
 
 sub dump {
   my $self = shift;
-  printf "[MEM%s]\n", $self->{hpLocalMemSlotIndex};
-  foreach (qw(hpLocalMemSlotIndex  hpLocalMemSlabCnt
-      hpLocalMemFreeSegCnt hpLocalMemAllocSegCnt hpLocalMemTotalBytes
-      hpLocalMemFreeBytes hpLocalMemAllocBytes)) {
-    printf "%s: %s\n", $_, $self->{$_};
+  printf "[MEM]\n";
+  foreach (qw(memory_usage total_memory free_memory)) {
+    if (exists $self->{$_}) {
+      printf "%s: %s\n", $_, $self->{$_};
+    }
   }
   printf "info: %s\n", $self->{info};
   printf "\n";
 }
-
 

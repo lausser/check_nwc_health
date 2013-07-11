@@ -2594,6 +2594,15 @@ $NWC::Device::mibs_and_oids = {
 
       mgStatShortDescr => '1.3.6.1.4.1.2620.1.7.102.0',
       mgStatLongDescr => '1.3.6.1.4.1.2620.1.7.103.0',
+
+      memTotalVirtual64 => '1.3.6.1.4.1.2620.1.6.7.4.1.0',
+      memActiveVirtual64 => '1.3.6.1.4.1.2620.1.6.7.4.2.0',
+      memTotalReal64 => '1.3.6.1.4.1.2620.1.6.7.4.3.0',
+      memActiveReal64 => '1.3.6.1.4.1.2620.1.6.7.4.4.0',
+      memFreeReal64 => '1.3.6.1.4.1.2620.1.6.7.4.5.0',
+      memSwapsSec64 => '1.3.6.1.4.1.2620.1.6.7.4.6.0',
+      memDiskTransfers64 => '1.3.6.1.4.1.2620.1.6.7.4.7.0',
+
   },
   'NETSCREEN-RESOURCE-MIB' => {
       nsResCpuAvg => '1.3.6.1.4.1.3224.16.1.1.0',
