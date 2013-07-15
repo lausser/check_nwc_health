@@ -14,7 +14,7 @@ sub init {
   my $self = shift;
   my %params = @_;
   $self->SUPER::init(%params);
-  if ($self->{productname} =~ /(FireWall\-1\s)|(cpx86_64)/i) {
+  if ($self->{productname} =~ /(FireWall\-1\s)|(cpx86_64)|(Linux.*\dcp )/i) {
     bless $self, 'NWC::CheckPoint::Firewall1';
     $self->debug('using NWC::CheckPoint::Firewall1');
   }

@@ -104,7 +104,7 @@ sub new {
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'NWC::HP';
         $self->debug('using NWC::HP');
-      } elsif ($self->{productname} =~ /(cpx86_64)|(Check\s*Point)/i) {
+      } elsif ($self->{productname} =~ /(cpx86_64)|(Check\s*Point)|(Linux.*\dcp )/i) {
         bless $self, 'NWC::CheckPoint';
         $self->debug('using NWC::CheckPoint');
       } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
