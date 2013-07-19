@@ -88,7 +88,7 @@ sub init {
       *STDERR = *ERR;
       my $tmpif = {
         ifDescr => $name,
-        ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x} * 1024*1024 : 1024*1024*1024),
+        ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x} * 1024*1024 : undef),
         ifInOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_bytes"; my $x = <>; close ARGV; $x},
         ifInDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_dropped"; my $x = <>; close ARGV; $x},
         ifInErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_errors"; my $x = <>; close ARGV; $x},
@@ -98,13 +98,17 @@ sub init {
       };
       *STDERR = *SAVEERR;
       foreach (keys %{$tmpif}) {
-        chomp($tmpif->{$_});
+        chomp($tmpif->{$_}) if defined $tmpif->{$_};
       }
       if (defined $self->opts->ifspeed) {
         $tmpif->{ifSpeed} = $self->opts->ifspeed * 1024*1024;
       }
-      push(@{$self->{interfaces}},
-        Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+      if (! defined $tmpif->{ifSpeed}) {
+        $self->add_message(UNKNOWN, sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
+      } else {
+        push(@{$self->{interfaces}},
+          Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+      }
     }
   }
 }
