@@ -18,6 +18,10 @@ sub init {
   if ($self->{productname} =~ /NetScreen/i) {
     bless $self, 'NWC::Juniper::NetScreen';
     $self->debug('using NWC::Juniper::NetScreen');
+  } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
+    # Juniper Networks,Inc,MAG-4610,7.2R10
+    bless $self, 'NWC::Juniper::IVE';
+    $self->debug('using NWC::Juniper::IVE');
   }
   $self->init(%params);
 }
