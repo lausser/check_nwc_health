@@ -89,6 +89,11 @@ sub new {
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
+        # Juniper Networks,Inc,MAG-4610,7.2R10
+        # bekommt Juniper::IVE
+        bless $self, 'NWC::Juniper';
+        $self->debug('using NWC::Juniper');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'NWC::Juniper';
         $self->debug('using NWC::Juniper');
