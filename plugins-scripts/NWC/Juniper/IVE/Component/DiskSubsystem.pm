@@ -23,7 +23,7 @@ sub init {
   my $self = shift;
   my $disks = {};
   $self->{diskFullPercent} = 
-      $self->get_snmp_table_object('JUNIPER-IVE-MIB', 'diskFullPercent');
+      $self->get_snmp_object('JUNIPER-IVE-MIB', 'diskFullPercent');
 }
 
 sub check {
@@ -32,9 +32,9 @@ sub check {
   $self->add_info('checking disks');
   $self->blacklist('di', '');
   $self->add_info(sprintf 'disk is %.2f%% full',
-      $self->{diskFullPercent};
+      $self->{diskFullPercent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{diskFullPercent}), $info);
+  $self->add_message($self->check_thresholds($self->{diskFullPercent}), $self->{info});
   $self->add_perfdata(
       label => 'disk_usage',
       value => $self->{diskFullPercent},
@@ -42,7 +42,6 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-
 }
 
 sub dump {

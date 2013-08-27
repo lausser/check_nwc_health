@@ -28,7 +28,8 @@ sub init {
   if (! $self->check_messages()) {
     ##$self->set_serial();
     if ($self->mode =~ /device::hardware::health/) {
-      $self->no_such_mode();
+      $self->analyze_environmental_subsystem();
+      $self->check_environmental_subsystem();
     } elsif ($self->mode =~ /device::hardware::load/) {
       $self->analyze_cpu_subsystem();
       $self->check_cpu_subsystem();
@@ -78,6 +79,19 @@ sub check_cpu_subsystem {
   my $self = shift;
   $self->{components}->{cpu_subsystem}->check();
   $self->{components}->{cpu_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub analyze_environmental_subsystem {
+  my $self = shift;
+  $self->{components}->{environmental_subsystem} =
+      NWC::Juniper::IVE::Component::EnvironmentalSubsystem->new();
+}
+
+sub check_environmental_subsystem {
+  my $self = shift;
+  $self->{components}->{environmental_subsystem}->check();
+  $self->{components}->{environmental_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }
 

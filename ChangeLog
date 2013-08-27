@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-08-27 2.3
+- add Juniper IVE (ex. Pulse-Gateway MAG4610)
+
 2013-07-11 2.2
 - add memory-usage for checkpoint
 - add detection for cpx

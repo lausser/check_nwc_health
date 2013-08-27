@@ -42,6 +42,11 @@ EXTRA_MODULES=\
   NWC/Juniper/NetScreen/Component/CpuSubsystem.pm \
   NWC/Juniper/NetScreen/Component/MemSubsystem.pm \
   NWC/Juniper/NetScreen.pm \
+  NWC/Juniper/IVE/Component/MemSubsystem.pm \
+  NWC/Juniper/IVE/Component/CpuSubsystem.pm \
+  NWC/Juniper/IVE/Component/EnvironmentalSubsystem.pm \
+  NWC/Juniper/IVE/Component/DiskSubsystem.pm \
+  NWC/Juniper/IVE.pm \
   NWC/Juniper.pm \
   NWC/AlliedTelesyn.pm \
   NWC/FabOS/Component/MemSubsystem.pm \
