@@ -35,8 +35,7 @@ sub check {
   my $info = sprintf 'memory usage is %.2f%%, swap usage is %.2f%%',
       $self->{iveMemoryUtil}, $self->{iveSwapUtil};
   $self->add_info($info);
-  $self->set_thresholds(warning => 80,
-      critical => 90);
+  $self->set_thresholds(warning => 90, critical => 95);
   $self->add_message($self->check_thresholds($self->{iveMemoryUtil}),
       sprintf 'memory usage is %.2f%%', $self->{iveMemoryUtil});
   $self->add_perfdata(
@@ -46,8 +45,7 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical}
   );
-  $self->set_thresholds(warning => 5,
-      critical => 10);
+  $self->set_thresholds(warning => 5, critical => 10);
   $self->add_message($self->check_thresholds($self->{iveSwapUtil}),
       sprintf 'swap usage is %.2f%%', $self->{iveSwapUtil});
   $self->add_perfdata(
