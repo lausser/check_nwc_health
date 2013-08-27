@@ -16,6 +16,7 @@ sub init {
       memory_subsystem => undef,
       disk_subsystem => undef,
       environmental_subsystem => undef,
+      connection_subsystem => undef,
   };
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
@@ -42,6 +43,9 @@ sub init {
     } elsif ($self->mode =~ /device::hsrp/) {
       $self->analyze_hsrp_subsystem();
       $self->check_hsrp_subsystem();
+    } elsif ($self->mode =~ /device::users/) {
+      $self->analyze_connection_subsystem();
+      $self->check_connection_subsystem();
     }
   }
 }
@@ -76,6 +80,12 @@ sub analyze_mem_subsystem {
       NWC::CiscoIOS::Component::MemSubsystem->new();
 }
 
+sub analyze_connection_subsystem {
+  my $self = shift;
+  $self->{components}->{connection_subsystem} =
+      NWC::CiscoIOS::Component::ConnectionSubsystem->new();
+}
+
 sub check_hsrp_subsystem {
   my $self = shift;
   $self->{components}->{hsrp}->check();
@@ -108,6 +118,13 @@ sub check_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem}->check();
   $self->{components}->{mem_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_connection_subsystem {
+  my $self = shift;
+  $self->{components}->{connection_subsystem}->check();
+  $self->{components}->{connection_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }
 

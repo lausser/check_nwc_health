@@ -26,6 +26,7 @@ EXTRA_MODULES=\
   NWC/CiscoIOS/Component/SupplySubsystem.pm \
   NWC/CiscoIOS/Component/VoltageSubsystem.pm \
   NWC/CiscoIOS/Component/FanSubsystem.pm \
+  NWC/CiscoIOS/Component/ConnectionSubsystem.pm \
   NWC/CiscoIOS.pm \
   NWC/CiscoNXOS/Component/CpuSubsystem.pm \
   NWC/CiscoNXOS/Component/MemSubsystem.pm \
@@ -46,6 +47,7 @@ EXTRA_MODULES=\
   NWC/Juniper/IVE/Component/CpuSubsystem.pm \
   NWC/Juniper/IVE/Component/EnvironmentalSubsystem.pm \
   NWC/Juniper/IVE/Component/DiskSubsystem.pm \
+  NWC/Juniper/IVE/Component/UserSubsystem.pm \
   NWC/Juniper/IVE.pm \
   NWC/Juniper.pm \
   NWC/AlliedTelesyn.pm \

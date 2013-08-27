@@ -21,6 +21,7 @@ sub init {
       memory_subsystem => undef,
       disk_subsystem => undef,
       environmental_subsystem => undef,
+      user_subsystem => undef,
   };
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
@@ -36,9 +37,9 @@ sub init {
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
+    } elsif ($self->mode =~ /device::users/) {
+      $self->analyze_user_subsystem();
+      $self->check_user_subsystem();
     }
   }
 }
@@ -95,4 +96,16 @@ sub check_environmental_subsystem {
       if $self->opts->verbose >= 2;
 }
 
+sub analyze_user_subsystem {
+  my $self = shift;
+  $self->{components}->{user_subsystem} =
+      NWC::Juniper::IVE::Component::UserSubsystem->new();
+}
+
+sub check_user_subsystem {
+  my $self = shift;
+  $self->{components}->{user_subsystem}->check();
+  $self->{components}->{user_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
 
