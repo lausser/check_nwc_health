@@ -264,8 +264,8 @@ $NWC::Device::mibs_and_oids = {
       cfwConnectionStatServiceDefinition => 'CISCO-FIREWALL-MIB::Services',
       cfwConnectionStatType => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.2',
       cfwConnectionStatDescription => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.3',
-      cfwConnectionStatCount => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.4',
-      cfwConnectionStatValue => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.5',
+      cfwConnectionStatCount => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.4', #Counter
+      cfwConnectionStatValue => '1.3.6.1.4.1.9.9.147.1.2.2.2.1.5', #Gauge
   },
   'AIRESPACE-SWITCHING-MIB' => {
       bsnSwitching => '1.3.6.1.4.1.14179.1',

@@ -78,21 +78,24 @@ sub new {
 
 sub check {
   my $self = shift;
-######repairme
-  $self->blacklist('m', $self->{cfwConnectionStatType});
-  my $info = sprintf 'mempool %s usage is %.2f%%',
-      $self->{ciscoConnectionlName}, $self->{usage};
-  $self->add_info($info);
-  $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{usage}), $info);
-
-  $self->add_perfdata(
-      label => $self->{ciscoConnectionoryPoolName}.'_usage',
-      value => $self->{usage},
-      uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
-  );
+  $self->blacklist('c', $self->{cfwConnectionStatDescription});
+  if ($self->{cfwConnectionStatDescription} !~ /number of connections currently in use/i) {
+    $self->add_blacklist(sprintf 'c:%s', $self->{cfwConnectionStatDescription});
+    $self->add_info(sprintf '%d connections currently in use',
+        $self->{cfwConnectionStatValue}||$self->{cfwConnectionStatCount}, $self->{usage});
+  } else {
+    my $info = sprintf '%d connections currently in use',
+        $self->{cfwConnectionStatValue}, $self->{usage};
+    $self->add_info($info);
+    $self->set_thresholds(warning => 500000, critical => 750000);
+    $self->add_message($self->check_thresholds($self->{cfwConnectionStatValue}), $info);
+    $self->add_perfdata(
+        label => 'connections',
+        value => $self->{cfwConnectionStatValue},
+        warning => $self->{warning},
+        critical => $self->{critical}
+    );
+  }
 }
 
 sub dump {
