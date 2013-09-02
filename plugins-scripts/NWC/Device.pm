@@ -966,6 +966,25 @@ sub make_symbolic {
     }
     push(@entries, $mo);
   }
+  if (@{$indices} and scalar(@{$indices}) == 1 and !defined $indices->[0]->[0]) {
+    my $mo = {};
+    foreach my $symoid
+        (keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
+      my $oid = $NWC::Device::mibs_and_oids->{$mib}->{$symoid};
+      if (ref($oid) ne 'HASH') {
+        if (exists $result->{$oid}) {
+          if (exists $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}) {
+            if (ref($NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}) eq 'HASH') {
+              if (exists $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$oid}}) {
+                $mo->{$symoid} = $NWC::Device::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$oid}};
+                push(@entries, $mo);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   return @entries;
 }
 

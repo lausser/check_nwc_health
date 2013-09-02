@@ -38,6 +38,9 @@ EXTRA_MODULES=\
   NWC/CiscoWLC/Component/EnvironmentalSubsystem.pm \
   NWC/CiscoWLC/Component/WlanSubsystem.pm \
   NWC/CiscoWLC.pm \
+  NWC/CiscoAsyncOS/Component/MemSubsystem.pm \
+  NWC/CiscoAsyncOS/Component/CpuSubsystem.pm \
+  NWC/CiscoAsyncOS.pm \
   NWC/Cisco.pm \
   NWC/Nortel.pm \
   NWC/Juniper/NetScreen/Component/CpuSubsystem.pm \

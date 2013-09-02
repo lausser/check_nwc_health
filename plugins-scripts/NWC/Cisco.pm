@@ -42,6 +42,9 @@ sub init {
   } elsif ($self->{productname} =~ /Cisco Controller/i) {
     bless $self, 'NWC::CiscoWLC';
     $self->debug('using NWC::WLC');
+  } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
+    bless $self, 'NWC::CiscoAsyncOS';
+    $self->debug('using NWC::AsyncOS');
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'NWC::CiscoIOS';
     $self->debug('using NWC::CiscoIOS');
