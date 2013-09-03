@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-09-03 2.4
+- add Cisco IronPort AsyncOS
+
 2013-08-27 2.3
 - add Juniper IVE (ex. Pulse-Gateway MAG4610)
 - add count-connections for cisco asa
