@@ -17,6 +17,7 @@ sub init {
       disk_subsystem => undef,
       environmental_subsystem => undef,
       connection_subsystem => undef,
+      key_subsystem => undef,
   };
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
@@ -37,6 +38,9 @@ sub init {
       $self->analyze_mem_subsystem();
       #$self->auto_blacklist();
       $self->check_mem_subsystem();
+    } elsif ($self->mode =~ /device::licenses::/) {
+      $self->analyze_key_subsystem();
+      $self->check_key_subsystem();
     } elsif ($self->mode =~ /device::shinken::interface/) {
       $self->analyze_interface_subsystem();
       $self->shinken_interface_subsystem();
@@ -62,6 +66,12 @@ sub analyze_mem_subsystem {
       NWC::CiscoAsyncOS::Component::MemSubsystem->new();
 }
 
+sub analyze_key_subsystem {
+  my $self = shift;
+  $self->{components}->{key_subsystem} =
+      NWC::CiscoAsyncOS::Component::KeySubsystem->new();
+}
+
 sub check_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem}->check();
@@ -80,6 +90,13 @@ sub check_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem}->check();
   $self->{components}->{mem_subsystem}->dump()
+      if $self->opts->verbose >= 2;
+}
+
+sub check_key_subsystem {
+  my $self = shift;
+  $self->{components}->{key_subsystem}->check();
+  $self->{components}->{key_subsystem}->dump()
       if $self->opts->verbose >= 2;
 }
 

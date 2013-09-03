@@ -1920,6 +1920,7 @@ $NWC::Device::mibs_and_oids = {
       keyExpirationIndex => '1.3.6.1.4.1.15497.1.1.1.12.1.1',
       keyDescription => '1.3.6.1.4.1.15497.1.1.1.12.1.2',
       keyIsPerpetual => '1.3.6.1.4.1.15497.1.1.1.12.1.3',
+      keyIsPerpetualDefinition => 'SNMPv2-TC-v1::TruthValue',
       keySecondsUntilExpire => '1.3.6.1.4.1.15497.1.1.1.12.1.4',
       updateTable => '1.3.6.1.4.1.15497.1.1.1.13',
       updateEntry => '1.3.6.1.4.1.15497.1.1.1.13.1',

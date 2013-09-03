@@ -8,7 +8,15 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
-    cpus => [],
+    runtime => $params{runtime},
+    rawdata => $params{rawdata},
+    method => $params{method},
+    condition => $params{condition},
+    status => $params{status},
+    fan_subsystem => undef,
+    temperature_subsystem => undef,
+    powersupply_subsystem => undef,
+    raid_subsystem => undef,
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
@@ -21,43 +29,37 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->{perCentMemoryUtilization} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'perCentMemoryUtilization');
-  $self->{memoryAvailabilityStatus} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'memoryAvailabilityStatus');
+  #
+  # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
+  # 
+  $self->{fan_subsystem} =
+      NWC::CiscoAsyncOS::Component::FanSubsystem->new(%params);
+  $self->{temperature_subsystem} =
+      NWC::CiscoAsyncOS::Component::TemperatureSubsystem->new(%params);
+  $self->{powersupply_subsystem} = 
+      NWC::CiscoAsyncOS::Component::SupplySubsystem->new(%params);
+  $self->{raid_subsystem} = 
+      NWC::CiscoAsyncOS::Component::RaidSubsystem->new(%params);
 }
 
 sub check {
   my $self = shift;
   my $errorfound = 0;
-  $self->add_info('checking memory');
-  $self->blacklist('m');
-  my $info = sprintf 'memory usage is %.2f%% (%s)',
-      $self->{perCentMemoryUtilization}, $self->{memoryAvailabilityStatus};
-  $self->add_info($info);
-  $self->set_thresholds(warning => 80, critical => 90);
-  if ($self->check_thresholds($self->{perCentMemoryUtilization})) {
-    $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}), $info);
-  } elsif ($self->{memoryAvailabilityStatus} eq 'memoryShortage') {
-    $self->add_message(WARNING, $info);
-    $self->set_thresholds(warning => $self->{perCentMemoryUtilization}, critical => 90);
-  } elsif ($self->{memoryAvailabilityStatus} eq 'memoryFull') {
-    $self->add_message(CRITICAL, $info);
-    $self->set_thresholds(warning => 80, critical => $self->{perCentMemoryUtilization});
+  $self->{fan_subsystem}->check();
+  $self->{temperature_subsystem}->check();
+  $self->{powersupply_subsystem}->check();
+  $self->{raid_subsystem}->check();
+  if (! $self->check_messages()) {
+    $self->add_message(OK, "environmental hardware working fine");
   }
-  $self->add_perfdata(
-      label => 'memory_usage',
-      value => $self->{perCentMemoryUtilization},
-      uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
-  );
 }
-
 
 sub dump {
   my $self = shift;
-  printf "[MEMORY]\n";
-  printf "perCentMemoryUtilization: %s\n", $self->{perCentMemoryUtilization};
-  printf "memoryAvailabilityStatus: %s\n", $self->{memoryAvailabilityStatus};
+  $self->{fan_subsystem}->dump();
+  $self->{temperature_subsystem}->dump();
+  $self->{powersupply_subsystem}->dump();
+  $self->{raid_subsystem}->dump();
 }
 
-
+1;

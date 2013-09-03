@@ -38,8 +38,14 @@ EXTRA_MODULES=\
   NWC/CiscoWLC/Component/EnvironmentalSubsystem.pm \
   NWC/CiscoWLC/Component/WlanSubsystem.pm \
   NWC/CiscoWLC.pm \
+  NWC/CiscoAsyncOS/Component/KeySubsystem.pm \
   NWC/CiscoAsyncOS/Component/MemSubsystem.pm \
   NWC/CiscoAsyncOS/Component/CpuSubsystem.pm \
+  NWC/CiscoAsyncOS/Component/TemperatureSubsystem.pm \
+  NWC/CiscoAsyncOS/Component/SupplySubsystem.pm \
+  NWC/CiscoAsyncOS/Component/FanSubsystem.pm \
+  NWC/CiscoAsyncOS/Component/RaidSubsystem.pm \
+  NWC/CiscoAsyncOS/Component/EnvironmentalSubsystem.pm \
   NWC/CiscoAsyncOS.pm \
   NWC/Cisco.pm \
   NWC/Nortel.pm \
