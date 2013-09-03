@@ -93,7 +93,7 @@ sub check {
 
 sub dump {
   my $self = shift;
-  printf "[TEMP_%s]\n", $self->{ciscoEnvMonTemperatureStatusIndex};
+  printf "[TEMP_%s]\n", $self->{temperatureIndex};
   foreach (qw(temperatureIndex degreesCelsius temperatureName)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
