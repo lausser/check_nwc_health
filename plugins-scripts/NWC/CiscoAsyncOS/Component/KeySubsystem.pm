@@ -1,5 +1,5 @@
 package NWC::CiscoAsyncOS::Component::KeySubsystem;
-our @ISA = qw(NWC::CiscoAsyncOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(NWC::CiscoAsyncOS::Component);
 
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };

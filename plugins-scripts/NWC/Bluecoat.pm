@@ -55,6 +55,11 @@ sub init {
     bless $self, 'NWC::SGOS';
     $self->debug('using NWC::SGOS');
     $self->init();
+  } elsif ($self->{productname} =~ /Blue.*Coat.*AV\d+/i) {
+    # product Blue Coat AV510 Series, ProxyAV Version: 3.5.1.1, Release id: 111017
+    bless $self, 'NWC::AVOS';
+    $self->debug('using NWC::AVOS');
+    $self->init();
   }
 }
 
