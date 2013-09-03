@@ -42,6 +42,8 @@ sub check {
   } elsif ($self->{memoryAvailabilityStatus} eq 'memoryFull') {
     $self->add_message(CRITICAL, $info);
     $self->set_thresholds(warning => 80, critical => $self->{perCentMemoryUtilization});
+  } else {
+    $self->add_message(OK, $info);
   }
   $self->add_perfdata(
       label => 'memory_usage',
