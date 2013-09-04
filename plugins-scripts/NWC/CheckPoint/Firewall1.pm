@@ -42,9 +42,6 @@ sub init {
     } elsif ($self->mode =~ /device::mngmt::/) {
       $self->analyze_mngmt_subsystem();
       $self->check_svn_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
     }
   }
 }
@@ -90,68 +87,5 @@ sub analyze_mngmt_subsystem {
   my $self = shift;
   $self->{components}->{mngmt_subsystem} =
       NWC::CheckPoint::Firewall1::Component::MngmtSubsystem->new();
-printf "%s\n", Data::Dumper::Dumper($self->{components});
-}
-
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      NWC::IFMIB::Component::InterfaceSubsystem->new();
-}
-
-sub check_environmental_subsystem {
-  my $self = shift;
-  $self->{components}->{environmental_subsystem}->check();
-  $self->{components}->{environmental_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_cpu_subsystem {
-  my $self = shift;
-  $self->{components}->{cpu_subsystem}->check();
-  $self->{components}->{cpu_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_mem_subsystem {
-  my $self = shift;
-  $self->{components}->{mem_subsystem}->check();
-  $self->{components}->{mem_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_ha_subsystem {
-  my $self = shift;
-  $self->{components}->{ha_subsystem}->check();
-  $self->{components}->{ha_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_fw_subsystem {
-  my $self = shift;
-  $self->{components}->{fw_subsystem}->check();
-  $self->{components}->{fw_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_svn_subsystem {
-  my $self = shift;
-  $self->{components}->{svn_subsystem}->check();
-  $self->{components}->{svn_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_mngmt_subsystem {
-  my $self = shift;
-  $self->{components}->{mngmt_subsystem}->check();
-  $self->{components}->{mngmt_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
 }
 

@@ -39,9 +39,6 @@ sub init {
       $self->analyze_mem_subsystem();
       #$self->auto_blacklist();
       $self->check_mem_subsystem();
-    } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
     } elsif ($self->mode =~ /device::lb/) {
       $self->analyze_ltm_subsystem(%params);
       $self->check_ltm_subsystem();
@@ -56,12 +53,6 @@ sub analyze_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem} =
       NWC::F5::F5BIGIP::Component::EnvironmentalSubsystem->new();
-}
-
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      NWC::IFMIB::Component::InterfaceSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
@@ -82,40 +73,4 @@ sub analyze_ltm_subsystem {
   $self->{components}->{ltm_subsystem} =
       NWC::F5::F5BIGIP::Component::LTMSubsystem->new(%params);
 }
-
-sub check_environmental_subsystem {
-  my $self = shift;
-  $self->{components}->{environmental_subsystem}->check();
-  $self->{components}->{environmental_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_cpu_subsystem {
-  my $self = shift;
-  $self->{components}->{cpu_subsystem}->check();
-  $self->{components}->{cpu_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_mem_subsystem {
-  my $self = shift;
-  $self->{components}->{mem_subsystem}->check();
-  $self->{components}->{mem_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_ltm_subsystem {
-  my $self = shift;
-  $self->{components}->{ltm_subsystem}->check();
-  $self->{components}->{ltm_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 

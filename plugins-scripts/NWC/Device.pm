@@ -4,6 +4,8 @@ use strict;
 use IO::File;
 use File::Basename;
 use Digest::MD5  qw(md5_hex);
+use AutoLoader;
+our $AUTOLOAD;
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -1658,13 +1660,6 @@ sub analyze_interface_subsystem {
       NWC::IFMIB::Component::InterfaceSubsystem->new();
 }
 
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 sub shinken_interface_subsystem {
   my $self = shift;
   my $attr = sprintf "%s", join(',', map {
@@ -1706,31 +1701,15 @@ EOEO
 
 
 
+sub AUTOLOAD {
+  my $self = shift;
+  return if ($AUTOLOAD =~ /DESTROY/);    
+  if ($AUTOLOAD =~ /^(.*)::check_(.*)_subsystem$/) {
+    my $class = $1;
+    my $subsystem = sprintf "%s_subsystem", $2;
+    $self->{components}->{$subsystem}->check();
+    $self->{components}->{$subsystem}->dump()
+        if $self->opts->verbose >= 2;
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;

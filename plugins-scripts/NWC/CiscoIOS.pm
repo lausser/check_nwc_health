@@ -52,7 +52,7 @@ sub init {
 
 sub analyze_hsrp_subsystem {
   my $self = shift;
-  $self->{components}->{hsrp} =
+  $self->{components}->{hsrp_subsystem} =
       NWC::HSRP::Component::HSRPSubsystem->new();
 }
 
@@ -60,12 +60,6 @@ sub analyze_environmental_subsystem {
   my $self = shift;
   $self->{components}->{environmental_subsystem} =
       NWC::CiscoIOS::Component::EnvironmentalSubsystem->new();
-}
-
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      NWC::IFMIB::Component::InterfaceSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
@@ -85,86 +79,4 @@ sub analyze_connection_subsystem {
   $self->{components}->{connection_subsystem} =
       NWC::CiscoIOS::Component::ConnectionSubsystem->new();
 }
-
-sub check_hsrp_subsystem {
-  my $self = shift;
-  $self->{components}->{hsrp}->check();
-  $self->{components}->{hsrp}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_environmental_subsystem {
-  my $self = shift;
-  $self->{components}->{environmental_subsystem}->check();
-  $self->{components}->{environmental_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_cpu_subsystem {
-  my $self = shift;
-  $self->{components}->{cpu_subsystem}->check();
-  $self->{components}->{cpu_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_mem_subsystem {
-  my $self = shift;
-  $self->{components}->{mem_subsystem}->check();
-  $self->{components}->{mem_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_connection_subsystem {
-  my $self = shift;
-  $self->{components}->{connection_subsystem}->check();
-  $self->{components}->{connection_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub shinken_interface_subsystem {
-  my $self = shift;
-  my $attr = sprintf "%s", join(',', map {
-      sprintf '%s$(%s)$$()$', $_->{ifDescr}, $_->{ifIndex}
-  } @{$self->{components}->{interface_subsystem}->{interfaces}});
-  printf <<'EOEO', $self->opts->hostname(), $self->opts->hostname(), $attr;
-define host {
-  host_name                     %s
-  address                       %s
-  use                           default-host
-  _interfaces                   %s
-
-}
-EOEO
-  printf <<'EOEO', $self->opts->hostname();
-define service {
-  host_name                     %s
-  service_description           net_cpu
-  check_command                 check_nwc_health!cpu-load!80%%!90%%
-}
-EOEO
-  printf <<'EOEO', $self->opts->hostname();
-define service {
-  host_name                     %s
-  service_description           net_mem
-  check_command                 check_nwc_health!memory-usage!80%%!90%%
-}
-EOEO
-  printf <<'EOEO', $self->opts->hostname();
-define service {
-  host_name                     %s
-  service_description           net_ifusage_$KEY$
-  check_command                 check_nwc_health!interface-usage!$VALUE1$!$VALUE2$
-  duplicate_foreach             _interfaces
-  default_value                 80%%|90%%
-}
-EOEO
-}
-
 

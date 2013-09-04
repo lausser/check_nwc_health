@@ -386,6 +386,12 @@ sub init {
     }
     $self->{inputRate} /= $factor;
     $self->{outputRate} /= $factor;
+    if ($self->{ifOperStatus} eq 'down') {
+      $self->{inputUtilization} = 0;
+      $self->{outputUtilization} = 0;
+      $self->{inputRate} = 0;
+      $self->{outputRate} = 0;
+    }
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors ifInDiscards ifOutDiscards));
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
@@ -438,14 +444,15 @@ sub check {
   $self->blacklist('if', $self->{ifIndex});
   if ($self->mode =~ /device::interfaces::traffic/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
+    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
         $self->{ifDescr}, 
         $self->{inputUtilization}, 
         sprintf("%.2f%s/s", $self->{inputRate},
             ($self->opts->units ? $self->opts->units : 'Bits')),
         $self->{outputUtilization},
         sprintf("%.2f%s/s", $self->{outputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits'));
+            ($self->opts->units ? $self->opts->units : 'Bits')),
+        $self->{ifOperStatus} eq 'down' ? ' (down)' : '';
     $self->add_info($info);
     $self->set_thresholds(warning => 80, critical => 90);
     my $in = $self->check_thresholds($self->{inputUtilization});

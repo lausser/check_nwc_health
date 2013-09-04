@@ -44,30 +44,10 @@ sub init {
   }
 }
 
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      NWC::IFMIB::Component::InterfaceSubsystem->new();
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 sub analyze_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem} =
       NWC::Juniper::NetScreen::Component::MemSubsystem->new();
-}
-
-sub check_mem_subsystem {
-  my $self = shift;
-  $self->{components}->{mem_subsystem}->check();
-  $self->{components}->{mem_subsystem}->dump()
-      if $self->opts->verbose >= 2;
 }
 
 sub analyze_cpu_subsystem {
@@ -75,12 +55,4 @@ sub analyze_cpu_subsystem {
   $self->{components}->{cpu_subsystem} =
       NWC::Juniper::NetScreen::Component::CpuSubsystem->new();
 }
-
-sub check_cpu_subsystem {
-  my $self = shift;
-  $self->{components}->{cpu_subsystem}->check();
-  $self->{components}->{cpu_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 
