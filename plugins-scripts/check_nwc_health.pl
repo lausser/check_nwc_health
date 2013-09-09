@@ -347,9 +347,17 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'snmphelp',
-    help => '--snmphelp
-   Output the list of OIDs you need to walk for a simulation file',
+    spec => 'oids=s',
+    help => '--oids
+   A list of oids which are downloaded and written to a cache file.
+   Use it together with --mode oidcache',
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'offline:i',
+    help => '--offline
+   The maximum number of seconds since the last update of cache file before
+   it is considered too old',
     required => 0,
 );
 $plugin->add_arg(
@@ -364,17 +372,6 @@ if ($plugin->opts->multiline) {
   $ENV{NRPE_MULTILINESUPPORT} = 1;
 } else {
   $ENV{NRPE_MULTILINESUPPORT} = 0;
-}
-if ($plugin->opts->snmphelp) {
-  my @subtrees = ("1");
-  foreach my $mib (keys %{$NWC::Device::mibs_and_oids}) {
-    foreach my $table (grep {/Table$/} keys %{$NWC::Device::mibs_and_oids->{$mib}}) {
-      push(@subtrees, $NWC::Device::mibs_and_oids->{$mib}->{$table});
-    }
-  }
-  printf "snmpwalk -On ... %s\n", join(" ", @subtrees);
-  printf "snmpwalk -On ... %s\n", join(" ", @subtrees);
-  exit 0;
 }
 if ($plugin->opts->community) {
   if ($plugin->opts->community =~ /^snmpv3(.)(.+)/) {
@@ -471,6 +468,8 @@ if (! $plugin->check_messages()) {
     $plugin->add_message(OK, $server->get_extendedinfo()) 
         if $server->get_extendedinfo();
   } 
+} elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
+  ;
 } else {
   $plugin->add_message(CRITICAL, 'wrong device');
 }

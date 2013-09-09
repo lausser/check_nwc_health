@@ -4,6 +4,7 @@ use strict;
 use IO::File;
 use File::Basename;
 use Digest::MD5  qw(md5_hex);
+use Errno;
 use AutoLoader;
 our $AUTOLOAD;
 
@@ -145,11 +146,33 @@ sub new {
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::walk/) {
-    if ($self->can("trees")) {
-      my @trees = $self->trees;
-      my $name = $0;
-      $name =~ s/.*\///g;
-      $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
+    my @trees = ();
+    my $name = $0;
+    $name =~ s/.*\///g;
+    $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
+    if ($self->opts->oids) {
+      # create pid filename
+      # already running?;x
+      @trees = split(",", $self->opts->oids);
+
+    } elsif ($self->can("trees")) {
+      @trees = $self->trees;
+    }
+    if ($self->opts->offline) {
+      # start timer
+      # write to 
+      $self->{pidfile} = $name.".pid";
+      if (! $self->check_pidfile()) {
+        $self->trace("Exiting because another walk is already running");
+        printf STDERR "Exiting because another walk is already running\n";
+        exit 3;
+      }
+      $self->write_pidfile();
+      foreach ($self->trees) {
+        printf "walking..\n";
+      }
+      -f $self->{pidfile} && unlink $self->{pidfile};
+    } else {
       printf "rm -f %s\n", $name;
       foreach ($self->trees) {
         printf "snmpwalk -ObentU -v%s -c %s %s %s >> %s\n", 
@@ -211,6 +234,12 @@ sub check_snmp_and_model {
       }
       close WALK;
     } else {
+      if ($self->opts->offline) {
+        if ((time - stat($self->opts->snmpwalk)) > $self->opts->offline) {
+          $self->add_message(UNKNOWN,
+              sprintf 'snmpwalk file %s is too old', $self->opts->snmpwalk);
+        }
+      }
       $self->opts->override_opt('hostname', 'walkhost');
       open(MESS, $self->opts->snmpwalk);
       while(<MESS>) {
@@ -1651,6 +1680,62 @@ sub load_cache {
     $VAR1 = eval "$content";
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{$cache} = $VAR1;
+  }
+}
+
+sub check_pidfile {
+  my $self = shift;
+  my $fh = new IO::File;
+  if ($fh->open($self->{pidfile}, "r")) {
+    my $pid = $fh->getline();
+    $fh->close();
+    if (! $pid) {
+      $self->debug("Found pidfile %s with no valid pid. Exiting.",
+          $self->{pidfile});
+      return 0;
+    } else {
+      $self->debug("Found pidfile %s with pid %d", $self->{pidfile}, $pid);
+      kill 0, $pid;
+      if ($! == Errno::ESRCH) {
+        $self->debug("This pidfile is stale. Writing a new one");
+        $self->write_pidfile();
+        return 1;
+      } else {
+        $self->debug("This pidfile is held by a running process. Exiting");
+        return 0;
+      }
+    }
+  } else {
+    $self->debug("Found no pidfile. Writing a new one");
+    $self->write_pidfile();
+    return 1;
+  }
+}
+
+sub write_pidfile {
+  my $self = shift;
+  if (! -d dirname($self->{pidfile})) {
+    eval "require File::Path;";
+    if (defined(&File::Path::mkpath)) {
+      import File::Path;
+      eval { mkpath(dirname($self->{pidfile})); };
+    } else {
+      my @dirs = ();
+      map {
+          push @dirs, $_;
+          mkdir(join('/', @dirs))
+              if join('/', @dirs) && ! -d join('/', @dirs);
+      } split(/\//, dirname($self->{pidfile}));
+    }
+  }
+  my $fh = new IO::File;
+  $fh->autoflush(1);
+  if ($fh->open($self->{pidfile}, "w")) {
+    $fh->printf("%s", $$);
+    $fh->close();
+  } else {
+    $self->debug("Could not write pidfile %s", $self->{pidfile});
+    die "pid file could not be written";
   }
 }
 
