@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-09-10 2.5
+- implemented offline mode with --snmpwalk & --offline
+
 2013-09-03 2.4
 - add Cisco IronPort AsyncOS
 

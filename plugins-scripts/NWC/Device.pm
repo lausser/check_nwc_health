@@ -158,10 +158,10 @@ sub init {
     } elsif ($self->can("trees")) {
       @trees = $self->trees;
     }
-printf "off%s\n", $self->opts->offline;
-    if ($self->opts->offline) {
-      # start timer
-      # write to 
+    if ($self->opts->snmpdump) {
+      $name = $self->opts->snmpdump;
+    }
+    if (defined $self->opts->offline) {
       $self->{pidfile} = $name.".pid";
       if (! $self->check_pidfile()) {
         $self->trace("Exiting because another walk is already running");
@@ -176,19 +176,18 @@ printf "off%s\n", $self->opts->offline;
         printf "UNKNOWN - check_nwc_health timed out after %d seconds\n",
             $self->opts->timeout;
         kill 9, $snmpwalkpid;
-        
       };
       alarm($self->opts->timeout);
       unlink $name.".partial";
-      while (! $timedout) {
-        my $tree = shift $self->trees;
-        printf "walking..%s\n", $tree;
+      while (! $timedout && @trees) {
+        my $tree = shift @trees;
         $SIG{CHLD} = 'IGNORE';
         my $cmd = sprintf "snmpwalk -ObentU -v%s -c %s %s %s >> %s", 
             $self->opts->protocol,
             $self->opts->community,
             $self->opts->hostname,
             $tree, $name.".partial";
+        $self->trace($cmd);
         $snmpwalkpid = fork;
         if (not $snmpwalkpid) {
           exec($cmd);
@@ -198,6 +197,12 @@ printf "off%s\n", $self->opts->offline;
       }
       rename $name.".partial", $name if ! $timedout;
       -f $self->{pidfile} && unlink $self->{pidfile};
+      if ($timedout) {
+        printf "CRITICAL - timeout. There are still %d snmpwalks left\n", scalar(@trees);
+        exit 3;
+      } else {
+        printf "OK - all requested oids are in %s\n", $name;
+      }
     } else {
       printf "rm -f %s\n", $name;
       foreach ($self->trees) {
@@ -260,8 +265,8 @@ sub check_snmp_and_model {
       }
       close WALK;
     } else {
-      if ($self->opts->offline) {
-        if ((time - stat($self->opts->snmpwalk)) > $self->opts->offline) {
+      if (defined $self->opts->offline) {
+        if ((time - (stat($self->opts->snmpwalk))[9]) > $self->opts->offline) {
           $self->add_message(UNKNOWN,
               sprintf 'snmpwalk file %s is too old', $self->opts->snmpwalk);
         }
@@ -359,15 +364,14 @@ sub check_snmp_and_model {
         $session->max_msg_size(4 * $max_msg_size);
         $NWC::Device::session = $session;
         my $sysUpTime = '1.3.6.1.2.1.1.3.0';
+        my $uptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
         if (my $uptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0)) {
           $self->debug(sprintf 'snmp agent answered: %s', $uptime);
           $self->whoami();
         } else {
-printf "fake ok\n";
-$self->{productname} = "cisco ios";
-          #$self->add_message(CRITICAL,
-          #    'could not contact snmp agent');
-          #$session->close;
+          $self->add_message(CRITICAL,
+              'could not contact snmp agent');
+          $session->close;
         }
       }
     } else {
@@ -1300,7 +1304,7 @@ sub create_statefile {
   my $self = shift;
   my %params = @_;
   my $extension = "";
-  if ($self->opts->snmpwalk) {
+  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
     $self->opts->override_opt('hostname',
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
   }
@@ -1365,7 +1369,7 @@ sub load_state {
 sub create_interface_cache_file {
   my $self = shift;
   my $extension = "";
-  if ($self->opts->snmpwalk) {
+  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
     $self->opts->override_opt('hostname',
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
   }

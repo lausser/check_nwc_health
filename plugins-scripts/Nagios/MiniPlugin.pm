@@ -62,6 +62,11 @@ sub override_opt {
    $self->{opts}->override_opt(@_);
 }
 
+sub create_opt { 
+   my $self = shift;
+   $self->{opts}->create_opt(@_);
+}
+
 sub opts {
        my $self = shift;
        return $self->{opts};
@@ -386,6 +391,15 @@ sub getopts {
       $self->{opts}->{$_} = $commandline{$_};
     }
   }
+}
+
+sub create_opt {
+  my $self = shift;
+  my $key = shift;
+  no strict 'refs';
+  *{"$key"} = sub {
+      return $self->{opts}->{$key};
+  };
 }
 
 sub override_opt {

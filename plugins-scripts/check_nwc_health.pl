@@ -391,8 +391,36 @@ if ($plugin->opts->community) {
     $plugin->override_opt('protocol', '3') ;
   }
 }
-if ($plugin->opts->snmpwalk) {
-  $plugin->override_opt('hostname', 'snmpwalk.file'.md5_hex($plugin->opts->snmpwalk)) 
+if ($plugin->opts->mode eq 'walk') {
+  if ($plugin->opts->snmpwalk && $plugin->opts->hostname) {
+    # snmp agent wird abgefragt, die ergebnisse landen in einem file
+    # opts->snmpwalk ist der filename. da sich die ganzen get_snmp_table/object-aufrufe
+    # an das walkfile statt an den agenten halten wuerden, muss opts->snmpwalk geloescht
+    # werden. stattdessen wird opts->snmpdump als traeger des dateinamens mitgegeben.
+    # nur sinnvoll mit mode=walk
+    $plugin->create_opt('snmpdump');
+    $plugin->override_opt('snmpdump', $plugin->opts->snmpwalk);
+    $plugin->override_opt('snmpwalk', undef);
+  } elsif (! $plugin->opts->snmpwalk && $plugin->opts->hostname && $plugin->opts->mode eq 'walk') {
+    # snmp agent wird abgefragt, die ergebnisse landen in einem file, dessen name
+    # nicht vorgegeben ist
+    $plugin->create_opt('snmpdump');
+  }
+} else {
+  if (exists $ENV{NAGIOS__HOSTSNMPWALK} || exists $ENV{NAGIOS__SERVICESNMPWALK}) {
+    $plugin->override_opt('snmpwalk', $ENV{NAGIOS__SERVICESNMPWALK} || $ENV{NAGIOS__HOSTSNMPWALK});
+    $plugin->override_opt('offline', $ENV{NAGIOS__SERVICEOFFLINE} || $ENV{NAGIOS__HOSTOFFLIN});
+  }
+  if ($plugin->opts->snmpwalk && ! $plugin->opts->hostname) {
+    # normaler aufruf, mode != walk, oid-quelle ist eine datei
+    $plugin->override_opt('hostname', 'snmpwalk.file'.md5_hex($plugin->opts->snmpwalk)) 
+  } elsif ($plugin->opts->snmpwalk && $plugin->opts->hostname) {
+    # snmpwalk hat vorrang
+    $plugin->override_opt('hostname', undef);
+  }
+}
+
+if ($plugin->opts->snmpwalk && $plugin->opts->hostname && $plugin->opts->mode eq 'walk') {
 }
 if (! $plugin->opts->statefilesdir) {
   if (exists $ENV{OMD_ROOT}) {
