@@ -88,7 +88,13 @@ sub check {
   my $info = sprintf 'mempool %s usage is %.2f%%',
       $self->{ciscoMemoryPoolName}, $self->{usage};
   $self->add_info($info);
-  $self->set_thresholds(warning => 80, critical => 90);
+  if ($self->{ciscoMemoryPoolName} eq 'lsmpi_io' && 
+      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XE/i) {
+    # https://supportforums.cisco.com/docs/DOC-16425
+    $self->set_thresholds(warning => 100, critical => 100);
+  } else {
+    $self->set_thresholds(warning => 80, critical => 90);
+  }
   $self->add_message($self->check_thresholds($self->{usage}), $info);
 
   $self->add_perfdata(
