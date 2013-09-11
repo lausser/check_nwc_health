@@ -1304,11 +1304,6 @@ sub create_statefile {
   my $self = shift;
   my %params = @_;
   my $extension = "";
-  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
-    $self->opts->override_opt('hostname',
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
-  }
-  #$extension .= $params{differenciator} ? "_".$params{differenciator} : "";
   $extension .= $params{name} ? '_'.$params{name} : '';
   if ($self->opts->community) { 
     $extension .= md5_hex($self->opts->community);
@@ -1318,8 +1313,18 @@ sub create_statefile {
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  return sprintf "%s/%s_%s%s", $NWC::Device::statefilesdir,
-      $self->opts->hostname, $self->opts->mode, lc $extension;
+  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
+    return sprintf "%s/%s_%s%s", $NWC::Device::statefilesdir,
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
+    return sprintf "%s/%s_%s%s", $NWC::Device::statefilesdir,
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } else {
+    return sprintf "%s/%s_%s%s", $NWC::Device::statefilesdir,
+        $self->opts->hostname, $self->opts->mode, lc $extension;
+  }
 }
 
 sub schimpf {
