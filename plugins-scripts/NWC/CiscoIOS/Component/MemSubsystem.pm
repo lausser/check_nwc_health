@@ -91,7 +91,7 @@ sub check {
   if ($self->{ciscoMemoryPoolName} eq 'lsmpi_io' && 
       $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XE/i) {
     # https://supportforums.cisco.com/docs/DOC-16425
-    $self->set_thresholds(warning => 100, critical => 100);
+    $self->force_thresholds(warning => 100, critical => 100);
   } else {
     $self->set_thresholds(warning => 80, critical => 90);
   }

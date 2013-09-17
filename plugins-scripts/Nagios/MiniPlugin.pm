@@ -195,6 +195,13 @@ sub set_thresholds {
   $self->{mycritical} = $self->opts->critical || $params{critical} || 0;
 }
 
+sub force_thresholds {
+  my $self = shift;
+  my %params = @_;
+  $self->{mywarning} = $params{warning} || 0;
+  $self->{mycritical} = $params{critical} || 0;
+}
+
 sub get_thresholds {
   my $self = shift;
   return ($self->{mywarning}, $self->{mycritical});
@@ -219,6 +226,9 @@ sub check_thresholds {
     $warningrange = $self->{mywarning};
     $criticalrange = $self->{mycritical};
   }
+printf "check_thresholds %s, %s\n", Data::Dumper::Dumper([
+ $value, $warningrange, $criticalrange,
+]);
   if ($warningrange =~ /^(\d+)$/) {
     # warning = 10, warn if > 10 or < 0
     $level = $ERRORS{WARNING}

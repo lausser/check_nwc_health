@@ -645,6 +645,11 @@ sub set_thresholds {
   $NWC::Device::plugin->set_thresholds(@_);
 }
 
+sub force_thresholds {
+  my $self = shift;
+  $NWC::Device::plugin->force_thresholds(@_);
+}
+
 sub check_thresholds {
   my $self = shift;
   my @params = @_;

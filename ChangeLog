@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-09-17 2.5.1.1
+- bugfix in lsmpi_io memory pools of Cisco ASR (100% even with --warning/--critical)
+
 2013-09-11 2.5.1
 - set a 100% threshold for lsmpi_io memory pools of Cisco ASR (Thanks James Clark & Perun)
 
