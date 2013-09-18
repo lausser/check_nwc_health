@@ -226,9 +226,6 @@ sub check_thresholds {
     $warningrange = $self->{mywarning};
     $criticalrange = $self->{mycritical};
   }
-printf "check_thresholds %s, %s\n", Data::Dumper::Dumper([
- $value, $warningrange, $criticalrange,
-]);
   if ($warningrange =~ /^(\d+)$/) {
     # warning = 10, warn if > 10 or < 0
     $level = $ERRORS{WARNING}
