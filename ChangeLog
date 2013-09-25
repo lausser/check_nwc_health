@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-09-25 2.5.2
+- add html output for f5 pool members
+
 2013-09-18 2.5.1.2
 - removed a leftover Data::Dumper (Thanks Frank Belau)
 

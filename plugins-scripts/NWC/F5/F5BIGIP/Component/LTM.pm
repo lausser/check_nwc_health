@@ -202,23 +202,21 @@ sub check {
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  $self->add_message($self->check_thresholds($self->{completeness}),
-      sprintf ("pool %s has %d active members (of %d)",
+  my $message = sprintf ("pool %s has %d active members (of %d)",
           $self->{ltmPoolName},
-          $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt}));
+          $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt});
+  $self->add_message($self->check_thresholds($self->{completeness}), $message);
   if ($self->{ltmPoolMinActiveMembers} > 0 &&
       $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
-    $self->add_message(
-        defined $params{mitigation} ? $params{mitigation} : 2,
-        sprintf("pool %s has not enough active members (%d, min is %d)", 
-            $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt}, 
-            $self->{ltmPoolMinActiveMembers})
-    );
+    $message = sprintf("pool %s has not enough active members (%d, min is %d)",
+            $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt},
+            $self->{ltmPoolMinActiveMembers});
+    $self->add_message(defined $params{mitigation} ? $params{mitigation} : 2, $message);
   }
   if ($self->check_messages()) {
-  foreach my $member (@{$self->{members}}) {
-    $member->check();
-  }
+    foreach my $member (@{$self->{members}}) {
+      $member->check();
+    }
   }
   $self->add_perfdata(
       label => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
@@ -227,6 +225,44 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
+  if ($self->opts->report eq "html") {
+    printf "%s - %s\n", $self->status_code($self->check_messages()), $message;
+    printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
+    printf "<tr>";
+    foreach (qw(Name Enabled Avail Reason)) {
+      printf "<th style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
+    }
+    printf "</tr>";
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+      printf "<tr>";
+      printf "<tr style=\"border: 1px solid black;\">";
+      foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
+        if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
+          if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
+            printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
+          } else {
+            printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
+          }
+        } else {
+          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
+        }
+      }
+      printf "</tr>";
+    }
+    printf "</table>\n";
+    printf "<!--\nASCII_NOTIFICATION_START\n";
+    foreach (qw(Name Enabled Avail Reason)) {
+      printf "%20s", $_;
+    }
+    printf "\n";
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+      foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
+        printf "%20s", $_->{$attr};
+      }
+      printf "\n";
+    }
+    printf "ASCII_NOTIFICATION_END\n-->\n";
+  }
 }
 
 sub dump { 

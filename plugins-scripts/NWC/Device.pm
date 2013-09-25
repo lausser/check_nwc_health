@@ -625,6 +625,11 @@ sub add_message {
   }
 }
 
+sub status_code {
+  my $self = shift;
+  return $NWC::Device::plugin->status_code(@_);
+}
+
 sub check_messages {
   my $self = shift;
   return $NWC::Device::plugin->check_messages(@_);
