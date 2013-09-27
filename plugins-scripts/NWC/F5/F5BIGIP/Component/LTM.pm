@@ -227,6 +227,7 @@ sub check {
   );
   if ($self->opts->report eq "html") {
     printf "%s - %s\n", $self->status_code($self->check_messages()), $message;
+    $self->suppress_messages();
     printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
     foreach (qw(Name Enabled Avail Reason)) {
