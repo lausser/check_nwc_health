@@ -640,6 +640,11 @@ sub clear_messages {
   return $NWC::Device::plugin->clear_messages(@_);
 }
 
+sub suppress_messages {
+  my $self = shift;
+  return $NWC::Device::plugin->suppress_messages(@_);
+}
+
 sub add_perfdata {
   my $self = shift;
   $NWC::Device::plugin->add_perfdata(@_);

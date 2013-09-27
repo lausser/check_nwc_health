@@ -105,6 +105,11 @@ sub add_perfdata {
   push @{$self->{perfdata}}, $str;
 }
 
+sub suppress_messages {
+  my $self = shift;
+  $self->{suppress_messages} = 1;
+}
+
 sub clear_messages {
   my $self = shift;
   my $code = shift;
@@ -184,7 +189,9 @@ sub nagios_exit {
     $output .= " | ".join(" ", @{$self->{perfdata}});
   }
   $output .= "\n";
-  print $output;
+  if (! exists $self->{suppress_messages}) {
+    print $output;
+  }
   exit $code;
 }
 

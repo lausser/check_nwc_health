@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-09-26 2.5.2.1
+- supress double output for html f5 pool members
+
 2013-09-25 2.5.2
 - add html output for f5 pool members
 
