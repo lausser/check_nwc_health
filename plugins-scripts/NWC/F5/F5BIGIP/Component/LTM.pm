@@ -231,7 +231,7 @@ sub check {
     printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
     foreach (qw(Name Enabled Avail Reason)) {
-      printf "<th style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
+      printf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
     }
     printf "</tr>";
     foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
@@ -240,12 +240,12 @@ sub check {
       foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
         if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
           if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
-            printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
+            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
           } else {
-            printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
+            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
           }
         } else {
-          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
+          printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
         }
       }
       printf "</tr>";
