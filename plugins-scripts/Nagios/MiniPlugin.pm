@@ -172,6 +172,16 @@ sub check_messages {
   return ($code, $message);
 }
 
+sub status_code {
+  my $self = shift;
+  my $code = shift;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = uc $code;
+  $code = $ERRORS{$code} if defined $code && exists $ERRORS{$code};
+  $code = UNKNOWN unless defined $code && exists $STATUS_TEXT{$code};
+  return "$STATUS_TEXT{$code}";
+}
+
 sub nagios_exit {
   my $self = shift;
   my ($code, $message, $arg) = @_;
