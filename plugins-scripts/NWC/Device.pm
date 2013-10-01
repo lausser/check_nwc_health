@@ -126,6 +126,9 @@ sub new {
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'NWC::Generic';
         $self->debug('using NWC::Generic');
+      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq $NWC::Device::mib_ids->{'SW-MIB'}) {
+        bless $self, 'NWC::Brocade';
+        $self->debug('using NWC::Brocade');
       } else {
         $self->add_message(CRITICAL,
             sprintf('unknown device%s', $self->{productname} eq 'unknown' ?

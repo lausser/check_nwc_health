@@ -1,6 +1,11 @@
+$NWC::Device::mib_ids = {
+  'SW-MIB' => '1.3.6.1.4.1.1588.2.1.1.1',
+};
+
 $NWC::Device::mibs_and_oids = {
   'MIB-II' => {
       sysDescr => '1.3.6.1.2.1.1.1',
+      sysObjectID => '1.3.6.1.2.1.1.2',
       sysUpTime => '1.3.6.1.2.1.1.3',
       sysName => '1.3.6.1.2.1.1.5',
   },
@@ -1948,6 +1953,7 @@ $NWC::Device::mibs_and_oids = {
   },
   # END Cisco
   'SW-MIB' => {
+      sw => '1.3.6.1.4.1.1588.2.1.1.1',
       swFirmwareVersion => '1.3.6.1.4.1.1588.2.1.1.1.1.6.0',
       swSensorTable => '1.3.6.1.4.1.1588.2.1.1.1.1.22',
       swSensorEntry => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1',
