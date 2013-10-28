@@ -31,6 +31,8 @@ sub new {
     productname => 'unknown',
   };
   bless $self, $class;
+die;
+printf "MARSCH!!!\n";
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     die "wie jetzt??!?!";
   } else {
@@ -148,6 +150,7 @@ sub new {
 
 sub init {
   my $self = shift;
+printf STDERR "mode %s\n", $self->mode;
   if ($self->mode =~ /device::walk/) {
     my @trees = ();
     my $name = $0;
@@ -238,6 +241,9 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->analyze_interface_subsystem();
     $self->check_interface_subsystem();
+  } elsif ($self->mode =~ /device::bgp/) {
+    $self->analyze_bgp_subsystem();
+    $self->check_bgp_subsystem();
   }
 }
 
@@ -1798,6 +1804,12 @@ sub analyze_interface_subsystem {
   my $self = shift;
   $self->{components}->{interface_subsystem} =
       NWC::IFMIB::Component::InterfaceSubsystem->new();
+}
+
+sub analyze_bgp_subsystem {
+  my $self = shift;
+  $self->{components}->{bgp_subsystem} =
+      NWC::BGP::Component::PeerSubsystem->new();
 }
 
 sub shinken_interface_subsystem {

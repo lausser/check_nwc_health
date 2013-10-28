@@ -79,6 +79,8 @@ EXTRA_MODULES=\
   NWC/IFMIB/Component/LinkAggregation.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \
   NWC/IFMIB.pm \
+  NWC/BGP/Component/PeerSubsystem.pm \
+  NWC/BGP.pm \
   NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
   NWC/FCMGMT/Component/SensorSubsystem.pm \
   NWC/FCMGMT.pm \
