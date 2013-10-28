@@ -3045,6 +3045,10 @@ $NWC::Device::mibs_and_oids = {
         6 => 'established',
       },
       bgpPeerAdminStatus => '1.3.6.1.2.1.15.3.1.3',
+      bgpPeerAdminStatusDefinition => {
+        1 => 'stop',
+        2 => 'start',
+      },
       bgpPeerNegotiatedVersion => '1.3.6.1.2.1.15.3.1.4',
       bgpPeerLocalAddr => '1.3.6.1.2.1.15.3.1.5',
       bgpPeerLocalPort => '1.3.6.1.2.1.15.3.1.6',

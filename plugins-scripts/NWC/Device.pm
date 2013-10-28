@@ -31,8 +31,6 @@ sub new {
     productname => 'unknown',
   };
   bless $self, $class;
-die;
-printf "MARSCH!!!\n";
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     die "wie jetzt??!?!";
   } else {
@@ -150,7 +148,6 @@ printf "MARSCH!!!\n";
 
 sub init {
   my $self = shift;
-printf STDERR "mode %s\n", $self->mode;
   if ($self->mode =~ /device::walk/) {
     my @trees = ();
     my $name = $0;
