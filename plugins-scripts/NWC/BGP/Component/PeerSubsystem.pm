@@ -78,7 +78,7 @@ sub init {
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr')) {
-    if ($self->filter_name($_->{bgpPeerRemoteAddr})) {
+    if ($self->filter_name($_->{bgpPeerRemoteAddr}) {
       push(@{$self->{peers}},
           NWC::BGP::Component::PeerSubsystem::Peer->new(%{$_}));
     }
@@ -103,7 +103,6 @@ sub check {
     foreach (@{$self->{peers}}) {
       $_->check();
     }
-printf "all ckeches\n";
   }
 }
 
@@ -138,25 +137,33 @@ sub new {
     $subcode = hex($2) * 1;
   }
   $self->{bgpPeerLastError} = $NWC::BGP::Component::PeerSubsystem::errorcodes->{$errorcode}->{$subcode};
+  my @parts = gmtime($self->{bgpPeerFsmEstablishedTime});
+  $self->{bgpPeerFsmEstablishedTime} = sprintf ("%dd, %dh, %dm, %ds",@parts[7,2,1,0]);
+
   return $self;
 }
 
 sub check {
   my $self = shift;
-printf "check\n";
   if ($self->{bgpPeerState} ne "established") {
-    $self->add_message(CRITICAL, sprintf "peer %s (%s) connection is %s (last error: %s)",
-        $self->{bgpPeerRemoteAs},
+    $self->add_message(CRITICAL, sprintf "peer %s (AS%s) state is %s (last error: %s)",
         $self->{bgpPeerRemoteAddr},
+        $self->{bgpPeerRemoteAs},
         $self->{bgpPeerState},
         $self->{bgpPeerLastError}
     );
-  } else {
-    $self->add_message(OK, sprintf "peer %s (%s) connection is %s since %ds",
-        $self->{bgpPeerRemoteAs},
+  } elsif ($self->{bgpPeerAdminStatus} eq "stop") {
+    $self->add_message(WARNING, sprintf "peer %s (AS%s) state is %s (is admin down)",
         $self->{bgpPeerRemoteAddr},
+        $self->{bgpPeerRemoteAs},
+        $self->{bgpPeerState}
+    );
+  } else {
+    $self->add_message(OK, sprintf "peer %s (AS%s) state is %s since %s",
+        $self->{bgpPeerRemoteAddr},
+        $self->{bgpPeerRemoteAs},
         $self->{bgpPeerState},
-        $self->{bgpPeerFsmEstablishedTransitions}
+        $self->{bgpPeerFsmEstablishedTime}
     );
   }
 }
