@@ -78,7 +78,7 @@ sub init {
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr')) {
-    if ($self->filter_name($_->{bgpPeerRemoteAddr}) {
+    if ($self->filter_name($_->{bgpPeerRemoteAddr})) {
       push(@{$self->{peers}},
           NWC::BGP::Component::PeerSubsystem::Peer->new(%{$_}));
     }

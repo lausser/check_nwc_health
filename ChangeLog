@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-10-30 2.5.4
+- add bgp
+
 2013-10-01 2.5.3
 - detect more brocade devices 
 
