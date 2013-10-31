@@ -62,6 +62,9 @@ sub new {
       if ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
+      } elsif ($self->{productname} =~ /fujitsu intelligent blade panel 30\/12/i) {
+        bless $self, 'NWC::Cisco';
+        $self->debug('using NWC::Cisco');
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'NWC::Nortel';
         $self->debug('using NWC::Nortel');

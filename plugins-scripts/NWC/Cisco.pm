@@ -48,6 +48,9 @@ sub init {
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'NWC::CiscoIOS';
     $self->debug('using NWC::CiscoIOS');
+  } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
+    bless $self, 'NWC::CiscoIOS';
+    $self->debug('using NWC::CiscoIOS');
   }
   $self->init();
 }
