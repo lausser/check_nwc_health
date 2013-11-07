@@ -549,6 +549,11 @@ sub check {
           sprintf 'fault condition is presumed to exist on %s',
           $self->{ifDescr});
     }
+    if ($self->{ifAdminStatus} eq 'down') {
+      $self->add_message(
+          defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
+          sprintf '%s is admin down', $self->{ifDescr});
+    }
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});

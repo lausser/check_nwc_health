@@ -2,6 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-11-07 2.6
+- finished bgp-peer-status (focus on as numbers with --name2)
+- admin down with --interface-status can have any level with --mitigation
+
 2013-10-31 2.5.4.1
 - add Fujitsu Intelligent Blade Panel 30/12
 

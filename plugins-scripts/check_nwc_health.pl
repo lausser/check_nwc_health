@@ -41,7 +41,7 @@ my @modes = (
       'Check the error-rate of interfaces (errors+discards per sec)' ],
   ['device::interfaces::operstatus',
       'interface-status', undef,
-      'Check the status of interfaces' ],
+      'Check the status of interfaces (oper/admin)' ],
   ['device::interfaces::list',
       'list-interfaces', undef,
       'Show the interfaces of the device and update the name cache' ],
@@ -295,6 +295,12 @@ $plugin->add_arg(
     spec => 'units=s',
     help => "--units
    One of %, B, KB, MB, GB, Bit, KBi, MBi, GBi. (used for e.g. mode interface-usage)",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'name2=s',
+    help => "--name2
+   The secondary name of a component",
     required => 0,
 );
 $plugin->add_arg(

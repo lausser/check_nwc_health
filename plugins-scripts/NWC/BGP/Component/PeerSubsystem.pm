@@ -100,8 +100,50 @@ sub check {
       #$_->list();
     }
   } else {
+    # es gibt 
+    # kleine installation: 1 peer zu 1 as, evt 2. as als fallback
+    # grosse installation: n peer zu 1 as, alternative routen zum provider
+    #                      n peer zu m as, mehrere provider, mehrere alternativrouten
+    # 1 ausfall on 4 peers zu as ist egal
+    my $as_numbers = {};
     foreach (@{$self->{peers}}) {
       $_->check();
+      if (! exists $as_numbers->{$_->{bgpPeerRemoteAs}}->{peers}) {
+        $as_numbers->{$_->{bgpPeerRemoteAs}}->{peers} = [];
+        $as_numbers->{$_->{bgpPeerRemoteAs}}->{availability} = 100;
+      }
+      push(@{$as_numbers->{$_->{bgpPeerRemoteAs}}->{peers}}, $_);
+    }
+    if ($self->opts->name2) {
+      $self->clear_messages(OK);
+      $self->clear_messages(CRITICAL);
+      if ($self->opts->name2 eq "_ALL_") {
+        $self->opts->override_opt("name2", join(",", keys %{$as_numbers}));
+      }
+      foreach my $as (split(",", $self->opts->name2)) {
+        my $asname = "";
+        if ($as =~ /(\d+)=(\w+)/) {
+          $as = $1;
+          $asname = $2;
+        }
+        if (exists $as_numbers->{$as}) {
+          my $num_peers = scalar(@{$as_numbers->{$as}->{peers}});
+          my $num_ok_peers = scalar(grep { $_->{bgpPeerFaulty} == 0 } @{$as_numbers->{$as}->{peers}});
+          $as_numbers->{$as}->{availability} = 100 * $num_ok_peers / $num_peers;
+          $self->set_thresholds(warning => "100:", critical => "50:");
+          $self->add_message($self->check_thresholds($as_numbers->{$as}->{availability}),
+              sprintf "%d from %d connections to %s are up (%.2f%%)",
+              $num_ok_peers, $num_peers, $asname ? $asname : "AS".$as, 
+              $as_numbers->{$as}->{availability});
+        } else {
+          $self->add_message(CRITICAL, sprintf 'found no peer for %s', $asname ? $asname : "AS".$as);
+        }
+      }
+      
+    }
+    if ($self->opts->report eq "short") {
+      $self->clear_messages(OK);
+      $self->add_message(OK, 'no problems') if ! $self->check_messages();
     }
   }
 }
@@ -137,6 +179,9 @@ sub new {
     $subcode = hex($2) * 1;
   }
   $self->{bgpPeerLastError} = $NWC::BGP::Component::PeerSubsystem::errorcodes->{$errorcode}->{$subcode};
+  $self->{bgpPeerRemoteAsName} = "";
+  $self->{bgpPeerRemoteAsImportant} = 0; # if named in --name2
+  $self->{bgpPeerFaulty} = 0;
   my @parts = gmtime($self->{bgpPeerFsmEstablishedTime});
   $self->{bgpPeerFsmEstablishedTime} = sprintf ("%dd, %dh, %dm, %ds",@parts[7,2,1,0]);
 
@@ -145,26 +190,45 @@ sub new {
 
 sub check {
   my $self = shift;
-  if ($self->{bgpPeerState} ne "established") {
-    $self->add_message(CRITICAL, sprintf "peer %s (AS%s) state is %s (last error: %s)",
-        $self->{bgpPeerRemoteAddr},
-        $self->{bgpPeerRemoteAs},
-        $self->{bgpPeerState},
-        $self->{bgpPeerLastError}
-    );
-  } elsif ($self->{bgpPeerAdminStatus} eq "stop") {
-    $self->add_message(WARNING, sprintf "peer %s (AS%s) state is %s (is admin down)",
-        $self->{bgpPeerRemoteAddr},
-        $self->{bgpPeerRemoteAs},
-        $self->{bgpPeerState}
-    );
+  if ($self->opts->name2) {
+    foreach my $as (split(",", $self->opts->name2)) {
+      if ($as =~ /(\d+)=(\w+)/) {
+        $as = $1;
+        $self->{bgpPeerRemoteAsName} = ", ".$2;
+      } else {
+        $self->{bgpPeerRemoteAsName} = "";
+      }
+      if ($as eq "_ALL_" || $as == $self->{bgpPeerRemoteAs}) {
+        $self->{bgpPeerRemoteAsImportant} = 1;
+      }
+    }
   } else {
+    $self->{bgpPeerRemoteAsImportant} = 1;
+  }
+  if ($self->{bgpPeerState} eq "established" || $self->{bgpPeerState} eq "idle") {
     $self->add_message(OK, sprintf "peer %s (AS%s) state is %s since %s",
         $self->{bgpPeerRemoteAddr},
-        $self->{bgpPeerRemoteAs},
+        $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
         $self->{bgpPeerState},
         $self->{bgpPeerFsmEstablishedTime}
     );
+  } elsif ($self->{bgpPeerAdminStatus} eq "stop") {
+    $self->add_message($self->{bgpPeerRemoteAsImportant} ? WARNING : OK, 
+        sprintf "peer %s (AS%s) state is %s (is admin down)",
+        $self->{bgpPeerRemoteAddr},
+        $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
+        $self->{bgpPeerState}
+    );
+    $self->{bgpPeerFaulty} = $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
+  } else {
+    $self->add_message($self->{bgpPeerRemoteAsImportant} ? CRITICAL : OK,
+        sprintf "peer %s (AS%s) state is %s (last error: %s)",
+        $self->{bgpPeerRemoteAddr},
+        $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
+        $self->{bgpPeerState},
+        $self->{bgpPeerLastError}
+    );
+    $self->{bgpPeerFaulty} = $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
   }
 }
 
