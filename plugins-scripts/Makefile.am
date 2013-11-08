@@ -79,6 +79,9 @@ EXTRA_MODULES=\
   NWC/IFMIB/Component/LinkAggregation.pm \
   NWC/IFMIB/Component/InterfaceSubsystem.pm \
   NWC/IFMIB.pm \
+  NWC/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
+  NWC/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
+  NWC/HOSTRESOURCESMIB.pm \
   NWC/BGP/Component/PeerSubsystem.pm \
   NWC/BGP.pm \
   NWC/FCMGMT/Component/EnvironmentalSubsystem.pm \
@@ -99,6 +102,11 @@ EXTRA_MODULES=\
   NWC/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
   NWC/F5/F5BIGIP.pm \
   NWC/F5.pm \
+  NWC/CheckPoint/Firewall1/Component/EnvironmentalSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/TemperatureSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/FanSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/VoltageSubsystem.pm \
+  NWC/CheckPoint/Firewall1/Component/DiskSubsystem.pm \
   NWC/CheckPoint/Firewall1/Component/MngmtSubsystem.pm \
   NWC/CheckPoint/Firewall1/Component/SvnSubsystem.pm \
   NWC/CheckPoint/Firewall1/Component/FwSubsystem.pm \
