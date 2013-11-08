@@ -57,7 +57,11 @@ sub http_get {
     my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
     $resp = HTTP::Request->new(POST => $loginurl);
     $resp->content_type("application/x-www-form-urlencoded");
-    $resp->content("response=$challengeresponse");
+    my $login = "response=$challengeresponse";
+    if ($self->opts->username) {
+        $login .= "&username=" . $self->opts->username;
+    }
+    $resp->content($login);
     my $loginresp = $ua->request($resp);
     $content = $loginresp->content();
     $self->{sid} = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
