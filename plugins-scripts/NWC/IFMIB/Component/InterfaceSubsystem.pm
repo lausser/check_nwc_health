@@ -137,7 +137,7 @@ sub check {
       }
       printf "\n";
     }
-    printf "ASCII_NOTIFICATION_END\n--!>\n";
+    printf "ASCII_NOTIFICATION_END\n-->\n";
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
