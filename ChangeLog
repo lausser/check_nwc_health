@@ -2,6 +2,11 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-11-08
+- added support for role based login for Fritz Boxes (available since 
+  FRITZ!OS 5.50). Use --community for password, --username for username if
+  role based security is switched on.
+
 2013-11-09
 - bugfix for fritzbox
 
