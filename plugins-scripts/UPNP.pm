@@ -29,7 +29,7 @@ sub init {
       my $root = $doc->documentElement();
       my $xpc = XML::LibXML::XPathContext->new( $root );
       $xpc->registerNs('n', 'urn:schemas-upnp-org:device-1-0');
-      $self->{productname} = $xpc->findvalue('(//n:device)[position()=1]/n:friendlyName' );
+      $self->{productname} = $xpc->findvalue('(//n:device)[position()=1]/n:modelName' );
     };
     if ($@) {
       $self->add_message(CRITICAL, $@);

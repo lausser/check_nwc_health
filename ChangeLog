@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-11-09
+- bugfix for fritzbox
+
 2013-11-08 2.6.1
 - hardware-health for Checkpoint Firewall-1
 
