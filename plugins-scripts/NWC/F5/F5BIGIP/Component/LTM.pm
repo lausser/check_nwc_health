@@ -240,7 +240,7 @@ sub check {
       critical => $self->{critical},
   );
   $self->add_perfdata(
-      label => sprintf('pool_%s_servercurconns', $self->{ltmPoolStatServerCurConns}),
+      label => sprintf('pool_%s_servercurconns', $self->{ltmPoolName}),
       value => $self->{ltmPoolStatServerCurConns},
   );
   if ($self->opts->report eq "html") {
