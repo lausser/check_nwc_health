@@ -659,6 +659,11 @@ sub add_perfdata {
   $NWC::Device::plugin->add_perfdata(@_);
 }
 
+sub perfdata_string {
+  my $self = shift;
+  $NWC::Device::plugin->perfdata_string(@_);
+}
+
 sub set_thresholds {
   my $self = shift;
   $NWC::Device::plugin->set_thresholds(@_);

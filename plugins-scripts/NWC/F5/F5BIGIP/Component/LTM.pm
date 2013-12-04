@@ -89,11 +89,17 @@ sub init {
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName');
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName');
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName');
+    $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatTable', 'ltmPoolStatName');
   }
   my @auxpools = ();
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName')) {
     push(@auxpools, $_);
+  }
+  my @auxstats = ();
+  foreach ($self->get_snmp_table_objects_with_cache(
+      'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatTable', 'ltmPoolStatName')) {
+    push(@auxstats, $_);
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolTable', 'ltmPoolName')) {
@@ -102,6 +108,13 @@ sub init {
         if ($_->{ltmPoolName} eq $auxpool->{ltmPoolStatusName}) {
           foreach my $key (keys %{$auxpool}) {
             $_->{$key} = $auxpool->{$key};
+          }
+        }
+      }
+      foreach my $auxstat (@auxstats) {
+        if ($_->{ltmPoolName} eq $auxstat->{ltmPoolStatName}) {
+          foreach my $key (keys %{$auxstat}) {
+            $_->{$key} = $auxstat->{$key};
           }
         }
       }
@@ -202,9 +215,10 @@ sub check {
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  my $message = sprintf ("pool %s has %d active members (of %d)",
+  my $message = sprintf ("pool %s has %d active members (of %d) and %d sessions",
           $self->{ltmPoolName},
-          $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt});
+          $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt},
+          $self->{ltmPoolStatServerCurConns});
   $self->add_message($self->check_thresholds($self->{completeness}), $message);
   if ($self->{ltmPoolMinActiveMembers} > 0 &&
       $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
@@ -225,8 +239,12 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
+  $self->add_perfdata(
+      label => sprintf('pool_%s_servercurconns', $self->{ltmPoolStatServerCurConns}),
+      value => $self->{ltmPoolStatServerCurConns},
+  );
   if ($self->opts->report eq "html") {
-    printf "%s - %s\n", $self->status_code($self->check_messages()), $message;
+    printf "%s - %s%s\n", $self->status_code($self->check_messages()), $message, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
     $self->suppress_messages();
     printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
@@ -271,7 +289,8 @@ sub dump {
   printf "[POOL_%s]\n", $self->{ltmPoolName};
   foreach(qw(ltmPoolName ltmPoolLbMode ltmPoolMinActiveMembers
       ltmPoolActiveMemberCnt ltmPoolMemberCnt
-      ltmPoolStatusAvailState ltmPoolStatusEnabledState ltmPoolStatusDetailReason)) {
+      ltmPoolStatusAvailState ltmPoolStatusEnabledState ltmPoolStatusDetailReason
+      ltmPoolStatCurSessions ltmPoolStatServerCurConns)) {
     printf "%s: %s\n", $_, $self->{$_};
   }
   foreach my $member (@{$self->{members}}) {

@@ -182,6 +182,15 @@ sub status_code {
   return "$STATUS_TEXT{$code}";
 }
 
+sub perfdata_string {
+  my $self = shift;
+  if (scalar (@{$self->{perfdata}})) {
+    return join(" ", @{$self->{perfdata}});
+  } else {
+    return "";
+  }
+}
+
 sub nagios_exit {
   my $self = shift;
   my ($code, $message, $arg) = @_;
@@ -196,7 +205,7 @@ sub nagios_exit {
   my $output = "$STATUS_TEXT{$code}";
   $output .= " - $message" if defined $message && $message ne '';
   if (scalar (@{$self->{perfdata}})) {
-    $output .= " | ".join(" ", @{$self->{perfdata}});
+    $output .= " | ".$self->perfdata_string();
   }
   $output .= "\n";
   if (! exists $self->{suppress_messages}) {

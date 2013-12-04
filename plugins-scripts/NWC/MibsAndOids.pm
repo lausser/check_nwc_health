@@ -2630,6 +2630,12 @@ $NWC::Device::mibs_and_oids = {
     ltmPoolSlowRampTime => '1.3.6.1.4.1.3375.2.2.5.1.2.1.22',
     ltmPoolMemberCnt => '1.3.6.1.4.1.3375.2.2.5.1.2.1.23',
 
+    ltmPoolStatTable => '1.3.6.1.4.1.3375.2.2.5.2.3',
+    ltmPoolStatEntry => '1.3.6.1.4.1.3375.2.2.5.2.3.1',
+    ltmPoolStatName => '1.3.6.1.4.1.3375.2.2.5.2.3.1.1',
+    ltmPoolStatServerCurConns => '1.3.6.1.4.1.3375.2.2.5.2.3.1.8',
+    ltmPoolStatCurSessions => '1.3.6.1.4.1.3375.2.2.5.2.3.1.31',
+
     ltmPoolMemberTable => '1.3.6.1.4.1.3375.2.2.5.3.2',
     ltmPoolMemberEntry => '1.3.6.1.4.1.3375.2.2.5.3.2.1',
     ltmPoolMemberPoolName => '1.3.6.1.4.1.3375.2.2.5.3.2.1.1',
