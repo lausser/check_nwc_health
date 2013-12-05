@@ -136,9 +136,15 @@ sub new {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
       } else {
-        $self->add_message(CRITICAL,
-            sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
-                '' : '('.$self->{productname}.')'));
+        my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
+        if ($sysobj && exists $NWC::Device::discover_ids->{$sysobj}) {
+          bless $self, $NWC::Device::discover_ids->{$sysobj};
+          $self->debug('using '.$NWC::Device::discover_ids->{$sysobj});
+        } else {
+          $self->add_message(CRITICAL,
+              sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
+                  '' : '('.$self->{productname}.')'));
+        }
       }
     }
   }

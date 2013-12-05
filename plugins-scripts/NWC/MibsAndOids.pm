@@ -1,3 +1,7 @@
+$NWC::Device::discover_ids = {
+  '1.3.6.1.4.1.12532.252.5.1' => 'NWC::Juniper::IVE',
+};
+
 $NWC::Device::mib_ids = {
   'SW-MIB' => '1.3.6.1.4.1.1588.2.1.1.1',
 };
