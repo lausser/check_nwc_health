@@ -120,6 +120,9 @@ sub new {
       } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
         bless $self, 'NWC::Bluecoat';
         $self->debug('using NWC::Bluecoat');
+      } elsif ($self->{productname} =~ /Foundry/i) {
+        bless $self, 'NWC::Foundry';
+        $self->debug('using NWC::Foundry');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');

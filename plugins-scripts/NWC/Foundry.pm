@@ -14,6 +14,7 @@ sub init {
       fan_subsystem => undef,
       temperature_subsystem => undef,
       cpu_subsystem => undef,
+      slb_subsystem => undef,
   };
   $self->{serial} = 'unknown';
   $self->{product} = 'unknown';
@@ -28,6 +29,9 @@ sub init {
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
+    } elsif ($self->mode =~ /device::lb::pool::/) {
+      $self->analyze_slb_subsystem();
+      $self->check_slb_subsystem();
     }
   }
 }
@@ -48,5 +52,11 @@ sub analyze_mem_subsystem {
   my $self = shift;
   $self->{components}->{mem_subsystem} =
       NWC::Foundry::Component::MemSubsystem->new();
+}
+
+sub analyze_slb_subsystem {
+  my $self = shift;
+  $self->{components}->{slb_subsystem} =
+      NWC::Foundry::Component::SLBSubsystem->new();
 }
 

@@ -128,6 +128,7 @@ EXTRA_MODULES=\
   NWC/AVOS/Component/MemSubsystem.pm \
   NWC/AVOS/Component/CpuSubsystem.pm \
   NWC/AVOS.pm \
+  NWC/Foundry/Component/SLBSubsystem.pm \
   NWC/Foundry/Component/MemSubsystem.pm \
   NWC/Foundry/Component/CpuSubsystem.pm \
   NWC/Foundry/Component/EnvironmentalSubsystem.pm \

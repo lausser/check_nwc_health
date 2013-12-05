@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2013-12-05
+- output number of sessions for f5 bigip load balancer pools
+
 2013-11-08
 - added support for role based login for Fritz Boxes (available since 
   FRITZ!OS 5.50). Use --community for password, --username for username if
