@@ -1378,6 +1378,41 @@ sub schimpf {
   printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $NWC::Device::statefilesdir;
 }
 
+sub protect_value {
+  my $self = shift;
+  my $ident = shift;
+  my $key = shift;
+  my $validfunc = shift;
+  if (ref($validfunc) ne "CODE" && $validfunc eq "percent") {
+printf "validfunc is a %s\n", $validfunc;
+    $validfunc = sub {
+      my $value = shift;
+      return ($value < 0 || $value > 100) ? 0 : 1;
+    };
+printf "validfunc is now a %s\n", ref($validfunc);
+  }
+  if (&$validfunc($self->{$key})) {
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $self->{$key},
+        exception => 0,
+    });
+  } else {
+    # if the device gives us an clearly wrong value, simply use the last value.
+    my $laststate = $self->load_state(name => 'protect_'.$ident.'_'.$key);
+    $self->debug(sprintf "self->{%s} is %s and invalid for the %dth time",
+        $key, $self->{$key}, $laststate->{exception} + 1);
+    if ($laststate->{exception} <= 5) {
+      # but only 5 times. 
+      # if the error persists, somebody has to check the device.
+      $self->{$key} = $laststate->{$key};
+    }
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $laststate->{$key},
+        exception => $laststate->{exception}++,
+    });
+  }
+}
+
 sub save_state {
   my $self = shift;
   my %params = @_;
