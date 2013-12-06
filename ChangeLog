@@ -2,8 +2,11 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
-2013-12-05
+
+2013-12-05 2.6.3
 - output number of sessions for f5 bigip load balancer pools
+- deal with obviously wrong values from devices (20000% cpu usage)
+- foundry server load balancing
 
 2013-11-08
 - added support for role based login for Fritz Boxes (available since 

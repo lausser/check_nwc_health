@@ -1384,12 +1384,10 @@ sub protect_value {
   my $key = shift;
   my $validfunc = shift;
   if (ref($validfunc) ne "CODE" && $validfunc eq "percent") {
-printf "validfunc is a %s\n", $validfunc;
     $validfunc = sub {
       my $value = shift;
       return ($value < 0 || $value > 100) ? 0 : 1;
     };
-printf "validfunc is now a %s\n", ref($validfunc);
   }
   if (&$validfunc($self->{$key})) {
     $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
