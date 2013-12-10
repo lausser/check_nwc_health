@@ -105,6 +105,12 @@ sub add_perfdata {
   push @{$self->{perfdata}}, $str;
 }
 
+sub add_html {
+  my $self = shift;
+  my $line = shift;
+  push @{$self->{html}}, $line;
+}
+
 sub suppress_messages {
   my $self = shift;
   $self->{suppress_messages} = 1;
@@ -186,6 +192,15 @@ sub perfdata_string {
   my $self = shift;
   if (scalar (@{$self->{perfdata}})) {
     return join(" ", @{$self->{perfdata}});
+  } else {
+    return "";
+  }
+}
+
+sub html_string {
+  my $self = shift;
+  if (scalar (@{$self->{html}})) {
+    return join(" ", @{$self->{html}});
   } else {
     return "";
   }

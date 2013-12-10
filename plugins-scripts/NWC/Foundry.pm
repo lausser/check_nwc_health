@@ -4,11 +4,12 @@ use strict;
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-our @ISA = qw(NWC::Brocade);
+our @ISA = qw(NWC::Device);
 
 sub init {
   my $self = shift;
   my %params = @_;
+  $self->SUPER::init(%params);
   $self->{components} = {
       powersupply_subsystem => undef,
       fan_subsystem => undef,
@@ -16,9 +17,6 @@ sub init {
       cpu_subsystem => undef,
       slb_subsystem => undef,
   };
-  $self->{serial} = 'unknown';
-  $self->{product} = 'unknown';
-  $self->{romversion} = 'unknown';
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
@@ -29,7 +27,7 @@ sub init {
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
-    } elsif ($self->mode =~ /device::lb::pool::/) {
+    } elsif ($self->mode =~ /device::lb/) {
       $self->analyze_slb_subsystem();
       $self->check_slb_subsystem();
     }

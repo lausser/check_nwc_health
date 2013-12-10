@@ -231,7 +231,8 @@ sub init {
     exit 0;
   } elsif ($self->mode =~ /device::uptime/) {
     $self->{uptime} /= 60;
-    my $info = sprintf 'device is up since %d minutes', $self->{uptime};
+    my $info = sprintf 'device is up since %s', 
+        $self->human_timeticks($self->{uptime});
     $self->add_info($info);
     $self->set_thresholds(warning => '15:', critical => '5:');
     $self->add_message($self->check_thresholds($self->{uptime}), $info);
@@ -457,7 +458,7 @@ sub human_timeticks {
   my $minutes = int($timeticks / 60); 
   my $seconds = $timeticks % 60; 
   $days = $days < 1 ? '' : $days .'d '; 
-  return $days . sprintf "%02d:%02d:%02d", $hours, $minutes, $seconds;
+  return $days . sprintf "%2dh %2dm %2ds", $hours, $minutes, $seconds;
 }
 
 sub get_snmp_object {
@@ -643,6 +644,12 @@ sub add_message {
   }
 }
 
+sub add_html {
+  my $self = shift;
+  my $line = shift;
+  $NWC::Device::plugin->add_html($line) 
+}
+
 sub status_code {
   my $self = shift;
   return $NWC::Device::plugin->status_code(@_);
@@ -671,6 +678,11 @@ sub add_perfdata {
 sub perfdata_string {
   my $self = shift;
   $NWC::Device::plugin->perfdata_string(@_);
+}
+
+sub html_string {
+  my $self = shift;
+  $NWC::Device::plugin->html_string(@_);
 }
 
 sub set_thresholds {
