@@ -216,25 +216,25 @@ $plugin->add_arg(
     default => 'public',
 );
 $plugin->add_arg(
-    spec => 'username=s',
+    spec => 'username:s',
     help => '--username
    The securityName for the USM security model (SNMPv3 only)',
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'authpassword=s',
+    spec => 'authpassword:s',
     help => '--authpassword
    The authentication password for SNMPv3',
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'authprotocol=s',
+    spec => 'authprotocol:s',
     help => '--authprotocol
    The authentication protocol for SNMPv3 (md5|sha)',
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'privpassword=s',
+    spec => 'privpassword:s',
     help => '--privpassword
    The password for authPriv security level',
     required => 0,
