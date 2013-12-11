@@ -45,10 +45,7 @@ sub init {
   if ($self->mode =~ /device::lb::session::usage/) {
     $self->{snL4MaxSessionLimit} = $self->get_snmp_object('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4MaxSessionLimit');
     $self->{snL4FreeSessionCount} = $self->get_snmp_object('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4FreeSessionCount');
-    printf "lim %s\n", $self->{snL4MaxSessionLimit};
-    printf "free %s\n", $self->{snL4FreeSessionCount};
     $self->{session_usage} = 100 * ($self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}) / $self->{snL4MaxSessionLimit};
-    printf "usage %s\n", $self->{session_usage};
   } elsif ($self->mode =~ /device::lb::pool/) {
     if ($self->mode =~ /device::lb::pool::list/) {
       $self->update_caches(1);
@@ -148,7 +145,7 @@ sub init {
       # virtual server has ports
       #
       foreach my $vspp (keys %{$self->{vspdict}->{$vs}}) {
-        next if ! exists $self->{bindingdict}->{$vs} || ! exists $self->{bindingdict}->{$vs}->{$vspp};
+        next if $self->opts->name2 && $self->opts->name2 ne $vspp;
         #
         # virtual server port has bindings
         #
@@ -161,6 +158,7 @@ sub init {
         # add the virtual port to the virtual server object
         #
         $self->{vsdict}->{$vs}->add_port($self->{vspdict}->{$vs}->{$vspp});
+        next if ! exists $self->{bindingdict}->{$vs} || ! exists $self->{bindingdict}->{$vs}->{$vspp};
         #
         # bound virtual server port has corresponding real server port(s)
         #
@@ -188,7 +186,7 @@ sub check {
     $self->add_info('checking session usage');
     $self->blacklist('su', undef);
     my $info = sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
-        $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit};
+        $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit};
     $self->add_info($info);
     $self->set_thresholds(warning => 80, critical => 90);
     $self->add_message($self->check_thresholds(
@@ -312,7 +310,7 @@ sub new {
     blacklisted => 0,
     info => undef,
     extendedinfo => undef,
-    realports => [],
+    ports => [],
   };
   foreach(keys %params) {
     $self->{$_} = $params{$_};
@@ -338,7 +336,12 @@ sub check {
   # wobei snL4RealServerStatusState' => serveractive ist
   # zu klaeren, ob ein kaputter real server auch in snL4RealServerPortStatusState angezeigt wird
   $self->{completeness} = $num_ports ? 100 * $active_ports / $num_ports : 0;
-  if ($active_ports == 1) {
+  if ($num_ports == 0) {
+    $self->set_thresholds(warning => "0:", critical => "0:");
+    $self->add_message(WARNING, sprintf "%s:%d has no bindings", 
+      $self->{snL4VirtualServerPortServerName},
+      $self->{snL4VirtualServerPortPort});
+  } elsif ($active_ports == 1) {
     # only one member left = no more redundancy!!
     $self->set_thresholds(warning => "100:", critical => "51:");
   } else {
