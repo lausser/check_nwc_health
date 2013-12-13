@@ -140,6 +140,10 @@ sub new {
         if ($sysobj && exists $NWC::Device::discover_ids->{$sysobj}) {
           bless $self, $NWC::Device::discover_ids->{$sysobj};
           $self->debug('using '.$NWC::Device::discover_ids->{$sysobj});
+        } elsif ($self->mode =~ /device::interfaces::/) { # it is snmp capable, so it should have interfaces
+          bless $self, 'NWC::Generic';
+        } elsif ($self->mode =~ /device::uptime/) {
+          bless $self, 'NWC::Generic';
         } else {
           $self->add_message(CRITICAL,
               sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
