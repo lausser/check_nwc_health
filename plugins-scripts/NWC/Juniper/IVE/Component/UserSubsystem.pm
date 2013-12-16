@@ -24,7 +24,7 @@ sub init {
   my $self = shift;
   my %params = @_;
   foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
-    $self->{$_} = $self->get_snmp_object('JUNIPER-IVE-MIB', $_) || 0;
+    $self->{$_} = $self->valid_response('JUNIPER-IVE-MIB', $_) || 0;
   }
 }
 
