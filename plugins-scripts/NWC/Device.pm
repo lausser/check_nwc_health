@@ -123,6 +123,9 @@ sub new {
       } elsif ($self->{productname} =~ /Foundry/i) {
         bless $self, 'NWC::Foundry';
         $self->debug('using NWC::Foundry');
+      } elsif ($self->{productname} =~ /Linux Stingray/i) {
+        bless $self, 'NWC::HOSTRESOURCESMIB';
+        $self->debug('using NWC::HOSTRESOURCESMIB');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');

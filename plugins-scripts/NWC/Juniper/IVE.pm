@@ -40,6 +40,9 @@ sub init {
     } elsif ($self->mode =~ /device::users/) {
       $self->analyze_user_subsystem();
       $self->check_user_subsystem();
+    } elsif ($self->mode =~ /device::interfaces/) {
+      $self->analyze_interface_subsystem();
+      $self->check_interface_subsystem();
     }
   }
 }
