@@ -60,6 +60,11 @@ EXTRA_MODULES=\
   NWC/Juniper/IVE.pm \
   NWC/Juniper.pm \
   NWC/AlliedTelesyn.pm \
+  NWC/Fortigate/Component/MemSubsystem.pm \
+  NWC/Fortigate/Component/CpuSubsystem.pm \
+  NWC/Fortigate/Component/EnvironmentalSubsystem.pm \
+  NWC/Fortigate/Component/SensorSubsystem.pm \
+  NWC/Fortigate.pm \
   NWC/FabOS/Component/MemSubsystem.pm \
   NWC/FabOS/Component/CpuSubsystem.pm \
   NWC/FabOS/Component/EnvironmentalSubsystem.pm \

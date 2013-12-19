@@ -126,6 +126,9 @@ sub new {
       } elsif ($self->{productname} =~ /Linux Stingray/i) {
         bless $self, 'NWC::HOSTRESOURCESMIB';
         $self->debug('using NWC::HOSTRESOURCESMIB');
+      } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
+        bless $self, 'NWC::Fortigate';
+        $self->debug('using NWC::Fortigate');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
