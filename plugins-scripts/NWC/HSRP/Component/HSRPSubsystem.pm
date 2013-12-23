@@ -24,8 +24,10 @@ sub init {
   if ($self->mode =~ /device::hsrp/) {
     foreach ($self->get_snmp_table_objects(
         'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
-      push(@{$self->{groups}},
-          NWC::HSRP::Component::HSRPSubsystem::Group->new(%{$_}));
+      my $group = NWC::HSRP::Component::HSRPSubsystem::Group->new(%{$_});
+      if ($self->filter_name($group->{name})) {
+        push(@{$self->{groups}}, $group);
+      }
     }
   }
 }

@@ -3,11 +3,12 @@
 ############################################
 
 
-2013-12-05 2.6.3
+2013-12-21 2.6.3
 - output number of sessions for f5 bigip load balancer pools
 - deal with obviously wrong values from devices (20000% cpu usage)
 - foundry server load balancing
 - bugfix in interface-* for Juniper IVE
+- filter hsrp groups by name
 
 2013-11-08
 - added support for role based login for Fritz Boxes (available since 
