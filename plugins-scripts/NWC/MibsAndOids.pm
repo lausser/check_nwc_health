@@ -4,6 +4,7 @@ $NWC::Device::discover_ids = {
 
 $NWC::Device::mib_ids = {
   'SW-MIB' => '1.3.6.1.4.1.1588.2.1.1.1',
+  'NETSCREEN-PRODUCTS-MIB' => '1.3.6.1.4.1.3224.1',
 };
 
 $NWC::Device::mibs_and_oids = {

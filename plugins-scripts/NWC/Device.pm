@@ -105,6 +105,9 @@ sub new {
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         bless $self, 'NWC::Juniper';
         $self->debug('using NWC::Juniper');
+      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) =~ /^([\d+\.]+)\.\d+$/ && $1 eq  $NWC::Device::mib_ids->{'NETSCREEN-PRODUCTS-MIB'}) {
+        $self->debug('using NWC::Juniper::NetScreen');
+        bless $self, 'NWC::Juniper::NetScreen';
       } elsif ($self->{productname} =~ /SecureOS/i) {
         bless $self, 'NWC::SecureOS';
         $self->debug('using NWC::SecureOS');
