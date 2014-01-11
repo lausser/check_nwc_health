@@ -59,7 +59,10 @@ sub new {
       # Brocade 4100 SilkWorm also sold as IBM 2005-B32 & EMC DS-4100
       # Brocade 4900 Switch also sold as IBM 2005-B64(3) & EMC DS4900B
       # Brocade M4700 (McData name Sphereon 4700) also sold as IBM 2026-432 & EMC DS-4700M
-      if ($self->{productname} =~ /Cisco/i) {
+      if ($self->{productname} =~ /upnp/i) {
+        bless $self, 'UPNP';
+        $self->debug('using UPNP');
+      } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'NWC::Cisco';
         $self->debug('using NWC::Cisco');
       } elsif ($self->{productname} =~ /fujitsu intelligent blade panel 30\/12/i) {
@@ -135,9 +138,6 @@ sub new {
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
-      } elsif ($self->{productname} =~ /upnp/i) {
-        bless $self, 'UPNP';
-        $self->debug('using UPNP');
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'NWC::Generic';
         $self->debug('using NWC::Generic');
