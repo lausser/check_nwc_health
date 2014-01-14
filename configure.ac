@@ -103,11 +103,7 @@ AC_ARG_WITH(perl,
   with_perl=$withval,with_perl=$PERL)
 AC_SUBST(PERL, $with_perl)
 
-AC_OUTPUT(
-  Makefile 
-  plugins-scripts/Makefile 
-  plugins-scripts/subst 
-)
+AC_OUTPUT(Makefile plugins-scripts/Makefile plugins-scripts/subst)
 
 ACX_FEATURE([with],[perl])
 ACX_FEATURE([with],[nagios-user])
