@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-01-14 2.6.4
+- add cisco ccm
+
 2014-01-11 2.6.3.1
 - support more SecureOS devices (i bought Juniper SSG5)
 - bugfix in upnp-detection 

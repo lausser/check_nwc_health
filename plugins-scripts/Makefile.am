@@ -38,6 +38,9 @@ EXTRA_MODULES=\
   NWC/CiscoWLC/Component/EnvironmentalSubsystem.pm \
   NWC/CiscoWLC/Component/WlanSubsystem.pm \
   NWC/CiscoWLC.pm \
+  NWC/CiscoCCM/Component/PhoneSubsystem.pm \
+  NWC/CiscoCCM/Component/CmSubsystem.pm \
+  NWC/CiscoCCM.pm \
   NWC/CiscoAsyncOS/Component/KeySubsystem.pm \
   NWC/CiscoAsyncOS/Component/MemSubsystem.pm \
   NWC/CiscoAsyncOS/Component/CpuSubsystem.pm \
@@ -86,6 +89,8 @@ EXTRA_MODULES=\
   NWC/IFMIB.pm \
   NWC/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   NWC/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
+  NWC/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
+  NWC/HOSTRESOURCESMIB/Component/MemSubsystem.pm \
   NWC/HOSTRESOURCESMIB.pm \
   NWC/BGP/Component/PeerSubsystem.pm \
   NWC/BGP.pm \

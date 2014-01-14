@@ -144,6 +144,9 @@ sub new {
       } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq $NWC::Device::mib_ids->{'SW-MIB'}) {
         bless $self, 'NWC::Brocade';
         $self->debug('using NWC::Brocade');
+      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) =~ /1\.3\.6\.1\.4\.1\.9\./) {
+        bless $self, 'NWC::Cisco';
+        $self->debug('using NWC::Cisco');
       } else {
         my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
         if ($sysobj && exists $NWC::Device::discover_ids->{$sysobj}) {

@@ -267,44 +267,44 @@ sub check_thresholds {
     $warningrange = $self->{mywarning};
     $criticalrange = $self->{mycritical};
   }
-  if ($warningrange =~ /^(\d+)$/) {
+  if ($warningrange =~ /^(-*\d+)$/) {
     # warning = 10, warn if > 10 or < 0
     $level = $ERRORS{WARNING}
         if ($value > $1 || $value < 0);
-  } elsif ($warningrange =~ /^(\d+):$/) {
+  } elsif ($warningrange =~ /^(-*\d+):$/) {
     # warning = 10:, warn if < 10
     $level = $ERRORS{WARNING}
         if ($value < $1);
-  } elsif ($warningrange =~ /^~:(\d+)$/) {
+  } elsif ($warningrange =~ /^~:(-*\d+)$/) {
     # warning = ~:10, warn if > 10
     $level = $ERRORS{WARNING}
         if ($value > $1);
-  } elsif ($warningrange =~ /^(\d+):(\d+)$/) {
+  } elsif ($warningrange =~ /^(-*\d+):(-*\d+)$/) {
     # warning = 10:20, warn if < 10 or > 20
     $level = $ERRORS{WARNING}
         if ($value < $1 || $value > $2);
-  } elsif ($warningrange =~ /^@(\d+):(\d+)$/) {
+  } elsif ($warningrange =~ /^@(-*\d+):(-*\d+)$/) {
     # warning = @10:20, warn if >= 10 and <= 20
     $level = $ERRORS{WARNING}
         if ($value >= $1 && $value <= $2);
   }
-  if ($criticalrange =~ /^(\d+)$/) {
+  if ($criticalrange =~ /^(-*\d+)$/) {
     # critical = 10, crit if > 10 or < 0
     $level = $ERRORS{CRITICAL}
         if ($value > $1 || $value < 0);
-  } elsif ($criticalrange =~ /^(\d+):$/) {
+  } elsif ($criticalrange =~ /^(-*\d+):$/) {
     # critical = 10:, crit if < 10
     $level = $ERRORS{CRITICAL}
         if ($value < $1);
-  } elsif ($criticalrange =~ /^~:(\d+)$/) {
+  } elsif ($criticalrange =~ /^~:(-*\d+)$/) {
     # critical = ~:10, crit if > 10
     $level = $ERRORS{CRITICAL}
         if ($value > $1);
-  } elsif ($criticalrange =~ /^(\d+):(\d+)$/) {
+  } elsif ($criticalrange =~ /^(-*\d+):(-*\d+)$/) {
     # critical = 10:20, crit if < 10 or > 20
     $level = $ERRORS{CRITICAL}
         if ($value < $1 || $value > $2);
-  } elsif ($criticalrange =~ /^@(\d+):(\d+)$/) {
+  } elsif ($criticalrange =~ /^@(-*\d+):(-*\d+)$/) {
     # critical = @10:20, crit if >= 10 and <= 20
     $level = $ERRORS{CRITICAL}
         if ($value >= $1 && $value <= $2);

@@ -51,6 +51,9 @@ sub init {
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
     bless $self, 'NWC::CiscoIOS';
     $self->debug('using NWC::CiscoIOS');
+  } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.1348') {
+    bless $self, 'NWC::CiscoCCM';
+    $self->debug('using NWC::CiscoCCM');
   }
   $self->init();
 }
