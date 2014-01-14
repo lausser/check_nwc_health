@@ -36,9 +36,9 @@ sub check {
   foreach (@{$self->{ccms}}) {
     $_->check();
   }
-  if (! scalar(@{$self->{ccms}})) {
-    $self->add_message(OK, 'local callmanager is down');
-  }
+  $self->add_message(
+      defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
+       'local callmanager is down');
 }
 
 sub dump {
