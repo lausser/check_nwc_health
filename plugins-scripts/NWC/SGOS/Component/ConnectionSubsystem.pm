@@ -39,7 +39,7 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking connections');
   if ($self->mode =~ /device::connections::check/) {
-    my $info = sprintf 'average service time for http requests is %.2fs',
+    my $info = sprintf 'average service time for http requests is %.5fs',
         $self->{sgProxyHttpResponseTimeAll};
     $self->add_info($info);
     $self->set_thresholds(warning => 5, critical => 10);
@@ -47,6 +47,8 @@ sub check {
     $self->add_perfdata(
         label => 'http_response_time',
         value => $self->{sgProxyHttpResponseTimeAll},
+        places => 5,
+        uom => 's',
         warning => $self->{warning},
         critical => $self->{critical}
     );
@@ -85,7 +87,7 @@ sub check {
 
 sub dump {
   my $self = shift;
-  printf "[MEMORY]\n";
+  printf "[CONNECTIONS]\n";
   foreach (qw(sgProxyHttpResponseTimeAll sgProxyHttpResponseFirstByte
       sgProxyHttpResponseByteRate sgProxyHttpResponseSize
       sgProxyHttpClientConnections sgProxyHttpClientConnectionsActive

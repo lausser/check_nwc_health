@@ -35,7 +35,7 @@ sub init {
     } elsif ($self->mode =~ /device::security/) {
       $self->analyze_security_subsystem();
       $self->check_security_subsystem();
-    } elsif ($self->mode =~ /device::(users|connections)::count/) {
+    } elsif ($self->mode =~ /device::(users|connections)::(count|check)/) {
       $self->analyze_connection_subsystem();
       $self->check_connection_subsystem();
     }
