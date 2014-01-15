@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-01-15 2.6.4.2
+- add http connection checks for bluecoat sg
+
 2014-01-14 2.6.4
 - add cisco ccm
 

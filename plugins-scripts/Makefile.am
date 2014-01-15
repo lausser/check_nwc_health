@@ -131,6 +131,7 @@ EXTRA_MODULES=\
   NWC/SGOS/Component/SensorSubsystem.pm \
   NWC/SGOS/Component/DiskSubsystem.pm \
   NWC/SGOS/Component/SecuritySubsystem.pm \
+  NWC/SGOS/Component/ConnectionSubsystem.pm \
   NWC/SGOS.pm \
   NWC/AVOS/Component/KeySubsystem.pm \
   NWC/AVOS/Component/SecuritySubsystem.pm \

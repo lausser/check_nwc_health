@@ -35,6 +35,9 @@ sub init {
     } elsif ($self->mode =~ /device::security/) {
       $self->analyze_security_subsystem();
       $self->check_security_subsystem();
+    } elsif ($self->mode =~ /device::(users|connections)::count/) {
+      $self->analyze_connection_subsystem();
+      $self->check_connection_subsystem();
     }
   }
 }
@@ -61,5 +64,11 @@ sub analyze_security_subsystem {
   my $self = shift;
   $self->{components}->{security_subsystem} =
       NWC::SGOS::Component::SecuritySubsystem->new();
+}
+
+sub analyze_connection_subsystem {
+  my $self = shift;
+  $self->{components}->{connection_subsystem} =
+      NWC::SGOS::Component::ConnectionSubsystem->new();
 }
 

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_REVISION ($Revision: 1.150 $)
 AC_PREREQ(2.58)
-AC_INIT(check_nwc_health,2.6.4)
+AC_INIT(check_nwc_health,2.6.4.2)
 AM_INIT_AUTOMAKE([1.9 tar-pax])
 AC_CANONICAL_HOST
 
