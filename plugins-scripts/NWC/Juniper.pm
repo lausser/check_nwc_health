@@ -15,7 +15,9 @@ sub init {
   my $self = shift;
   my %params = @_;
   $self->SUPER::init(%params);
-  if ($self->{productname} =~ /NetScreen/i) {
+  if (ref($self) =~ /^NWC::Juniper/) {
+    # 
+  } elsif ($self->{productname} =~ /NetScreen/i) {
     bless $self, 'NWC::Juniper::NetScreen';
     $self->debug('using NWC::Juniper::NetScreen');
   } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
@@ -25,4 +27,8 @@ sub init {
   }
   $self->init(%params);
 }
+
+# NWC::Device->init
+# array aus signaturfunktion, signatur, klasse
+# selber init
 

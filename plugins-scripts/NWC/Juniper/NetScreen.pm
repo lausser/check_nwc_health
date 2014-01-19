@@ -13,6 +13,7 @@ use constant trees => (
 
 sub init {
   my $self = shift;
+  $self->SUPER::init();
   $self->{components} = {
       powersupply_subsystem => undef,
       fan_subsystem => undef,
