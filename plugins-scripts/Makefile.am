@@ -19,6 +19,7 @@ EXTRA_MODULES=\
   UPNP/AVM.pm \
   UPNP.pm \
   Server/Linux.pm \
+  NWC/CiscoIOS/Component/ConfigSubsystem.pm \
   NWC/CiscoIOS/Component/CpuSubsystem.pm \
   NWC/CiscoIOS/Component/MemSubsystem.pm \
   NWC/CiscoIOS/Component/EnvironmentalSubsystem.pm \

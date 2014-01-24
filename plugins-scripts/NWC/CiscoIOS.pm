@@ -46,6 +46,9 @@ sub init {
     } elsif ($self->mode =~ /device::users/) {
       $self->analyze_connection_subsystem();
       $self->check_connection_subsystem();
+    } elsif ($self->mode =~ /device::config/) {
+      $self->analyze_config_subsystem();
+      $self->check_config_subsystem();
     }
   }
 }
@@ -78,5 +81,11 @@ sub analyze_connection_subsystem {
   my $self = shift;
   $self->{components}->{connection_subsystem} =
       NWC::CiscoIOS::Component::ConnectionSubsystem->new();
+}
+
+sub analyze_config_subsystem {
+  my $self = shift;
+  $self->{components}->{config_subsystem} =
+      NWC::CiscoIOS::Component::ConfigSubsystem->new();
 }
 
