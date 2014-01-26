@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-01-26
+- add CISCO-ENHANCED-MEMPOOL-MIB
+
 2014-01-24 2.6.5
 - add mode --check-config, which finds unsaved (cisco only) configs (Thanks Simon Meggle)
 
