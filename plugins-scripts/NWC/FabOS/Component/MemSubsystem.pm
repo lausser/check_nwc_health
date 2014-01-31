@@ -28,7 +28,10 @@ sub init {
   my $type = 0;
   foreach (qw(swMemUsage swMemUsageLimit1 swMemUsageLimit3 swMemPollingInterval
       swMemNoOfRetries swMemAction)) {
-    $self->{$_} = $self->get_snmp_object('SW-MIB', $_, 0);
+    $self->{$_} = $self->valid_response('SW-MIB', $_, 0);
+  }
+  foreach (qw(swFwFabricWatchLicense)) {
+    $self->{$_} = $self->get_snmp_object('SW-MIB', $_);
   }
 }
 
@@ -51,6 +54,8 @@ sub check {
         warning => $self->{warning},
         critical => $self->{critical}
     );
+  } elsif ($self->{swFwFabricWatchLicense} eq 'swFwNotLicensed') {
+    $self->add_message(UNKNOWN, 'please install a fabric watch license');
   } else {
     $self->add_message(UNKNOWN, 'cannot aquire momory usage');
   }

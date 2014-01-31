@@ -2574,6 +2574,12 @@ $NWC::Device::mibs_and_oids = {
       swSensorValue => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.4',
       swSensorInfo => '1.3.6.1.4.1.1588.2.1.1.1.1.22.1.5',
 
+      swFwFabricWatchLicense => '1.3.6.1.4.1.1588.2.1.1.1.10.1.0',
+      swFwFabricWatchLicenseDefinition => {
+          1 => 'swFwLicensed',
+          2 => 'swFwNotLicensed',
+      },
+
       swFwThresholdTable => '1.3.6.1.4.1.1588.2.1.1.1.10.3',
       swFwThresholdEntry => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1',
       swFwThresholdIndex => '1.3.6.1.4.1.1588.2.1.1.1.10.3.1.1',

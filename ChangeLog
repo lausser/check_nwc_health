@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-01-31 2.6.5.1
+- handle a missing brocade fabric watch license in cpu-load & memory-usage
+
 2014-01-24 2.6.5
 - add mode --check-config, which finds unsaved (cisco only) configs (Thanks Simon Meggle)
 

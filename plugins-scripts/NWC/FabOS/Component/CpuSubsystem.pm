@@ -24,7 +24,10 @@ sub init {
   my $type = 0;
   foreach (qw(swCpuUsage swCpuNoOfRetries swCpuUsageLimit swCpuPollingInterval
       swCpuAction)) {
-    $self->{$_} = $self->get_snmp_object('SW-MIB', $_, 0);
+    $self->{$_} = $self->valid_response('SW-MIB', $_, 0);
+  }
+  foreach (qw(swFwFabricWatchLicense)) {
+    $self->{$_} = $self->get_snmp_object('SW-MIB', $_);
   }
 }
 
@@ -33,18 +36,24 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage};
-  $self->add_info($info);
-  $self->set_thresholds(warning => $self->{swCpuUsageLimit},
-      critical => $self->{swCpuUsageLimit});
-  $self->add_message($self->check_thresholds($self->{swCpuUsage}), $info);
-  $self->add_perfdata(
-      label => 'cpu_usage',
-      value => $self->{swCpuUsage},
-      uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
-  );
+  if (defined $self->{swCpuUsage}) {
+    my $info = sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage};
+    $self->add_info($info);
+    $self->set_thresholds(warning => $self->{swCpuUsageLimit},
+        critical => $self->{swCpuUsageLimit});
+    $self->add_message($self->check_thresholds($self->{swCpuUsage}), $info);
+    $self->add_perfdata(
+        label => 'cpu_usage',
+        value => $self->{swCpuUsage},
+        uom => '%',
+        warning => $self->{warning},
+        critical => $self->{critical},
+    );
+  } elsif ($self->{swFwFabricWatchLicense} eq 'swFwNotLicensed') {
+    $self->add_message(UNKNOWN, 'please install a fabric watch license');
+  } else {
+    $self->add_message(UNKNOWN, 'cannot aquire momory usage');
+  }
 }
 
 sub dump {
