@@ -1,6 +1,7 @@
 $NWC::Device::discover_ids = {
   '1.3.6.1.4.1.12532.252.5.1' => 'NWC::Juniper::IVE',
   '1.3.6.1.4.1.9.1.1348' => 'NWC::CiscoCCM',
+  '1.3.6.1.4.1.9.1.746' => 'NWC::CiscoCCM',
 };
 
 $NWC::Device::mib_ids = {

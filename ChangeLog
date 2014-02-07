@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-02-07 2.6.5.2
+- add another cisco unified communication model
+
 2014-01-31 2.6.5.1
 - handle a missing brocade fabric watch license in cpu-load & memory-usage
 - add CISCO-ENHANCED-MEMPOOL-MIB
