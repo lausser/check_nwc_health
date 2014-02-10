@@ -1,7 +1,8 @@
 #! /usr/bin/perl
 
 use strict;
-use Digest::MD5 qw(md5_hex);;
+use Digest::MD5 qw(md5_hex);
+use Devel::TraceMethods;
 
 use vars qw ($PROGNAME $REVISION $CONTACT $TIMEOUT $STATEFILESDIR $needs_restart %commandline);
 
@@ -491,29 +492,48 @@ $SIG{'ALRM'} = sub {
 };
 alarm($plugin->opts->timeout);
 
-$NWC::Device::plugin = $plugin;
-$NWC::Device::mode = (
+$GLPlugin::plugin = $plugin;
+$GLPlugin::statefilesdir = $plugin->opts->statefilesdir;
+$GLPlugin::mode = (
     map { $_->[0] }
     grep {
        ($plugin->opts->mode eq $_->[1]) ||
        ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
     } @modes
 )[0];
-my $server = NWC::Device->new( runtime => {
+my $device = Classes::Device->new();
+#$device->dumper();
+if (! $plugin->check_messages()) {
+  $device->init();
+  if (! $plugin->check_messages()) {
+    $plugin->add_message(OK, $device->get_summary())
+        if $device->get_summary();
+    $plugin->add_message(OK, $device->get_extendedinfo(" "))
+        if $device->get_extendedinfo();
+  }
+} elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
+  ;
+} else {
+  $plugin->add_message(CRITICAL, 'wrong device');
+}
+my ($code, $message) = $plugin->opts->multiline ?
+    $plugin->check_messages(join => "\n", join_all => ', ') :
+    $plugin->check_messages(join => ', ', join_all => ', ');
+$message .= sprintf "\n%s\n", $device->get_info("\n")
+    if $plugin->opts->verbose >= 1;
+#printf "%s\n", Data::Dumper::Dumper($plugin->{info});
+$plugin->nagios_exit($code, $message);
 
-    plugin => $plugin,
-    options => {
-        servertype => $plugin->opts->servertype,
-        verbose => $plugin->opts->verbose,
-        customthresholds => $plugin->opts->get('customthresholds'),
-        blacklist => $plugin->opts->blacklist,
-#        celsius => $CELSIUS,
-#        perfdata => $PERFDATA,
-#        extendedinfo => $EXTENDEDINFO,
-#        hwinfo => $HWINFO,
-#        noinstlevel => $NOINSTLEVEL,
-    },
-},);
+__END__
+$Classes::Device::plugin = $plugin;
+$Classes::Device::mode = (
+    map { $_->[0] }
+    grep {
+       ($plugin->opts->mode eq $_->[1]) ||
+       ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
+    } @modes
+)[0];
+my $server = Classes::Device->new();
 #$server->dumper();
 if (! $plugin->check_messages()) {
   $server->init();
@@ -531,7 +551,7 @@ if (! $plugin->check_messages()) {
 my ($code, $message) = $plugin->opts->multiline ? 
     $plugin->check_messages(join => "\n", join_all => ', ') :
     $plugin->check_messages(join => ', ', join_all => ', ');
-$message .= sprintf "\n%s\n", join("\n", @{$NWC::Device::info})
+$message .= sprintf "\n%s\n", join("\n", @{$Classes::Device::info})
     if $plugin->opts->verbose >= 1;
 #printf "%s\n", Data::Dumper::Dumper($plugin->{info});
 $plugin->nagios_exit($code, $message);

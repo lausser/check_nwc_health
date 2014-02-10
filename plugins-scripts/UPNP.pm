@@ -4,7 +4,7 @@ use strict;
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-our @ISA = qw(NWC::Device);
+our @ISA = qw(Classes::Device);
 
 sub init {
   my $self = shift;
@@ -55,7 +55,7 @@ sub init {
           critical => $self->{critical},
       );
       my ($code, $message) = $self->check_messages(join => ', ', join_all => ' , ');
-      $NWC::Device::plugin->nagios_exit($code, $message);
+      $Classes::Device::plugin->nagios_exit($code, $message);
     } elsif ($self->{productname} =~ /Fritz/i) {
       bless $self, 'UPNP::AVM';
       $self->debug('using UPNP::AVM');
