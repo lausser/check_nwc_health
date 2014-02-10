@@ -67,6 +67,7 @@ sub check {
     #foreach (sort @{$self->{interfaces}}) {
       $_->list();
     }
+    $self->add_message(OK, "have fun");
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     foreach (@{$self->{interfaces}}) {
       $_->check();
