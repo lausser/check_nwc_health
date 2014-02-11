@@ -35,7 +35,24 @@ sub new {
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     $self->add_message(UNKNOWN, 'either specify a hostname or a snmpwalk file');
   } else {
-    $self->check_snmp_and_model();
+    if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
+    } elsif ($self->opts->port && $self->opts->port == 49000) {
+      $self->{productname} = 'upnp';
+    } else {
+      $self->check_snmp_and_model();
+    }
+    if ($self->opts->servertype) {
+      $self->{productname} = 'cisco' if $self->opts->servertype eq 'cisco';
+      $self->{productname} = 'huawei' if $self->opts->servertype eq 'huawei';
+      $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
+      $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
+      $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
+      $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
+      $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
+      $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
+      $self->{productname} = 'checkpoint' if $self->opts->servertype eq 'checkpoint';
+      $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
+    }
     if (! $self->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};

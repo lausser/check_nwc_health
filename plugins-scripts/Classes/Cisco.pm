@@ -39,7 +39,6 @@ sub i_can_handle_this {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->SUPER::init(%params);
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     bless $self, 'Classes::CiscoNXOS';
     $self->debug('using Classes::CiscoNXOS');
@@ -62,6 +61,6 @@ sub init {
     bless $self, 'Classes::CiscoCCM';
     $self->debug('using Classes::CiscoCCM');
   }
-  $self->init();
+  $self->SUPER::init(%params);
 }
 
