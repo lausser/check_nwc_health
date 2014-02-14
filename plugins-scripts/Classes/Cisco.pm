@@ -1,10 +1,6 @@
 package Classes::Cisco;
-
-use strict;
-
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
 our @ISA = qw(Classes::Device);
+use strict;
 
 use constant trees => (
   '1.3.6.1.2.1',        # mib-2
@@ -32,13 +28,8 @@ use constant trees => (
   '1.3.6.1.4.1.14179.2',   # airespace-wireless-mib
 );
 
-sub i_can_handle_this {
-  my $self = shift;
-}
-
 sub init {
   my $self = shift;
-  my %params = @_;
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     bless $self, 'Classes::CiscoNXOS';
     $self->debug('using Classes::CiscoNXOS');
@@ -61,6 +52,6 @@ sub init {
     bless $self, 'Classes::CiscoCCM';
     $self->debug('using Classes::CiscoCCM');
   }
-  $self->SUPER::init(%params);
+  $self->init();
 }
 
