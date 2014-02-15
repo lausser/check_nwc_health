@@ -1,10 +1,6 @@
 package Classes::Brocade;
-
-use strict;
-
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
 our @ISA = qw(Classes::Device);
+use strict;
 
 use constant trees => (
   '1.3.6.1.2.1',        # mib-2
@@ -17,8 +13,6 @@ use constant trees => (
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  $self->SUPER::init(%params);
   foreach ($self->get_snmp_table_objects(
       'ENTITY-MIB', 'entPhysicalTable')) {
     if ($_->{entPhysicalDescr} =~ /Brocade/) {

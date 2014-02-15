@@ -1,10 +1,6 @@
 package Classes::Bluecoat;
-
-use strict;
-
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
 our @ISA = qw(Classes::Device);
+use strict;
 
 use constant trees => (
   '1.3.6.1.2.1.1', # RFC1213-MIB
@@ -47,11 +43,9 @@ use constant trees => (
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  $self->SUPER::init(%params);
   if ($self->{productname} =~ /Blue.*Coat.*SG\d+/i) {
     # product ProxySG  Blue Coat SG600
-# iso.3.6.1.4.1.3417.2.11.1.3.0 = STRING: "Version: SGOS 5.5.8.1, Release id: 78642 Proxy Edition"
+    # iso.3.6.1.4.1.3417.2.11.1.3.0 = STRING: "Version: SGOS 5.5.8.1, Release id: 78642 Proxy Edition"
     bless $self, 'Classes::SGOS';
     $self->debug('using Classes::SGOS');
     $self->init();

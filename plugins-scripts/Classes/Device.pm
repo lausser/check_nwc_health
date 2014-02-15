@@ -27,7 +27,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
   my $self = {
     productname => 'unknown',
   };
@@ -60,10 +59,6 @@ sub new {
       if ($self->{productname} =~ /upnp/i) {
         bless $self, 'UPNP';
         $self->debug('using UPNP');
-      } elsif ($self->mode =~ /device::uptime/) {
-        bless $self, 'GLPlugin::SNMP';
-      } elsif ($self->mode =~ /device::interfaces::/) {
-        bless $self, 'Classes::Generic';
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
@@ -110,7 +105,7 @@ sub new {
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
-      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) =~ /^([\d+\.]+)\.\d+$/ && $1 eq  $Classes::Device::mib_ids->{'NETSCREEN-PRODUCTS-MIB'}) {
+      } elsif ($self->{sysobjectid} =~ /^([\d+\.]+)\.\d+$/ && $1 eq  $Classes::Device::mib_ids->{'NETSCREEN-PRODUCTS-MIB'}) {
         $self->debug('using Classes::Juniper::NetScreen');
         bless $self, 'Classes::Juniper::NetScreen';
       } elsif ($self->{productname} =~ /SecureOS/i) {
@@ -143,10 +138,10 @@ sub new {
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'Classes::Generic';
         $self->debug('using Classes::Generic');
-      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq $Classes::Device::mib_ids->{'SW-MIB'}) {
+      } elsif ($self->{sysobjectid} eq $Classes::Device::mib_ids->{'SW-MIB'}) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
-      } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) =~ /1\.3\.6\.1\.4\.1\.9\./) {
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.9\./) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
       } else {
@@ -154,14 +149,50 @@ sub new {
           bless $self, $class;
           $self->debug('using '.$class);
         } else {
-          $self->add_message(UNKNOWN, 'the device did not implement the mibs this plugin is asking for');
-          $self->add_message(UNKNOWN,
-              sprintf('unknown device%s', $self->{productname} eq 'unknown' ?
-                  '' : '('.$self->{productname}.')'));
+          bless $self, 'Classes::Generic';
+          $self->debug('using Classes::Generic');
         }
       }
     }
   }
   return $self;
+}
+
+
+package Classes::Generic;
+our @ISA = qw(Classes::Device);
+use strict;
+
+
+sub init {
+  my $self = shift;
+  if ($self->mode =~ /device::interfaces::aggregation::availability/) {
+    $self->analyze_and_check_aggregation_subsystem();
+  } elsif ($self->mode =~ /device::interfaces/) {
+    $self->analyze_and_check_interface_subsystem();
+  } elsif ($self->mode =~ /device::bgp/) {
+    $self->analyze_and_check_bgp_subsystem();
+  } else {
+    bless $self, 'GLPlugin::SNMP';
+    $self->no_such_mode();
+  }
+}
+
+sub analyze_interface_subsystem {
+  my $self = shift;
+  $self->{components}->{interface_subsystem} =
+      NWC::IFMIB::Component::InterfaceSubsystem->new();
+}
+
+sub analyze_bgp_subsystem {
+  my $self = shift;
+  $self->{components}->{bgp_subsystem} =
+      NWC::BGP::Component::PeerSubsystem->new();
+}
+
+sub analyze_aggregation_subsystem {
+  my $self = shift;
+  $self->{components}->{aggregation_subsystem} =
+      NWC::IFMIB::Component::LinkAggregation->new();
 }
 
