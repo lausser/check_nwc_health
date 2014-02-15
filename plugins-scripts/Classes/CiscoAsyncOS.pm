@@ -12,6 +12,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::CiscoAsyncOS::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::licenses::/) {
     $self->analyze_and_check_key_subsystem("Classes::CiscoAsyncOS::Component::KeySubsystem");
+  } else {
+    $self->no_such_mode();
   }
 }
 
