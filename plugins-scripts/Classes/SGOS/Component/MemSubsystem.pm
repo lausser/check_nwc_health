@@ -1,22 +1,13 @@
 package Classes::SGOS::Component::MemSubsystem;
 our @ISA = qw(Classes::SGOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    mems => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -28,10 +19,6 @@ sub init {
   # SGOSV4:  memPressureValue - OIDs: 1.3.6.1.4.1.3417.2.8.2.3 (systemResourceMIB)
   # SGOSV5: sgProxyMemoryPressure - OIDs: 1.3.6.1.4.1.3417.2.11.2.3.4 (bluecoatSGProxyMIB)
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  my $type = 0;
   foreach (qw(sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage
       sgProxyMemSysUsage)) {
     $self->{$_} = $self->get_snmp_object('BLUECOAT-SG-PROXY-MIB', $_);
@@ -40,7 +27,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   my $info = sprintf 'memory usage is %.2f%%',

@@ -1,26 +1,18 @@
 package Classes::SGOS::Component::CpuSubsystem;
 our @ISA = qw(Classes::SGOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    cpus => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   # With SGOS version 5.5.4.1, 5.4.6.1 and 6.1.2.1, the SNMP MIB has been extended to support multiple CPU cores.
   # The new OID is defined as a table 1.3.6.1.4.1.3417.2.11.2.4.1 in the BLUECOAT-SG-PROXY-MIB file with the following sub-OIDs.
   # https://kb.bluecoat.com/index?page=content&id=FAQ1244&actp=search&viewlocale=en_US&searchid=1360452047002
@@ -41,7 +33,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('ff', '');
   if (scalar (@{$self->{cpus}}) == 0) {
@@ -62,7 +53,6 @@ sub dump {
 
 package Classes::SGOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(Classes::SGOS::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -124,7 +114,6 @@ sub dump {
 
 package Classes::SGOS::Component::CpuSubsystem::DevCpu;
 our @ISA = qw(Classes::SGOS::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

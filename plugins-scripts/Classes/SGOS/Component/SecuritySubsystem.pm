@@ -1,26 +1,18 @@
 package Classes::SGOS::Component::SecuritySubsystem;
 our @ISA = qw(Classes::SGOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    securitys => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   foreach ($self->get_snmp_table_objects(
       'ATTACK-MIB', 'deviceAttackTable')) {
     push(@{$self->{securitys}},
@@ -55,7 +47,6 @@ sub dump {
 
 package Classes::SGOS::Component::SecuritySubsystem::Security;
 our @ISA = qw(Classes::SGOS::Component::SecuritySubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

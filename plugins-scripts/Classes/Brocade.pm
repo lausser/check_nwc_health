@@ -36,6 +36,9 @@ sub init {
     bless $self, 'Classes::Foundry';
     $self->debug('using Classes::Foundry');
   }
-  $self->init();
+  if (ref($self) ne "Classes::Brocade") {
+    $self->init();
+  }
+
 }
 

@@ -1,21 +1,13 @@
 package Classes::SGOS::Component::DiskSubsystem;
 our @ISA = qw(Classes::SGOS::Component::EnvironmentalSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    disks => [],
-    fss => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -62,7 +54,6 @@ sub dump {
 
 package Classes::SGOS::Component::DiskSubsystem::Disk;
 our @ISA = qw(Classes::SGOS::Component::DiskSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -112,7 +103,6 @@ sub dump {
 
 package Classes::SGOS::Component::DiskSubsystem::FS;
 our @ISA = qw(Classes::SGOS::Component::DiskSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

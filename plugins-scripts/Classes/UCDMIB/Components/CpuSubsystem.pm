@@ -1,27 +1,18 @@
 package Classes::UCDMIB::Component::CpuSubsystem;
 our @ISA = qw(Classes::UCDMIB);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    loads => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $type = 0;
   foreach (qw(ssCpuUser ssCpuSystem ssCpuIdle
       ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)) {
     $self->{$_} = $self->get_snmp_object('UCD-SNMP-MIB', $_, 0);
@@ -38,7 +29,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
   my $info = sprintf 'cpu usage is %.2f%%', $self->{cpu_usage};
@@ -78,7 +68,6 @@ sub unix_init {
 
 sub unix_check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking loads');
   $self->blacklist('c', '');
   foreach (@{$self->{loads}}) {
@@ -96,7 +85,6 @@ sub unix_dump {
 
 package Classes::UCDMIB::Component::CpuSubsystem::Load;
 our @ISA = qw(Classes::UCDMIB::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

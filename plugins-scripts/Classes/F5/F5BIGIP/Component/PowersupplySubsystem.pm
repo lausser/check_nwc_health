@@ -1,20 +1,13 @@
 package Classes::F5::F5BIGIP::Component::PowersupplySubsystem;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    powersupplies => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -40,7 +33,6 @@ sub check {
   }
 }
 
-
 sub dump {
   my $self = shift;
   foreach (@{$self->{powersupplies}}) {
@@ -51,7 +43,6 @@ sub dump {
 
 package Classes::F5::F5BIGIP::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::PowersupplySubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

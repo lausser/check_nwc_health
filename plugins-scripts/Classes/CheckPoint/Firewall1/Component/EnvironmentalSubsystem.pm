@@ -1,45 +1,30 @@
 package Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::CheckPoint::Firewall1);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    method => $params{method},
-    condition => $params{condition},
-    status => $params{status},
-    sensor_subsystem => undef,
-    disk_subsystem => undef,
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{disk_subsystem} =
-      Classes::CheckPoint::Firewall1::Component::DiskSubsystem->new(%params);
+      Classes::CheckPoint::Firewall1::Component::DiskSubsystem->new();
   $self->{temperature_subsystem} =
-      Classes::CheckPoint::Firewall1::Component::TemperatureSubsystem->new(%params);
+      Classes::CheckPoint::Firewall1::Component::TemperatureSubsystem->new();
   $self->{fan_subsystem} =
-      Classes::CheckPoint::Firewall1::Component::FanSubsystem->new(%params);
+      Classes::CheckPoint::Firewall1::Component::FanSubsystem->new();
   $self->{voltage_subsystem} =
-      Classes::CheckPoint::Firewall1::Component::VoltageSubsystem->new(%params);
+      Classes::CheckPoint::Firewall1::Component::VoltageSubsystem->new();
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->{disk_subsystem}->check();
   $self->{temperature_subsystem}->check();
   $self->{fan_subsystem}->check();

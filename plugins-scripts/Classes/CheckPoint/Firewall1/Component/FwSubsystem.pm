@@ -1,26 +1,18 @@
 package Classes::CheckPoint::Firewall1::Component::FwSubsystem;
 our @ISA = qw(Classes::CheckPoint::Firewall1);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    cpus => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{fwModuleState} = $self->get_snmp_object('CHECKPOINT-MIB', 'fwModuleState');
   $self->{fwPolicyName} = $self->get_snmp_object('CHECKPOINT-MIB', 'fwPolicyName');
   if ($self->mode =~ /device::fw::policy::installed/) {
@@ -31,8 +23,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my %params = @_;
-  my $errorfound = 0;
   $self->add_info('checking fw module');
   if ($self->{fwModuleState} ne 'Installed') {
     $self->add_message(CRITICAL,

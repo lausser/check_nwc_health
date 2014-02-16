@@ -48,11 +48,12 @@ sub init {
     # iso.3.6.1.4.1.3417.2.11.1.3.0 = STRING: "Version: SGOS 5.5.8.1, Release id: 78642 Proxy Edition"
     bless $self, 'Classes::SGOS';
     $self->debug('using Classes::SGOS');
-    $self->init();
   } elsif ($self->{productname} =~ /Blue.*Coat.*AV\d+/i) {
     # product Blue Coat AV510 Series, ProxyAV Version: 3.5.1.1, Release id: 111017
     bless $self, 'Classes::AVOS';
     $self->debug('using Classes::AVOS');
+  }
+  if (ref($self) ne "Classes::Bluecoat") {
     $self->init();
   }
 }

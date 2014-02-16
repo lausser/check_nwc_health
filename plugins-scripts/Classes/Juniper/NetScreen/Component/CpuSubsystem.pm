@@ -1,27 +1,18 @@
 package Classes::Juniper::NetScreen::Component::CpuSubsystem;
 our @ISA = qw(Classes::Juniper::NetScreen);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    loads => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $type = 0;
   foreach (qw(nsResCpuAvg)) {
     $self->{$_} = $self->get_snmp_object('NETSCREEN-RESOURCE-MIB', $_);
   }
@@ -55,38 +46,9 @@ sub dump {
   printf "\n";
 }
 
-sub unix_init {
-  my $self = shift;
-  my %params = @_;
-  my $type = 0;
-  foreach ($self->get_snmp_table_objects(
-     'UCD-SNMP-MIB', 'laTable')) {
-    push(@{$self->{loads}},
-        Classes::Juniper::NetScreen::Component::CpuSubsystem::Load->new(%{$_}));
-  }
-}
-
-sub unix_check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking loads');
-  $self->blacklist('c', '');
-  foreach (@{$self->{loads}}) {
-    $_->check();
-  }
-}
-
-sub unix_dump {
-  my $self = shift;
-  foreach (@{$self->{loads}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::Juniper::NetScreen::Component::CpuSubsystem::Load;
 our @ISA = qw(Classes::Juniper::NetScreen::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

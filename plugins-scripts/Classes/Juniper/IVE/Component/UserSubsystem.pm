@@ -1,28 +1,18 @@
 package Classes::Juniper::IVE::Component::UserSubsystem;
 our @ISA = qw(Classes::Juniper::IVE);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    mems => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
     $self->{$_} = $self->valid_response('JUNIPER-IVE-MIB', $_) || 0;
   }
@@ -30,7 +20,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   my $info = sprintf 'Users:  cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',

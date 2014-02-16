@@ -1,33 +1,24 @@
 package Classes::CheckPoint::Firewall1::Component::CpuSubsystem;
 our @ISA = qw(Classes::CheckPoint::Firewall1);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    cpus => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{procUsage} = $self->get_snmp_object('CHECKPOINT-MIB', 'procUsage');
   $self->{procQueue} = $self->valid_response('CHECKPOINT-MIB', 'procQueue');
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   my $info = sprintf 'cpu usage is %.2f%%', $self->{procUsage};
   $self->add_info($info);

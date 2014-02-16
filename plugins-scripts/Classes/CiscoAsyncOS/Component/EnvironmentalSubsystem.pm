@@ -1,50 +1,33 @@
 package Classes::CiscoAsyncOS::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::CiscoAsyncOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    method => $params{method},
-    condition => $params{condition},
-    status => $params{status},
-    fan_subsystem => undef,
-    temperature_subsystem => undef,
-    powersupply_subsystem => undef,
-    raid_subsystem => undef,
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   #
   # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
   # 
   $self->{fan_subsystem} =
-      Classes::CiscoAsyncOS::Component::FanSubsystem->new(%params);
+      Classes::CiscoAsyncOS::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
-      Classes::CiscoAsyncOS::Component::TemperatureSubsystem->new(%params);
+      Classes::CiscoAsyncOS::Component::TemperatureSubsystem->new();
   $self->{powersupply_subsystem} = 
-      Classes::CiscoAsyncOS::Component::SupplySubsystem->new(%params);
+      Classes::CiscoAsyncOS::Component::SupplySubsystem->new();
   $self->{raid_subsystem} = 
-      Classes::CiscoAsyncOS::Component::RaidSubsystem->new(%params);
+      Classes::CiscoAsyncOS::Component::RaidSubsystem->new();
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
   $self->{powersupply_subsystem}->check();

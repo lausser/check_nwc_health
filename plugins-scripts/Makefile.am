@@ -151,7 +151,6 @@ EXTRA_MODULES=\
   Classes/Foundry.pm \
   Classes/Bluecoat.pm \
   Classes/MibsAndOids.pm \
-  Classes/Generic.pm \
   Classes/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
 

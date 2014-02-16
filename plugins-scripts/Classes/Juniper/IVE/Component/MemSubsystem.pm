@@ -1,35 +1,24 @@
 package Classes::Juniper::IVE::Component::MemSubsystem;
 our @ISA = qw(Classes::Juniper::IVE);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    mems => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{iveMemoryUtil} = $self->get_snmp_object('JUNIPER-IVE-MIB', 'iveMemoryUtil');
   $self->{iveSwapUtil} = $self->get_snmp_object('JUNIPER-IVE-MIB', 'iveSwapUtil');
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   my $info = sprintf 'memory usage is %.2f%%, swap usage is %.2f%%',

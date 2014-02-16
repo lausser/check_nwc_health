@@ -1,21 +1,13 @@
 package Classes::CiscoNXOS::Component::SensorSubsystem;
 our @ISA = qw(Classes::CiscoNXOS::Component::EnvironmentalSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    sensors => [],
-    sensorthresholds => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -56,7 +48,6 @@ sub check {
   }
 }
 
-
 sub dump {
   my $self = shift;
   foreach (@{$self->{sensors}}) {
@@ -67,7 +58,6 @@ sub dump {
 
 package Classes::CiscoNXOS::Component::SensorSubsystem::Sensor;
 our @ISA = qw(Classes::CiscoNXOS::Component::SensorSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -152,7 +142,6 @@ sub dump {
 
 package Classes::CiscoNXOS::Component::SensorSubsystem::SensorThreshold;
 our @ISA = qw(Classes::CiscoNXOS::Component::SensorSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

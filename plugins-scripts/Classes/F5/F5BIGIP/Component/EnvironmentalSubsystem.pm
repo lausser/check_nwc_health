@@ -1,47 +1,30 @@
 package Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::F5::F5BIGIP);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    method => $params{method},
-    condition => $params{condition},
-    status => $params{status},
-    cpu_subsystem => undef,
-    fan_subsystem => undef,
-    temperature_subsystem => undef,
-    powersupply_subsystem => undef,
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{cpu_subsystem} =
-      Classes::F5::F5BIGIP::Component::CpuSubsystem->new(%params);
+      Classes::F5::F5BIGIP::Component::CpuSubsystem->new();
   $self->{fan_subsystem} =
-      Classes::F5::F5BIGIP::Component::FanSubsystem->new(%params);
+      Classes::F5::F5BIGIP::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
-      Classes::F5::F5BIGIP::Component::TemperatureSubsystem->new(%params);
+      Classes::F5::F5BIGIP::Component::TemperatureSubsystem->new();
   $self->{powersupply_subsystem} = 
-      Classes::F5::F5BIGIP::Component::PowersupplySubsystem->new(%params);
+      Classes::F5::F5BIGIP::Component::PowersupplySubsystem->new();
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->{cpu_subsystem}->check();
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();

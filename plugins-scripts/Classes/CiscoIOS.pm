@@ -16,6 +16,8 @@ sub init {
     $self->analyze_and_check_connection_subsystem("Classes::CiscoIOS::Component::ConnectionSubsystem");
   } elsif ($self->mode =~ /device::config/) {
     $self->analyze_and_check_config_subsystem("Classes::CiscoIOS::Component::ConfigSubsystem");
+  } else {
+    $self->no_such_mode();
   }
 }
 

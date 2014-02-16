@@ -1,27 +1,18 @@
 package Classes::Juniper::IVE::Component::CpuSubsystem;
 our @ISA = qw(Classes::Juniper::IVE);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    loads => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $type = 0;
   $self->{iveCpuUtil} = $self->get_snmp_object('JUNIPER-IVE-MIB', 'iveCpuUtil');
 }
 
@@ -85,7 +76,6 @@ sub unix_dump {
 
 package Classes::Juniper::IVE::Component::CpuSubsystem::Load;
 our @ISA = qw(Classes::Juniper::IVE::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

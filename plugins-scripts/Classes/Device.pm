@@ -167,32 +167,14 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
-    $self->analyze_and_check_aggregation_subsystem();
+    $self->analyze_and_check_aggregation_subsystem("NWC::IFMIB::Component::LinkAggregation");
   } elsif ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem();
+    $self->analyze_and_check_interface_subsystem("NWC::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::bgp/) {
-    $self->analyze_and_check_bgp_subsystem();
+    $self->analyze_and_check_bgp_subsystem("NWC::BGP::Component::PeerSubsystem");
   } else {
     bless $self, 'GLPlugin::SNMP';
     $self->no_such_mode();
   }
-}
-
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      NWC::IFMIB::Component::InterfaceSubsystem->new();
-}
-
-sub analyze_bgp_subsystem {
-  my $self = shift;
-  $self->{components}->{bgp_subsystem} =
-      NWC::BGP::Component::PeerSubsystem->new();
-}
-
-sub analyze_aggregation_subsystem {
-  my $self = shift;
-  $self->{components}->{aggregation_subsystem} =
-      NWC::IFMIB::Component::LinkAggregation->new();
 }
 

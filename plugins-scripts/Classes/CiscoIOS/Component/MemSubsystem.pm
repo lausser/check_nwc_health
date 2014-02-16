@@ -1,31 +1,18 @@
 package Classes::CiscoIOS::Component::MemSubsystem;
 our @ISA = qw(Classes::CiscoIOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    mems => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  my $type = 0;
   foreach ($self->get_snmp_table_objects(
      'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
     $_->{ciscoMemoryPoolType} ||= $type++;
@@ -36,7 +23,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking mems');
   $self->blacklist('ff', '');
   if (scalar (@{$self->{mems}}) == 0) {
@@ -46,7 +32,6 @@ sub check {
     }
   }
 }
-
 
 sub dump {
   my $self = shift;
@@ -58,7 +43,6 @@ sub dump {
 
 package Classes::CiscoIOS::Component::MemSubsystem::Mem;
 our @ISA = qw(Classes::CiscoIOS::Component::MemSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

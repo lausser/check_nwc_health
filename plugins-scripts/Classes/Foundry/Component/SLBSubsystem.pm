@@ -1,29 +1,13 @@
 package Classes::Foundry::Component::SLBSubsystem;
 our @ISA = qw(Classes::Foundry);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    virtualservers => [],
-    realservers => [],
-    bindings => [],
-    vsdict => {},
-    vspdict => {},
-    vspsdict => {},
-    rsdict => {},
-    rsstdict => {},
-    rspstdict => {},
-    bindingdict => {},
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -39,7 +23,6 @@ sub update_caches {
 
 sub init {
   my $self = shift;
-  my %params = @_;
   # opt->name can be servername:serverport
   my $original_name = $self->opts->name;
   if ($self->mode =~ /device::lb::session::usage/) {
@@ -179,7 +162,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking slb virtual servers');
   $self->blacklist('vip', '');
   if ($self->mode =~ /device::lb::session::usage/) {
@@ -239,7 +221,6 @@ sub add_port {
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
 our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -299,7 +280,6 @@ sub dump {
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
 our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -429,7 +409,6 @@ sub dump {
 
 package Classes::Foundry::Component::SLBSubsystem::RealServer;
 our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -477,7 +456,6 @@ sub dump {
 
 package Classes::Foundry::Component::SLBSubsystem::RealServerPort;
 our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -525,7 +503,6 @@ sub dump {
 
 package Classes::Foundry::Component::SLBSubsystem::Binding;
 our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

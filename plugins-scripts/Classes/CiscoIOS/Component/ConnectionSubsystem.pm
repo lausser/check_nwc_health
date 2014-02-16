@@ -1,22 +1,13 @@
 package Classes::CiscoIOS::Component::ConnectionSubsystem;
 our @ISA = qw(Classes::CiscoIOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    connectionstates => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -45,7 +36,6 @@ sub check {
   }
 }
 
-
 sub dump {
   my $self = shift;
   foreach (@{$self->{connectionstates}}) {
@@ -56,7 +46,6 @@ sub dump {
 
 package Classes::CiscoIOS::Component::ConnectionSubsystem::ConnectionState;
 our @ISA = qw(Classes::CiscoIOS::Component::ConnectionSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

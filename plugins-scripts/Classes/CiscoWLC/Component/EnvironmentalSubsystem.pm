@@ -1,46 +1,18 @@
 package Classes::CiscoWLC::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::CiscoWLC);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    method => $params{method},
-    condition => $params{condition},
-    status => $params{status},
-    fan_subsystem => undef,
-    temperature_subsystem => undef,
-    powersupply_subsystem => undef,
-    voltage_subsystem => undef,
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-my $remarks = "
-gentRadioUpDownTrapCount => '1.3.6.1.4.1.14179.1.1.2.5',
-      agentApAssociateDisassociateTrapCount => '1.3.6.1.4.1.14179.1.1.2.6',
-      agentApLoadProfileFailTrapCount => '1.3.6.1.4.1.14179.1.1.2.7',
-      agentApNoiseProfileFailTrapCount => '1.3.6.1.4.1.14179.1.1.2.8',
-      agentTrapLogTable => '1.3.6.1.4.1.14179.1.1.2.4',
-      agentTrapLogEntry => '1.3.6.1.4.1.14179.1.1.2.4.1',
-      agentTrapLogIndex => '1.3.6.1.4.1.14179.1.1.2.4.1.1',
-      agentTrapLogSystemTime => '1.3.6.1.4.1.14179.1.1.2.4.1.2',
-      agentTrapLogTrap => '1.3.6.1.4.1.14179.1.1.2.4.1.22',
-
-";
 
   $self->{ps1_present} = $self->get_snmp_object(
       'AIRESPACE-SWITCHING-MIB', 'agentSwitchInfoPowerSupply1Present', 0);

@@ -1,20 +1,13 @@
 package Classes::CiscoAsyncOS::Component::CpuSubsystem;
 our @ISA = qw(Classes::CiscoAsyncOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    cpus => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -42,7 +35,6 @@ sub check {
       critical => $self->{critical},
   );
 }
-
 
 sub dump {
   my $self = shift;

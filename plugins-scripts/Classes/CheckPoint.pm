@@ -12,6 +12,8 @@ sub init {
     bless $self, 'Classes::CheckPoint::Firewall1';
     $self->debug('using Classes::CheckPoint::Firewall1');
   }
-  $self->init();
+  if (ref($self) ne "Classes::CheckPoint") {
+    $self->init();
+  }
 }
 

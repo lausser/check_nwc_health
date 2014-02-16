@@ -1,6 +1,5 @@
 package Classes::BGP::Component::PeerSubsystem;
 our @ISA = qw(Classes::BGP);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -58,15 +57,9 @@ our $errorcodes = {
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    peers => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -158,10 +151,8 @@ sub dump {
 
 package Classes::BGP::Component::PeerSubsystem::Peer;
 our @ISA = qw(Classes::BGP::Component::PeerSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
 
 sub new {
   my $class = shift;

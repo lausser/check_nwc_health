@@ -2,7 +2,6 @@
 
 use strict;
 use Digest::MD5 qw(md5_hex);
-use Devel::TraceMethods;
 
 use vars qw ($PROGNAME $REVISION $CONTACT $TIMEOUT $STATEFILESDIR $needs_restart %commandline);
 

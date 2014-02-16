@@ -1,28 +1,13 @@
 package Classes::CiscoIOS::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::CiscoIOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    method => $params{method},
-    condition => $params{condition},
-    status => $params{status},
-    fan_subsystem => undef,
-    temperature_subsystem => undef,
-    powersupply_subsystem => undef,
-    voltage_subsystem => undef,
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -33,13 +18,13 @@ sub init {
   # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
   # 
   $self->{fan_subsystem} =
-      Classes::CiscoIOS::Component::FanSubsystem->new(%params);
+      Classes::CiscoIOS::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
-      Classes::CiscoIOS::Component::TemperatureSubsystem->new(%params);
+      Classes::CiscoIOS::Component::TemperatureSubsystem->new();
   $self->{powersupply_subsystem} = 
-      Classes::CiscoIOS::Component::SupplySubsystem->new(%params);
+      Classes::CiscoIOS::Component::SupplySubsystem->new();
   $self->{voltage_subsystem} =
-      Classes::CiscoIOS::Component::VoltageSubsystem->new(%params);
+      Classes::CiscoIOS::Component::VoltageSubsystem->new();
 }
 
 sub check {

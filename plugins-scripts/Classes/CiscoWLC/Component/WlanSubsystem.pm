@@ -1,33 +1,18 @@
 package Classes::CiscoWLC::Component::WlanSubsystem;
 our @ISA = qw(Classes::CiscoWLC);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    aps => [],
-    ifs => [],
-    ifloads => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  my $type = 0;
   $self->{name} = $self->get_snmp_object(
      'MIB-II', 'sysName', 0);
   foreach ($self->get_snmp_table_objects(
@@ -143,9 +128,9 @@ sub assign_loads_to_ifs {
   }
 }
 
+
 package Classes::CiscoWLC::Component::WlanSubsystem::IF;
 our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -164,9 +149,9 @@ sub new {
   return $self;
 }
 
+
 package Classes::CiscoWLC::Component::WlanSubsystem::IFLoad;
 our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -185,9 +170,9 @@ sub new {
   return $self;
 }
 
+
 package Classes::CiscoWLC::Component::WlanSubsystem::AP;
 our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

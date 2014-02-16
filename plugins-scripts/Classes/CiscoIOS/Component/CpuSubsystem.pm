@@ -1,26 +1,18 @@
 package Classes::CiscoIOS::Component::CpuSubsystem;
 our @ISA = qw(Classes::CiscoIOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    cpus => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   my $type = 0;
   foreach ($self->get_snmp_table_objects(
       'CISCO-PROCESS-MIB', 'cpmCPUTotalTable')) {
@@ -69,7 +61,6 @@ sub check {
   }
 }
 
-
 sub dump {
   my $self = shift;
   foreach (@{$self->{cpus}}) {
@@ -80,7 +71,6 @@ sub dump {
 
 package Classes::CiscoIOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(Classes::CiscoIOS::Component::CpuSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

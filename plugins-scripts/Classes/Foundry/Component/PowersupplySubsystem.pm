@@ -1,20 +1,13 @@
 package Classes::Foundry::Component::PowersupplySubsystem;
 our @ISA = qw(Classes::Foundry::Component::EnvironmentalSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    supplies => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -40,7 +33,6 @@ sub check {
   }
 }
 
-
 sub dump {
   my $self = shift;
   foreach (@{$self->{supplies}}) {
@@ -51,7 +43,6 @@ sub dump {
 
 package Classes::Foundry::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(Classes::Foundry::Component::PowersupplySubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

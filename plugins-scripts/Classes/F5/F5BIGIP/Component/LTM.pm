@@ -1,20 +1,12 @@
 package Classes::F5::F5BIGIP::Component::LTMSubsystem;
 our @ISA = qw(Classes::F5::F5BIGIP);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
   my %params = @_;
-  my $self = {
-    pools => [],
-    poolmembers => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  #bless $self, $class;
+  my $self = {};
   # tables can be huge
   if ($Classes::Device::session) {
     $Classes::Device::session->max_msg_size(10 * $Classes::Device::session->max_msg_size());
@@ -27,13 +19,12 @@ sub new {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem9";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem9");
   }
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking ltm pools');
   $self->blacklist('poo', '');
   if (scalar(@{$self->{pools}}) == 0) {
@@ -59,9 +50,9 @@ sub dump {
   }
 }
 
+
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -179,7 +170,6 @@ sub assign_members_to_pools {
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPool;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem9);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -303,7 +293,6 @@ sub dump {
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem9);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -360,7 +349,6 @@ sub dump {
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -420,7 +408,6 @@ sub assign_members_to_pools {
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPool;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem4);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -492,7 +479,6 @@ sub dump {
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPoolMember;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem4);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

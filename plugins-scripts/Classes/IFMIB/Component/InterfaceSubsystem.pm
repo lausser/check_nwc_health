@@ -1,26 +1,18 @@
 package Classes::IFMIB::Component::InterfaceSubsystem;
 our @ISA = qw(Classes::IFMIB);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    interfaces => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
 sub init {
   my $self = shift;
-  my %params = @_;
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     foreach my $ifIndex (keys %{$self->{interface_cache}}) {
@@ -55,7 +47,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
@@ -262,7 +253,6 @@ sub dump {
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

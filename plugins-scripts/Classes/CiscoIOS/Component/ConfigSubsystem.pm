@@ -1,22 +1,13 @@
 package Classes::CiscoIOS::Component::ConfigSubsystem;
 our @ISA = qw(Classes::CiscoIOS);
-
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    rawdata => $params{rawdata},
-    configstates => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
+  my $self = {};
   bless $self, $class;
-  $self->init(%params);
+  $self->init();
   return $self;
 }
 
@@ -72,7 +63,6 @@ sub check {
     $self->add_message($self->check_thresholds($unsaved_since), $info);
   }
 }
-
 
 sub dump {
   my $self = shift;
