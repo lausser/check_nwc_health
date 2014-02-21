@@ -105,7 +105,7 @@ sub new {
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
-      } elsif ($self->{sysobjectid} =~ /^([\d+\.]+)\.\d+$/ && $1 eq  $Classes::Device::mib_ids->{'NETSCREEN-PRODUCTS-MIB'}) {
+      } elsif ($self->implements_mib('NETSCREEN-PRODUCTS-MIB')) {
         $self->debug('using Classes::Juniper::NetScreen');
         bless $self, 'Classes::Juniper::NetScreen';
       } elsif ($self->{productname} =~ /SecureOS/i) {
@@ -138,7 +138,7 @@ sub new {
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'Classes::Generic';
         $self->debug('using Classes::Generic');
-      } elsif ($self->{sysobjectid} eq $Classes::Device::mib_ids->{'SW-MIB'}) {
+      } elsif ($self->implements_mib('SW-MIB')) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.9\./) {

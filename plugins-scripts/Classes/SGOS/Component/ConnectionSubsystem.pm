@@ -13,14 +13,13 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(sgProxyHttpResponseTimeAll sgProxyHttpResponseFirstByte
+  $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(sgProxyHttpResponseTimeAll
+      sgProxyHttpResponseFirstByte
       sgProxyHttpResponseByteRate sgProxyHttpResponseSize
       sgProxyHttpClientConnections sgProxyHttpClientConnectionsActive
       sgProxyHttpClientConnectionsIdle
       sgProxyHttpServerConnections sgProxyHttpServerConnectionsActive
-      sgProxyHttpServerConnectionsIdle)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-SG-PROXY-MIB', $_, 0);
-  }
+      sgProxyHttpServerConnectionsIdle)));
   $self->{sgProxyHttpResponseTimeAll} /= 1000;
 }
 
@@ -74,18 +73,4 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[CONNECTIONS]\n";
-  foreach (qw(sgProxyHttpResponseTimeAll sgProxyHttpResponseFirstByte
-      sgProxyHttpResponseByteRate sgProxyHttpResponseSize
-      sgProxyHttpClientConnections sgProxyHttpClientConnectionsActive
-      sgProxyHttpClientConnectionsIdle
-      sgProxyHttpServerConnections sgProxyHttpServerConnectionsActive
-      sgProxyHttpServerConnectionsIdle)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
 

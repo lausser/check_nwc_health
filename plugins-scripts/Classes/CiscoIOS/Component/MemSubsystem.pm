@@ -15,7 +15,7 @@ sub init {
   my $self = shift;
   foreach ($self->get_snmp_table_objects(
      'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
-    $_->{ciscoMemoryPoolType} ||= $type++;
+    $_->{ciscoMemoryPoolType} ||= 0;
     push(@{$self->{mems}},
         Classes::CiscoIOS::Component::MemSubsystem::Mem->new(%{$_}));
   }
@@ -68,7 +68,7 @@ sub new {
 
 sub check {
   my $self = shift;
-  $self->blacklist('m', $self->{ciscoMemoryPoolType});
+  $self->blacklist('m', $self->{flat_indices});
   my $info = sprintf 'mempool %s usage is %.2f%%',
       $self->{ciscoMemoryPoolName}, $self->{usage};
   $self->add_info($info);
@@ -92,7 +92,7 @@ sub check {
 
 sub dump {
   my $self = shift;
-  printf "[MEMPOOL_%s]\n", $self->{ciscoMemoryPoolType};
+  printf "[MEMPOOL_%s]\n", $self->{flat_indices};
   foreach (qw(ciscoMemoryPoolType ciscoMemoryPoolName ciscoMemoryPoolAlternate ciscoMemoryPoolValid ciscoMemoryPoolUsed ciscoMemoryPoolFree ciscoMemoryPoolLargestFree)) {
     printf "%s: %s\n", $_, $self->{$_};
   }

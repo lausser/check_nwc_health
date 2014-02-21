@@ -1,6 +1,7 @@
 package Classes::MEOS;
 our @ISA = qw(Classes::Brocade);
 use strict;
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;

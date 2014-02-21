@@ -13,15 +13,11 @@ sub new {
 
 sub init {
   my $self = shift;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  my $type = 0;
   $self->{cseSysMemoryUtilization} = $self->get_snmp_object('CISCO-SYSTEM-EXT-MIB', 'cseSysMemoryUtilization');
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   if (defined $self->{cseSysMemoryUtilization}) {

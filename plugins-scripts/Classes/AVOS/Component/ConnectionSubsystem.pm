@@ -1,7 +1,6 @@
 package Classes::AVOS::Component::ConnectionSubsystem;
 our @ISA = qw(Classes::AVOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -13,9 +12,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(avSlowICAPConnections)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-AV-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-AV-MIB', (qw(
+      avSlowICAPConnections)));
 }
 
 sub check {
@@ -31,15 +29,4 @@ sub check {
       critical => $self->{critical},
   );
 }
-
-sub dump {
-  my $self = shift;
-  printf "[CONNECTIONS]\n";
-  foreach (qw(avSlowICAPConnections)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

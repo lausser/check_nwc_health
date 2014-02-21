@@ -14,7 +14,7 @@ sub new {
 sub init {
   my $self = shift;
   $self->{sensor_subsystem} =
-      Classes::FabOS::Component::SensorSubsystem->new(%params);
+      Classes::FabOS::Component::SensorSubsystem->new();
 }
 
 sub check {

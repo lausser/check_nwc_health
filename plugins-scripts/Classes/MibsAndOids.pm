@@ -268,6 +268,13 @@ $GLPlugin::SNMP::mibs_and_oids = {
       ciscoMemoryPoolTable => '1.3.6.1.4.1.9.9.48.1.1',
       ciscoMemoryPoolEntry => '1.3.6.1.4.1.9.9.48.1.1.1',
       ciscoMemoryPoolType => '1.3.6.1.4.1.9.9.48.1.1.1.1',
+      ciscoMemoryPoolTypeDefinition => {
+          1 => 'processor memory',
+          2 => 'i/o memory',
+          3 => 'pci memory',
+          4 => 'fast memory',
+          5 => 'multibus memory',
+      },
       ciscoMemoryPoolName => '1.3.6.1.4.1.9.9.48.1.1.1.2',
       ciscoMemoryPoolAlternate => '1.3.6.1.4.1.9.9.48.1.1.1.3',
       ciscoMemoryPoolValid => '1.3.6.1.4.1.9.9.48.1.1.1.4',

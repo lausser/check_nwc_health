@@ -116,6 +116,30 @@ sub mode {
   return $GLPlugin::mode;
 }
 
+sub add_ok {
+  my $self = shift;
+  my $message = shift;
+  $self->add_message(OK, $message);
+}
+
+sub add_warning {
+  my $self = shift;
+  my $message = shift;
+  $self->add_message(WARNING, $message);
+}
+
+sub add_critical {
+  my $self = shift;
+  my $message = shift;
+  $self->add_message(CRITICAL, $message);
+}
+
+sub add_unknown {
+  my $self = shift;
+  my $message = shift;
+  $self->add_message(UNKNOWN, $message);
+}
+
 sub add_message {
   my $self = shift;
   my $level = shift;
@@ -547,6 +571,24 @@ sub accentfree {
   return join '', @transformed;
 }
 
+sub dump {
+  my $self = shift;
+  my $class = ref($self);
+  $class =~ s/^.*:://;
+  if (exists $self->{flat_indices}) {
+    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
+  } else {
+    printf "[%s]\n", uc $class;
+  }
+  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
+  }
+  if ($self->{info}) {
+    printf "info: %s\n", $self->{info};
+  }
+  printf "\n";
+}
+
 
 package GLPlugin::SNMP;
 our @ISA = qw(GLPlugin);
@@ -824,6 +866,10 @@ sub implements_mib {
   my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
   $sysobj =~ s/^\.// if $sysobj;
   if ($sysobj && $sysobj eq $GLPlugin::SNMP::mib_ids->{$mib}) {
+    return 1;
+  }
+  if ($GLPlugin::SNMP::mib_ids->{$mib} eq
+      substr $sysobj, 0, length $GLPlugin::SNMP::mib_ids->{$mib}) {
     return 1;
   }
 }
@@ -1236,10 +1282,14 @@ sub get_snmp_tables {
   my $mib = shift;
   my $infos = shift;
   foreach my $info (@{$infos}) {
-    $self->{$info->[0]} = [] if ! exists $self->{$info->[0]};
-    foreach ($self->get_snmp_table_objects($mib, $info->[1])) {
-      my $class = $info->[2];
-      push(@{$self->{$info->[0]}}, $class->new(%{$_}));
+    my $arrayname = $info->[0];
+    my $table = $info->[1];
+    my $class = $info->[2];
+    my $filter = $info->[3];
+    $self->{$arrayname} = [] if ! exists $self->{$arrayname};
+    foreach ($self->get_snmp_table_objects($mib, $table)) {
+      next if (defined $filter && &$filter($_));
+      push(@{$self->{$arrayname}}, $class->new(%{$_}));
     }
   }
 }
@@ -1818,7 +1868,7 @@ sub no_such_mode {
 
 sub AUTOLOAD {
   my $self = shift;
-  return if ($AUTOLOAD =~ /DESTROY/);    
+  return if ($AUTOLOAD =~ /DESTROY/);
   if ($AUTOLOAD =~ /^(.*)::analyze_and_check_(.*)_subsystem$/) {
     my $class = $1;
     my $subsystem = $2;
@@ -1840,9 +1890,6 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
   }
-else {
-printf "auto %s\n", $AUTOLOAD;
-}
 }
 
 
@@ -1868,9 +1915,16 @@ sub dump {
   my $self = shift;
   my $class = ref($self);
   $class =~ s/^.*:://;
-  printf "[%s_%s]\n", uc $class, $self->{flat_indices};
-  foreach (grep !/^(blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
-    printf "%s %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
+  if (exists $self->{flat_indices}) {
+    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
+  } else {
+    printf "[%s]\n", uc $class;
+  }
+  foreach (grep !/^(warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
+  }
+  if ($self->{info}) {
+    printf "info: %s\n", $self->{info};
   }
   printf "\n";
 }

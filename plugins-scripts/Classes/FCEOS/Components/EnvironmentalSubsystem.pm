@@ -7,7 +7,7 @@ sub new {
   my $class = shift;
   my $self = {};
   bless $self, $class;
-  $self->overall_init(%params);
+  $self->overall_init();
   $self->init();
   return $self;
 }
@@ -21,7 +21,7 @@ sub overall_init {
 sub init {
   my $self = shift;
   $self->{fru_subsystem} =
-      Classes::FCEOS::Component::FruSubsystem->new(%params);
+      Classes::FCEOS::Component::FruSubsystem->new();
 }
 
 sub check {

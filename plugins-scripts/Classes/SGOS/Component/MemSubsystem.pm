@@ -1,7 +1,6 @@
 package Classes::SGOS::Component::MemSubsystem;
 our @ISA = qw(Classes::SGOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -12,17 +11,15 @@ sub new {
 }
 
 sub init {
+  my $self = shift;
   # https://kb.bluecoat.com/index?page=content&id=KB3069
   # Memory pressure simply is the percentage of physical memory less free and reclaimable memory, of total memory. So, for example, if there is no free or reclaimable memory in the system, then memory pressure is at 100%.
   # The event logs start reporting memory pressure when it is over 75%.
   # There's two separate OIDs to obtain memory pressure value for SGOSV4 and SGOSV5;
   # SGOSV4:  memPressureValue - OIDs: 1.3.6.1.4.1.3417.2.8.2.3 (systemResourceMIB)
   # SGOSV5: sgProxyMemoryPressure - OIDs: 1.3.6.1.4.1.3417.2.11.2.3.4 (bluecoatSGProxyMIB)
-  my $self = shift;
-  foreach (qw(sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage
-      sgProxyMemSysUsage)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-SG-PROXY-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(sgProxyMemPressure
+      sgProxyMemAvailable sgProxyMemCacheUsage sgProxyMemSysUsage)));
 }
 
 sub check {
@@ -41,16 +38,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical}
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEMORY]\n";
-  foreach (qw(sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage
-      sgProxyMemSysUsage)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

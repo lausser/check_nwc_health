@@ -17,7 +17,7 @@ sub init {
       ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)) {
     $self->{$_} = $self->get_snmp_object('UCD-SNMP-MIB', $_, 0);
   }
-  $self->valdiff(\%params, qw(ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice));
+  $self->valdiff({name => 'cpu'}, qw(ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice));
   my $cpu_total = $self->{delta_ssCpuRawUser} + $self->{delta_ssCpuRawSystem} +
       $self->{delta_ssCpuRawIdle} + $self->{delta_ssCpuRawNice};
   if ($cpu_total == 0) {
