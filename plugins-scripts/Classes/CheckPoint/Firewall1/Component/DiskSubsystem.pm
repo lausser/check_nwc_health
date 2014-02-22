@@ -22,12 +22,11 @@ sub init {
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
   ]);
-  foreach ($self->get_snmp_table_objects(
-      'CHECKPOINT-MIB', 'disksTable')) {
-    push(@{$self->{disks}}, 
-        Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk->new(%{$_}));
-  }
-  $self->{diskPercent} = $self->get_snmp_object('CHECKPOINT-MIB', 'diskPercent');
+  $self->get_snmp_tables('CHECKPOINT-MIB', [
+      ['disks', 'disksTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk'],
+  ]);
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      diskPercent diskPercent)));
 }
 
 sub check {
@@ -35,7 +34,8 @@ sub check {
   $self->add_info('checking disks');
   $self->blacklist('ses', '');
   if (scalar (@{$self->{storages}}) == 0) {
-    $self->{diskPercent} = $self->get_snmp_object('CHECKPOINT-MIB', 'diskPercent');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      diskPercent diskPercent)));
     my $free = 100 - $self->{diskPercent};
     $self->add_info(sprintf 'disk has %.2f%% free space left', $free);
     $self->set_thresholds(warning => '10:', critical => '5:');

@@ -1,7 +1,6 @@
 package Classes::CiscoWLC::Component::MemSubsystem;
 our @ISA = qw(Classes::CiscoWLC);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -13,12 +12,10 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{total_memory} = $self->get_snmp_object(
-      'AIRESPACE-SWITCHING-MIB', 'agentTotalMemory');
-  $self->{free_memory} = $self->get_snmp_object(
-      'AIRESPACE-SWITCHING-MIB', 'agentFreeMemory');
-  $self->{memory_usage} = $self->{free_memory} ? 
-      ($self->{free_memory} / $self->{total_memory} * 100) : 100;
+  $self->get_snmp_objects('AIRESPACE-SWITCHING-MIB', (qw(
+      agentTotalMemory agentFreeMemory)));
+  $self->{memory_usage} = $self->{agentFreeMemory} ? 
+      ($self->{agentFreeMemory} / $self->{agentTotalMemory} * 100) : 100;
 }
 
 sub check {
@@ -35,17 +32,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU]\n";
-  foreach (qw(memory_usage total_memory free_memory)) {
-    if (exists $self->{$_}) {
-      printf "%s: %s\n", $_, $self->{$_};
-    }
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

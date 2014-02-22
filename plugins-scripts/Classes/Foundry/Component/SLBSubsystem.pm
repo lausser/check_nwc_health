@@ -26,8 +26,8 @@ sub init {
   # opt->name can be servername:serverport
   my $original_name = $self->opts->name;
   if ($self->mode =~ /device::lb::session::usage/) {
-    $self->{snL4MaxSessionLimit} = $self->get_snmp_object('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4MaxSessionLimit');
-    $self->{snL4FreeSessionCount} = $self->get_snmp_object('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4FreeSessionCount');
+  $self->get_snmp_objects('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', (qw(
+      snL4MaxSessionLimit snL4FreeSessionCount)));
     $self->{session_usage} = 100 * ($self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}) / $self->{snL4MaxSessionLimit};
   } elsif ($self->mode =~ /device::lb::pool/) {
     if ($self->mode =~ /device::lb::pool::list/) {

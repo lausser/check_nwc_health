@@ -25,11 +25,9 @@ sub init {
   $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
       ['ifs', 'bsnAPIfTable', 'Classes::CiscoWLC::Component::WlanSubsystem::IF'],
   ]);
-  foreach ($self->get_snmp_table_objects(
-     'AIRESPACE-WIRELESS-MIB', 'bsnAPIfLoadParametersTable')) {
-    push(@{$self->{ifloads}},
-        Classes::CiscoWLC::Component::WlanSubsystem::IFLoad->new(%{$_}));
-  }
+  $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
+      ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::CiscoWLC::Component::WlanSubsystem::IFLoad'],
+  ]);
   $self->assign_loads_to_ifs();
   $self->assign_ifs_to_aps();
 }

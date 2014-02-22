@@ -13,10 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{fgSysDiskUsage} = 
-      $self->get_snmp_object('FORTINET-FORTIGATE-MIB', 'fgSysDiskUsage');
-  $self->{fgSysDiskCapacity} = 
-      $self->get_snmp_object('FORTINET-FORTIGATE-MIB', 'fgSysDiskCapacity');
+  $self->get_snmp_objects('FORTINET-FORTIGATE-MIB', (qw(
+      fgSysDiskUsage fgSysDiskCapacity)));
   $self->{usage} = $self->{fgSysDiskCapacity} ? 
       100 * $self->{fgSysDiskUsage} /  $self->{fgSysDiskCapacity} : undef;
 }

@@ -1,7 +1,6 @@
 package Classes::FCEOS::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::FCEOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -15,7 +14,8 @@ sub new {
 
 sub overall_init {
   my $self = shift;
-  $self->{oper_status} = $self->get_snmp_object('FCEOS-MIB', 'fcEosSysOperStatus');
+  $self->get_snmp_objects('FCEOS-MIB', (qw(
+      fcEosSysOperStatus)));
 }
 
 sub init {
@@ -28,23 +28,16 @@ sub check {
   my $self = shift;
   $self->{fru_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   } else {
-    if ($self->{oper_status} eq "operational") {
+    if ($self->{fcEosSysOperStatus} eq "operational") {
       $self->clear_messages(CRITICAL);
       $self->clear_messages(WARNING);
-    } elsif ($self->{oper_status} eq "major-failure") {
-      $self->add_message(CRITICAL, "major device failure");
+    } elsif ($self->{fcEosSysOperStatus} eq "major-failure") {
+      $self->add_critical("major device failure");
     } else {
-      $self->add_message(WARNING, $self->{oper_status});
+      $self->add_warning($self->{fcEosSysOperStatus});
     }
   }
 }
-
-sub dump {
-  my $self = shift;
-  $self->{fru_subsystem}->dump();
-}
-
-1;
 

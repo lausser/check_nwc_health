@@ -14,8 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::svn::status/) {
-    $self->{svnStatShortDescr} = $self->get_snmp_object('CHECKPOINT-MIB', 'svnStatShortDescr');
-    $self->{svnStatLongDescr} = $self->get_snmp_object('CHECKPOINT-MIB', 'svnStatLongDescr');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      svnStatShortDescr svnStatLongDescr)));
   }
 }
 

@@ -13,7 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{procUsage} = $self->get_snmp_object('CHECKPOINT-MIB', 'procUsage');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      procUsage)));
   $self->{procQueue} = $self->valid_response('CHECKPOINT-MIB', 'procQueue');
 }
 

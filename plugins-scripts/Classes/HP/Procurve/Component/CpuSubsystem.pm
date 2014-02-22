@@ -14,7 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->{hpSwitchCpuStat} = $self->get_snmp_object('STATISTICS-MIB', 'hpSwitchCpuStat');
+  $self->get_snmp_objects('STATISTICS-MIB', (qw(
+      hpSwitchCpuStat)));
 }
 
 sub check {

@@ -13,14 +13,8 @@ sub new {
 
 sub overall_init {
   my $self = shift;
-  $self->{sysStatMemoryTotal} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysStatMemoryTotal');
-  $self->{sysStatMemoryUsed} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysStatMemoryUsed');
-  $self->{sysHostMemoryTotal} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysHostMemoryTotal');
-  $self->{sysHostMemoryUsed} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysHostMemoryUsed');
+  $self->get_snmp_objects('F5-BIGIP-SYSTEM-MIB', (qw(
+      sysStatMemoryTotal sysStatMemoryUsed sysHostMemoryTotal sysHostMemoryUsed)));
   $self->{stat_mem_usage} = ($self->{sysStatMemoryUsed} / $self->{sysStatMemoryTotal}) * 100;
   $self->{host_mem_usage} = ($self->{sysHostMemoryUsed} / $self->{sysHostMemoryTotal}) * 100;
 }

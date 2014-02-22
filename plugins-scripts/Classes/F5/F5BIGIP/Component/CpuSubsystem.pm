@@ -17,12 +17,8 @@ sub new {
 
 sub overall_init {
   my $self = shift;
-  $self->{sysStatTmTotalCycles} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysStatTmTotalCycles');
-  $self->{sysStatTmIdleCycles} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysStatTmIdleCycles');
-  $self->{sysStatTmSleepCycles} = $self->get_snmp_object(
-      'F5-BIGIP-SYSTEM-MIB', 'sysStatTmSleepCycles');
+  $self->get_snmp_objects('F5-BIGIP-SYSTEM-MIB', (qw(
+      sysStatTmTotalCycles sysStatTmIdleCycles sysStatTmSleepCycles)));
   $self->valdiff({name => 'cpu'}, qw(sysStatTmTotalCycles sysStatTmIdleCycles sysStatTmSleepCycles ));
   my $delta_used_cycles = $self->{delta_sysStatTmTotalCycles} -
      ($self->{delta_sysStatTmIdleCycles} + $self->{delta_sysStatTmSleepCycles});

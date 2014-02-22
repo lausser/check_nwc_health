@@ -14,8 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->{perCentMemoryUtilization} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'perCentMemoryUtilization');
-  $self->{memoryAvailabilityStatus} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'memoryAvailabilityStatus');
+  $self->get_snmp_objects('ASYNCOS-MAIL-MIB', (qw(
+      perCentMemoryUtilization memoryAvailabilityStatus)));
 }
 
 sub check {

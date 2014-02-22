@@ -13,8 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{diskFullPercent} = 
-      $self->get_snmp_object('JUNIPER-IVE-MIB', 'diskFullPercent');
+  $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      diskFullPercent)));
 }
 
 sub check {

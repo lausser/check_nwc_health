@@ -13,12 +13,10 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{total_memory} = $self->get_snmp_object(
-      'CHECKPOINT-MIB', 'memTotalReal64');
-  $self->{free_memory} = $self->get_snmp_object(
-      'CHECKPOINT-MIB', 'memFreeReal64');
-  $self->{memory_usage} = $self->{free_memory} ? 
-      ($self->{free_memory} / $self->{total_memory} * 100) : 100;
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      memTotalReal64 memFreeReal64)));
+  $self->{memory_usage} = $self->{memFreeReal64} ? 
+      ($self->{memFreeReal64} / $self->{memTotalReal64} * 100) : 100;
 }
 
 sub check {
@@ -35,17 +33,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEM]\n";
-  foreach (qw(memory_usage total_memory free_memory)) {
-    if (exists $self->{$_}) {
-      printf "%s: %s\n", $_, $self->{$_};
-    }
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

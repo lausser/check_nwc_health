@@ -13,7 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{iveCpuUtil} = $self->get_snmp_object('JUNIPER-IVE-MIB', 'iveCpuUtil');
+  $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      iveCpuUtil)));
 }
 
 sub check {

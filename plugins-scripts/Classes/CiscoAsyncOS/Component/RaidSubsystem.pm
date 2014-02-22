@@ -13,7 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{raidEvents} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'raidEvents');
+  $self->get_snmp_objects('ASYNCOS-MAIL-MIB', (qw(
+      raidEvents)));
   $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
       ['raids', 'raidTable', 'Classes::CiscoAsyncOS::Component::RaidSubsystem::Raid'],
   ]);

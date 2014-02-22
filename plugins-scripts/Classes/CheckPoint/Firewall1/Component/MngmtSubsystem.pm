@@ -14,8 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::mngmt::status/) {
-    $self->{mgStatShortDescr} = $self->get_snmp_object('CHECKPOINT-MIB', 'mgStatShortDescr');
-    $self->{mgStatLongDescr} = $self->get_snmp_object('CHECKPOINT-MIB', 'mgStatLongDescr');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      mgStatShortDescr mgStatLongDescr)));
   }
 }
 

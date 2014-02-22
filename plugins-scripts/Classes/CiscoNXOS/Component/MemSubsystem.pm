@@ -13,7 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{cseSysMemoryUtilization} = $self->get_snmp_object('CISCO-SYSTEM-EXT-MIB', 'cseSysMemoryUtilization');
+  $self->get_snmp_objects('CISCO-SYSTEM-EXT-MIB', (qw(
+      cseSysMemoryUtilization)));
 }
 
 sub check {

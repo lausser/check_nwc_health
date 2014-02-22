@@ -13,11 +13,12 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{fwModuleState} = $self->get_snmp_object('CHECKPOINT-MIB', 'fwModuleState');
-  $self->{fwPolicyName} = $self->get_snmp_object('CHECKPOINT-MIB', 'fwPolicyName');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      fwModuleState fwPolicyName fwNumConn)));
   if ($self->mode =~ /device::fw::policy::installed/) {
   } elsif ($self->mode =~ /device::fw::policy::connections/) {
-    $self->{fwNumConn} = $self->get_snmp_object('CHECKPOINT-MIB', 'fwNumConn');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      fwModuleState fwPolicyName fwNumConn)));
   }
 }
 

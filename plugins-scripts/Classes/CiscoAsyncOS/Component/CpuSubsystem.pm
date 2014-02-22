@@ -14,7 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  $self->{perCentCPUUtilization} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'perCentCPUUtilization');
+  $self->get_snmp_objects('ASYNCOS-MAIL-MIB', (qw(
+      perCentCPUUtilization)));
 }
 
 sub check {

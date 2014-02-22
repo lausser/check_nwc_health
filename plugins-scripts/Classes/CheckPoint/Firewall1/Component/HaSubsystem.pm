@@ -14,9 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::ha::role/) {
-    $self->{haStarted} = $self->get_snmp_object('CHECKPOINT-MIB', 'haStarted');
-    $self->{haState} = $self->get_snmp_object('CHECKPOINT-MIB', 'haState');
-    $self->{haStatShort} = $self->get_snmp_object('CHECKPOINT-MIB', 'haStatShort');
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+      haStarted haState haStatShort)));
     if (! $self->opts->role()) {
       $self->opts->override_opt('role', 'active');
     }
