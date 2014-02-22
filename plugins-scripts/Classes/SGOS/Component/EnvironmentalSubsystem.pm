@@ -1,7 +1,6 @@
 package Classes::SGOS::Component::EnvironmentalSubsystem;
 our @ISA = qw(Classes::SGOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -24,7 +23,7 @@ sub check {
   $self->{sensor_subsystem}->check();
   $self->{disk_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 
