@@ -14,11 +14,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'ASYNCOS-MAIL-MIB', 'fanTable')) {
-    push(@{$self->{fans}},
-        Classes::CiscoAsyncOS::Component::FanSubsystem::Fan->new(%{$_}));
-  }
+  $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
+      ['fans', 'fanTable', 'Classes::CiscoAsyncOS::Component::FanSubsystem::Fan'],
+  ]);
 }
 
 sub check {

@@ -14,11 +14,9 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-CCM-MIB', 'ccmTable')) {
-    push(@{$self->{ccms}},
-        Classes::CiscoCCM::Component::CmSubsystem::Cm->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-CCM-MIB', [
+      ['ccms', 'ccmTable', 'Classes::CiscoCCM::Component::CmSubsystem::Cm'],
+  ]);
 }
 
 sub check {

@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'HP-ICF-CHASSIS-MIB', 'hpicfSensorTable')) {
-    push(@{$self->{sensors}}, 
-        Classes::HP::Procurve::Component::SensorSubsystem::Sensor->new(%{$_}));
-  }
+  $self->get_snmp_tables('HP-ICF-CHASSIS-MIB', [
+      ['sensors', 'hpicfSensorTable', 'Classes::HP::Procurve::Component::SensorSubsystem::Sensor'],
+  ]);
 }
 
 sub check {

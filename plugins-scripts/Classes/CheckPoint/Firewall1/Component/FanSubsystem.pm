@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'CHECKPOINT-MIB', 'sensorsFanTable')) {
-    push(@{$self->{fans}},
-        Classes::CheckPoint::Firewall1::Component::FanSubsystem::Fan->new(%{$_}));
-  }
+  $self->get_snmp_tables('CHECKPOINT-MIB', [
+      ['fans', 'sensorsFanTable', 'Classes::CheckPoint::Firewall1::Component::FanSubsystem::Fan'],
+  ]);
 }
 
 sub check {

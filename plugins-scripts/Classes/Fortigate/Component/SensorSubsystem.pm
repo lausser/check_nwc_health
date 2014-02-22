@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'FORTINET-FORTIGATE-MIB', 'fgHwSensorTable')) {
-    push(@{$self->{sensors}}, 
-        Classes::Fortigate::Component::SensorSubsystem::Sensor->new(%{$_}));
-  }
+  $self->get_snmp_tables('FORTINET-FORTIGATE-MIB', [
+      ['sensors', 'fgHwSensorTable', 'Classes::Fortigate::Component::SensorSubsystem::Sensor'],
+  ]);
 }
 
 sub check {

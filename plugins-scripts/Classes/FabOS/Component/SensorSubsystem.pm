@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'SW-MIB', 'swSensorTable')) {
-    push(@{$self->{sensors}}, 
-        Classes::FabOS::Component::SensorSubsystem::Sensor->new(%{$_}));
-  }
+  $self->get_snmp_tables('SW-MIB', [
+      ['sensors', 'swSensorTable', 'Classes::FabOS::Component::SensorSubsystem::Sensor'],
+  ]);
   #foreach ($self->get_snmp_table_objects(
   #    'SW-MIB', 'swFwThresholdTable')) {
   #  printf "%s\n", Data::Dumper::Dumper($_);

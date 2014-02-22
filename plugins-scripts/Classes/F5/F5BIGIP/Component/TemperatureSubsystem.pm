@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-SYSTEM-MIB', 'sysChassisTempTable')) {
-    push(@{$self->{temperatures}},
-        Classes::F5::F5BIGIP::Component::TemperatureSubsystem::Temperature->new(%{$_}));
-  }
+  $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
+      ['temperatures', 'sysChassisTempTable', 'Classes::F5::F5BIGIP::Component::TemperatureSubsystem::Temperature'],
+  ]);
 }
 
 sub check {

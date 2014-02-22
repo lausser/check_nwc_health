@@ -49,11 +49,9 @@ sub unix_init {
   my $self = shift;
   my %params = @_;
   my $type = 0;
-  foreach ($self->get_snmp_table_objects(
-     'UCD-SNMP-MIB', 'laTable')) {
-    push(@{$self->{loads}},
-        Classes::Juniper::IVE::Component::CpuSubsystem::Load->new(%{$_}));
-  }
+  $self->get_snmp_tables('UCD-SNMP-MIB', [
+      ['loads', 'laTable', 'Classes::Juniper::IVE::Component::CpuSubsystem::Load'],
+  ]);
 }
 
 sub unix_check {

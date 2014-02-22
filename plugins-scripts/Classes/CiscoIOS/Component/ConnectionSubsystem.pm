@@ -16,11 +16,9 @@ sub init {
   my %params = @_;
   my $snmpwalk = $params{rawdata};
   my $type = 0;
-  foreach ($self->get_snmp_table_objects(
-     'CISCO-FIREWALL-MIB', 'cfwConnectionStatTable')) {
-    push(@{$self->{connectionstates}},
-        Classes::CiscoIOS::Component::ConnectionSubsystem::ConnectionState->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-FIREWALL-MIB', [
+      ['connectionstates', 'cfwConnectionStatTable', 'Classes::CiscoIOS::Component::ConnectionSubsystem::ConnectionState'],
+  ]);
 }
 
 sub check {

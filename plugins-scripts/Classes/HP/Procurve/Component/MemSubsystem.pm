@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'NETSWITCH-MIB', 'hpLocalMemTable')) {
-    push(@{$self->{mem}}, 
-        Classes::HP::Procurve::Component::MemSubsystem::Memory->new(%{$_}));
-  }
+  $self->get_snmp_tables('NETSWITCH-MIB', [
+      ['mem', 'hpLocalMemTable', 'Classes::HP::Procurve::Component::MemSubsystem::Memory'],
+  ]);
 }
 
 sub check {

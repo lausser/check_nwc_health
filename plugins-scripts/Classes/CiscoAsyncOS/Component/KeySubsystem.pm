@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'ASYNCOS-MAIL-MIB', 'keyExpirationTable')) {
-    push(@{$self->{keys}},
-        Classes::CiscoAsyncOS::Component::KeySubsystem::Key->new(%{$_}));
-  }
+  $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
+      ['keys', 'keyExpirationTable', 'Classes::CiscoAsyncOS::Component::KeySubsystem::Key'],
+  ]);
 }
 
 sub check {

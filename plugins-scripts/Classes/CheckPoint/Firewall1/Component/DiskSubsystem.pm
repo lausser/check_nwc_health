@@ -19,11 +19,9 @@ sub init {
     push(@{$self->{storages}}, 
         Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage->new(%{$_}));
   }
-  foreach ($self->get_snmp_table_objects(
-      'CHECKPOINT-MIB', 'volumesTable')) {
-    push(@{$self->{volumes}}, 
-        Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume->new(%{$_}));
-  }
+  $self->get_snmp_tables('CHECKPOINT-MIB', [
+      ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
+  ]);
   foreach ($self->get_snmp_table_objects(
       'CHECKPOINT-MIB', 'disksTable')) {
     push(@{$self->{disks}}, 

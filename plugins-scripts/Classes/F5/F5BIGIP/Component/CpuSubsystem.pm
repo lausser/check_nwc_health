@@ -32,11 +32,9 @@ sub overall_init {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-SYSTEM-MIB', 'sysCpuTable')) {
-    push(@{$self->{cpus}},
-        Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu->new(%{$_}));
-  }
+  $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
+      ['cpus', 'sysCpuTable', 'Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu'],
+  ]);
 }
 
 sub check {

@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'FOUNDRY-SN-AGENT-MIB', 'snChasPwrSupplyTable')) {
-    push(@{$self->{supplies}},
-        Classes::Foundry::Component::PowersupplySubsystem::Powersupply->new(%{$_}));
-  }
+  $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
+      ['supplies', 'snChasPwrSupplyTable', 'Classes::Foundry::Component::PowersupplySubsystem::Powersupply'],
+  ]);
 }
 
 sub check {

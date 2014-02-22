@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'F5-BIGIP-SYSTEM-MIB', 'sysChassisFanTable')) {
-    push(@{$self->{fans}},
-        Classes::F5::F5BIGIP::Component::FanSubsystem::Fan->new(%{$_}));
-  }
+  $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
+      ['fans', 'sysChassisFanTable', 'Classes::F5::F5BIGIP::Component::FanSubsystem::Fan'],
+  ]);
 }
 
 sub check {

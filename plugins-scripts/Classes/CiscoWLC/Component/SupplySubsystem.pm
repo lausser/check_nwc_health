@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENVMON-MIB', 'ciscoEnvMonSupplyStatusTable')) {
-    push(@{$self->{supplies}},
-        Classes::CiscoIOS::Component::SupplySubsystem::Supply->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-ENVMON-MIB', [
+      ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::CiscoIOS::Component::SupplySubsystem::Supply'],
+  ]);
 }
 
 sub check {

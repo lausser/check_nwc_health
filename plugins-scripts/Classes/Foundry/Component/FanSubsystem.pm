@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'FOUNDRY-SN-AGENT-MIB', 'snChasFanTable')) {
-    push(@{$self->{fans}},
-        Classes::Foundry::Component::FanSubsystem::Fan->new(%{$_}));
-  }
+  $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
+      ['fans', 'snChasFanTable', 'Classes::Foundry::Component::FanSubsystem::Fan'],
+  ]);
 }
 
 sub check {

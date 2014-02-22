@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'FOUNDRY-SN-AGENT-MIB', 'snAgentCpuUtilTable')) {
-    push(@{$self->{cpus}},
-        Classes::Foundry::Component::CpuSubsystem::Cpu->new(%{$_}));
-  }
+  $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
+      ['cpus', 'snAgentCpuUtilTable', 'Classes::Foundry::Component::CpuSubsystem::Cpu'],
+  ]);
   foreach (qw(snAgGblCpuUtil1SecAvg snAgGblCpuUtil5SecAvg
       snAgGblCpuUtil1MinAvg)) {
     $self->{$_} = $self->get_snmp_object('FOUNDRY-SN-AGENT-MIB', $_);

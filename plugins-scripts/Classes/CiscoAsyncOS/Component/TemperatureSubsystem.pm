@@ -14,11 +14,9 @@ sub new {
 sub init {
   my $self = shift;
   my $tempcnt = 0;
-  foreach ($self->get_snmp_table_objects(
-      'ASYNCOS-MAIL-MIB', 'temperatureTable')) {
-    push(@{$self->{temperatures}},
-        Classes::CiscoAsyncOS::Component::TemperatureSubsystem::Temperature->new(%{$_}));
-  }
+  $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
+      ['temperatures', 'temperatureTable', 'Classes::CiscoAsyncOS::Component::TemperatureSubsystem::Temperature'],
+  ]);
 }
 
 sub check {

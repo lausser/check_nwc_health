@@ -13,11 +13,9 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'FCEOS-MIB', 'fcEosFruTable')) {
-    push(@{$self->{frus}}, 
-        Classes::FCEOS::Component::FruSubsystem::Fcu->new(%{$_}));
-  }
+  $self->get_snmp_tables('FCEOS-MIB', [
+      ['frus', 'fcEosFruTable', 'Classes::FCEOS::Component::FruSubsystem::Fcu'],
+  ]);
 }
 
 sub check {

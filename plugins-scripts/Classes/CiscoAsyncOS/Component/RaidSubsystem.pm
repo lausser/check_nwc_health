@@ -14,11 +14,9 @@ sub new {
 sub init {
   my $self = shift;
   $self->{raidEvents} = $self->get_snmp_object('ASYNCOS-MAIL-MIB', 'raidEvents');
-  foreach ($self->get_snmp_table_objects(
-      'ASYNCOS-MAIL-MIB', 'raidTable')) {
-    push(@{$self->{raids}},
-        Classes::CiscoAsyncOS::Component::RaidSubsystem::Raid->new(%{$_}));
-  }
+  $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
+      ['raids', 'raidTable', 'Classes::CiscoAsyncOS::Component::RaidSubsystem::Raid'],
+  ]);
 }
 
 sub check {
