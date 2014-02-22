@@ -13,21 +13,10 @@ sub new {
 
 sub init {
   my $self = shift;
-  $self->{sensor_subsystem} =
-      Classes::HP::Procurve::Component::SensorSubsystem->new();
-}
-
-sub check {
-  my $self = shift;
-  $self->{sensor_subsystem}->check();
+  $self->analyze_and_check_sensor_subsystem('Classes::HP::Procurve::Component::SensorSubsystem');
   if (! $self->check_messages()) {
     $self->add_message(OK, "environmental hardware working fine");
   }
 }
 
-sub dump {
-  my $self = shift;
-  $self->{sensor_subsystem}->dump();
-}
 
-1;
