@@ -17,9 +17,8 @@ sub init {
       swMemNoOfRetries swMemAction)) {
     $self->{$_} = $self->valid_response('SW-MIB', $_, 0);
   }
-  foreach (qw(swFwFabricWatchLicense)) {
-    $self->{$_} = $self->get_snmp_object('SW-MIB', $_);
-  }
+  $self->get_snmp_objects('SW-MIB', (qw(
+      swFwFabricWatchLicense)));
 }
 
 sub check {

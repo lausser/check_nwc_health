@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(snAgGblDynMemUtil snAgGblDynMemTotal snAgGblDynMemFree)) {
-    $self->{$_} = $self->get_snmp_object('FOUNDRY-SN-AGENT-MIB', $_);
-  }
+  $self->get_snmp_objects('FOUNDRY-SN-AGENT-MIB', (qw(
+      snAgGblDynMemUtil snAgGblDynMemTotal snAgGblDynMemFree)));
 }
 
 sub check {

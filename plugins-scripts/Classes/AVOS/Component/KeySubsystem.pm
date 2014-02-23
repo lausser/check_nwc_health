@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(avLicenseDaysRemaining avVendorName)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-AV-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-AV-MIB', (qw(
+      avLicenseDaysRemaining avVendorName)));
 }
 
 sub check {

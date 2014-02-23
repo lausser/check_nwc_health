@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(nsResMemAllocate nsResMemLeft nsResMemFrag)) {
-    $self->{$_} = $self->get_snmp_object('NETSCREEN-RESOURCE-MIB', $_);
-  }
+  $self->get_snmp_objects('NETSCREEN-RESOURCE-MIB', (qw(
+      nsResMemAllocate nsResMemLeft nsResMemFrag)));
   my $mem_total = $self->{nsResMemAllocate} + $self->{nsResMemLeft};
   $self->{mem_usage} = $self->{nsResMemAllocate} / $mem_total * 100;
 }

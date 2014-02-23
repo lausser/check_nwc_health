@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(nsResCpuAvg)) {
-    $self->{$_} = $self->get_snmp_object('NETSCREEN-RESOURCE-MIB', $_);
-  }
+  $self->get_snmp_objects('NETSCREEN-RESOURCE-MIB', (qw(
+      nsResCpuAvg)));
 }
 
 sub check {

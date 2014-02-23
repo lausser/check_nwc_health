@@ -14,9 +14,8 @@ sub new {
 sub init {
   my $self = shift;
   my %params = @_;
-  foreach (qw(ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)) {
-    $self->{$_} = $self->get_snmp_object('CISCO-CCM-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('CISCO-CCM-MIB', (qw(
+      ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)));
 }
 
 sub check {

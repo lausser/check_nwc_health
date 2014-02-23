@@ -15,9 +15,8 @@ sub init {
   my $self = shift;
   $self->{disk_subsystem} =
       Classes::Juniper::IVE::Component::DiskSubsystem->new();
-  foreach (qw(iveTemperature fanDescription psDescription raidDescription)) {
-    $self->{$_} = $self->get_snmp_object('JUNIPER-IVE-MIB', $_);
-  }
+  $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      iveTemperature fanDescription psDescription raidDescription)));
 }
 
 sub check {

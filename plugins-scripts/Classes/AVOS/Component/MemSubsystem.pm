@@ -23,14 +23,11 @@ sub init {
   my $snmpwalk = $params{rawdata};
   my $ignore_redundancy = $params{ignore_redundancy};
   my $type = 0;
-  foreach (qw(sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage
-      sgProxyMemSysUsage)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-SG-PROXY-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(
+      sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage sgProxyMemSysUsage)));
   if (! defined $self->{sgProxyMemPressure}) {
-    foreach (qw(memPressureValue memWarningThreshold memCriticalThreshold memCurrentState)) {
-      $self->{$_} = $self->get_snmp_object('SYSTEM-RESOURCES-MIB', $_);
-    }
+  $self->get_snmp_objects('SYSTEM-RESOURCES-MIB', (qw(
+      memPressureValue memWarningThreshold memCriticalThreshold memCurrentState)));
   }
   if (! defined $self->{memPressureValue}) {
     foreach ($self->get_snmp_table_objects(

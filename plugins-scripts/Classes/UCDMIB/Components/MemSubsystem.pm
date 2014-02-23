@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(memTotalSwap memAvailSwap memTotalReal memAvailReal memTotalFree)) {
-    $self->{$_} = $self->get_snmp_object('UCD-SNMP-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
+      memTotalSwap memAvailSwap memTotalReal memAvailReal memTotalFree)));
   # https://kc.mcafee.com/corporate/index?page=content&id=KB73175
   $self->{mem_usage} = ($self->{memTotalReal} - $self->{memTotalFree}) /
       $self->{memTotalReal} * 100;

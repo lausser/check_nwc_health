@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(avVirusesDetected)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-AV-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-AV-MIB', (qw(
+      avVirusesDetected)));
 }
 
 sub check {
