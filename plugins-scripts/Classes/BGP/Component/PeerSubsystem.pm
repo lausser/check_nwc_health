@@ -1,7 +1,6 @@
 package Classes::BGP::Component::PeerSubsystem;
 our @ISA = qw(Classes::BGP);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 our $errorcodes = {
   0 => {
@@ -55,14 +54,6 @@ our $errorcodes = {
   },
 };
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
-
 sub init {
   my $self = shift;
   my %params = @_;
@@ -84,7 +75,7 @@ sub check {
   $self->add_info('checking bgp peers');
   $self->blacklist('bgp', '');
   if (scalar(@{$self->{peers}}) == 0) {
-    $self->add_message(UNKNOWN, 'no peers');
+    $self->add_unknown('no peers');
     return;
   }
   if ($self->mode =~ /peer::list/) {
@@ -108,8 +99,8 @@ sub check {
       push(@{$as_numbers->{$_->{bgpPeerRemoteAs}}->{peers}}, $_);
     }
     if ($self->opts->name2) {
-      $self->clear_messages(OK);
-      $self->clear_messages(CRITICAL);
+      $self->clear_ok();
+      $self->clear_critical();
       if ($self->opts->name2 eq "_ALL_") {
         $self->opts->override_opt("name2", join(",", keys %{$as_numbers}));
       }
@@ -129,22 +120,15 @@ sub check {
               $num_ok_peers, $num_peers, $asname ? $asname : "AS".$as, 
               $as_numbers->{$as}->{availability});
         } else {
-          $self->add_message(CRITICAL, sprintf 'found no peer for %s', $asname ? $asname : "AS".$as);
+          $self->add_critical(sprintf 'found no peer for %s', $asname ? $asname : "AS".$as);
         }
       }
       
     }
     if ($self->opts->report eq "short") {
       $self->clear_messages(OK);
-      $self->add_message(OK, 'no problems') if ! $self->check_messages();
+      $self->add_ok('no problems') if ! $self->check_messages();
     }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{peers}}) {
-    $_->dump();
   }
 }
 
@@ -197,7 +181,7 @@ sub check {
     $self->{bgpPeerRemoteAsImportant} = 1;
   }
   if ($self->{bgpPeerState} eq "established" || $self->{bgpPeerState} eq "idle") {
-    $self->add_message(OK, sprintf "peer %s (AS%s) state is %s since %s",
+    $self->add_ok(sprintf "peer %s (AS%s) state is %s since %s",
         $self->{bgpPeerRemoteAddr},
         $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
         $self->{bgpPeerState},
@@ -222,15 +206,5 @@ sub check {
     $self->{bgpPeerFaulty} = $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
   }
 }
-
-sub dump {
-  my $self = shift;
-  printf "[BGP_PEER_%s]\n", $self->{bgpPeerRemoteAddr};
-  foreach(qw(bgpPeerRemoteAddr bgpPeerRemotePort bgpPeerState bgpPeerAdminStatus bgpPeerIdentifier
-      bgpPeerLocalAddr bgpPeerLocalPort bgpPeerRemoteAs bgpPeerFsmEstablishedTime)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
 
 

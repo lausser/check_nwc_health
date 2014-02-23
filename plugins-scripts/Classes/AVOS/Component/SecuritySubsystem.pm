@@ -1,15 +1,6 @@
 package Classes::AVOS::Component::SecuritySubsystem;
 our @ISA = qw(Classes::AVOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -31,15 +22,4 @@ sub check {
   );
 
 }
-
-sub dump {
-  my $self = shift;
-  printf "[VIRUSES]\n";
-  foreach (qw(avVirusesDetected)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

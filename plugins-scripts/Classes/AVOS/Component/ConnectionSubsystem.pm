@@ -2,14 +2,6 @@ package Classes::AVOS::Component::ConnectionSubsystem;
 our @ISA = qw(Classes::AVOS);
 use strict;
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
-
 sub init {
   my $self = shift;
   $self->get_snmp_objects('BLUECOAT-AV-MIB', (qw(

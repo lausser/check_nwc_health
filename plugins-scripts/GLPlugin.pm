@@ -20,6 +20,12 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $statefilesdir = undef;
 }
 
+sub new {
+  my $class = shift;
+  my $self = {};
+  bless $self, $class;
+  return $self;
+}
 
 sub init {
   my $self = shift;
@@ -587,6 +593,13 @@ sub dump {
     printf "info: %s\n", $self->{info};
   }
   printf "\n";
+  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+    if (defined $self->{$_} && ref($self->{$_}) eq "ARRAY") {
+      foreach my $obj (@{$self->{$_}}) {
+        $obj->dump();
+      }
+    }
+  }
 }
 
 
