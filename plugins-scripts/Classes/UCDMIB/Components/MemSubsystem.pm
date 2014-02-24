@@ -1,15 +1,6 @@
 package Classes::UCDMIB::Component::MemSubsystem;
 our @ISA = qw(Classes::UCDMIB);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -40,17 +31,7 @@ sub check {
         critical => $self->{critical}
     );
   } else {
-    $self->add_message(UNKNOWN, 'cannot aquire momory usage');
+    $self->add_unknown('cannot aquire momory usage');
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEMORY]\n";
-  foreach (qw(memTotalSwap memAvailSwap memTotalReal memAvailReal memTotalFree)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

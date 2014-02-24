@@ -1,15 +1,6 @@
 package Classes::UCDMIB::Component::CpuSubsystem;
 our @ISA = qw(Classes::UCDMIB);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -42,17 +33,6 @@ sub check {
   );
 }
 
-sub dump {
-  my $self = shift;
-  printf "[CPU]\n";
-  foreach (qw(ssCpuUser ssCpuSystem ssCpuIdle
-      ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 sub unix_init {
   my $self = shift;
   my %params = @_;
@@ -80,25 +60,8 @@ sub unix_dump {
 
 
 package Classes::UCDMIB::Component::CpuSubsystem::Load;
-our @ISA = qw(Classes::UCDMIB::Component::CpuSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(laIndex laNames laLoad laConfig laLoadFloat 
-      laErrorFlag laErrMessage)) {
-    $self->{$param} = $params{$param};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -115,16 +78,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[LOAD_%s]\n", lc $self->{laNames};
-  foreach (qw(laIndex laNames laLoad laConfig laLoadFloat 
-      laErrorFlag laErrMessage)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

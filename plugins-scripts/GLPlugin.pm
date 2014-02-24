@@ -171,6 +171,11 @@ sub check_messages {
   return $GLPlugin::plugin->check_messages(@_);
 }
 
+sub clear_ok {
+  my $self = shift;
+  return $self->clear_messages(OK);
+}
+
 sub clear_warning {
   my $self = shift;
   return $self->clear_messages(WARNING);
