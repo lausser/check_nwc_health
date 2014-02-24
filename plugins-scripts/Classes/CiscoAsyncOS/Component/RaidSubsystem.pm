@@ -71,9 +71,9 @@ sub check {
       $self->{raidStatus});
   if ($self->{raidStatus} eq 'driveHealthy') {
   } elsif ($self->{raidStatus} eq 'driveRebuild') {
-    $self->add_message(WARNING, $self->{info});
+    $self->add_warning($self->{info});
   } elsif ($self->{raidStatus} eq 'driveFailure') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
 }
 

@@ -103,11 +103,11 @@ sub check {
       $self->{volumesNumberOfDisks},
       $self->{volumesVolumeState});
   if ($self->{volumesVolumeState} eq 'degraded') {
-    $self->add_message(WARNING, $self->{info});
+    $self->add_warning($self->{info});
   } elsif ($self->{volumesVolumeState} eq 'failed') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   } else {
-    $self->add_message(OK, $self->{info});
+    $self->add_ok($self->{info});
   }
   
 }

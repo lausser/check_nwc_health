@@ -31,7 +31,7 @@ sub check {
   $self->{voltage_subsystem}->check();
   if (! $self->check_messages()) {
     $self->clear_messages(OK); # too much noise
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 

@@ -40,7 +40,7 @@ sub check {
   $self->{numOfAPs} = scalar (@{$self->{aps}});
   $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
   if (scalar (@{$self->{aps}}) == 0) {
-    $self->add_message(UNKNOWN, 'no access points found');
+    $self->add_unknown('no access points found');
   } else {
     foreach (@{$self->{aps}}) {
       $_->check();
@@ -52,12 +52,12 @@ sub check {
       if (scalar(@{$self->{delta_found_apNameList}}) > 0) {
       #if (scalar(@{$self->{delta_found_apNameList}}) > 0 &&
       #    $self->{delta_timestamp} > $self->opts->lookback) {
-        $self->add_message(WARNING, sprintf '%d new access points (%s)',
+        $self->add_warning(sprintf '%d new access points (%s)',
             scalar(@{$self->{delta_found_apNameList}}),
             join(", ", @{$self->{delta_found_apNameList}}));
       }
       if (scalar(@{$self->{delta_lost_apNameList}}) > 0) {
-        $self->add_message(CRITICAL, sprintf '%d access points missing (%s)',
+        $self->add_critical(sprintf '%d access points missing (%s)',
             scalar(@{$self->{delta_lost_apNameList}}),
             join(", ", @{$self->{delta_lost_apNameList}}));
       }
@@ -81,7 +81,7 @@ sub check {
     } elsif ($self->mode =~ /device::wlan::aps::status/) {
       if ($self->opts->report eq "short") {
         $self->clear_messages(OK);
-        $self->add_message(OK, 'no problems') if ! $self->check_messages();
+        $self->add_ok('no problems') if ! $self->check_messages();
       }
     } elsif ($self->mode =~ /device::wlan::aps::list/) {
       foreach (@{$self->{aps}}) {
@@ -201,14 +201,14 @@ sub check {
   $self->add_info($info);
   if ($self->mode =~ /device::wlan::aps::status/) {
     if ($self->{bsnAPOperationStatus} eq 'disassociating') {
-      $self->add_message(CRITICAL, $info);
+      $self->add_critical($info);
     } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
       # das verschwindet hoffentlich noch vor dem HARD-state
-      $self->add_message(WARNING, $info);
+      $self->add_warning($info);
     } elsif ($self->{bsnAPOperationStatus} eq 'associated') {
-      $self->add_message(OK, $info);
+      $self->add_ok($info);
     } else {
-      $self->add_message(UNKNOWN, $info);
+      $self->add_unknown($info);
     }
   }
 }

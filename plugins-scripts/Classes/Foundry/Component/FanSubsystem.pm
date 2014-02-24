@@ -67,7 +67,7 @@ sub check {
       $self->{snChasFanIndex},
       $self->{snChasFanOperStatus});
   if ($self->{snChasFanOperStatus} eq 'failure') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
 }
 

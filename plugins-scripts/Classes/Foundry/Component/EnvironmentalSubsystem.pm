@@ -27,7 +27,7 @@ sub check {
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 

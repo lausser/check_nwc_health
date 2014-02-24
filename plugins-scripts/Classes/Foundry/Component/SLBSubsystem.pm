@@ -182,7 +182,7 @@ sub check {
     );
   } elsif ($self->mode =~ /device::lb::pool/) {
     if (scalar(@{$self->{virtualservers}}) == 0) {
-      $self->add_message(UNKNOWN, 'no vips');
+      $self->add_unknown('no vips');
       return;
     }
     if ($self->mode =~ /pool::list/) {
@@ -197,7 +197,7 @@ sub check {
       if (! $self->opts->name) {
         $self->clear_messages(OK); # too much noise
         if (! $self->check_messages()) {
-          $self->add_message(OK, "virtual servers working fine");
+          $self->add_ok("virtual servers working fine");
         }
       }
     }
@@ -249,7 +249,7 @@ sub check {
       $self->{snL4VirtualServerAdminStatus};
   $self->add_info($info);
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
-    $self->add_message(WARNING, $info);
+    $self->add_warning($info);
   } else {
     foreach (@{$self->{ports}}) {
       $_->check();
@@ -318,7 +318,7 @@ sub check {
   $self->{completeness} = $num_ports ? 100 * $active_ports / $num_ports : 0;
   if ($num_ports == 0) {
     $self->set_thresholds(warning => "0:", critical => "0:");
-    $self->add_message(WARNING, sprintf "%s:%d has no bindings", 
+    $self->add_warning(sprintf "%s:%d has no bindings", 
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort});
   } elsif ($active_ports == 1) {
@@ -431,7 +431,7 @@ sub check {
   my $self = shift;
   if ($self->{slbPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{slbPoolMbrStatusAvailState} ne "green") {
-      $self->add_message(CRITICAL, sprintf
+      $self->add_critical(sprintf
           "member %s is %s/%s (%s)",
           $self->{slbPoolMemberNodeName},
           $self->{slbPoolMemberMonitorState},

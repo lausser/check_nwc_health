@@ -67,7 +67,7 @@ sub check {
       $self->{snChasPwrSupplyIndex},
       $self->{snChasPwrSupplyOperStatus});
   if ($self->{snChasPwrSupplyOperStatus} eq 'failure') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
 }
 

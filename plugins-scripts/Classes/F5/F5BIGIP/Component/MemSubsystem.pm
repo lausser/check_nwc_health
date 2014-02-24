@@ -39,7 +39,7 @@ sub check {
       $self->{host_mem_usage};
   $self->add_info($info);
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message(OK, $info);
+  $self->add_ok($info);
   $self->add_perfdata(
       label => 'host_usage',
       value => $self->{host_mem_usage},

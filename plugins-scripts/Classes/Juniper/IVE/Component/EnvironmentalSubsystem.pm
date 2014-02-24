@@ -32,16 +32,16 @@ sub check {
       critical => $self->{critical},
   );
   if ($self->{fanDescription} && $self->{fanDescription} =~ /(failed)|(threshold)/) {
-    $self->add_message(CRITICAL, $self->{fanDescription});
+    $self->add_critical($self->{fanDescription});
   }
   if ($self->{psDescription} && $self->{psDescription} =~ /failed/) {
-    $self->add_message(CRITICAL, $self->{psDescription});
+    $self->add_critical($self->{psDescription});
   }
   if ($self->{raidDescription} && $self->{raidDescription} =~ /(failed)|(unknown)/) {
-    $self->add_message(CRITICAL, $self->{raidDescription});
+    $self->add_critical($self->{raidDescription});
   }
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 

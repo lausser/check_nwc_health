@@ -50,7 +50,7 @@ sub check {
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
+    $self->add_unknown('no interfaces');
     return;
   }
   if ($self->mode =~ /device::interfaces::list/) {
@@ -58,7 +58,7 @@ sub check {
     #foreach (sort @{$self->{interfaces}}) {
       $_->list();
     }
-    $self->add_message(OK, "have fun");
+    $self->add_ok("have fun");
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     foreach (@{$self->{interfaces}}) {
       $_->check();
@@ -534,9 +534,9 @@ sub check {
     my $info = sprintf '%s is %s/%s',
         $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus};
     $self->add_info($info);
-    $self->add_message(OK, $info);
+    $self->add_ok($info);
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
-      $self->add_message(CRITICAL, 
+      $self->add_critical(
           sprintf 'fault condition is presumed to exist on %s',
           $self->{ifDescr});
     }

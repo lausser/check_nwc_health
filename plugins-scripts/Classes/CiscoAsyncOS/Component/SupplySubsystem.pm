@@ -70,7 +70,7 @@ sub check {
       $self->{powerSupplyStatus});
   if ($self->{powerSupplyStatus} eq 'powerSupplyNotInstalled') {
   } elsif ($self->{powerSupplyStatus} ne 'powerSupplyHealthy') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
 }
 

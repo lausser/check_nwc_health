@@ -26,7 +26,7 @@ sub check {
     }
   } elsif ($self->mode =~ /device::hsrp/) {
     if (scalar (@{$self->{groups}}) == 0) {
-      $self->add_message(UNKNOWN, 'no hsrp groups');
+      $self->add_unknown('no hsrp groups');
     } else {
       foreach (@{$self->{groups}}) {
         $_->check();
@@ -84,9 +84,9 @@ sub check {
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
     $self->add_info($info);
     if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
-        $self->add_message(OK, $info);
+        $self->add_ok($info);
     } else {
-      $self->add_message(CRITICAL, 
+      $self->add_critical(
           sprintf 'state in group %s (interface %s) is %s instead of %s',
               $self->{cHsrpGrpNumber}, $self->{ifIndex},
               $self->{cHsrpGrpStandbyState},
@@ -98,21 +98,21 @@ sub check {
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
     if (my $laststate = $self->load_state( name => $self->{name} )) {
       if ($laststate->{active} ne $self->{cHsrpGrpActiveRouter}) {
-        $self->add_message(CRITICAL, sprintf 'hsrp group %s/%s: active node %s --> %s',
+        $self->add_critical(sprintf 'hsrp group %s/%s: active node %s --> %s',
             $self->{cHsrpGrpNumber}, $self->{ifIndex},
             $laststate->{active}, $self->{cHsrpGrpActiveRouter});
       }
       if ($laststate->{standby} ne $self->{cHsrpGrpStandbyRouter}) {
-        $self->add_message(WARNING, sprintf 'hsrp group %s/%s: standby node %s --> %s',
+        $self->add_warning(sprintf 'hsrp group %s/%s: standby node %s --> %s',
             $self->{cHsrpGrpNumber}, $self->{ifIndex},
             $laststate->{standby}, $self->{cHsrpGrpStandbyRouter});
       }
       if (($laststate->{active} eq $self->{cHsrpGrpActiveRouter}) &&
           ($laststate->{standby} eq $self->{cHsrpGrpStandbyRouter})) {
-        $self->add_message(OK, $info);
+        $self->add_ok($info);
       }
     } else {
-      $self->add_message(OK, 'initializing....');
+      $self->add_ok('initializing....');
     }
     $self->save_state( name => $self->{name}, save => {
         active => $self->{cHsrpGrpActiveRouter},

@@ -68,7 +68,7 @@ sub check {
     $self->add_info(sprintf 'perpetual key %d (%s) never expires',
         $self->{keyExpirationIndex},
         $self->{keyDescription});
-    $self->add_message(OK, $self->{info});
+    $self->add_ok($self->{info});
   } else {
     $self->add_info(sprintf 'key %d (%s) expires in %d days',
         $self->{keyExpirationIndex},

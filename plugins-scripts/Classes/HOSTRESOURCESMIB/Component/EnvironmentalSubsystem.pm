@@ -21,7 +21,7 @@ sub check {
   my $self = shift;
   $self->{disk_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 

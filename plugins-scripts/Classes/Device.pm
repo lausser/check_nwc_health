@@ -32,7 +32,7 @@ sub new {
   };
   bless $self, $class;
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
-    $self->add_message(UNKNOWN, 'either specify a hostname or a snmpwalk file');
+    $self->add_unknown('either specify a hostname or a snmpwalk file');
   } else {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
     } elsif ($self->opts->port && $self->opts->port == 49000) {

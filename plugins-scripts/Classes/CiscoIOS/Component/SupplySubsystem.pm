@@ -70,7 +70,7 @@ sub check {
       $self->{ciscoEnvMonSupplyState});
   if ($self->{ciscoEnvMonSupplyState} eq 'notPresent') {
   } elsif ($self->{ciscoEnvMonSupplyState} ne 'normal') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
 }
 

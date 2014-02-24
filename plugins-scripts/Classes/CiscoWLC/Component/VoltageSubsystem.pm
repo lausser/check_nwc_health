@@ -76,7 +76,7 @@ sub check {
       $self->{ciscoEnvMonVoltageState});
   if ($self->{ciscoEnvMonVoltageState} eq 'notPresent') {
   } elsif ($self->{ciscoEnvMonVoltageState} ne 'normal') {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   }
   $self->add_perfdata(
       label => sprintf('mvolt_%s', $self->{ciscoEnvMonVoltageStatusIndex}),

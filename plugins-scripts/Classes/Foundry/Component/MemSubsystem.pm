@@ -35,7 +35,7 @@ sub check {
         critical => $self->{critical}
     );
   } else {
-    $self->add_message(UNKNOWN, 'cannot aquire momory usage');
+    $self->add_unknown('cannot aquire momory usage');
   }
 }
 

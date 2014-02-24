@@ -50,12 +50,12 @@ sub check {
   );
   if ($self->{ps1_present} eq "true") {
     if ($self->{ps1_operational} ne "true") {
-      $self->add_message(WARNING, "Powersupply 1 is not operational");
+      $self->add_warning("Powersupply 1 is not operational");
     }
   }
   if ($self->{ps2_present} eq "true") {
     if ($self->{ps2_operational} ne "true") {
-      $self->add_message(WARNING, "Powersupply 2 is not operational");
+      $self->add_warning("Powersupply 2 is not operational");
     }
   }
   my $p1info = sprintf "PS1 is %spresent and %soperational",

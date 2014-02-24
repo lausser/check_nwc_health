@@ -69,7 +69,7 @@ sub check {
   if ($self->{sysChassisFanStatus} eq 'notpresent') {
   } else {
     if ($self->{sysChassisFanStatus} ne 'good') {
-      $self->add_message(CRITICAL, $self->{info});
+      $self->add_critical($self->{info});
     }
     $self->add_perfdata(
         label => sprintf('fan_%s', $self->{sysChassisFanIndex}),

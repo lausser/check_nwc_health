@@ -68,7 +68,7 @@ sub check {
   if ($self->{sysChassisPowerSupplyStatus} eq 'notpresent') {
   } else {
     if ($self->{sysChassisPowerSupplyStatus} ne 'good') {
-      $self->add_message(CRITICAL, $self->{info});
+      $self->add_critical($self->{info});
     }
   }
 }

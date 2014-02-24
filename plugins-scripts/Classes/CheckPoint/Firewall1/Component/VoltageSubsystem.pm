@@ -63,11 +63,11 @@ sub check {
       $self->{sensorsVoltageValue}, $self->{sensorsVoltageUOM};
   $self->add_info($info);
   if ($self->{sensorsVoltageStatus} eq 'normal') {
-    $self->add_message(OK, $info);
+    $self->add_ok($info);
   } elsif ($self->{sensorsVoltageStatus} eq 'abnormal') {
-    $self->add_message(CRITICAL, $info);
+    $self->add_critical($info);
   } else {
-    $self->add_message(UNKNOWN, $info);
+    $self->add_unknown($info);
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(

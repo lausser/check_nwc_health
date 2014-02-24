@@ -74,9 +74,9 @@ sub check {
       $self->{fcConnUnitSensorStatus},
       $self->{fcConnUnitSensorMessage});
   if ($self->{fcConnUnitSensorStatus} ne "ok") {
-    $self->add_message(CRITICAL, $self->{info});
+    $self->add_critical($self->{info});
   } else {
-    #$self->add_message(OK, $self->{info});
+    #$self->add_ok($self->{info});
   }
 }
 

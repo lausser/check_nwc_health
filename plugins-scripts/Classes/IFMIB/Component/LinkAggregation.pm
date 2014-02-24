@@ -42,7 +42,7 @@ sub check {
   my $self = shift;
   $self->add_info('checking link aggregation');
   if (scalar(@{$self->{components}->{interface_subsystem}->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
+    $self->add_unknown('no interfaces');
     return;
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {

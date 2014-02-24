@@ -28,7 +28,7 @@ sub check {
   $self->add_info('checking ltm pools');
   $self->blacklist('poo', '');
   if (scalar(@{$self->{pools}}) == 0) {
-    $self->add_message(UNKNOWN, 'no pools');
+    $self->add_unknown('no pools');
     return;
   }
   if ($self->mode =~ /pool::list/) {
@@ -324,7 +324,7 @@ sub check {
   my $self = shift;
   if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
-      $self->add_message(CRITICAL, sprintf
+      $self->add_critical(sprintf
           "member %s is %s/%s (%s)",
           $self->{ltmPoolMemberNodeName},
           $self->{ltmPoolMemberMonitorState},
