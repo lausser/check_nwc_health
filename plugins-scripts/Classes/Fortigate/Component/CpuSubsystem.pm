@@ -15,9 +15,8 @@ sub init {
   my $self = shift;
   my %params = @_;
   my $type = 0;
-  foreach (qw(fgSysCpuUsage)) {
-    $self->{$_} = $self->get_snmp_object('FORTINET-FORTIGATE-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('FORTINET-FORTIGATE-MIB', (qw(
+      fgSysCpuUsage)));
 }
 
 sub check {

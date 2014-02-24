@@ -16,10 +16,8 @@ sub init {
   $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
       ['cpus', 'snAgentCpuUtilTable', 'Classes::Foundry::Component::CpuSubsystem::Cpu'],
   ]);
-  foreach (qw(snAgGblCpuUtil1SecAvg snAgGblCpuUtil5SecAvg
-      snAgGblCpuUtil1MinAvg)) {
-    $self->{$_} = $self->get_snmp_object('FOUNDRY-SN-AGENT-MIB', $_);
-  }
+  $self->get_snmp_objects('FOUNDRY-SN-AGENT-MIB', (qw(
+      snAgGblCpuUtil1SecAvg snAgGblCpuUtil5SecAvg snAgGblCpuUtil1MinAvg)));
 }
 
 sub check {

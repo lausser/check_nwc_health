@@ -1,15 +1,6 @@
 package Classes::AVOS::Component::MemSubsystem;
 our @ISA = qw(Classes::AVOS);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   # https://kb.bluecoat.com/index?page=content&id=KB3069
@@ -23,14 +14,11 @@ sub init {
   my $snmpwalk = $params{rawdata};
   my $ignore_redundancy = $params{ignore_redundancy};
   my $type = 0;
-  foreach (qw(sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage
-      sgProxyMemSysUsage)) {
-    $self->{$_} = $self->get_snmp_object('BLUECOAT-SG-PROXY-MIB', $_);
-  }
+  $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(
+      sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage sgProxyMemSysUsage)));
   if (! defined $self->{sgProxyMemPressure}) {
-    foreach (qw(memPressureValue memWarningThreshold memCriticalThreshold memCurrentState)) {
-      $self->{$_} = $self->get_snmp_object('SYSTEM-RESOURCES-MIB', $_);
-    }
+  $self->get_snmp_objects('SYSTEM-RESOURCES-MIB', (qw(
+      memPressureValue memWarningThreshold memCriticalThreshold memCurrentState)));
   }
   if (! defined $self->{memPressureValue}) {
     foreach ($self->get_snmp_table_objects(
@@ -50,7 +38,6 @@ sub init {
 package Classes::AVOS::Component::MemSubsystem::AVOS3;
 our @ISA = qw(Classes::AVOS::Component::MemSubsystem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
@@ -69,16 +56,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical}
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEMORY]\n";
-  foreach (qw(deviceUsageName deviceUsagePercent deviceUsageHigh
-      deviceUsageStatus deviceUsageTime)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

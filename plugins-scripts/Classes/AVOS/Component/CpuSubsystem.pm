@@ -2,14 +2,6 @@ package Classes::AVOS::Component::CpuSubsystem;
 our @ISA = qw(Classes::AVOS);
 use strict;
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
-
 sub init {
   my $self = shift;
   my %params = @_;
@@ -32,13 +24,6 @@ sub check {
   $self->add_info('checking cpus');
   foreach (@{$self->{cpus}}) {
     $_->check();
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{cpus}}) {
-    $_->dump();
   }
 }
 

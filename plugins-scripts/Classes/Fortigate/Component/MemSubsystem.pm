@@ -13,9 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(fgSysMemUsage)) {
-    $self->{$_} = $self->get_snmp_object('FORTINET-FORTIGATE-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('FORTINET-FORTIGATE-MIB', (qw(
+      fgSysMemUsage)));
 }
 
 sub check {

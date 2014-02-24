@@ -1,22 +1,11 @@
 package Classes::CiscoCCM::Component::PhoneSubsystem;
 our @ISA = qw(Classes::CiscoCCM);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  foreach (qw(ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)) {
-    $self->{$_} = $self->get_snmp_object('CISCO-CCM-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('CISCO-CCM-MIB', (qw(
+      ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)));
 }
 
 sub check {
@@ -42,12 +31,3 @@ sub check {
   );
 }
 
-sub dump {
-  my $self = shift;
-  printf "[PHONES]\n";
-  foreach (qw(ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
-1;

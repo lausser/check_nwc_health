@@ -13,10 +13,8 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach (qw(ssCpuUser ssCpuSystem ssCpuIdle
-      ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)) {
-    $self->{$_} = $self->get_snmp_object('UCD-SNMP-MIB', $_, 0);
-  }
+  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
+      ssCpuUser ssCpuSystem ssCpuIdle ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice)));
   $self->valdiff({name => 'cpu'}, qw(ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice));
   my $cpu_total = $self->{delta_ssCpuRawUser} + $self->{delta_ssCpuRawSystem} +
       $self->{delta_ssCpuRawIdle} + $self->{delta_ssCpuRawNice};
