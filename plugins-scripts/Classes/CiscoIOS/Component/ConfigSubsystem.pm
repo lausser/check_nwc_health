@@ -30,25 +30,31 @@ sub check {
   # ccmHistoryStartupLastChanged 
   $self->set_thresholds(warning => 3600, critical => 3600*24);
 
+  # ??? 
+  # The Running config is stored in RAM, so it's lost either way if changed,
+  # unless copied to the startup config (which is saved in NVRAM.)
+  # Don't understand the use of unsaved_since (using Cisco's like 2901, 3750)
+  # ???
+
   # how much is ccmHistoryRunningLastChanged ahead of ccmHistoryRunningLastSaved
   # the current running config is definitively lost in case of an outage
   my $unsaved_since =
       $self->{ccmHistoryRunningLastChanged} > $self->{ccmHistoryRunningLastSaved} ?
       time - $self->{ccmHistoryRunningLastChanged} : 0;
 
-  # how much is ccmHistoryRunningLastSaved ahead of ccmHistoryStartupLastChanged
+  # How much is ccmHistoryRunningLastChanged ahead of ccmHistoryStartupLastChanged
   # the running config could have been saved for backup purposes.
-  # the saved config can still be identical to the saved running config
-  # if there are regular backups of the running config and no one messes
+  # The saved config can still be identical to the saved running config.
+  # If there are regular backups of the running config and no one messes
   # with the latter without flushing it to the startup config, then i recommend
-  # to use --mitigation ok. this can be in an environment, where there is
+  # to use --mitigation ok. This can be in an environment, where there is
   # a specific day of the week reserved for maintenance and admins are forced
   # to save their modifications to the startup-config.
   my $unsynced_since = 
-      $self->{ccmHistoryRunningLastSaved} > $self->{ccmHistoryStartupLastChanged} ? 
-      time - $self->{ccmHistoryRunningLastSaved} : 0;
+      $self->{ccmHistoryRunningLastChanged} > $self->{ccmHistoryStartupLastChanged} ?
+      time - $self->{ccmHistoryRunningLastChanged} : 0;
   if ($unsaved_since) {
-    $info = sprintf "running config is modified and unsaved since %d minutes. your changes my be lost in case of a reboot",
+    $info = sprintf "running config is modified and unsaved since %d minutes. your changes may be lost in case of a reboot",
         $unsaved_since / 60;
   } else {
     $info = "saved config is up to date";
