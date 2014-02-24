@@ -165,6 +165,21 @@ sub check_messages {
   return $GLPlugin::plugin->check_messages(@_);
 }
 
+sub clear_warning {
+  my $self = shift;
+  return $self->clear_messages(WARNING);
+}
+
+sub clear_critical {
+  my $self = shift;
+  return $self->clear_messages(CRITICAL);
+}
+
+sub clear_unknown {
+  my $self = shift;
+  return $self->clear_messages(UNKNOWN);
+}
+
 sub clear_messages {
   my $self = shift;
   return $GLPlugin::plugin->clear_messages(@_);

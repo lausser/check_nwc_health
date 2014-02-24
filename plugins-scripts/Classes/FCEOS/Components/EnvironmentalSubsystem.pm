@@ -31,8 +31,8 @@ sub check {
     $self->add_ok("environmental hardware working fine");
   } else {
     if ($self->{fcEosSysOperStatus} eq "operational") {
-      $self->clear_messages(CRITICAL);
-      $self->clear_messages(WARNING);
+      $self->clear_critical();
+      $self->clear_warning();
     } elsif ($self->{fcEosSysOperStatus} eq "major-failure") {
       $self->add_critical("major device failure");
     } else {
