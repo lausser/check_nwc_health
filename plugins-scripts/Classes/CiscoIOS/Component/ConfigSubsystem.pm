@@ -55,12 +55,14 @@ sub check {
   }
   $self->add_message($self->check_thresholds($unsaved_since), $info);
   if ($unsynced_since) {
-    my $errorlevel = defined $self->opts->mitigation() ?
-        $self->opts->mitigation() :
-        $self->check_thresholds($unsynced_since);
+    my $errorlevel = $self->check_thresholds($unsynced_since);
+    if ($errorlevel != OK && defined $self->opts->mitigation()) {
+      $errorlevel = $self->opts->mitigation();
+    }
+
     $info = sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
         $unsynced_since / 60;
-    $self->add_message($self->check_thresholds($unsaved_since), $info);
+    $self->add_message($errorlevel, $info);
   }
 }
 
