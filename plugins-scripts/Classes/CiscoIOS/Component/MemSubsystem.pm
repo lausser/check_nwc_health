@@ -1,24 +1,12 @@
 package Classes::CiscoIOS::Component::MemSubsystem;
-our @ISA = qw(Classes::CiscoIOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-     'CISCO-MEMORY-POOL-MIB', 'ciscoMemoryPoolTable')) {
-    $_->{ciscoMemoryPoolType} ||= 0;
-    push(@{$self->{mems}},
-        Classes::CiscoIOS::Component::MemSubsystem::Mem->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
+      ['mems', 'ciscoMemoryPoolTable', 'Classes::CiscoIOS::Component::MemSubsystem::Mem'],
+  });
 }
 
 sub check {
@@ -33,41 +21,14 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{mems}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CiscoIOS::Component::MemSubsystem::Mem;
-our @ISA = qw(Classes::CiscoIOS::Component::MemSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(ciscoMemoryPoolTable ciscoMemoryPoolEntry
-      ciscoMemoryPoolType ciscoMemoryPoolName ciscoMemoryPoolAlternate
-      ciscoMemoryPoolValid ciscoMemoryPoolUsed ciscoMemoryPoolFree
-      ciscoMemoryPoolLargestFree)) {
-    $self->{$param} = $params{$param};
-  }
-  bless $self, $class;
-  $self->{usage} = 100 * $params{ciscoMemoryPoolUsed} /
-      ($params{ciscoMemoryPoolFree} + $params{ciscoMemoryPoolUsed});
-  return $self;
-}
 
 sub check {
   my $self = shift;
+  $self->{ciscoMemoryPoolType} ||= 0;
   $self->blacklist('m', $self->{flat_indices});
   my $info = sprintf 'mempool %s usage is %.2f%%',
       $self->{ciscoMemoryPoolName}, $self->{usage};
@@ -80,7 +41,6 @@ sub check {
     $self->set_thresholds(warning => 80, critical => 90);
   }
   $self->add_message($self->check_thresholds($self->{usage}), $info);
-
   $self->add_perfdata(
       label => $self->{ciscoMemoryPoolName}.'_usage',
       value => $self->{usage},
@@ -88,15 +48,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical}
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEMPOOL_%s]\n", $self->{flat_indices};
-  foreach (qw(ciscoMemoryPoolType ciscoMemoryPoolName ciscoMemoryPoolAlternate ciscoMemoryPoolValid ciscoMemoryPoolUsed ciscoMemoryPoolFree ciscoMemoryPoolLargestFree)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

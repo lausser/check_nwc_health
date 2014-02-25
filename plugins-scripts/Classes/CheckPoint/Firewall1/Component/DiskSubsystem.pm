@@ -13,16 +13,11 @@ sub new {
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'HOST-RESOURCES-MIB', 'hrStorageTable')) {
-    next if $_->{hrStorageType} ne 'hrStorageFixedDisk';
-    push(@{$self->{storages}}, 
-        Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage->new(%{$_}));
-  }
-  $self->get_snmp_tables('CHECKPOINT-MIB', [
-      ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
+  $self->get_snmp_tables('HOST-RESOURCES-MIB', [
+      ['storages', 'hrStorageTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Storage', sub { my $o = shift; return $_->{hrStorageType} eq 'hrStorageFixedDisk'}],
   ]);
   $self->get_snmp_tables('CHECKPOINT-MIB', [
+      ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
       ['disks', 'disksTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk'],
   ]);
   $self->get_snmp_objects('CHECKPOINT-MIB', (qw(

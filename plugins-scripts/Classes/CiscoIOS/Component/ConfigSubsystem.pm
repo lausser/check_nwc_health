@@ -1,22 +1,14 @@
 package Classes::CiscoIOS::Component::ConfigSubsystem;
-our @ISA = qw(Classes::CiscoIOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  my %params = @_;
-  foreach (qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
-      ccmHistoryStartupLastChanged)) {
-    $self->{$_} = $self->get_snmp_object('CISCO-CONFIG-MAN-MIB', $_);
+  $self->get_snmp_objects('CISCO-CONFIG-MAN-MIB', (qw(
+      ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
+      ccmHistoryStartupLastChanged)));
+  foreach ((qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
+      ccmHistoryStartupLastChanged))) {
     $self->{$_} = time - $self->uptime() + $self->timeticks($self->{$_});
   }
 }
@@ -61,15 +53,6 @@ sub check {
     $info = sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
         $unsynced_since / 60;
     $self->add_message($self->check_thresholds($unsaved_since), $info);
-  }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CONFIG]\n";
-  foreach (qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
-      ccmHistoryStartupLastChanged)) {
-    printf "%s: %s %s\n", $_, $self->{$_}, scalar localtime $self->{$_};
   }
 }
 

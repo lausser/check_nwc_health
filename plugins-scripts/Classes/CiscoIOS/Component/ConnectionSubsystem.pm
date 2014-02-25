@@ -1,15 +1,6 @@
 package Classes::CiscoIOS::Component::ConnectionSubsystem;
-our @ISA = qw(Classes::CiscoIOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -34,34 +25,11 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{connectionstates}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CiscoIOS::Component::ConnectionSubsystem::ConnectionState;
-our @ISA = qw(Classes::CiscoIOS::Component::ConnectionSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(cfwConnectionStatService cfwConnectionStatType cfwConnectionStatDescription
-      cfwConnectionStatCount cfwConnectionStatValue)) {
-    $self->{$_} = $params{$_} || "";
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -83,16 +51,5 @@ sub check {
         critical => $self->{critical}
     );
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CONNECTIONSTATS_%s]\n", $self->{cfwConnectionStatType};
-  foreach (qw(cfwConnectionStatService cfwConnectionStatType cfwConnectionStatDescription
-      cfwConnectionStatCount cfwConnectionStatValue)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

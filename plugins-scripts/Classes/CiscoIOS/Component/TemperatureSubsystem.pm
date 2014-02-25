@@ -1,24 +1,15 @@
 package Classes::CiscoIOS::Component::TemperatureSubsystem;
-our @ISA = qw(Classes::CiscoIOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
   my $tempcnt = 0;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENVMON-MIB', 'ciscoEnvMonTemperatureStatusTable')) {
+  $self->get_snmp_tables('CISCO-ENVMON-MIB', [
+      ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature'],
+  ]);
+  foreach (@{$self->{temperatures}}) {
     $_->{ciscoEnvMonTemperatureStatusIndex} = $tempcnt++ if (! exists $_->{ciscoEnvMonTemperatureStatusIndex});
-    push(@{$self->{temperatures}},
-        Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature->new(%{$_}));
   }
 }
 
@@ -34,16 +25,9 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{temperatures}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature;
-our @ISA = qw(Classes::CiscoIOS::Component::TemperatureSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -55,11 +39,8 @@ sub new {
     info => undef,
     extendedinfo => undef,
   };
-  foreach my $param (qw(ciscoEnvMonTemperatureStatusIndex
-      ciscoEnvMonTemperatureStatusDescr ciscoEnvMonTemperatureStatusValue
-      ciscoEnvMonTemperatureThreshold ciscoEnvMonTemperatureLastShutdown
-      ciscoEnvMonTemperatureState)) {
-    $self->{$param} = $params{$param};
+  foreach (keys %params) {
+    $self->{$_} = $params{$_};
   }
   $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
@@ -103,39 +84,15 @@ sub check {
   );
 }
 
-sub dump {
-  my $self = shift;
-  printf "[TEMP_%s]\n", $self->{ciscoEnvMonTemperatureStatusIndex};
-  foreach (qw(ciscoEnvMonTemperatureStatusIndex ciscoEnvMonTemperatureStatusDescr ciscoEnvMonTemperatureStatusValue ciscoEnvMonTemperatureThreshold ciscoEnvMonTemperatureLastShutdown ciscoEnvMonTemperatureState)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
 
 package Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature::Simple;
-our @ISA = qw(Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    runtime => $params{runtime},
-    ciscoEnvMonTemperatureStatusIndex => $params{ciscoEnvMonTemperatureStatusIndex} || 0,
-    ciscoEnvMonTemperatureStatusDescr => $params{ciscoEnvMonTemperatureStatusDescr},
-    ciscoEnvMonTemperatureState => $params{ciscoEnvMonTemperatureState},
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
+  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
+  $self->{ciscoEnvMonTemperatureStatusDescr} ||= 0;
   $self->blacklist('t', $self->{ciscoEnvMonTemperatureStatusIndex});
   $self->add_info(sprintf 'temperature %d %s is %s',
       $self->{ciscoEnvMonTemperatureStatusIndex},
@@ -150,15 +107,4 @@ sub check {
   } else {
   }
 }
-
-sub dump {
-  my $self = shift;
-  printf "[TEMP_%s]\n", $self->{ciscoEnvMonTemperatureStatusIndex};
-  foreach (qw(ciscoEnvMonTemperatureStatusIndex ciscoEnvMonTemperatureStatusDescr ciscoEnvMonTemperatureState)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

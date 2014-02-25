@@ -1,24 +1,16 @@
 package Classes::CiscoIOS::Component::CpuSubsystem;
-our @ISA = qw(Classes::CiscoIOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
   my $type = 0;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-PROCESS-MIB', 'cpmCPUTotalTable')) {
+  $self->get_snmp_tables('CISCO-PROCESS-MIB', {
+      'cpus', 'cpmCPUTotalTable', 'Classes::CiscoIOS::Component::CpuSubsystem::Cpu'],
+  ]);
+  foreach (@{$self->{cpus}) {
     $_->{cpmCPUTotalIndex} ||= $type++;
-    push(@{$self->{cpus}},
-        Classes::CiscoIOS::Component::CpuSubsystem::Cpu->new(%{$_}));
   }
   if (scalar(@{$self->{cpus}}) == 0) {
     # maybe too old. i fake a cpu. be careful. this is a really bad hack
@@ -61,16 +53,9 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{cpus}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CiscoIOS::Component::CpuSubsystem::Cpu;
-our @ISA = qw(Classes::CiscoIOS::Component::CpuSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -125,17 +110,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU_%s]\n", $self->{cpmCPUTotalPhysicalIndex};
-  foreach (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev cpmCPUMonInterval cpmCPUTotalMonIntervalValue cpmCPUInterruptMonIntervalValue)) {
-    if (exists $self->{$_}) {
-      printf "%s: %s\n", $_, $self->{$_};
-    }
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

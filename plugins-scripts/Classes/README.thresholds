@@ -1,0 +1,10 @@
+den ganzen scheissdreck in $self->warning() verstecken zb in
+
+  $self->add_perfdata(
+      label => $self->{ciscoMemoryPoolName}.'_usage',
+      value => $self->{usage},
+      uom => '%',
+      warning => $self->{warning},
+      critical => $self->{critical}
+  );
+
