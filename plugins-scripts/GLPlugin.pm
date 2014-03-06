@@ -458,6 +458,7 @@ sub schimpf {
   printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $GLPlugin::statefilesdir;
 }
 
+# $self->protect_value('1.1-flat_index', 'cpu_busy', 'percent');
 sub protect_value {
   my $self = shift;
   my $ident = shift;

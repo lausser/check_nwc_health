@@ -63,7 +63,7 @@ sub finish {
   } else {
     $self->{usage} = $params{cpmCPUTotal5min};
   }
-  $self->protect_value($self->{cpmCPUTotalIndex}.$self->{cpmCPUTotalPhysicalIndex}, 'usage', 'percent');
+  $self->protect_value(($self->{cpmCPUTotalIndex}||"").($self->{cpmCPUTotalPhysicalIndex}||""), 'usage', 'percent');
   if (defined $self->{cpmCPUTotalPhysicalIndex}) {
     my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
     $self->{entPhysicalName} = $self->get_request(
