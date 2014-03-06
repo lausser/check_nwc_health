@@ -43,7 +43,7 @@ sub check {
   $self->add_info(sprintf 'memory usage is %.2f%%',
       $self->{deviceUsagePercent});
   $self->set_thresholds(warning => $self->{deviceUsageHigh} - 10, critical => $self->{deviceUsageHigh});
-  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}));
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{deviceUsagePercent},

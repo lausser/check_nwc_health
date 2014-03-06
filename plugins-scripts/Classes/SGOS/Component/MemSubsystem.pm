@@ -21,7 +21,7 @@ sub check {
   $self->add_info(sprintf 'memory usage is %.2f%%',
       $self->{sgProxyMemPressure});
   $self->set_thresholds(warning => 75, critical => 90);
-  $self->add_message($self->check_thresholds($self->{sgProxyMemPressure}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{sgProxyMemPressure}));
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{sgProxyMemPressure},

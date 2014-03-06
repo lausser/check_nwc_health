@@ -13,7 +13,7 @@ sub check {
   $self->add_info(sprintf '%d viruses detected',
       $self->{avVirusesDetected});
   $self->set_thresholds(warning => 1500, critical => 1500);
-  $self->add_message($self->check_thresholds($self->{avVirusesDetected}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{avVirusesDetected}));
   $self->add_perfdata(
       label => 'viruses',
       value => $self->{avVirusesDetected},

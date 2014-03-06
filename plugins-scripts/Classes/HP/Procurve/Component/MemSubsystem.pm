@@ -34,7 +34,7 @@ sub check {
   $self->add_info(sprintf 'memory %s usage is %.2f',
       $self->{hpLocalMemSlotIndex}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{usage}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{usage}));
   $self->add_perfdata(
       label => 'memory_'.$self->{hpLocalMemSlotIndex}.'_usage',
       value => $self->{usage},

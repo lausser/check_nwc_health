@@ -15,7 +15,7 @@ sub check {
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{iveCpuUtil});
   # http://www.juniper.net/techpubs/software/ive/guides/howtos/SA-IC-MAG-SNMP-Monitoring-Guide.pdf
   $self->set_thresholds(warning => 50, critical => 90);
-  $self->add_message($self->check_thresholds($self->{iveCpuUtil}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{iveCpuUtil}));
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{iveCpuUtil},
@@ -62,7 +62,7 @@ sub check {
   $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});
-  $self->add_message($self->check_thresholds($self->{laLoadFloat}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{laLoadFloat}));
   $self->add_perfdata(
       label => lc $self->{laNames},
       value => $self->{laLoadFloat},

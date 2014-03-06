@@ -37,7 +37,7 @@ sub check {
   $self->add_info(sprintf 'temperature %s is %.2fC', 
       $self->{snAgentTempSlotNum}, $self->{snAgentTempValue});
   $self->set_thresholds(warning => 60, critical => 70);
-  $self->add_message($self->check_thresholds($self->{snAgentTempValue}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{snAgentTempValue}));
   $self->add_perfdata(
       label => 'temperature_'.$self->{snAgentTempSlotNum},
       value => $self->{snAgentTempValue},

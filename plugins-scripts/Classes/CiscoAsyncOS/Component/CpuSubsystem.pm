@@ -15,7 +15,7 @@ sub check {
   $self->add_info(sprintf 'cpu usage is %.2f%%',
       $self->{perCentCPUUtilization});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{perCentCPUUtilization}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{perCentCPUUtilization}));
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{perCentCPUUtilization},

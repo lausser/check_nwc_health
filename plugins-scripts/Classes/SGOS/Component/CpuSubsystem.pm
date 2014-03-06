@@ -37,7 +37,7 @@ sub check {
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{sgProxyCpuCoreBusyPerCent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{sgProxyCpuCoreBusyPerCent}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{sgProxyCpuCoreBusyPerCent}));
   $self->add_perfdata(
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{sgProxyCpuCoreBusyPerCent},
@@ -58,7 +58,7 @@ sub check {
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{deviceUsagePercent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}));
   $self->add_perfdata(
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{deviceUsagePercent},

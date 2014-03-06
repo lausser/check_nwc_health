@@ -34,7 +34,7 @@ sub check {
       $self->{hrProcessorIndex},
       $self->{hrProcessorLoad});
   $self->set_thresholds(warning => '80', critical => '90');
-  $self->add_message($self->check_thresholds($self->{hrProcessorLoad}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{hrProcessorLoad}));
   $self->add_perfdata(
       label => sprintf('cpu_%s_usage', $self->{hrProcessorIndex}),
       value => $self->{hrProcessorLoad},

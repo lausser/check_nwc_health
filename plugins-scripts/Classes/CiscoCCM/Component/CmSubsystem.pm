@@ -33,6 +33,6 @@ sub check {
   $self->add_info(sprintf 'cm %s is %s',
       $self->{ccmName},
       $self->{ccmStatus});
-  $self->add_message($self->{ccmStatus} eq 'up' ? OK : CRITICAL, $self->{info});
+  $self->add_message($self->{ccmStatus} eq 'up' ? OK : CRITICAL);
 }
 

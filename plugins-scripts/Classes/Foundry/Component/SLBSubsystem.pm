@@ -361,7 +361,7 @@ sub check {
       $self->{snL4RealServerPortStatusServerName},
       $self->{snL4RealServerPortStatusPort},
       $self->{snL4RealServerPortStatusState});
-  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL, $self->{info});
+  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL);
   # snL4VirtualServerPortStatisticTable dazumischen
   # snL4VirtualServerPortStatisticTable:   snL4VirtualServerPortStatisticCurrentConnection*
   # realports connecten und den status ermitteln

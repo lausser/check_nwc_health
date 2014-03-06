@@ -15,7 +15,7 @@ sub check {
   $self->add_info(sprintf 'disk is %.2f%% full',
       $self->{diskFullPercent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{diskFullPercent}), $self->{info});
+  $self->add_message($self->check_thresholds($self->{diskFullPercent}));
   $self->add_perfdata(
       label => 'disk_usage',
       value => $self->{diskFullPercent},

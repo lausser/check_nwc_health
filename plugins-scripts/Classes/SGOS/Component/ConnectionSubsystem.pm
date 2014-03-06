@@ -22,7 +22,7 @@ sub check {
     $self->add_info(sprintf 'average service time for http requests is %.5fs',
         $self->{sgProxyHttpResponseTimeAll});
     $self->set_thresholds(warning => 5, critical => 10);
-    $self->add_message($self->check_thresholds($self->{sgProxyHttpResponseTimeAll}), $self->{info});
+    $self->add_message($self->check_thresholds($self->{sgProxyHttpResponseTimeAll}));
     $self->add_perfdata(
         label => 'http_response_time',
         value => $self->{sgProxyHttpResponseTimeAll},

@@ -25,7 +25,7 @@ sub check {
     my $free = 100 - $self->{diskPercent};
     $self->add_info(sprintf 'disk has %.2f%% free space left', $free);
     $self->set_thresholds(warning => '10:', critical => '5:');
-    $self->add_message($self->check_thresholds($free), $self->{info});
+    $self->add_message($self->check_thresholds($free));
     $self->add_perfdata(
         label => 'disk_free',
         value => $free,

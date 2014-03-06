@@ -16,7 +16,7 @@ sub check {
       $self->{perCentMemoryUtilization}, $self->{memoryAvailabilityStatus});
   $self->set_thresholds(warning => 80, critical => 90);
   if ($self->check_thresholds($self->{perCentMemoryUtilization})) {
-    $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}), $self->{info});
+    $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}));
   } elsif ($self->{memoryAvailabilityStatus} eq 'memoryShortage') {
     $self->add_warning();
     $self->set_thresholds(warning => $self->{perCentMemoryUtilization}, critical => 90);

@@ -32,7 +32,7 @@ sub check {
       $self->{hrStorageDescr},
       $free);
   $self->set_thresholds(warning => '10:', critical => '5:');
-  $self->add_message($self->check_thresholds($free), $self->{info});
+  $self->add_message($self->check_thresholds($free));
   $self->add_perfdata(
       label => sprintf('%s_free_pct', $self->{hrStorageDescr}),
       value => $free,
