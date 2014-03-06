@@ -1,15 +1,6 @@
 package Classes::CheckPoint::Firewall1::Component::VoltageSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -25,49 +16,23 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{voltages}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CheckPoint::Firewall1::Component::VoltageSubsystem::Voltage;
-our @ISA = qw(Classes::CheckPoint::Firewall1::Component::VoltageSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(sensorsVoltageIndex sensorsVoltageName sensorsVoltageValue
-      sensorsVoltageUOM sensorsVoltageType sensorsVoltageStatus)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->blacklist('t', $self->{sensorsVoltageIndex});
-  my $info = sprintf 'voltage %s is %s (%.2f %s)', 
+  $self->add_info(sprintf 'voltage %s is %s (%.2f %s)', 
       $self->{sensorsVoltageName}, $self->{sensorsVoltageStatus},
-      $self->{sensorsVoltageValue}, $self->{sensorsVoltageUOM};
-  $self->add_info($info);
+      $self->{sensorsVoltageValue}, $self->{sensorsVoltageUOM});
   if ($self->{sensorsVoltageStatus} eq 'normal') {
-    $self->add_ok($info);
+    $self->add_ok($self->{info});
   } elsif ($self->{sensorsVoltageStatus} eq 'abnormal') {
-    $self->add_critical($info);
+    $self->add_critical($self->{info});
   } else {
-    $self->add_unknown($info);
+    $self->add_unknown($self->{info});
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(
@@ -77,16 +42,4 @@ sub check {
       critical => $self->{critical},
   );
 }
-
-sub dump {
-  my $self = shift;
-  printf "[VOLTAGE_%s]\n", $self->{sensorsVoltageIndex};
-  foreach (qw(sensorsVoltageIndex sensorsVoltageName sensorsVoltageValue
-      sensorsVoltageUOM sensorsVoltageType sensorsVoltageStatus)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info} || "unchecked";
-  printf "\n";
-}
-
 

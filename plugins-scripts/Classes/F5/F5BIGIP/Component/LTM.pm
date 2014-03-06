@@ -1,7 +1,6 @@
 package Classes::F5::F5BIGIP::Component::LTMSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -43,37 +42,13 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{pools}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    pools => [],
-    poolmembers => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  $self->init(%params);
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  my %params = @_;
   # ! merge ltmPoolStatus, ltmPoolMemberStatus, bec. ltmPoolAvailabilityState is deprecated
   if ($self->mode =~ /pool::list/) {
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName');
@@ -169,31 +144,14 @@ sub assign_members_to_pools {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPool;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem9);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    members => [],
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
-  $self->{name} = $self->{ltmPoolName};
-  bless $self, $class;
-  return $self;
-}
-
 sub check {
   my $self = shift;
-  my %params = @_;
+  $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
+  $self->{name} = $self->{ltmPoolName};
   $self->blacklist('po', $self->{ltmPoolName});
   $self->add_info(sprintf "pool %s is %s, avail state is %s, active members: %d of %d", 
       $self->{ltmPoolName},
@@ -215,7 +173,7 @@ sub check {
     $message = sprintf("pool %s has not enough active members (%d, min is %d)",
             $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt},
             $self->{ltmPoolMinActiveMembers});
-    $self->add_message(defined $params{mitigation} ? $params{mitigation} : 2, $message);
+    $self->add_message(defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL, $message);
   }
   if ($self->check_messages()) {
     foreach my $member (@{$self->{members}}) {
@@ -274,39 +232,14 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s]\n", $self->{ltmPoolName};
-  foreach(qw(ltmPoolName ltmPoolLbMode ltmPoolMinActiveMembers
-      ltmPoolActiveMemberCnt ltmPoolMemberCnt
-      ltmPoolStatusAvailState ltmPoolStatusEnabledState ltmPoolStatusDetailReason
-      ltmPoolStatCurSessions ltmPoolStatServerCurConns)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  foreach my $member (@{$self->{members}}) {
-    $member->dump();
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem9);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
+sub check {
+  my $self = shift;
   $self->{ltmPoolMemberAddr} =~ s/ //g;
   if ($self->{ltmPoolMemberAddr} =~ /^0x([0-9a-zA-Z]{8})/) {
     $self->{ltmPoolMemberAddr} = join(".", unpack "C*", pack "H*", $1);
@@ -316,12 +249,6 @@ sub new {
       $self->{ltmNodeAddrStatusName}) {
     $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
   }
-  bless $self, $class;
-  return $self;
-}
-
-sub check {
-  my $self = shift;
   if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
       $self->add_critical(sprintf
@@ -334,38 +261,10 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s_MEMBER]\n", $self->{ltmPoolMemberPoolName};
-  foreach(qw(ltmPoolMemberPoolName ltmPoolMemberNodeName
-      ltmPoolMemberAddr ltmPoolMemberPort
-      ltmPoolMemberMonitorRule
-      ltmPoolMemberMonitorState ltmPoolMemberMonitorStatus
-      ltmPoolMbrStatusAvailState  ltmPoolMbrStatusEnabledState ltmPoolMbrStatusDetailReason)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    pools => [],
-    poolmembers => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  $self->init(%params);
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -407,27 +306,9 @@ sub assign_members_to_pools {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPool;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem4);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    members => [],
-  };
-  foreach(qw(poolName poolLBMode poolMinActiveMembers 
-      poolActiveMemberCount poolMemberQty)) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{name} = $self->{poolName};
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -447,7 +328,7 @@ sub check {
   if ($self->{poolMinActiveMembers} > 0 &&
       $self->{poolActiveMemberCount} < $self->{poolMinActiveMembers}) {
     $self->add_nagios(
-        defined $params{mitigation} ? $params{mitigation} : 2,
+        defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL,
         sprintf("pool %s has not enough active members (%d, min is %d)", 
             $self->{poolName}, $self->{poolActiveMemberCount}, 
             $self->{poolMinActiveMembers})
@@ -462,48 +343,8 @@ sub check {
   );
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s]\n", $self->{poolName};
-  foreach(qw(poolName poolLBMode poolMinActiveMembers 
-      poolActiveMemberCount poolMemberQty)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  foreach my $member (@{$self->{members}}) {
-    $member->dump();
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPoolMember;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem4);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(qw(poolMemberPoolName poolMemberStatus)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
-
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s_MEMBER]\n", $self->{poolMemberPoolName};
-  foreach(qw(poolMemberPoolName poolMemberStatus)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
-
 

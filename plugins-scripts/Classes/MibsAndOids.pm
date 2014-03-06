@@ -7,6 +7,7 @@ $GLPlugin::SNMP::discover_ids = {
 $GLPlugin::SNMP::mib_ids = {
   'SW-MIB' => '1.3.6.1.4.1.1588.2.1.1.1',
   'NETSCREEN-PRODUCTS-MIB' => '1.3.6.1.4.1.3224.1',
+  'HOST-RESOURCES-MIB' => '1.3.6.1.2.1.25.1.1.0',
 };
 
 $GLPlugin::SNMP::mibs_and_oids = {

@@ -458,6 +458,39 @@ sub schimpf {
   printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $GLPlugin::statefilesdir;
 }
 
+sub protect_value {
+  my $self = shift;
+  my $ident = shift;
+  my $key = shift;
+  my $validfunc = shift;
+  if (ref($validfunc) ne "CODE" && $validfunc eq "percent") {
+    $validfunc = sub {
+      my $value = shift;
+      return ($value < 0 || $value > 100) ? 0 : 1;
+    };
+  }
+  if (&$validfunc($self->{$key})) {
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $self->{$key},
+        exception => 0,
+    });
+  } else {
+    # if the device gives us an clearly wrong value, simply use the last value.
+    my $laststate = $self->load_state(name => 'protect_'.$ident.'_'.$key);
+    $self->debug(sprintf "self->{%s} is %s and invalid for the %dth time",
+        $key, $self->{$key}, $laststate->{exception} + 1);
+    if ($laststate->{exception} <= 5) {
+      # but only 5 times.
+      # if the error persists, somebody has to check the device.
+      $self->{$key} = $laststate->{$key};
+    }
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $laststate->{$key},
+        exception => $laststate->{exception}++,
+    });
+  }
+}
+
 sub save_state {
   my $self = shift;
   my %params = @_;
@@ -1902,6 +1935,8 @@ sub no_such_mode {
 sub AUTOLOAD {
   my $self = shift;
   return if ($AUTOLOAD =~ /DESTROY/);
+  $self->debug("AUTOLOAD %s\n", $AUTOLOAD)
+        if $self->opts->verbose >= 2;
   if ($AUTOLOAD =~ /^(.*)::analyze_and_check_(.*)_subsystem$/) {
     my $class = $1;
     my $subsystem = $2;
@@ -1912,8 +1947,11 @@ sub AUTOLOAD {
       # analyzer class
       my $subsystem_class = shift @params;
       $self->{components}->{$subsystem.'_subsystem'} = $subsystem_class->new();
+      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new())",
+          $subsystem, $class);
     } else {
       $self->$analyze();
+      $self->debug("call %s()", $analyze);
     }
     $self->$check();
   } elsif ($AUTOLOAD =~ /^(.*)::check_(.*)_subsystem$/) {
@@ -1962,6 +2000,7 @@ sub dump {
   printf "\n";
 }
 
+
 package GLPlugin::TableItem;
 our @ISA = qw(GLPlugin::Item);
 
@@ -1974,6 +2013,9 @@ sub new {
   bless $self, $class;
   foreach (keys %params) {
     $self->{$_} = $params{$_};
+  }
+  if ($self->can("finish")) {
+    $self->finish(%params);
   }
   return $self;
 }

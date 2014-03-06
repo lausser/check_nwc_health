@@ -1,17 +1,8 @@
 package Classes::F5::F5BIGIP::Component::MemSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->overall_init();
-  return $self;
-}
-
-sub overall_init {
+sub init {
   my $self = shift;
   $self->get_snmp_objects('F5-BIGIP-SYSTEM-MIB', (qw(
       sysStatMemoryTotal sysStatMemoryUsed sysHostMemoryTotal sysHostMemoryUsed)));
@@ -49,12 +40,4 @@ sub check {
   );
   return;
 }
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{mems}}) {
-    $_->dump();
-  }
-}
-
 

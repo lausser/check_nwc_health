@@ -1,15 +1,6 @@
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -29,8 +20,8 @@ sub check {
   $self->add_info('checking disks');
   $self->blacklist('ses', '');
   if (scalar (@{$self->{storages}}) == 0) {
-  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
-      diskPercent diskPercent)));
+    $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+        diskPercent diskPercent)));
     my $free = 100 - $self->{diskPercent};
     $self->add_info(sprintf 'disk has %.2f%% free space left', $free);
     $self->set_thresholds(warning => '10:', critical => '5:');
@@ -55,40 +46,10 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{storages}}) {
-    $_->dump();
-  }
-  foreach (@{$self->{volumes}}) {
-    $_->dump();
-  }
-  foreach (@{$self->{disks}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume;
-our @ISA = qw(Classes::CheckPoint::Firewall1::Component::DiskSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(volumesIndex volumesVolumeID volumesNumberOfDisks volumesVolumeSize
-      volumesVolumeState volumesVolumeFlags)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -107,38 +68,10 @@ sub check {
   
 }
 
-sub dump {
-  my $self = shift;
-  printf "[VOLUME_%s]\n", $self->{volumesVolumeID};
-  foreach (qw(volumesIndex volumesVolumeID volumesNumberOfDisks volumesVolumeSize
-      volumesVolumeState volumesVolumeFlags)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk;
-our @ISA = qw(Classes::CheckPoint::Firewall1::Component::DiskSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(disksState disksVolumeID disksProductID disksSize disksRevision
-      disksFlags disksIndex disksScsiID disksSyncState disksVendor)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -149,17 +82,4 @@ sub check {
       $self->{disksState});
   # warning/critical comes from the volume
 }
-
-sub dump {
-  my $self = shift;
-  printf "[DISK_%s]\n", $self->{disksVolumeID}.'.'.$self->{disksIndex};
-  foreach (qw(disksState disksVolumeID disksProductID disksSize disksRevision
-      disksFlags disksIndex disksScsiID disksSyncState disksVendor)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
-
 

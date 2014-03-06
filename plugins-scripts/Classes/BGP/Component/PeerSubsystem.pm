@@ -1,5 +1,5 @@
 package Classes::BGP::Component::PeerSubsystem;
-our @ISA = qw(Classes::BGP);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 our $errorcodes = {

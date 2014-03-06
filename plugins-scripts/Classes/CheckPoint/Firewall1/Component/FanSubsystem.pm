@@ -1,15 +1,6 @@
 package Classes::CheckPoint::Firewall1::Component::FanSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -25,49 +16,23 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{fans}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::CheckPoint::Firewall1::Component::FanSubsystem::Fan;
-our @ISA = qw(Classes::CheckPoint::Firewall1::Component::FanSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(sensorsFanIndex sensorsFanName sensorsFanValue
-      sensorsFanUOM sensorsFanType sensorsFanStatus)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->blacklist('t', $self->{sensorsFanIndex});
-  my $info = sprintf 'fan %s is %s (%d %s)', 
+  $self->add_info(sprintf 'fan %s is %s (%d %s)', 
       $self->{sensorsFanName}, $self->{sensorsFanStatus},
-      $self->{sensorsFanValue}, $self->{sensorsFanUOM};
-  $self->add_info($info);
+      $self->{sensorsFanValue}, $self->{sensorsFanUOM});
   if ($self->{sensorsFanStatus} eq 'normal') {
-    $self->add_ok($info);
+    $self->add_ok($self->{info});
   } elsif ($self->{sensorsFanStatus} eq 'abnormal') {
-    $self->add_critical($info);
+    $self->add_critical($self->{info});
   } else {
-    $self->add_unknown($info);
+    $self->add_unknown($self->{info});
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(
@@ -77,16 +42,4 @@ sub check {
       critical => $self->{critical},
   );
 }
-
-sub dump {
-  my $self = shift;
-  printf "[FAN_%s]\n", $self->{sensorsFanIndex};
-  foreach (qw(sensorsFanIndex sensorsFanName sensorsFanValue
-      sensorsFanUOM sensorsFanType sensorsFanStatus)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info} || "unchecked";
-  printf "\n";
-}
-
 

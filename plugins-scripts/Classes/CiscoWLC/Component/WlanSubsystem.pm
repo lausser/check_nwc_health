@@ -1,15 +1,6 @@
 package Classes::CiscoWLC::Component::WlanSubsystem;
-our @ISA = qw(Classes::CiscoWLC);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -61,8 +52,7 @@ sub check {
             scalar(@{$self->{delta_lost_apNameList}}),
             join(", ", @{$self->{delta_lost_apNameList}}));
       }
-      $self->add_message(OK,
-          sprintf 'found %d access points', scalar (@{$self->{aps}}));
+      $self->add_ok(sprintf 'found %d access points', scalar (@{$self->{aps}}));
       $self->add_perfdata(
           label => 'num_aps',
           value => scalar (@{$self->{aps}}),
@@ -80,7 +70,7 @@ sub check {
       );
     } elsif ($self->mode =~ /device::wlan::aps::status/) {
       if ($self->opts->report eq "short") {
-        $self->clear_messages(OK);
+        $self->clear_ok();
         $self->add_ok('no problems') if ! $self->check_messages();
       }
     } elsif ($self->mode =~ /device::wlan::aps::list/) {
@@ -88,13 +78,6 @@ sub check {
         printf "%s\n", $_->{bsnAPName};
       }
     }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{aps}}) {
-    $_->dump();
   }
 }
 
@@ -126,102 +109,39 @@ sub assign_loads_to_ifs {
 
 
 package Classes::CiscoWLC::Component::WlanSubsystem::IF;
-our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(bsnApIfNoOfUsers bsnAPIfPortNumber bsnAPIfAdminStatus bsnAPIfSlotId bsnAPIfType bsnAPIfOperStatus flat_indices)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 
 package Classes::CiscoWLC::Component::WlanSubsystem::IFLoad;
-our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 
 package Classes::CiscoWLC::Component::WlanSubsystem::AP;
-our @ISA = qw(Classes::CiscoWLC::Component::WlanSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(bsnAPName bsnAPLocation bsnAPModel bsnApIpAddress bsnAPSerialNumber
-      bsnAPDot3MacAddress bsnAPIOSVersion bsnAPGroupVlanName bsnAPPrimaryMwarName
-      bsnAPSecondaryMwarName bsnAPType bsnAPPortNumber bsnAPOperationStatus)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  if ($self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
-  }
-  return $self;
-}
 
 sub check {
   my $self = shift;
+  if ($self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
+    $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+  }
   $self->blacklist('ap', $self->{bsnAPName});
-  my $info = sprintf 'access point %s is %s (%d interfaces with %d clients)',
+  $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
       $self->{bsnAPName}, $self->{bsnAPOperationStatus},
-      scalar(@{$self->{interfaces}}), $self->{NumOfClients};
-  $self->add_info($info);
+      scalar(@{$self->{interfaces}}), $self->{NumOfClients});
   if ($self->mode =~ /device::wlan::aps::status/) {
     if ($self->{bsnAPOperationStatus} eq 'disassociating') {
-      $self->add_critical($info);
+      $self->add_critical($self->{info});
     } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
       # das verschwindet hoffentlich noch vor dem HARD-state
-      $self->add_warning($info);
+      $self->add_warning($self->{info});
     } elsif ($self->{bsnAPOperationStatus} eq 'associated') {
-      $self->add_ok($info);
+      $self->add_ok($self->{info});
     } else {
-      $self->add_unknown($info);
+      $self->add_unknown($self->{info});
     }
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[ACCESSPOINT_%s]\n", $self->{bsnAPName};
-  foreach (qw(bsnAPName bsnAPLocation bsnAPModel bsnApIpAddress bsnAPSerialNumber
-      bsnAPDot3MacAddress bsnAPIOSVersion bsnAPGroupVlanName bsnAPPrimaryMwarName
-      bsnAPSecondaryMwarName bsnAPType bsnAPPortNumber bsnAPOperationStatus)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

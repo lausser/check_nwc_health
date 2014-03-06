@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::ConnectionSubsystem;
-our @ISA = qw(Classes::AVOS);
+@ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

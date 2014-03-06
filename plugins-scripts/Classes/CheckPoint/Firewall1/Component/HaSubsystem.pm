@@ -1,15 +1,7 @@
 package Classes::CheckPoint::Firewall1::Component::HaSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+@ISA = qw(GLPlugin::Item);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -25,41 +17,28 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking ha');
-  my $info = sprintf 'ha %sstarted, role is %s, status is %s', 
+  $self->add_info(sprintf 'ha %sstarted, role is %s, status is %s', 
       $self->{haStarted} eq 'yes' ? '' : 'not ', 
-      $self->{haState}, $self->{haStatShort};
-  $self->add_info($info);
+      $self->{haState}, $self->{haStatShort});
   if ($self->{haStarted} eq 'yes') {
     if ($self->{haStatShort} ne 'OK') {
       $self->add_message(
-          defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
-          $info);
+          defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL,
+          $self->{info});
     } elsif ($self->{haState} ne $self->opts->role()) {
       $self->add_message(
-          defined $self->opts->mitigation() ? $self->opts->mitigation() : 1,
-          $info);
+          defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
+          $self->{info});
       $self->add_message(
-          defined $self->opts->mitigation() ? $self->opts->mitigation() : 1,
+          defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
           sprintf "expected role %s", $self->opts->role())
     } else {
-      $self->add_ok($info);
+      $self->add_ok($self->{info});
     }
   } else {
     $self->add_message(
-        defined $self->opts->mitigation() ? $self->opts->mitigation() : 1,
+        defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
         'ha was not started');
   }
-
-  #$self->add_message($self->check_thresholds($self->{procUsage}), $info);
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU]\n";
-  foreach (qw(procUsage procQueue)) {
-    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

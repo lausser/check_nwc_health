@@ -1,7 +1,6 @@
 package Classes::HSRP::Component::HSRPSubsystem;
-our @ISA = qw(Classes::HSRP);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;
@@ -37,7 +36,7 @@ sub check {
 
 
 package Classes::HSRP::Component::HSRPSubsystem::Group;
-our @ISA = qw(Classes::HSRP::Component::HSRPSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -125,15 +124,5 @@ sub list {
   my $self = shift;
   printf "%s %s %s %s\n", $self->{name}, $self->{cHsrpGrpVirtualIpAddr},
       $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
-}
-
-sub dump {
-  my $self = shift;
-  printf "[HSRPGRP_%s]\n", $self->{name};
-  foreach (qw(cHsrpGrpNumber cHsrpGrpVirtualIpAddr cHsrpGrpStandbyState cHsrpGrpActiveRouter cHsrpGrpStandbyRouter cHsrpGrpEntryRowStatus)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

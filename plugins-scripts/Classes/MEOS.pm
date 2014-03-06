@@ -28,7 +28,7 @@ sub check_environmental_subsystem {
   $self->{components}->{environmental_subsystem1}->check();
   $self->{components}->{environmental_subsystem2}->check();
   if ($self->check_messages()) {
-    $self->clear_messages(OK);
+    $self->clear_ok();
   }
   $self->{components}->{environmental_subsystem1}->dump()
       if $self->opts->verbose >= 2;

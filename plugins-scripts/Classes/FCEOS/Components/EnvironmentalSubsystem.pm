@@ -1,16 +1,6 @@
 package Classes::FCEOS::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::FCEOS);
+@ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->overall_init();
-  $self->init();
-  return $self;
-}
-
 
 sub overall_init {
   my $self = shift;

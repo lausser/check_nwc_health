@@ -1,15 +1,6 @@
 package Classes::Foundry::Component::SLBSubsystem;
-our @ISA = qw(Classes::Foundry);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub update_caches {
   my $self = shift;
@@ -195,19 +186,12 @@ sub check {
         $_->check();
       }
       if (! $self->opts->name) {
-        $self->clear_messages(OK); # too much noise
+        $self->clear_ok(); # too much noise
         if (! $self->check_messages()) {
           $self->add_ok("virtual servers working fine");
         }
       }
     }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{virtualservers}}) {
-    $_->dump();
   }
 }
 
@@ -220,25 +204,8 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    ports => [],
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -263,41 +230,10 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[VIS_%s]\n", $self->{snL4VirtualServerName};
-  foreach(qw(snL4VirtualServerVirtualIP snL4VirtualServerAdminStatus
-      snL4VirtualServerSDAType snL4VirtualServerDeleteState)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  foreach (@{$self->{ports}}) {
-    $_->dump();
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    ports => [],
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -392,40 +328,10 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[VIP_%s_%s]\n", $self->{snL4VirtualServerPortServerName}, $self->{snL4VirtualServerPortPort};
-  foreach(qw(snL4VirtualServerPortServerName snL4VirtualServerPortPort
-      snL4VirtualServerPortAdminStatus snL4VirtualServerPortStatisticCurrentConnection)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  foreach (@{$self->{ports}}) {
-    $_->dump();
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::RealServer;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -441,93 +347,28 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s_MEMBER]\n", $self->{slbPoolMemberPoolName};
-  foreach(qw(slbPoolMemberPoolName slbPoolMemberNodeName
-      slbPoolMemberAddr slbPoolMemberPort
-      slbPoolMemberMonitorRule
-      slbPoolMemberMonitorState slbPoolMemberMonitorStatus
-      slbPoolMbrStatusAvailState  slbPoolMbrStatusEnabledState slbPoolMbrStatusDetailReason)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::RealServerPort;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('rpo', $self->{snL4RealServerPortStatusServerName}.':'.$self->{snL4RealServerPortStatusPort});
-  my $info = sprintf "rpo %s:%d is %s",
+  $self->add_info(sprintf "rpo %s:%d is %s",
       $self->{snL4RealServerPortStatusServerName},
       $self->{snL4RealServerPortStatusPort},
-      $self->{snL4RealServerPortStatusState};
-  $self->add_info($info);
-  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL, $info);
+      $self->{snL4RealServerPortStatusState});
+  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL, $self->{info});
   # snL4VirtualServerPortStatisticTable dazumischen
   # snL4VirtualServerPortStatisticTable:   snL4VirtualServerPortStatisticCurrentConnection*
   # realports connecten und den status ermitteln
 }
 
-sub dump {
-  my $self = shift;
-  printf "[REP_%s_%s]\n", $self->{snL4RealServerPortStatusServerName}, $self->{snL4RealServerPortStatusPort};
-  printf "info: %s\n", $self->{info};
-  foreach(qw(snL4RealServerPortStatusServerName snL4RealServerPortStatusPort snL4RealServerPortStatusState
-      snL4RealServerPortStatusCurrentConnection)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::Binding;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
-
-sub dump { 
-  my $self = shift;
-  printf "[BINDING_%s_%d_%s_%d]\n", 
-      $self->{snL4BindVirtualServerName},
-      $self->{snL4BindVirtualPortNumber},
-      $self->{snL4BindRealServerName},
-      $self->{snL4BindRealPortNumber};
-}
-
 

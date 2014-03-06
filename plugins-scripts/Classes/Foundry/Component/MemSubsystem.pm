@@ -1,15 +1,6 @@
 package Classes::Foundry::Component::MemSubsystem;
-our @ISA = qw(Classes::Foundry);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -37,15 +28,5 @@ sub check {
   } else {
     $self->add_unknown('cannot aquire momory usage');
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[MEMORY]\n";
-  foreach (qw(snAgGblDynMemUtil snAgGblDynMemTotal snAgGblDynMemFree)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

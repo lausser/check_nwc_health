@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::KeySubsystem;
-our @ISA = qw(Classes::AVOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

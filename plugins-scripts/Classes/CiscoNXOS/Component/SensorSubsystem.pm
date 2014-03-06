@@ -1,15 +1,6 @@
 package Classes::CiscoNXOS::Component::SensorSubsystem;
-our @ISA = qw(Classes::CiscoNXOS::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -39,39 +30,23 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking sensors');
-  $self->blacklist('t', '');
-  if (scalar (@{$self->{sensors}}) == 0) {
-  } else {
-    foreach (@{$self->{sensors}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
+  $self->blacklist('s', '');
   foreach (@{$self->{sensors}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::CiscoNXOS::Component::SensorSubsystem::Sensor;
-our @ISA = qw(Classes::CiscoNXOS::Component::SensorSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(entSensorType entSensorScale entSensorPrecision
-      entSensorValue entSensorStatus entSensorMeasuredEntity indices)) {
-    $self->{$param} = $params{$param};
+  my $self = {};
+  foreach (keys %params) {
+    $self->{$_} = $params{$_};
   }
   $self->{entPhysicalIndex} = $params{indices}[0];
   # www.thaiadmin.org%2Fboard%2Findex.php%3Faction%3Ddlattach%3Btopic%3D45832.0%3Battach%3D23494&ei=kV9zT7GHJ87EsgbEvpX6DQ&usg=AFQjCNHuHiS2MR9TIpYtu7C8bvgzuqxgMQ&cad=rja
@@ -97,8 +72,7 @@ sub check {
   } elsif ($self->{entSensorStatus} eq "unavailable") {
   } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
         @{$self->{thresholds}})) {
-    $self->add_message(CRITICAL,
-        sprintf "%s sensor %s threshold evaluation is true", 
+    $self->add_critical(sprintf "%s sensor %s threshold evaluation is true", 
         $self->{entSensorType},
         $self->{entPhysicalIndex});
   } else {
@@ -126,53 +100,21 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[SENSOR_%s]\n", $self->{entPhysicalIndex};
-  foreach (qw(entSensorType entSensorScale entSensorPrecision
-      entSensorValue entSensorStatus entSensorMeasuredEntity)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  foreach my $threshold (@{$self->{thresholds}}) {
-    $threshold->dump();
-  }
-  printf "\n";
-}
 
 package Classes::CiscoNXOS::Component::SensorSubsystem::SensorThreshold;
-our @ISA = qw(Classes::CiscoNXOS::Component::SensorSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(entSensorThresholdRelation entSensorThresholdValue
-      entSensorThresholdSeverity entSensorThresholdNotificationEnable
-      entSensorThresholdEvaluation indices)) {
-    $self->{$param} = $params{$param};
+  my $self = {};
+  foreach (keys %params) {
+    $self->{$_} = $params{$_};
   }
   $self->{entPhysicalIndex} = $params{indices}[0];
   $self->{entSensorThresholdIndex} = $params{indices}[1];
   bless $self, $class;
   return $self;
 }
-
-sub dump {
-  my $self = shift;
-  printf "[SENSOR_THRESHOLD_%s_%s]\n", 
-      $self->{entPhysicalIndex}, $self->{entSensorThresholdIndex};
-  foreach (qw(entSensorThresholdRelation entSensorThresholdValue
-      entSensorThresholdSeverity entSensorThresholdNotificationEnable
-      entSensorThresholdEvaluation)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
 

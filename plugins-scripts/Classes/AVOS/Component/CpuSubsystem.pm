@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::CpuSubsystem;
-our @ISA = qw(Classes::AVOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -20,7 +20,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   foreach (@{$self->{cpus}}) {
     $_->check();

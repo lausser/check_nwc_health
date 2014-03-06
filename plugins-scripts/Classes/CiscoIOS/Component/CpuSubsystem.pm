@@ -5,12 +5,12 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;
-  my $type = 0;
-  $self->get_snmp_tables('CISCO-PROCESS-MIB', {
-      'cpus', 'cpmCPUTotalTable', 'Classes::CiscoIOS::Component::CpuSubsystem::Cpu'],
+  my $idx = 0;
+  $self->get_snmp_tables('CISCO-PROCESS-MIB', [
+      ['cpus', 'cpmCPUTotalTable', 'Classes::CiscoIOS::Component::CpuSubsystem::Cpu'],
   ]);
-  foreach (@{$self->{cpus}) {
-    $_->{cpmCPUTotalIndex} ||= $type++;
+  foreach (@{$self->{cpus}}) {
+    $_->{cpmCPUTotalIndex} ||= $idx++;
   }
   if (scalar(@{$self->{cpus}}) == 0) {
     # maybe too old. i fake a cpu. be careful. this is a really bad hack
@@ -42,14 +42,10 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('ff', '');
-  if (scalar (@{$self->{cpus}}) == 0) {
-  } else {
-    foreach (@{$self->{cpus}}) {
-      $_->check();
-    }
+  foreach (@{$self->{cpus}}) {
+    $_->check();
   }
 }
 
@@ -59,31 +55,16 @@ our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
+sub finish {
+  my $self = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex
-      cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min
-      cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev
-      cpmCPUMonInterval cpmCPUTotalMonIntervalValue
-      cpmCPUInterruptMonIntervalValue)) {
-    if (exists $params{$param}) {
-      $self->{$param} = $params{$param};
-    }
-  }
-  bless $self, $class;
   if (exists $params{cpmCPUTotal5minRev}) {
     $self->{usage} = $params{cpmCPUTotal5minRev};
   } else {
     $self->{usage} = $params{cpmCPUTotal5min};
   }
   $self->protect_value($self->{cpmCPUTotalIndex}.$self->{cpmCPUTotalPhysicalIndex}, 'usage', 'percent');
-  if ($self->{cpmCPUTotalPhysicalIndex}) {
+  if (defined $self->{cpmCPUTotalPhysicalIndex}) {
     my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
     $self->{entPhysicalName} = $self->get_request(
         -varbindlist => [$entPhysicalName.'.'.$self->{cpmCPUTotalPhysicalIndex}]

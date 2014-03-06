@@ -1,14 +1,6 @@
 package Classes::CiscoWLC::Component::CpuSubsystem;
-our @ISA = qw(Classes::CiscoWLC);
+@ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -19,11 +11,10 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $info = sprintf 'cpu usage is %.2f%%',
-      $self->{agentCurrentCPUUtilization};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%',
+      $self->{agentCurrentCPUUtilization});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{agentCurrentCPUUtilization}), $info);
+  $self->add_message($self->check_thresholds($self->{agentCurrentCPUUtilization}), $self->{info});
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{agentCurrentCPUUtilization},

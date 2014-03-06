@@ -1,15 +1,6 @@
 package Classes::Foundry::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::Foundry);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;

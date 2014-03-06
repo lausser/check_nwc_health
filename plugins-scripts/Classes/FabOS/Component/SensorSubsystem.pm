@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::SensorSubsystem;
-our @ISA = qw(Classes::FabOS::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -13,11 +13,8 @@ sub check {
   my $self = shift;
   $self->add_info('checking sensors');
   $self->blacklist('ses', '');
-  if (scalar (@{$self->{sensors}}) == 0) {
-  } else {
-    foreach (@{$self->{sensors}}) {
-      $_->check();
-    }
+  foreach (@{$self->{sensors}}) {
+    $_->check();
   }
 }
 

@@ -1,15 +1,6 @@
 package Classes::F5::F5BIGIP::Component::TemperatureSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -20,44 +11,17 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking temperatures');
   $self->blacklist('tt', '');
-  if (scalar (@{$self->{temperatures}}) == 0) {
-  } else {
-    foreach (@{$self->{temperatures}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
   foreach (@{$self->{temperatures}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::F5::F5BIGIP::Component::TemperatureSubsystem::Temperature;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::TemperatureSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(qw(sysChassisTempIndex sysChassisTempTemperature)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -71,15 +35,5 @@ sub check {
       warning => undef,
       critical => undef,
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[TEMP_%s]\n", $self->{sysChassisTempIndex};
-  foreach(qw(sysChassisTempIndex sysChassisTempTemperature)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

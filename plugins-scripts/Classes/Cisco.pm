@@ -39,6 +39,9 @@ sub init {
   } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
     bless $self, 'Classes::CiscoAsyncOS';
     $self->debug('using Classes::AsyncOS');
+  } elsif ($self->{productname} =~ /Cisco.*Prime Network Control System/i) {
+    bless $self, 'Classes::CiscoPrimeNCS';
+    $self->debug('using Classes::CiscoPrimeNCS');
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'Classes::CiscoIOS';
     $self->debug('using Classes::CiscoIOS');

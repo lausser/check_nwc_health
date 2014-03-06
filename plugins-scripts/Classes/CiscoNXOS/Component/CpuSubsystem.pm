@@ -1,15 +1,6 @@
 package Classes::CiscoNXOS::Component::CpuSubsystem;
-our @ISA = qw(Classes::CiscoNXOS);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -50,44 +41,24 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('ff', '');
-  if (scalar (@{$self->{cpus}}) == 0) {
-  } else {
-    foreach (@{$self->{cpus}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
   foreach (@{$self->{cpus}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::CiscoNXOS::Component::CpuSubsystem::Cpu;
-our @ISA = qw(Classes::CiscoNXOS::Component::CpuSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex
-      cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min
-      cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev
-      cpmCPUMonInterval cpmCPUTotalMonIntervalValue
-      cpmCPUInterruptMonIntervalValue)) {
-    $self->{$param} = $params{$param};
+  my $self = {};
+  foreach (keys %params) {
+    $self->{$_} = $params{$_};
   }
   bless $self, $class;
   $self->{usage} = $params{cpmCPUTotal5minRev};
@@ -118,15 +89,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU_%s]\n", $self->{cpmCPUTotalPhysicalIndex};
-  foreach (qw(cpmCPUTotalIndex cpmCPUTotalPhysicalIndex cpmCPUTotal5sec cpmCPUTotal1min cpmCPUTotal5min cpmCPUTotal5secRev cpmCPUTotal1minRev cpmCPUTotal5minRev cpmCPUMonInterval cpmCPUTotalMonIntervalValue cpmCPUInterruptMonIntervalValue)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

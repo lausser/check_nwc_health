@@ -1,7 +1,6 @@
 package Classes::F5::F5BIGIP::Component::CpuSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -52,42 +51,15 @@ sub check {
     );
     return;
   }
-  if (scalar (@{$self->{cpus}}) == 0) {
-  } else {
-    foreach (@{$self->{cpus}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
   foreach (@{$self->{cpus}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::CpuSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(qw(sysCpuIndex sysCpuTemperature sysCpuFanSpeed
-      sysCpuName sysCpuSlot)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -108,16 +80,5 @@ sub check {
       warning => undef,
       critical => undef,
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU_%s]\n", $self->{sysCpuIndex};
-  foreach(qw(sysCpuIndex sysCpuTemperature sysCpuFanSpeed
-      sysCpuName sysCpuSlot)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

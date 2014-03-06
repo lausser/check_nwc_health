@@ -1,7 +1,6 @@
 package Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -42,4 +41,3 @@ sub dump {
   $self->{powersupply_subsystem}->dump();
 }
 
-1;

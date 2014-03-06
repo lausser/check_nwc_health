@@ -1,14 +1,6 @@
 package Classes::CiscoWLC::Component::MemSubsystem;
-our @ISA = qw(Classes::CiscoWLC);
+@ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;

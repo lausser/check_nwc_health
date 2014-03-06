@@ -40,6 +40,7 @@ EXTRA_MODULES=\
   Classes/CiscoWLC/Component/EnvironmentalSubsystem.pm \
   Classes/CiscoWLC/Component/WlanSubsystem.pm \
   Classes/CiscoWLC.pm \
+  Classes/CiscoPrimeNCS.pm \
   Classes/CiscoCCM/Component/PhoneSubsystem.pm \
   Classes/CiscoCCM/Component/CmSubsystem.pm \
   Classes/CiscoCCM.pm \

@@ -6,7 +6,7 @@ sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
       ['mems', 'ciscoMemoryPoolTable', 'Classes::CiscoIOS::Component::MemSubsystem::Mem'],
-  });
+  ]);
 }
 
 sub check {

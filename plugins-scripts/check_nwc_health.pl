@@ -523,35 +523,3 @@ $message .= sprintf "\n%s\n", $device->get_info("\n")
 #printf "%s\n", Data::Dumper::Dumper($plugin->{info});
 $plugin->nagios_exit($code, $message);
 
-__END__
-$Classes::Device::plugin = $plugin;
-$Classes::Device::mode = (
-    map { $_->[0] }
-    grep {
-       ($plugin->opts->mode eq $_->[1]) ||
-       ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
-    } @modes
-)[0];
-my $server = Classes::Device->new();
-#$server->dumper();
-if (! $plugin->check_messages()) {
-  $server->init();
-  if (! $plugin->check_messages()) {
-    $plugin->add_message(OK, $server->get_summary()) 
-        if $server->get_summary();
-    $plugin->add_message(OK, $server->get_extendedinfo()) 
-        if $server->get_extendedinfo();
-  } 
-} elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
-  ;
-} else {
-  $plugin->add_message(CRITICAL, 'wrong device');
-}
-my ($code, $message) = $plugin->opts->multiline ? 
-    $plugin->check_messages(join => "\n", join_all => ', ') :
-    $plugin->check_messages(join => ', ', join_all => ', ');
-$message .= sprintf "\n%s\n", join("\n", @{$Classes::Device::info})
-    if $plugin->opts->verbose >= 1;
-#printf "%s\n", Data::Dumper::Dumper($plugin->{info});
-$plugin->nagios_exit($code, $message);
-

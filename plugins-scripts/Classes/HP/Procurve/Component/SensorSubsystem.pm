@@ -1,15 +1,6 @@
 package Classes::HP::Procurve::Component::SensorSubsystem;
-our @ISA = qw(Classes::HP::Procurve::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -30,35 +21,10 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{sensors}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::HP::Procurve::Component::SensorSubsystem::Sensor;
-our @ISA = qw(Classes::HP::Procurve::Component::SensorSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $param (qw(hpicfSensorIndex hpicfSensorObjectId 
-      hpicfSensorNumber hpicfSensorStatus hpicfSensorWarnings
-      hpicfSensorFailures hpicfSensorDescr)) {
-    $self->{$param} = $params{$param};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -78,17 +44,4 @@ sub check {
     $self->add_unknown($self->{info});
   }
 }
-
-sub dump {
-  my $self = shift;
-  printf "[SENSOR_%s]\n", $self->{hpicfSensorIndex};
-  foreach (qw(hpicfSensorIndex hpicfSensorObjectId 
-      hpicfSensorNumber hpicfSensorStatus hpicfSensorWarnings
-      hpicfSensorFailures hpicfSensorDescr)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

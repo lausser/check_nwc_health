@@ -1,15 +1,6 @@
 package Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -30,7 +21,7 @@ sub check {
   $self->{fan_subsystem}->check();
   $self->{voltage_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->clear_messages(OK); # too much noise
+    $self->clear_ok(); # too much noise
     $self->add_ok("environmental hardware working fine");
   }
 }
@@ -43,4 +34,3 @@ sub dump {
   $self->{voltage_subsystem}->dump();
 }
 
-1;

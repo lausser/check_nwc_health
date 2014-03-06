@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::MemSubsystem;
-our @ISA = qw(Classes::FabOS);
+@ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

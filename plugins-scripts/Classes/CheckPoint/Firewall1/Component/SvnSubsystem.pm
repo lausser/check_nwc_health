@@ -1,21 +1,12 @@
 package Classes::CheckPoint::Firewall1::Component::SvnSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+@ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::svn::status/) {
-  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
-      svnStatShortDescr svnStatLongDescr)));
+    $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
+        svnStatShortDescr svnStatLongDescr)));
   }
 }
 
@@ -24,17 +15,10 @@ sub check {
   $self->add_info('checking svn');
   if ($self->mode =~ /device::svn::status/) {
     if ($self->{svnStatShortDescr} ne 'OK') {
-      $self->add_message(CRITICAL,
-          sprintf 'status of svn is %s', $self->{svnStatLongDescr});
+      $self->add_critical(sprintf 'status of svn is %s', $self->{svnStatLongDescr});
     } else {
-      $self->add_message(OK,
-          sprintf 'status of svn is %s', $self->{svnStatLongDescr});
+      $self->add_ok(sprintf 'status of svn is %s', $self->{svnStatLongDescr});
     }
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[SVN]\n";
 }
 
