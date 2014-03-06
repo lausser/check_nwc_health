@@ -1,15 +1,6 @@
 package Classes::Juniper::IVE::Component::DiskSubsystem;
-our @ISA = qw(Classes::Juniper::IVE::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -32,11 +23,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[DISK]\n";
-  printf "info: %s\n", $self->{info};
 }
 

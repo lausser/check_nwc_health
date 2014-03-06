@@ -124,32 +124,32 @@ sub mode {
 
 sub add_ok {
   my $self = shift;
-  my $message = shift;
+  my $message = shift || $self->{info};
   $self->add_message(OK, $message);
 }
 
 sub add_warning {
   my $self = shift;
-  my $message = shift;
+  my $message = shift || $self->{info};
   $self->add_message(WARNING, $message);
 }
 
 sub add_critical {
   my $self = shift;
-  my $message = shift;
+  my $message = shift || $self->{info};
   $self->add_message(CRITICAL, $message);
 }
 
 sub add_unknown {
   my $self = shift;
-  my $message = shift;
+  my $message = shift || $self->{info};
   $self->add_message(UNKNOWN, $message);
 }
 
 sub add_message {
   my $self = shift;
   my $level = shift;
-  my $message = shift;
+  my $message = shift || $self->{info};
   $GLPlugin::plugin->add_message($level, $message)
       unless $self->{blacklisted};
   if (exists $self->{failed}) {

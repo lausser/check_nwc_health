@@ -1,15 +1,6 @@
 package Classes::CiscoAsyncOS::Component::KeySubsystem;
-our @ISA = qw(Classes::CiscoAsyncOS::Component);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -20,45 +11,17 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking keys');
   $self->blacklist('k', '');
-  if (scalar (@{$self->{keys}}) == 0) {
-  } else {
-    foreach (@{$self->{keys}}) {
-      $_->check();
-    }
-  }
-}
-
-
-sub dump {
-  my $self = shift;
   foreach (@{$self->{keys}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::CiscoAsyncOS::Component::KeySubsystem::Key;
-our @ISA = qw(Classes::CiscoAsyncOS::Component::KeySubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(keyExpirationIndex keyDescription keyIsPerpetual keySecondsUntilExpire)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -83,15 +46,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[KEY%s]\n", $self->{keyExpirationIndex};
-  foreach (qw(keyExpirationIndex keyDescription keyIsPerpetual keyDaysUntilExpire keySecondsUntilExpire)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

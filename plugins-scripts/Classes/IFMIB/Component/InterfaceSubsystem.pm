@@ -1,15 +1,6 @@
 package Classes::IFMIB::Component::InterfaceSubsystem;
-our @ISA = qw(Classes::IFMIB);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -243,18 +234,10 @@ sub get_interface_indices {
   return @indices;
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{interfaces}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -568,30 +551,8 @@ sub list {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[IF32_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit;
-our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
-
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub dump {
-  my $self = shift;
-  printf "[IF64_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific ifName ifInMulticastPkts ifInBroadcastPkts ifOutMulticastPkts ifOutBroadcastPkts ifHCInOctets ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts ifHCOutOctets ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts ifLinkUpDownTrapEnable ifHighSpeed ifPromiscuousMode ifConnectorPresent ifAlias ifCounterDiscontinuityTime)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

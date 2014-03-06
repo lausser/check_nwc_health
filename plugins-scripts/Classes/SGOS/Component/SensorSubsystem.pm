@@ -1,14 +1,6 @@
 package Classes::SGOS::Component::SensorSubsystem;
-our @ISA = qw(Classes::SGOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -23,13 +15,6 @@ sub check {
   $self->blacklist('ses', '');
   foreach (@{$self->{sensors}}) {
     $_->check();
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{sensors}}) {
-    $_->dump();
   }
 }
 
@@ -60,8 +45,7 @@ sub check {
       }
     }
     $self->add_perfdata(
-        label => sprintf('sensor_%s', 
-            $self->{deviceSensorName}),
+        label => sprintf('sensor_%s', $self->{deviceSensorName}),
         value => $self->{deviceSensorValue},
     );
   }

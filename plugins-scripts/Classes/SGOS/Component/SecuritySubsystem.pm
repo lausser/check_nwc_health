@@ -1,14 +1,6 @@
 package Classes::SGOS::Component::SecuritySubsystem;
-our @ISA = qw(Classes::SGOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -34,13 +26,6 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{attacks}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::SGOS::Component::SecuritySubsystem::Attack;
 our @ISA = qw(GLPlugin::TableItem);
@@ -52,15 +37,14 @@ sub check {
   $self->{deviceAttackTime} = $self->timeticks(
       $self->{deviceAttackTime});
   $self->{count_me} = 0;
-  my $info = sprintf '%s %s %s',
+  $self->add_info(sprintf '%s %s %s',
       scalar localtime (time - $self->uptime() + $self->{deviceAttackTime}),
-      $self->{deviceAttackName}, $self->{deviceAttackStatus};
-  $self->add_info($info);
+      $self->{deviceAttackName}, $self->{deviceAttackStatus});
   my $lookback = $self->opts->lookback() ? 
       $self->opts->lookback() : 3600;
   if (($self->{deviceAttackStatus} eq 'under-attack') &&
       ($lookback - $self->uptime() + $self->{deviceAttackTime} > 0)) {
-    $self->add_critical($info);
+    $self->add_critical($self->{info});
     $self->{count_me}++;
   }
 }

@@ -1,15 +1,6 @@
 package Classes::CiscoAsyncOS::Component::RaidSubsystem;
-our @ISA = qw(Classes::CiscoAsyncOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -25,43 +16,15 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking raids');
   $self->blacklist('r', '');
-  if (scalar (@{$self->{raids}}) == 0) {
-  } else {
-    foreach (@{$self->{raids}}) {
-      $_->check();
-    }
-  }
-}
-
-
-sub dump {
-  my $self = shift;
-  printf "raidEvents: %s\n", $self->{raidEvents};
   foreach (@{$self->{raids}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::CiscoAsyncOS::Component::RaidSubsystem::Raid;
-our @ISA = qw(Classes::CiscoAsyncOS::Component::RaidSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach (qw(raidIndex raidStatus raidID raidLastError)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -75,15 +38,5 @@ sub check {
   } elsif ($self->{raidStatus} eq 'driveFailure') {
     $self->add_critical($self->{info});
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[RAID_%s]\n", $self->{raidIndex};
-  foreach (qw(raidIndex raidStatus raidID raidLastError)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

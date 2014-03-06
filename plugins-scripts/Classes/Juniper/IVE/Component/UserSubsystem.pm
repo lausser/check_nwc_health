@@ -1,21 +1,12 @@
 package Classes::Juniper::IVE::Component::UserSubsystem;
-our @ISA = qw(Classes::Juniper::IVE);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
-    $self->{$_} = $self->valid_response('JUNIPER-IVE-MIB', $_) || 0;
-  }
+  $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      signedInWebUsers signedInMailUsers meetingUserCount
+      iveConcurrentUsers clusterConcurrentUsers)));
 }
 
 sub check {
@@ -49,15 +40,5 @@ sub check {
       label => 'cluster_concurrent_users',
       value => $self->{clusterConcurrentUsers},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[USERS]\n";
-  foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 
