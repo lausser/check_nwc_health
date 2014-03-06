@@ -18,13 +18,13 @@ sub check {
   if ($self->check_thresholds($self->{perCentMemoryUtilization})) {
     $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}), $self->{info});
   } elsif ($self->{memoryAvailabilityStatus} eq 'memoryShortage') {
-    $self->add_warning($self->{info});
+    $self->add_warning();
     $self->set_thresholds(warning => $self->{perCentMemoryUtilization}, critical => 90);
   } elsif ($self->{memoryAvailabilityStatus} eq 'memoryFull') {
-    $self->add_critical($self->{info});
+    $self->add_critical();
     $self->set_thresholds(warning => 80, critical => $self->{perCentMemoryUtilization});
   } else {
-    $self->add_ok($self->{info});
+    $self->add_ok();
   }
   $self->add_perfdata(
       label => 'memory_usage',

@@ -40,19 +40,19 @@ sub check {
       $self->{ccmHistoryRunningLastSaved} > $self->{ccmHistoryStartupLastChanged} ? 
       time - $self->{ccmHistoryRunningLastSaved} : 0;
   if ($unsaved_since) {
-    $info = sprintf "running config is modified and unsaved since %d minutes. your changes my be lost in case of a reboot",
-        $unsaved_since / 60;
+    $self->add_info(sprintf "running config is modified and unsaved since %d minutes. your changes my be lost in case of a reboot",
+        $unsaved_since / 60);
   } else {
-    $info = "saved config is up to date";
+    $self->add_info("saved config is up to date");
   }
-  $self->add_message($self->check_thresholds($unsaved_since), $info);
+  $self->add_message($self->check_thresholds($unsaved_since));
   if ($unsynced_since) {
     my $errorlevel = defined $self->opts->mitigation() ?
         $self->opts->mitigation() :
         $self->check_thresholds($unsynced_since);
-    $info = sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
-        $unsynced_since / 60;
-    $self->add_message($self->check_thresholds($unsaved_since), $info);
+    $self->add_info(sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
+        $unsynced_since / 60);
+    $self->add_message($self->check_thresholds($unsaved_since));
   }
 }
 

@@ -29,11 +29,11 @@ sub check {
       $self->{sensorsTemperatureName}, $self->{sensorsTemperatureStatus},
       $self->{sensorsTemperatureValue}, $self->{sensorsTemperatureUOM});
   if ($self->{sensorsTemperatureStatus} eq 'normal') {
-    $self->add_ok($self->{info});
+    $self->add_ok();
   } elsif ($self->{sensorsTemperatureStatus} eq 'abnormal') {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
-    $self->add_unknown($self->{info});
+    $self->add_unknown();
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(

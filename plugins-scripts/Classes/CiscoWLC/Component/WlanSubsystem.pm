@@ -133,14 +133,14 @@ sub check {
       scalar(@{$self->{interfaces}}), $self->{NumOfClients});
   if ($self->mode =~ /device::wlan::aps::status/) {
     if ($self->{bsnAPOperationStatus} eq 'disassociating') {
-      $self->add_critical($self->{info});
+      $self->add_critical();
     } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
       # das verschwindet hoffentlich noch vor dem HARD-state
-      $self->add_warning($self->{info});
+      $self->add_warning();
     } elsif ($self->{bsnAPOperationStatus} eq 'associated') {
-      $self->add_ok($self->{info});
+      $self->add_ok();
     } else {
-      $self->add_unknown($self->{info});
+      $self->add_unknown();
     }
   }
 }

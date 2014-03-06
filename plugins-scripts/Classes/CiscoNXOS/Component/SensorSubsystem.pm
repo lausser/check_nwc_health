@@ -68,7 +68,7 @@ sub check {
       $self->{entPhysicalIndex},
       $self->{entSensorStatus});
   if ($self->{entSensorStatus} eq "nonoperational") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } elsif ($self->{entSensorStatus} eq "unavailable") {
   } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
         @{$self->{thresholds}})) {

@@ -39,9 +39,9 @@ sub check {
   } else {
     if ($self->{deviceSensorCode} ne "ok") {
       if ($self->{deviceSensorCode} =~ /warning/) {
-        $self->add_warning($self->{info});
+        $self->add_warning();
       } else {
-        $self->add_critical($self->{info});
+        $self->add_critical();
       }
     }
     $self->add_perfdata(

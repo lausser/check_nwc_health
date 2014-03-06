@@ -35,13 +35,13 @@ sub check {
       $self->{hpicfSensorStatus});
   if ($self->{hpicfSensorStatus} eq "notPresent") {
   } elsif ($self->{hpicfSensorStatus} eq "bad") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } elsif ($self->{hpicfSensorStatus} eq "warning") {
-    $self->add_warning($self->{info});
+    $self->add_warning();
   } elsif ($self->{hpicfSensorStatus} eq "good") {
-    #$self->add_ok($self->{info});
+    #$self->add_ok();
   } else {
-    $self->add_unknown($self->{info});
+    $self->add_unknown();
   }
 }
 

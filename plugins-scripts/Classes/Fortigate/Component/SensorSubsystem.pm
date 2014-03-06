@@ -31,7 +31,7 @@ sub check {
       $self->{fgHwSensorEntName},
       $self->{fgHwSensorEntValueStatus});
   if ($self->{fgHwSensorEntValueStatus} && $self->{fgHwSensorEntValueStatus} eq "true") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   }
   if ($self->{fgHwSensorEntValue}) {
     $self->add_perfdata(

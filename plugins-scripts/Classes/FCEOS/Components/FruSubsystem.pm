@@ -32,9 +32,9 @@ sub check {
       $self->{fcEosFruPosition},
       $self->{fcEosFruStatus});
   if ($self->{fcEosFruStatus} eq "failed") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
-    #$self->add_ok($self->{info});
+    #$self->add_ok();
   }
 }
 

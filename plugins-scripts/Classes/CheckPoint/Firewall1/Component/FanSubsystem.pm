@@ -28,11 +28,11 @@ sub check {
       $self->{sensorsFanName}, $self->{sensorsFanStatus},
       $self->{sensorsFanValue}, $self->{sensorsFanUOM});
   if ($self->{sensorsFanStatus} eq 'normal') {
-    $self->add_ok($self->{info});
+    $self->add_ok();
   } elsif ($self->{sensorsFanStatus} eq 'abnormal') {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
-    $self->add_unknown($self->{info});
+    $self->add_unknown();
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(

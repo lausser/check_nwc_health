@@ -44,7 +44,7 @@ sub check {
       $self->opts->lookback() : 3600;
   if (($self->{deviceAttackStatus} eq 'under-attack') &&
       ($lookback - $self->uptime() + $self->{deviceAttackTime} > 0)) {
-    $self->add_critical($self->{info});
+    $self->add_critical();
     $self->{count_me}++;
   }
 }

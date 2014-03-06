@@ -30,9 +30,8 @@ sub check {
   my $self = shift;
   $self->{ciscoMemoryPoolType} ||= 0;
   $self->blacklist('m', $self->{flat_indices});
-  my $info = sprintf 'mempool %s usage is %.2f%%',
-      $self->{ciscoMemoryPoolName}, $self->{usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'mempool %s usage is %.2f%%',
+      $self->{ciscoMemoryPoolName}, $self->{usage});
   if ($self->{ciscoMemoryPoolName} eq 'lsmpi_io' && 
       $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XE/i) {
     # https://supportforums.cisco.com/docs/DOC-16425
@@ -40,7 +39,7 @@ sub check {
   } else {
     $self->set_thresholds(warning => 80, critical => 90);
   }
-  $self->add_message($self->check_thresholds($self->{usage}), $info);
+  $self->add_message($self->check_thresholds($self->{usage}));
   $self->add_perfdata(
       label => $self->{ciscoMemoryPoolName}.'_usage',
       value => $self->{usage},

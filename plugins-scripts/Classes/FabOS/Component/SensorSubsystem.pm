@@ -33,15 +33,15 @@ sub check {
       $self->{swSensorInfo},
       $self->{swSensorStatus});
   if ($self->{swSensorStatus} eq "faulty") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } elsif ($self->{swSensorStatus} eq "absent") {
   } elsif ($self->{swSensorStatus} eq "unknown") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
     if ($self->{swSensorStatus} eq "nominal") {
-      #$self->add_ok($self->{info});
+      #$self->add_ok();
     } else {
-      $self->add_critical($self->{info});
+      $self->add_critical();
     }
     $self->add_perfdata(
         label => sprintf('sensor_%s_%s', 

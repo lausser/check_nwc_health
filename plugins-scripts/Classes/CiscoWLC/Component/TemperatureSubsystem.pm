@@ -57,9 +57,9 @@ sub check {
         $self->{ciscoEnvMonTemperatureThreshold},
         $self->{ciscoEnvMonTemperatureState});
     if ($self->{ciscoEnvMonTemperatureState} eq 'warning') {
-      $self->add_warning($self->{info});
+      $self->add_warning();
     } elsif ($self->{ciscoEnvMonTemperatureState} eq 'critical') {
-      $self->add_critical($self->{info});
+      $self->add_critical();
     }
   } else {
     $self->add_info(sprintf 'temperature %d %s is %d (of %d max = normal)',
@@ -103,9 +103,9 @@ sub check {
       $self->{ciscoEnvMonTemperatureState});
   if ($self->{ciscoEnvMonTemperatureState} ne 'normal') {
     if ($self->{ciscoEnvMonTemperatureState} eq 'warning') {
-      $self->add_warning($self->{info});
+      $self->add_warning();
     } elsif ($self->{ciscoEnvMonTemperatureState} eq 'critical') {
-      $self->add_critical($self->{info});
+      $self->add_critical();
     }
   } else {
   }

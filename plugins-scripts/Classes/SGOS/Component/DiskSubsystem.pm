@@ -43,7 +43,7 @@ sub check {
       $self->{deviceDiskRevision},
       $self->{deviceDiskStatus});
   if ($self->{deviceDiskStatus} eq "bad") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   }
 }
 
@@ -59,9 +59,9 @@ sub check {
       $self->{deviceUsageIndex},
       $self->{deviceUsagePercent});
   if ($self->{deviceUsageStatus} ne "ok") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
-    $self->add_ok($self->{info});
+    $self->add_ok();
   }
   $self->add_perfdata(
       label => 'disk_'.$self->{deviceUsageIndex}.'_usage',

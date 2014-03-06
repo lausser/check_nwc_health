@@ -33,7 +33,7 @@ sub check {
           defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
           sprintf "expected role %s", $self->opts->role())
     } else {
-      $self->add_ok($self->{info});
+      $self->add_ok();
     }
   } else {
     $self->add_message(
