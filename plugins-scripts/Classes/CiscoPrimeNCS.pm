@@ -1,4 +1,4 @@
-package Classes::CiscoCCM;
+package Classes::CiscoPrimeNCS;
 our @ISA = qw(Classes::Cisco);
 use strict;
 
