@@ -18,7 +18,7 @@ sub check {
       $self->{signedInWebUsers},
       $self->{signedInMailUsers},
       $self->{meetingUserCount});
-  $self->add_ok($info);
+  $self->add_ok();
   $self->add_perfdata(
       label => 'web_users',
       value => $self->{signedInWebUsers},

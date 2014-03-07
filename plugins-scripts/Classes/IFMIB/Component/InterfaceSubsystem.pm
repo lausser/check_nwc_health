@@ -62,7 +62,7 @@ sub check {
     $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are available",
         $available_interfaces, $num_interfaces, $up_interfaces);
     $self->set_thresholds(warning => "3:", critical => "2:");
-    $self->add_message($self->check_thresholds($available_interfaces), $info);
+    $self->add_message($self->check_thresholds($available_interfaces));
     $self->add_perfdata(
         label => 'num_interfaces',
         value => $num_interfaces,
@@ -74,7 +74,7 @@ sub check {
         critical => $self->{critical},
     );
 
-    printf "%s\n", $info;
+    printf "%s\n", $self->{info};
     printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
     foreach (qw(Index Descr Type Speed AdminStatus OperStatus Duration Available)) {
@@ -430,7 +430,7 @@ sub check {
     my $in = $self->check_thresholds($self->{inputUtilization});
     my $out = $self->check_thresholds($self->{outputUtilization});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_in',
         value => $self->{inputUtilization},
@@ -465,7 +465,7 @@ sub check {
     my $in = $self->check_thresholds($self->{inputRate});
     my $out = $self->check_thresholds($self->{outputRate});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
@@ -513,7 +513,7 @@ sub check {
 #    } 
     $self->add_info(sprintf '%s is %s/%s',
         $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus});
-    $self->add_ok($info);
+    $self->add_ok();
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
       $self->add_critical(
           sprintf 'fault condition is presumed to exist on %s',

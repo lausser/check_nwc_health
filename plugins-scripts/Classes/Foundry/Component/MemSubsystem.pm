@@ -16,7 +16,7 @@ sub check {
     $self->add_info(sprintf 'memory usage is %.2f%%',
         $self->{snAgGblDynMemUtil});
     $self->set_thresholds(warning => 80, critical => 99);
-    $self->add_message($self->check_thresholds($self->{snAgGblDynMemUtil}), $info);
+    $self->add_message($self->check_thresholds($self->{snAgGblDynMemUtil}));
     $self->add_perfdata(
         label => 'memory_usage',
         value => $self->{snAgGblDynMemUtil},

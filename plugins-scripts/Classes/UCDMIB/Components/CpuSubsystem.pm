@@ -22,7 +22,7 @@ sub check {
   $self->blacklist('c', undef);
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 50, critical => 90);
-  $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+  $self->add_message($self->check_thresholds($self->{cpu_usage}));
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{cpu_usage},
@@ -69,7 +69,7 @@ sub check {
   $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});
-  $self->add_message($self->check_thresholds($self->{laLoadFloat}), $info);
+  $self->add_message($self->check_thresholds($self->{laLoadFloat}));
   $self->add_perfdata(
       label => lc $self->{laNames},
       value => $self->{laLoadFloat},

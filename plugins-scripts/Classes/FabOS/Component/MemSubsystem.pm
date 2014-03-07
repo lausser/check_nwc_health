@@ -21,7 +21,7 @@ sub check {
         $self->{swMemUsage});
     $self->set_thresholds(warning => $self->{swMemUsageLimit1},
         critical => $self->{swMemUsageLimit3});
-    $self->add_message($self->check_thresholds($self->{swMemUsage}), $info);
+    $self->add_message($self->check_thresholds($self->{swMemUsage}));
     $self->add_perfdata(
         label => 'memory_usage',
         value => $self->{swMemUsage},

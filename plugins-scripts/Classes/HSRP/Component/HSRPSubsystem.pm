@@ -40,31 +40,12 @@ our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
+sub finish {
+  my $self = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  foreach ($self->get_snmp_table_attributes(
-      'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
-    $self->{$_} = $params{$_};
-  }
   $self->{ifIndex} = $params{indices}->[0];
   $self->{cHsrpGrpNumber} = $params{indices}->[1];
   $self->{name} = $self->{cHsrpGrpNumber}.':'.$self->{ifIndex};
-  foreach my $key (keys %params) {
-    $self->{$key} = 0 if ! defined $params{$key};
-  }
-  $self->init();
-  return $self;
-}
-
-sub init {
-  my $self = shift;
   if ($self->mode =~ /device::hsrp::state/) {
     if (! $self->opts->role()) {
       $self->opts->override_opt('role', 'active');
@@ -82,7 +63,7 @@ sub check {
         $self->{cHsrpGrpStandbyState},
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
-        $self->add_ok($info);
+        $self->add_ok();
     } else {
       $self->add_critical(
           sprintf 'state in group %s (interface %s) is %s instead of %s',
@@ -91,9 +72,9 @@ sub check {
               $self->opts->role());
     }
   } elsif ($self->mode =~ /device::hsrp::failover/) {
-    my $info = sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',
+    $self->add_info(sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
-        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     if (my $laststate = $self->load_state( name => $self->{name} )) {
       if ($laststate->{active} ne $self->{cHsrpGrpActiveRouter}) {
         $self->add_critical(sprintf 'hsrp group %s/%s: active node %s --> %s',
@@ -107,7 +88,7 @@ sub check {
       }
       if (($laststate->{active} eq $self->{cHsrpGrpActiveRouter}) &&
           ($laststate->{standby} eq $self->{cHsrpGrpStandbyRouter})) {
-        $self->add_ok($info);
+        $self->add_ok();
       }
     } else {
       $self->add_ok('initializing....');

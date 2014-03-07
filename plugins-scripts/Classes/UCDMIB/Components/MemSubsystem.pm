@@ -21,7 +21,7 @@ sub check {
         $self->{mem_usage});
     $self->set_thresholds(warning => 80,
         critical => 90);
-    $self->add_message($self->check_thresholds($self->{mem_usage}), $info);
+    $self->add_message($self->check_thresholds($self->{mem_usage}));
     $self->add_perfdata(
         label => 'memory_usage',
         value => $self->{mem_usage},

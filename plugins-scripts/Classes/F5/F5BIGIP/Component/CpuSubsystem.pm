@@ -40,7 +40,7 @@ sub check {
     $self->add_info(sprintf 'tmm cpu usage is %.2f%%',
         $self->{cpu_usage});
     $self->set_thresholds(warning => 80, critical => 90);
-    $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+    $self->add_message($self->check_thresholds($self->{cpu_usage}));
     $self->add_perfdata(
         label => 'cpu_tmm_usage',
         value => $self->{cpu_usage},

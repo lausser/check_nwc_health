@@ -41,7 +41,7 @@ sub overall_check {
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{snAgGblCpuUtil1MinAvg});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds(
-      $self->{snAgGblCpuUtil1MinAvg}), $info);
+      $self->{snAgGblCpuUtil1MinAvg}));
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{snAgGblCpuUtil1MinAvg},
@@ -105,7 +105,7 @@ sub check {
       if $self->{snAgentCpuUtilValue} > 100;
   $self->add_info(sprintf 'cpu %s usage is %.2f', $self->{snAgentCpuUtilSlotNum}, $self->{snAgentCpuUtilValue});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{snAgentCpuUtilValue}), $info);
+  $self->add_message($self->check_thresholds($self->{snAgentCpuUtilValue}));
   $self->add_perfdata(
       label => 'cpu_'.$self->{snAgentCpuUtilSlotNum},
       value => $self->{snAgentCpuUtilValue},
@@ -127,7 +127,7 @@ sub check {
   $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});
-  $self->add_message($self->check_thresholds($self->{laLoadFloat}), $info);
+  $self->add_message($self->check_thresholds($self->{laLoadFloat}));
   $self->add_perfdata(
       label => lc $self->{laNames},
       value => $self->{laLoadFloat},

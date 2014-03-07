@@ -52,7 +52,7 @@ sub check {
     foreach (@selected) {
       $self->add_info(sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1]);
       $self->set_thresholds(warning => 5000, critical => 10000);
-      $self->add_message($self->check_thresholds($self->{$_->[2]}), $info);
+      $self->add_message($self->check_thresholds($self->{$_->[2]}));
       $self->add_perfdata(
           label => $_->[0].'_connections_'.$_->[1],
           value => $self->{$_->[2]},

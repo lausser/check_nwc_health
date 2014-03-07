@@ -161,8 +161,7 @@ sub check {
     $self->add_info(sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
         $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit});
     $self->set_thresholds(warning => 80, critical => 90);
-    $self->add_message($self->check_thresholds(
-        $self->{session_usage}), $info);
+    $self->add_message($self->check_thresholds($self->{session_usage}));
     $self->add_perfdata(
         label => 'session_usage',
         value => $self->{session_usage},
@@ -214,7 +213,7 @@ sub check {
       $self->{snL4VirtualServerName},
       $self->{snL4VirtualServerAdminStatus});
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
-    $self->add_warning($info);
+    $self->add_warning();
   } else {
     foreach (@{$self->{ports}}) {
       $_->check();
@@ -260,7 +259,7 @@ sub check {
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  $self->add_message($self->check_thresholds($self->{completeness}), $info);
+  $self->add_message($self->check_thresholds($self->{completeness}));
   foreach (@{$self->{ports}}) {
     $_->check();
   }

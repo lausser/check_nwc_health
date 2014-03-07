@@ -323,7 +323,7 @@ sub check {
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  $self->add_message($self->check_thresholds($self->{completeness}), $info);
+  $self->add_message($self->check_thresholds($self->{completeness}));
   if ($self->{poolMinActiveMembers} > 0 &&
       $self->{poolActiveMemberCount} < $self->{poolMinActiveMembers}) {
     $self->add_nagios(
