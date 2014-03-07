@@ -754,7 +754,6 @@ sub init {
     }
     exit 0;
   } elsif ($self->mode =~ /device::uptime/) {
-    $self->{uptime} /= 60;
     my $info = sprintf 'device is up since %s',
         $self->human_timeticks($self->{uptime});
     $self->add_info($info);
@@ -762,7 +761,7 @@ sub init {
     $self->add_message($self->check_thresholds($self->{uptime}), $info);
     $self->add_perfdata(
         label => 'uptime',
-        value => $self->{uptime},
+        value => $self->{uptime} / 60,
         warning => $self->{warning},
         critical => $self->{critical},
     );
@@ -962,6 +961,8 @@ sub timeticks {
   } elsif ($timestr =~ /(\d+)\.\d+\s*second[s]/) {
     # Timeticks: 01.02 seconds
     $timestr = $1;
+  } elsif ($timestr =~ /^(\d+)$/) {
+    $timestr = $1 / 100;
   }
   return $timestr;
 }

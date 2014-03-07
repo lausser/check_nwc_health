@@ -15,15 +15,16 @@ sub check {
   $self->add_info('checking attacks');
   $self->blacklist('at', '');
   if (scalar (@{$self->{attacks}}) == 0) {
-    $self->add_ok('no security incidents');
+    $self->add_info('no security incidents');
   } else {
     foreach (@{$self->{attacks}}) {
       $_->check();
     }
-    $self->add_ok(sprintf '%d serious incidents (of %d)',
+    $self->add_info(sprintf '%d serious incidents (of %d)',
         scalar(grep { $_->{count_me} == 1 } @{$self->{attacks}}),
         scalar(@{$self->{attacks}}));
   }
+  $self->add_ok();
 }
 
 
