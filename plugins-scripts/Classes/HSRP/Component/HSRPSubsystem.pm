@@ -77,11 +77,10 @@ sub check {
   my $self = shift;
   $self->blacklist('hsrp', $self->{name});
   if ($self->mode =~ /device::hsrp::state/) {
-    my $info = sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
+    $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
         $self->{cHsrpGrpStandbyState},
-        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
-    $self->add_info($info);
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
         $self->add_ok($info);
     } else {

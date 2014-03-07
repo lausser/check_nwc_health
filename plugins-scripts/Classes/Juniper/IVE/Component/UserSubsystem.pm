@@ -13,12 +13,11 @@ sub check {
   my $self = shift;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
-  my $info = sprintf 'Users:  cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
+  $self->add_info(sprintf 'Users:  cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
       $self->{clusterConcurrentUsers}, $self->{iveConcurrentUsers},
       $self->{signedInWebUsers},
       $self->{signedInMailUsers},
-      $self->{meetingUserCount};
-  $self->add_info($info);
+      $self->{meetingUserCount});
   $self->add_ok($info);
   $self->add_perfdata(
       label => 'web_users',

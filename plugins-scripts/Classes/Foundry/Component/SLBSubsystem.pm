@@ -158,9 +158,8 @@ sub check {
   if ($self->mode =~ /device::lb::session::usage/) {
     $self->add_info('checking session usage');
     $self->blacklist('su', undef);
-    my $info = sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
-        $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit};
-    $self->add_info($info);
+    $self->add_info(sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
+        $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit});
     $self->set_thresholds(warning => 80, critical => 90);
     $self->add_message($self->check_thresholds(
         $self->{session_usage}), $info);
@@ -211,10 +210,9 @@ sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('po', $self->{snL4VirtualServerName});
-  my $info = sprintf "vip %s is %s", 
+  $self->add_info(sprintf "vip %s is %s", 
       $self->{snL4VirtualServerName},
-      $self->{snL4VirtualServerAdminStatus};
-  $self->add_info($info);
+      $self->{snL4VirtualServerAdminStatus});
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
     $self->add_warning($info);
   } else {
@@ -239,13 +237,12 @@ sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('vpo', $self->{snL4VirtualServerPortServerName}.':'.$self->{snL4VirtualServerPortPort});
-  my $info = sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
+  $self->add_info(sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort},
       $self->{snL4VirtualServerPortAdminStatus},
       $self->{snL4VirtualServerPortStatisticCurrentConnection},
-      scalar(@{$self->{ports}});
-  $self->add_info($info);
+      scalar(@{$self->{ports}}));
   my $num_ports = scalar(@{$self->{ports}});
   my $active_ports = scalar(grep { $_->{snL4RealServerPortStatusState} eq 'active' } @{$self->{ports}});
   # snL4RealServerPortStatusState: failed wird auch angezeigt durch snL4RealServerStatusFailedPortExists => 1

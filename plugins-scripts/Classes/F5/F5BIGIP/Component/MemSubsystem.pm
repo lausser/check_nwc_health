@@ -14,9 +14,8 @@ sub check {
   my $self = shift;
   $self->add_info('checking memory');
   $self->blacklist('mm', '');
-  my $info = sprintf 'tmm memory usage is %.2f%%',
-      $self->{stat_mem_usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'tmm memory usage is %.2f%%',
+      $self->{stat_mem_usage});
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{stat_mem_usage}), $info);
   $self->add_perfdata(

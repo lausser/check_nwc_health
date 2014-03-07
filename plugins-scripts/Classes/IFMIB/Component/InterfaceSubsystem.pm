@@ -59,9 +59,8 @@ sub check {
         scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
     my $available_interfaces =
         scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
-    my $info = sprintf "%d of %d (%d adm. up) interfaces are available",
-        $available_interfaces, $num_interfaces, $up_interfaces;
-    $self->add_info($info);
+    $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are available",
+        $available_interfaces, $num_interfaces, $up_interfaces);
     $self->set_thresholds(warning => "3:", critical => "2:");
     $self->add_message($self->check_thresholds($available_interfaces), $info);
     $self->add_perfdata(
@@ -418,7 +417,7 @@ sub check {
   $self->blacklist('if', $self->{ifIndex});
   if ($self->mode =~ /device::interfaces::traffic/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
+    $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
         $self->{ifDescr}, 
         $self->{inputUtilization}, 
         sprintf("%.2f%s/s", $self->{inputRate},
@@ -426,8 +425,7 @@ sub check {
         $self->{outputUtilization},
         sprintf("%.2f%s/s", $self->{outputRate},
             ($self->opts->units ? $self->opts->units : 'Bits')),
-        $self->{ifOperStatus} eq 'down' ? ' (down)' : '';
-    $self->add_info($info);
+        $self->{ifOperStatus} eq 'down' ? ' (down)' : '');
     $self->set_thresholds(warning => 80, critical => 90);
     my $in = $self->check_thresholds($self->{inputUtilization});
     my $out = $self->check_thresholds($self->{outputUtilization});
@@ -458,12 +456,11 @@ sub check {
         uom => $self->opts->units,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    my $info = sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
         'discards in:%.2f/s out:%.2f/s',
         $self->{ifDescr},
         $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate};
-    $self->add_info($info);
+        $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(warning => 1, critical => 10);
     my $in = $self->check_thresholds($self->{inputRate});
     my $out = $self->check_thresholds($self->{outputRate});
@@ -514,9 +511,8 @@ sub check {
 #    if ($self->{ifOperStatus} ne 'up') {
 #      }
 #    } 
-    my $info = sprintf '%s is %s/%s',
-        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus};
-    $self->add_info($info);
+    $self->add_info(sprintf '%s is %s/%s',
+        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus});
     $self->add_ok($info);
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
       $self->add_critical(
@@ -531,11 +527,10 @@ sub check {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});
-    my $info = sprintf '%s is %savailable (%s/%s, since %s)',
+    $self->add_info(sprintf '%s is %savailable (%s/%s, since %s)',
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
         $self->{ifOperStatus}, $self->{ifAdminStatus},
-        $self->{ifStatusDuration};
-    $self->add_info($info);
+        $self->{ifStatusDuration});
   }
 }
 

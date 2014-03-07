@@ -13,9 +13,8 @@ sub check {
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   if (defined $self->{fgSysMemUsage}) {
-    my $info = sprintf 'memory usage is %.2f%%',
-        $self->{fgSysMemUsage};
-    $self->add_info($info);
+    $self->add_info(sprintf 'memory usage is %.2f%%',
+        $self->{fgSysMemUsage});
     $self->set_thresholds(warning => 80, critical => 90);
     $self->add_message($self->check_thresholds($self->{fgSysMemUsage}), $info);
     $self->add_perfdata(

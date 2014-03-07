@@ -38,8 +38,7 @@ sub overall_check {
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{snAgGblCpuUtil1MinAvg};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{snAgGblCpuUtil1MinAvg});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds(
       $self->{snAgGblCpuUtil1MinAvg}), $info);
@@ -104,8 +103,7 @@ sub check {
   # but it seems that sometimes in reality it is percent
   $self->{snAgentCpuUtilValue} = $self->{snAgentCpuUtilValue} / 100
       if $self->{snAgentCpuUtilValue} > 100;
-  my $info = sprintf 'cpu %s usage is %.2f', $self->{snAgentCpuUtilSlotNum}, $self->{snAgentCpuUtilValue};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu %s usage is %.2f', $self->{snAgentCpuUtilSlotNum}, $self->{snAgentCpuUtilValue});
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{snAgentCpuUtilValue}), $info);
   $self->add_perfdata(
@@ -126,8 +124,7 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->blacklist('c', undef);
-  my $info = sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat};
-  $self->add_info($info);
+  $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});
   $self->add_message($self->check_thresholds($self->{laLoadFloat}), $info);

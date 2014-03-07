@@ -34,9 +34,8 @@ use strict;
 sub check {
   my $self = shift;
   $self->blacklist('c', $self->{sgProxyCpuCoreIndex});
-  my $info = sprintf 'cpu %s usage is %.2f%%',
-      $self->{sgProxyCpuCoreIndex}, $self->{sgProxyCpuCoreBusyPerCent};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu %s usage is %.2f%%',
+      $self->{sgProxyCpuCoreIndex}, $self->{sgProxyCpuCoreBusyPerCent});
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{sgProxyCpuCoreBusyPerCent}), $info);
   $self->add_perfdata(
@@ -56,9 +55,8 @@ use strict;
 sub check {
   my $self = shift;
   $self->blacklist('c', $self->{deviceUsageIndex});
-  my $info = sprintf 'cpu %s usage is %.2f%%',
-      $self->{deviceUsageIndex}, $self->{deviceUsagePercent};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu %s usage is %.2f%%',
+      $self->{deviceUsageIndex}, $self->{deviceUsagePercent});
   $self->set_thresholds(warning => $self->{deviceUsageHigh} - 10, critical => $self->{deviceUsageHigh});
   $self->add_message($self->check_thresholds($self->{deviceUsagePercent}), $info);
   $self->add_perfdata(

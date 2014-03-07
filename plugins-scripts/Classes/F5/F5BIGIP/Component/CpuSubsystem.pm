@@ -37,9 +37,8 @@ sub check {
   $self->add_info('checking cpus');
   $self->blacklist('cc', '');
   if ($self->mode =~ /load/) {
-    my $info = sprintf 'tmm cpu usage is %.2f%%',
-        $self->{cpu_usage};
-    $self->add_info($info);
+    $self->add_info(sprintf 'tmm cpu usage is %.2f%%',
+        $self->{cpu_usage});
     $self->set_thresholds(warning => 80, critical => 90);
     $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
     $self->add_perfdata(

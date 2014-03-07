@@ -15,8 +15,7 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{fgSysCpuUsage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{fgSysCpuUsage});
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{fgSysCpuUsage}), $info);
   $self->add_perfdata(

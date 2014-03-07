@@ -314,10 +314,9 @@ sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('po', $self->{poolName});
-  my $info = sprintf 'pool %s active members: %d of %d', $self->{poolName},
+  $self->add_info(sprintf 'pool %s active members: %d of %d', $self->{poolName},
       $self->{poolActiveMemberCount},
-      $self->{poolMemberQty};
-  $self->add_info($info);
+      $self->{poolMemberQty});
   if ($self->{poolActiveMemberCount} == 1) {
     # only one member left = no more redundancy!!
     $self->set_thresholds(warning => "100:", critical => "51:");

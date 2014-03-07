@@ -17,9 +17,8 @@ sub check {
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   if (defined $self->{swMemUsage}) {
-    my $info = sprintf 'memory usage is %.2f%%',
-        $self->{swMemUsage};
-    $self->add_info($info);
+    $self->add_info(sprintf 'memory usage is %.2f%%',
+        $self->{swMemUsage});
     $self->set_thresholds(warning => $self->{swMemUsageLimit1},
         critical => $self->{swMemUsageLimit3});
     $self->add_message($self->check_thresholds($self->{swMemUsage}), $info);

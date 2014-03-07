@@ -20,8 +20,7 @@ sub check {
   my $self = shift;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{cpu_usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
   $self->add_perfdata(
@@ -67,8 +66,7 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->blacklist('c', undef);
-  my $info = sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat};
-  $self->add_info($info);
+  $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});
   $self->add_message($self->check_thresholds($self->{laLoadFloat}), $info);

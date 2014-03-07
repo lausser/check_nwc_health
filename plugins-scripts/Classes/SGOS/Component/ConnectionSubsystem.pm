@@ -50,8 +50,7 @@ sub check {
       @selected = grep { $_->[0] eq $self->opts->name && $_->[1] eq $self->opts->name2 } @{$details};
     }
     foreach (@selected) {
-      my $info = sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1];
-      $self->add_info($info);
+      $self->add_info(sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1]);
       $self->set_thresholds(warning => 5000, critical => 10000);
       $self->add_message($self->check_thresholds($self->{$_->[2]}), $info);
       $self->add_perfdata(

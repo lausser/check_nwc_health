@@ -13,9 +13,8 @@ sub check {
   $self->add_info('checking memory');
   $self->blacklist('m', '');
   if (defined $self->{cseSysMemoryUtilization}) {
-    my $info = sprintf 'memory usage is %.2f%%',
-        $self->{cseSysMemoryUtilization};
-    $self->add_info($info);
+    $self->add_info(sprintf 'memory usage is %.2f%%',
+        $self->{cseSysMemoryUtilization});
     $self->set_thresholds(warning => 80, critical => 90);
     $self->add_message($self->check_thresholds($self->{cseSysMemoryUtilization}), $info);
     $self->add_perfdata(
