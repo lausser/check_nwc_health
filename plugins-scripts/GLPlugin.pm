@@ -640,14 +640,14 @@ sub dump {
   } else {
     printf "[%s]\n", uc $class;
   }
-  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
     printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
   }
   if ($self->{info}) {
     printf "info: %s\n", $self->{info};
   }
   printf "\n";
-  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
     if (defined $self->{$_} && ref($self->{$_}) eq "ARRAY") {
       foreach my $obj (@{$self->{$_}}) {
         $obj->dump();
@@ -1986,24 +1986,6 @@ sub new {
   bless $self, $class;
   $self->init(%params);
   return $self;
-}
-
-sub dump {
-  my $self = shift;
-  my $class = ref($self);
-  $class =~ s/^.*:://;
-  if (exists $self->{flat_indices}) {
-    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
-  } else {
-    printf "[%s]\n", uc $class;
-  }
-  foreach (grep !/^(warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
-    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
-  }
-  if ($self->{info}) {
-    printf "info: %s\n", $self->{info};
-  }
-  printf "\n";
 }
 
 
