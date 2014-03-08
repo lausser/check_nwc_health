@@ -13,6 +13,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("Classes::Juniper::NetScreen::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::Juniper::NetScreen::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::hardware::health/) {
+    $self->analyze_and_check_environmental_subsystem("Classes::Juniper::NetScreen::Component::EnvironmentalSubsystem");
   } else {
     $self->no_such_mode();
   }

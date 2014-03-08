@@ -57,6 +57,7 @@ EXTRA_MODULES=\
   Classes/Nortel.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \
+  Classes/Juniper/NetScreen/Component/EnvironmentalSubsystem.pm \
   Classes/Juniper/NetScreen.pm \
   Classes/Juniper/IVE/Component/MemSubsystem.pm \
   Classes/Juniper/IVE/Component/CpuSubsystem.pm \

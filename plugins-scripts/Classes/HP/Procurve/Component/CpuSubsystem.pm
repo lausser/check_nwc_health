@@ -6,6 +6,10 @@ sub init {
   my $self = shift;
   $self->get_snmp_objects('STATISTICS-MIB', (qw(
       hpSwitchCpuStat)));
+  if (! defined $self->{hpSwitchCpuStat}) {
+    $self->get_snmp_objects('OLD-STATISTICS-MIB', (qw(
+        hpSwitchCpuStat)));
+  }
 }
 
 sub check {

@@ -14,6 +14,7 @@ sub check {
   $self->add_info('checking sensors');
   $self->blacklist('ses', '');
   if (scalar (@{$self->{sensors}}) == 0) {
+    $self->add_ok('no sensors');
   } else {
     foreach (@{$self->{sensors}}) {
       $_->check();
