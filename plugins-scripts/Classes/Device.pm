@@ -167,11 +167,11 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
-    $self->analyze_and_check_aggregation_subsystem("NWC::IFMIB::Component::LinkAggregation");
+    $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
   } elsif ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem("NWC::IFMIB::Component::InterfaceSubsystem");
+    $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::bgp/) {
-    $self->analyze_and_check_bgp_subsystem("NWC::BGP::Component::PeerSubsystem");
+    $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
   } else {
     bless $self, 'GLPlugin::SNMP';
     $self->no_such_mode();

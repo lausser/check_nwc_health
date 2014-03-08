@@ -548,6 +548,6 @@ sub list {
 
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 

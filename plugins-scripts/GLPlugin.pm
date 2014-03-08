@@ -3,7 +3,7 @@ package GLPlugin;
 use strict;
 use IO::File;
 use File::Basename;
-use Digest::MD5  qw(md5_hex);
+use Digest::MD5 qw(md5_hex);
 use Errno;
 use AutoLoader;
 our $AUTOLOAD;
@@ -662,6 +662,7 @@ our @ISA = qw(GLPlugin);
 
 use strict;
 use File::Basename;
+use Digest::MD5 qw(md5_hex);
 use AutoLoader;
 our $AUTOLOAD;
 
@@ -857,7 +858,11 @@ sub check_snmp_and_model {
       my %params = ();
       my $net_snmp_version = Net::SNMP->VERSION(); # 5.002000 or 6.000000
       $params{'-translate'} = [ # because we see "NULL" coming from socomec devices
-        -all => 0x0
+        -all => 0x0,
+        -nosuchobject => 1,
+        -nosuchinstance => 1,
+        -endofmibview => 1,
+        -unsigned => 1,
       ];
       $params{'-hostname'} = $self->opts->hostname;
       $params{'-version'} = $self->opts->protocol;
@@ -1930,7 +1935,7 @@ sub no_such_mode {
     }
   }
   printf "Mode %s is not implemented for this type of device\n",
-      $self->opts->mode;
+      $self->opts->mode if ref($self) eq "GLPlugin::SNMP";
   exit 3;
 }
 
