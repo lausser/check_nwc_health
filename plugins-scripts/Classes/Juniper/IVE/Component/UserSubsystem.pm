@@ -5,6 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      iveSSLConnections iveVPNTunnels 
       signedInWebUsers signedInMailUsers meetingUserCount
       iveConcurrentUsers clusterConcurrentUsers)));
 }
@@ -13,12 +14,18 @@ sub check {
   my $self = shift;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
-  $self->add_info(sprintf 'Users:  cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
-      $self->{clusterConcurrentUsers}, $self->{iveConcurrentUsers},
+  $self->add_info(sprintf 'Users: sslconns=%d cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
+      $self->{iveSSLConnections},
+      $self->{clusterConcurrentUsers},
+      $self->{iveConcurrentUsers},
       $self->{signedInWebUsers},
       $self->{signedInMailUsers},
       $self->{meetingUserCount});
   $self->add_ok();
+  $self->add_perfdata(
+      label => 'sslconns',
+      value => $self->{iveSSLConnections},
+  );
   $self->add_perfdata(
       label => 'web_users',
       value => $self->{signedInWebUsers},
