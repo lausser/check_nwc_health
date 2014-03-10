@@ -1,5 +1,5 @@
 package Classes::Device;
-our @ISA = qw(GLPlugin::SNMP);
+our @ISA = qw(GLPlugin::SNMP GLPlugin::UPNP);
 
 use strict;
 use IO::File;
@@ -37,6 +37,7 @@ sub new {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
     } elsif ($self->opts->port && $self->opts->port == 49000) {
       $self->{productname} = 'upnp';
+      $self->check_upnp_and_model();
     } else {
       $self->check_snmp_and_model();
     }
@@ -57,8 +58,14 @@ sub new {
         printf "I am a %s\n", $self->{productname};
       }
       if ($self->{productname} =~ /upnp/i) {
-        bless $self, 'UPNP';
-        $self->debug('using UPNP');
+        bless $self, 'Classes::UPNP';
+        $self->debug('using Classes::UPNP');
+      } elsif ($self->{productname} =~ /FRITZ/i) {
+        bless $self, 'Classes::UPNP::AVM';
+        $self->debug('using Classes::UPNP::AVM');
+      } elsif ($self->{productname} =~ /linuxlocal/i) {
+        bless $self, 'Server::Linux';
+        $self->debug('using Server::Linux');
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
@@ -132,9 +139,6 @@ sub new {
       } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
         bless $self, 'Classes::Fortigate';
         $self->debug('using Classes::Fortigate');
-      } elsif ($self->{productname} =~ /linuxlocal/i) {
-        bless $self, 'Server::Linux';
-        $self->debug('using Server::Linux');
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'Classes::Generic';
         $self->debug('using Classes::Generic');

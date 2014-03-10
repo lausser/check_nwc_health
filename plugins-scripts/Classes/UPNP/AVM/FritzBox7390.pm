@@ -1,37 +1,23 @@
-package UPNP::AVM::FritzBox7390;
-
+package Classes::UPNP::AVM::FritzBox7390;
+our @ISA = qw(Classes::UPNP::AVM);
 use strict;
-
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-our @ISA = qw(UPNP::AVM);
 
 sub init {
   my $self = shift;
   foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
     if (! eval "require $module") {
-      $self->add_message(UNKNOWN,
-          "could not find $module module");
+      $self->add_unknown("could not find $module module");
     }
   }
-  $self->{sid} = undef;
-  $self->{components} = {
-    interface_subsystem => undef,
-    smarthome_subsystem => undef,
-  };
   if (! $self->check_messages()) {
-    ##$self->set_serial();
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
-      #$self->auto_blacklist();
       $self->check_environmental_subsystem();
     } elsif ($self->mode =~ /device::hardware::load/) {
       $self->analyze_cpu_subsystem();
-      #$self->auto_blacklist();
       $self->check_cpu_subsystem();
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_mem_subsystem();
-      #$self->auto_blacklist();
       $self->check_mem_subsystem();
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_interface_subsystem();
@@ -39,6 +25,8 @@ sub init {
     } elsif ($self->mode =~ /device::smarthome/) {
       $self->analyze_smarthome_subsystem();
       $self->check_smarthome_subsystem();
+    } else {
+      $self->no_such_mode();
     }
   }
 }
@@ -66,7 +54,7 @@ sub http_get {
     $content = $loginresp->content();
     $self->{sid} = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
     if (! $loginresp->is_success()) {
-      $self->add_message(CRITICAL, $loginresp->status_line());
+      $self->add_critical($loginresp->status_line());
     }
   }
   if ($page =~ /\?/) {
@@ -77,7 +65,7 @@ sub http_get {
   my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
   my $resp = $ua->get($ecourl);
   if (! $resp->is_success()) {
-    $self->add_message(CRITICAL, $resp->status_line());
+    $self->add_critical($resp->status_line());
   }
   return $resp->content();
 }
@@ -85,36 +73,46 @@ sub http_get {
 sub analyze_smarthome_subsystem {
   my $self = shift;
   $self->{components}->{smarthome_subsystem} =
-      UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem->new();
+      Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem->new();
 }
 
 sub analyze_interface_subsystem {
   my $self = shift;
   $self->{components}->{interface_subsystem} =
-      UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem->new();
+      Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
   my $self = shift;
   my $html = $self->http_get('system/ecostat.lua');
-  my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
-  my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{cpu_usage} = $cpu[0];
+  if ($html =~ /uiSubmitLogin/) {
+    $self->add_critical("wrong login");
+    $self->{cpu_usage} = 0;
+  } else {
+    my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
+    my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
+    $self->{cpu_usage} = $cpu[0];
+  }
 }
 
 sub analyze_mem_subsystem {
   my $self = shift;
   my $html = $self->http_get('system/ecostat.lua');
-  my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
-  my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_cache_used} = $ramcacheused[0];
-  my $ramphysfree = (grep /StatRAMPhysFree/, split(/\n/, $html))[0];
-  my @ramphysfree = ($ramphysfree =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_phys_free} = $ramphysfree[0];
-  my $ramstrictlyused = (grep /StatRAMStrictlyUsed/, split(/\n/, $html))[0];
-  my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
-  $self->{ram_strictly_used} = $ramstrictlyused[0];
-  $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
+  if ($html =~ /uiSubmitLogin/) {
+    $self->add_critical("wrong login");
+    $self->{ram_used} = 0;
+  } else {
+    my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
+    my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
+    $self->{ram_cache_used} = $ramcacheused[0];
+    my $ramphysfree = (grep /StatRAMPhysFree/, split(/\n/, $html))[0];
+    my @ramphysfree = ($ramphysfree =~ /= "(.*?)"/ && split(/,/, $1));
+    $self->{ram_phys_free} = $ramphysfree[0];
+    my $ramstrictlyused = (grep /StatRAMStrictlyUsed/, split(/\n/, $html))[0];
+    my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
+    $self->{ram_strictly_used} = $ramstrictlyused[0];
+    $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
+  }
 }
 
 sub check_smarthome_subsystem {

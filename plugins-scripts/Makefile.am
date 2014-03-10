@@ -14,12 +14,12 @@ MY_MODULES=
 EXTRA_MODULES=\
   Nagios/MiniPlugin.pm \
   GLPlugin.pm \
-  UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
-  UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
-  UPNP/AVM/FritzBox7390.pm \
-  UPNP/AVM.pm \
-  UPNP.pm \
-  Server/Linux.pm \
+  Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
+  Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
+  Classes/UPNP/AVM/FritzBox7390.pm \
+  Classes/UPNP/AVM.pm \
+  Classes/UPNP.pm \
+  Classes/Server/Linux.pm \
   Classes/CiscoIOS/Component/ConfigSubsystem.pm \
   Classes/CiscoIOS/Component/CpuSubsystem.pm \
   Classes/CiscoIOS/Component/MemSubsystem.pm \
