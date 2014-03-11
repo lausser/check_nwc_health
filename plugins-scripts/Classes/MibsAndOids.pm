@@ -4897,6 +4897,8 @@ $GLPlugin::SNMP::mibs_and_oids = {
       nicEvent => '1.3.6.1.4.1.12532.40.0',
       nodeName => '1.3.6.1.4.1.12532.41.0',
       iveTemperature => '1.3.6.1.4.1.12532.42.0',
+      iveVPNTunnels => '1.3.6.1.4.1.12532.43.0',
+      iveSSLConnections => '1.3.6.1.4.1.12532.44.0',
   },
   'BGP4-MIB' => {
       bgpVersion => '1.3.6.1.2.1.15.1.0',

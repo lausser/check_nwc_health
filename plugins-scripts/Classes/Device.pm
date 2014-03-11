@@ -106,6 +106,10 @@ sub new {
         # Juniper Networks,Inc,MAG-4610,7.2R10
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
+      } elsif ($self->{productname} =~ /Juniper.*MAG\-SM\d+/i) {
+        # Juniper Networks,Inc,MAG-SMx60,7.4R8
+        bless $self, 'Classes::Juniper::IVE';
+        $self->debug('using Classes::Juniper::IVE');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
