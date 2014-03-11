@@ -1,9 +1,10 @@
 package Classes::HSRP::Component::HSRPSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
+  $self->{groups} = [];
   if ($self->mode =~ /device::hsrp/) {
     foreach ($self->get_snmp_table_objects(
         'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {

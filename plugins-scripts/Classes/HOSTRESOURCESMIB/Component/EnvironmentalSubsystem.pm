@@ -1,5 +1,5 @@
 package Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

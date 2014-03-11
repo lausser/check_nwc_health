@@ -7,11 +7,8 @@ sub init {
   my $self = shift;
   my $idx = 0;
   $self->get_snmp_tables('CISCO-PROCESS-MIB', [
-      ['cpus', 'cpmCPUTotalTable', 'Classes::CiscoIOS::Component::CpuSubsystem::Cpu'],
+      ['cpus', 'cpmCPUTotalTable', 'Classes::CiscoIOS::Component::CpuSubsystem::Cpu', sub { my $o = shift; $o->{cpmCPUTotalIndex} ||= $idx++; return 1; }],
   ]);
-  foreach (@{$self->{cpus}}) {
-    $_->{cpmCPUTotalIndex} ||= $idx++;
-  }
   if (scalar(@{$self->{cpus}}) == 0) {
     # maybe too old. i fake a cpu. be careful. this is a really bad hack
     my $response = $self->get_request(
@@ -57,14 +54,13 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
   my $self = shift;
-  my %params = @_;
-  if (exists $params{cpmCPUTotal5minRev}) {
-    $self->{usage} = $params{cpmCPUTotal5minRev};
+  if (exists $self->{cpmCPUTotal5minRev}) {
+    $self->{usage} = $self->{cpmCPUTotal5minRev};
   } else {
-    $self->{usage} = $params{cpmCPUTotal5min};
+    $self->{usage} = $self->{cpmCPUTotal5min};
   }
   $self->protect_value(($self->{cpmCPUTotalIndex}||"").($self->{cpmCPUTotalPhysicalIndex}||""), 'usage', 'percent');
-  if (defined $self->{cpmCPUTotalPhysicalIndex}) {
+  if ($self->{cpmCPUTotalPhysicalIndex}) {
     my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
     $self->{entPhysicalName} = $self->get_request(
         -varbindlist => [$entPhysicalName.'.'.$self->{cpmCPUTotalPhysicalIndex}]

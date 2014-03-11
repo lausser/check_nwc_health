@@ -1360,7 +1360,7 @@ sub get_snmp_tables {
     my $filter = $info->[3];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
     foreach ($self->get_snmp_table_objects($mib, $table)) {
-      next if (defined $filter && &$filter($_));
+      next if (defined $filter && ! &$filter($_));
       push(@{$self->{$arrayname}}, $class->new(%{$_}));
     }
   }
@@ -1933,9 +1933,11 @@ sub no_such_mode {
       $self->init();
     }
   }
-  printf "Mode %s is not implemented for this type of device\n",
-      $self->opts->mode if ref($self) eq "GLPlugin::SNMP";
-  exit 3;
+  if (ref($self) eq "GLPlugin::SNMP") {
+    printf "Mode %s is not implemented for this type of device\n",
+        $self->opts->mode;
+    exit 3;
+  }
 }
 
 sub AUTOLOAD {
@@ -1953,8 +1955,8 @@ sub AUTOLOAD {
       # analyzer class
       my $subsystem_class = shift @params;
       $self->{components}->{$subsystem.'_subsystem'} = $subsystem_class->new();
-      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new())",
-          $subsystem, $class);
+      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new()",
+          $subsystem, $subsystem_class);
     } else {
       $self->$analyze();
       $self->debug("call %s()", $analyze);

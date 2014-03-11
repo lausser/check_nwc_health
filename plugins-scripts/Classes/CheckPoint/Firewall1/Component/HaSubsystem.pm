@@ -1,5 +1,5 @@
 package Classes::CheckPoint::Firewall1::Component::HaSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

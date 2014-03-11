@@ -1,5 +1,5 @@
 package Classes::Foundry::Component::PowersupplySubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

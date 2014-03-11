@@ -13,7 +13,7 @@ sub init {
   ]);
   if (scalar (@{$self->{cpus}}) == 0) {
     $self->get_snmp_tables('USAGE-MIB', [
-        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { my $cpu = shift; return $_->{deviceUsageName} !~ /CPU/ }],
+        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { my $cpu = shift; return $_->{deviceUsageName} =~ /CPU/ }],
     ]);
   }
 }

@@ -56,7 +56,7 @@ our $errorcodes = {
 
 sub init {
   my $self = shift;
-  my %params = @_;
+  $self->{peers} = [];
   if ($self->mode =~ /device::bgp::peer::list/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }

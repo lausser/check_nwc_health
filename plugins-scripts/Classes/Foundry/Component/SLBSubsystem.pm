@@ -1,5 +1,5 @@
 package Classes::Foundry::Component::SLBSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub update_caches {

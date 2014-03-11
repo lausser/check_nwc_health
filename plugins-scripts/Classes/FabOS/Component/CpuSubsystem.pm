@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::CpuSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {

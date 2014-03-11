@@ -1,5 +1,5 @@
 package Classes::F5::F5BIGIP::Component::LTMSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub new {

@@ -1,5 +1,5 @@
 package Classes::CiscoNXOS::Component::SensorSubsystem;
-@ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -78,6 +78,17 @@ sub check {
   } else {
   }
   if (scalar(@{$self->{thresholds}} == 2)) {
+    # reparaturlauf
+    foreach my $idx (0..1) {
+      my $otheridx = $idx == 0 ? 1 : 0;
+      if (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   
+          @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "minor") {
+        @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "major";
+      } elsif (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   
+          @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "minor") {
+        @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "minor";
+      }
+    }
     my $warning = (map { $_->{entSensorThresholdValue} } 
         grep { $_->{entSensorThresholdSeverity} eq "minor" }
         @{$self->{thresholds}})[0];

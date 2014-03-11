@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->{interfaces} = [];
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     foreach my $ifIndex (keys %{$self->{interface_cache}}) {
@@ -382,7 +383,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
-        $Classes::Device::uptime - $self->timeticks($self->{ifLastChange});
+        $GLPlugin::SNMP::uptime - $self->timeticks($self->{ifLastChange});
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     if ($self->{ifAdminStatus} eq "down") {
       $self->{ifAvailable} = "true";
