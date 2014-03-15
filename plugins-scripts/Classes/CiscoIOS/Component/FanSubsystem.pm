@@ -30,7 +30,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
-  $self->{ciscoEnvMonFanStatusIndex} ||= 0;
+  $self->ensure_index('ciscoEnvMonFanStatusIndex');
   $self->blacklist('f', $self->{ciscoEnvMonFanStatusIndex});
   $self->add_info(sprintf 'fan %d (%s) is %s',
       $self->{ciscoEnvMonFanStatusIndex},

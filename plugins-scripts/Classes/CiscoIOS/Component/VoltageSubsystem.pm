@@ -8,9 +8,6 @@ sub init {
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['voltages', 'ciscoEnvMonVoltageStatusTable', 'Classes::CiscoIOS::Component::VoltageSubsystem::Voltage'],
   ]);
-  foreach (@{$self->{voltages}}) {
-    $_->{ciscoEnvMonVoltageStatusIndex} ||= $index++;
-  }
 }
 
 sub check {
@@ -33,6 +30,7 @@ use strict;
 
 sub check {
   my $self = shift;
+  $self->ensure_index('ciscoEnvMonVoltageStatusIndex');
   $self->blacklist('v', $self->{ciscoEnvMonVoltageStatusIndex});
   $self->add_info(sprintf 'voltage %d (%s) is %s',
       $self->{ciscoEnvMonVoltageStatusIndex},

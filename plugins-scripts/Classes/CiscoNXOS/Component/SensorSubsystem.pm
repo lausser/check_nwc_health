@@ -5,24 +5,18 @@ use strict;
 sub init {
   my $self = shift;
   my $sensors = {};
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENTITY-SENSOR-MIB', 'entSensorValueTable')) {
-    my $sensor = Classes::CiscoNXOS::Component::SensorSubsystem::Sensor->new(%{$_});
+  $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
+    ['sensors', 'entSensorValueTable', 'Classes::CiscoNXOS::Component::SensorSubsystem::Sensor'],
+    ['thresholds', 'entSensorThresholdTable', 'Classes::CiscoNXOS::Component::SensorSubsystem::SensorThreshold'],
+  ]);
+
+  foreach my $sensor (@{$self->{sensors}}) {
     $sensors->{$sensor->{entPhysicalIndex}} = $sensor;
-  }
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENTITY-SENSOR-MIB', 'entSensorThresholdTable')) {
-    my $threshold = Classes::CiscoNXOS::Component::SensorSubsystem::SensorThreshold->new(%{$_});
-    if (exists $sensors->{$threshold->{entPhysicalIndex}}) {
-      push(@{$sensors->{$threshold->{entPhysicalIndex}}->{thresholds}},
-          $threshold);
-    } else {
-      printf STDERR "sensorthreshold without sensor\n";
+    foreach my $threshold (@{$self->{thresholds}}) {
+      if ($sensor->{entPhysicalIndex} eq $threshold->{entPhysicalIndex}) {
+        push(@{$sensors->{thresholds}}, $threshold);
+      }
     }
-  }
-#printf "%s\n", Data::Dumper::Dumper($sensors);
-  foreach my $sensorid (sort {$a <=> $b} keys %{$sensors}) {
-    push(@{$self->{sensors}}, $sensors->{$sensorid});
   }
 }
 
@@ -41,14 +35,9 @@ package Classes::CiscoNXOS::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{entPhysicalIndex} = $params{indices}[0];
+sub finish {
+  my $self = shift;
+  $self->{entPhysicalIndex} = $self->{flat_indices};
   # www.thaiadmin.org%2Fboard%2Findex.php%3Faction%3Ddlattach%3Btopic%3D45832.0%3Battach%3D23494&ei=kV9zT7GHJ87EsgbEvpX6DQ&usg=AFQjCNHuHiS2MR9TIpYtu7C8bvgzuqxgMQ&cad=rja
   # zu klaeren. entPhysicalIndex entspricht dem entPhysicalindex der ENTITY-MIB.
   # In der stehen alle moeglichen Powersupplies etc.
@@ -56,8 +45,6 @@ sub new {
   # Beispiel-walks
   $self->{thresholds} = [];
   $self->{entSensorMeasuredEntity} ||= 'undef';
-  bless $self, $class;
-  return $self;
 }
 
 sub check {
@@ -69,7 +56,11 @@ sub check {
       $self->{entSensorStatus});
   if ($self->{entSensorStatus} eq "nonoperational") {
     $self->add_critical();
+  } elsif ($self->{entSensorStatus} eq "unknown_10") {
+    # these sensors do not exist according to cisco-tools
+    return;
   } elsif ($self->{entSensorStatus} eq "unavailable") {
+    return;
   } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
         @{$self->{thresholds}})) {
     $self->add_critical(sprintf "%s sensor %s threshold evaluation is true", 
@@ -116,16 +107,9 @@ package Classes::CiscoNXOS::Component::SensorSubsystem::SensorThreshold;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{entPhysicalIndex} = $params{indices}[0];
-  $self->{entSensorThresholdIndex} = $params{indices}[1];
-  bless $self, $class;
-  return $self;
+sub finish {
+  my $self = shift;
+  $self->{entPhysicalIndex} = $self->{indices}->[0];
+  $self->{entSensorThresholdIndex} = $self->{indices}->[1];
 }
 

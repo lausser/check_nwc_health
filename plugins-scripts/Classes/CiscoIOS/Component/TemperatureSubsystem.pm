@@ -4,13 +4,9 @@ use strict;
 
 sub init {
   my $self = shift;
-  my $tempcnt = 0;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::CiscoIOS::Component::TemperatureSubsystem::Temperature'],
   ]);
-  foreach (@{$self->{temperatures}}) {
-    $_->{ciscoEnvMonTemperatureStatusIndex} = $tempcnt++ if (! exists $_->{ciscoEnvMonTemperatureStatusIndex});
-  }
 }
 
 sub check {
@@ -42,13 +38,13 @@ sub new {
   foreach (keys %params) {
     $self->{$_} = $params{$_};
   }
-  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
-  $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
   if ($self->{ciscoEnvMonTemperatureStatusValue}) {
     bless $self, $class;
   } else {
     bless $self, $class.'::Simple';
   }
+  $self->ensure_index('ciscoEnvMonTemperatureStatusIndex');
+  $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
   return $self;
 }
 

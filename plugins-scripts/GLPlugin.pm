@@ -2019,6 +2019,12 @@ sub new {
   return $self;
 }
 
+sub ensure_index {
+  my $self = shift;
+  my $key = shift;
+  $self->{$key} ||= $self->{flat_indices};
+}
+
 
 package GLPlugin::UPNP;
 our @ISA = qw(GLPlugin);
