@@ -1360,8 +1360,9 @@ sub get_snmp_tables {
     my $filter = $info->[3];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
     foreach ($self->get_snmp_table_objects($mib, $table)) {
-      next if (defined $filter && ! &$filter($_));
-      push(@{$self->{$arrayname}}, $class->new(%{$_}));
+      my $new_object = $class->new(%{$_});
+      next if (defined $filter && ! &$filter($new_object));
+      push(@{$self->{$arrayname}}, $new_object);
     }
   }
 }

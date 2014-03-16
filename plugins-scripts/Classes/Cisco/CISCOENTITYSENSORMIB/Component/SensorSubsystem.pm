@@ -1,4 +1,4 @@
-package Classes::Cisco::NXOS::Component::SensorSubsystem;
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
@@ -6,8 +6,11 @@ sub init {
   my $self = shift;
   my $sensors = {};
   $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
-    ['sensors', 'entSensorValueTable', 'Classes::Cisco::NXOS::Component::SensorSubsystem::Sensor'],
-    ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::NXOS::Component::SensorSubsystem::SensorThreshold'],
+    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my $o = shift; $self->filter_name($o->{entPhysicalIndex})}],
+    ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold'],
+  ]);
+  $self->get_snmp_tables('ENTITY-MIB', [
+    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
   ]);
 
   foreach my $sensor (@{$self->{sensors}}) {
@@ -17,12 +20,16 @@ sub init {
         push(@{$sensors->{thresholds}}, $threshold);
       }
     }
+    foreach my $entity (@{$self->{entities}}) {
+      if ($sensor->{entPhysicalIndex} eq $entity->{entPhysicalIndex}) {
+        $sensor->{entity} = $entity;
+      }
+    }
   }
 }
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking sensors');
   $self->blacklist('s', '');
   foreach (@{$self->{sensors}}) {
@@ -31,7 +38,7 @@ sub check {
 }
 
 
-package Classes::Cisco::NXOS::Component::SensorSubsystem::Sensor;
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
@@ -50,9 +57,10 @@ sub finish {
 sub check {
   my $self = shift;
   $self->blacklist('se', $self->{entPhysicalIndex});
-  $self->add_info(sprintf '%s sensor %s is %s',
+  $self->add_info(sprintf '%s sensor %s%s is %s',
       $self->{entSensorType},
       $self->{entPhysicalIndex},
+      exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.')' : '',
       $self->{entSensorStatus});
   if ($self->{entSensorStatus} eq "nonoperational") {
     $self->add_critical();
@@ -92,7 +100,7 @@ sub check {
         warning => $warning,
         critical => $critical,
     );
-  } else {
+  } elsif ($self->{entSensorValue}) {
     $self->add_perfdata(
         label => sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex}),
         value => $self->{entSensorValue},
@@ -103,7 +111,7 @@ sub check {
 }
 
 
-package Classes::Cisco::NXOS::Component::SensorSubsystem::SensorThreshold;
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
@@ -113,3 +121,12 @@ sub finish {
   $self->{entSensorThresholdIndex} = $self->{indices}->[1];
 }
 
+
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity;
+our @ISA = qw(GLPlugin::TableItem);
+use strict;
+
+sub finish {
+  my $self = shift;
+  $self->{entPhysicalIndex} = $self->{flat_indices};
+}

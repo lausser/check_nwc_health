@@ -1,4 +1,4 @@
-package Classes::Cisco::IOS::Component::VoltageSubsystem;
+package Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
@@ -6,7 +6,7 @@ sub init {
   my $self = shift;
   my $index = 0;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
-      ['voltages', 'ciscoEnvMonVoltageStatusTable', 'Classes::Cisco::IOS::Component::VoltageSubsystem::Voltage'],
+      ['voltages', 'ciscoEnvMonVoltageStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem::Voltage'],
   ]);
 }
 
@@ -24,7 +24,7 @@ sub check {
 }
 
 
-package Classes::Cisco::IOS::Component::VoltageSubsystem::Voltage;
+package Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem::Voltage;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 

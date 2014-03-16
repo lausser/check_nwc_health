@@ -4,9 +4,8 @@ use strict;
 
 sub init {
   my $self = shift;
-  my %params = @_;
   $self->{sensor_subsystem} =
-      Classes::Cisco::NXOS::Component::SensorSubsystem->new(%params);
+      Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();
 }
 
 sub check {

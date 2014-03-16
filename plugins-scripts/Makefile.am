@@ -20,20 +20,20 @@ EXTRA_MODULES=\
   Classes/UPNP/AVM.pm \
   Classes/UPNP.pm \
   Classes/Server/Linux.pm \
+  Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/SupplySubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
   Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
   Classes/Cisco/IOS/Component/CpuSubsystem.pm \
   Classes/Cisco/IOS/Component/MemSubsystem.pm \
   Classes/Cisco/IOS/Component/EnvironmentalSubsystem.pm \
-  Classes/Cisco/IOS/Component/TemperatureSubsystem.pm \
-  Classes/Cisco/IOS/Component/SupplySubsystem.pm \
-  Classes/Cisco/IOS/Component/VoltageSubsystem.pm \
-  Classes/Cisco/IOS/Component/FanSubsystem.pm \
   Classes/Cisco/IOS/Component/ConnectionSubsystem.pm \
   Classes/Cisco/IOS.pm \
   Classes/Cisco/NXOS/Component/CpuSubsystem.pm \
   Classes/Cisco/NXOS/Component/MemSubsystem.pm \
   Classes/Cisco/NXOS/Component/EnvironmentalSubsystem.pm \
-  Classes/Cisco/NXOS/Component/SensorSubsystem.pm \
   Classes/Cisco/NXOS.pm \
   Classes/Cisco/WLC/Component/MemSubsystem.pm \
   Classes/Cisco/WLC/Component/CpuSubsystem.pm \

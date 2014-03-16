@@ -1,11 +1,11 @@
-package Classes::Cisco::IOS::Component::TemperatureSubsystem;
+package Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
-      ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature'],
+      ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem::Temperature'],
   ]);
 }
 
@@ -13,19 +13,15 @@ sub check {
   my $self = shift;
   $self->add_info('checking temperatures');
   $self->blacklist('t', '');
-  if (scalar (@{$self->{temperatures}}) == 0) {
-  } else {
-    foreach (@{$self->{temperatures}}) {
-      $_->check();
-    }
+  foreach (@{$self->{temperatures}}) {
+    $_->check();
   }
 }
 
 
-package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature;
+package Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem::Temperature;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -77,7 +73,7 @@ sub check {
 }
 
 
-package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature::Simple;
+package Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem::Temperature::Simple;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
