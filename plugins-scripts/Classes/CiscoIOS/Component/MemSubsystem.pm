@@ -26,6 +26,12 @@ package Classes::CiscoIOS::Component::MemSubsystem::Mem;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
+sub finish {
+  my $self = shift;
+  $self->{usage} = 100 * $self->{ciscoMemoryPoolUsed} /
+      ($self->{ciscoMemoryPoolFree} + $self->{ciscoMemoryPoolUsed});
+}
+
 sub check {
   my $self = shift;
   $self->{ciscoMemoryPoolType} ||= 0;
