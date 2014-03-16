@@ -31,29 +31,29 @@ use constant trees => (
 sub init {
   my $self = shift;
   if ($self->{productname} =~ /Cisco NX-OS/i) {
-    bless $self, 'Classes::CiscoNXOS';
-    $self->debug('using Classes::CiscoNXOS');
+    bless $self, 'Classes::Cisco::NXOS';
+    $self->debug('using Classes::Cisco::NXOS');
   } elsif ($self->{productname} =~ /Cisco Controller/i) {
-    bless $self, 'Classes::CiscoWLC';
-    $self->debug('using Classes::WLC');
+    bless $self, 'Classes::Cisco::WLC';
+    $self->debug('using Classes::Cisco::WLC');
   } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
-    bless $self, 'Classes::CiscoAsyncOS';
-    $self->debug('using Classes::AsyncOS');
+    bless $self, 'Classes::Cisco::AsyncOS';
+    $self->debug('using Classes::Cisco::AsyncOS');
   } elsif ($self->{productname} =~ /Cisco.*Prime Network Control System/i) {
-    bless $self, 'Classes::CiscoPrimeNCS';
-    $self->debug('using Classes::CiscoPrimeNCS');
+    bless $self, 'Classes::Cisco::PrimeNCS';
+    $self->debug('using Classes::Cisco::PrimeNCS');
   } elsif ($self->{productname} =~ /Cisco/i) {
-    bless $self, 'Classes::CiscoIOS';
-    $self->debug('using Classes::CiscoIOS');
+    bless $self, 'Classes::Cisco::IOS';
+    $self->debug('using Classes::Cisco::IOS');
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
-    bless $self, 'Classes::CiscoIOS';
-    $self->debug('using Classes::CiscoIOS');
+    bless $self, 'Classes::Cisco::IOS';
+    $self->debug('using Classes::Cisco::IOS');
   } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.1348') {
-    bless $self, 'Classes::CiscoCCM';
-    $self->debug('using Classes::CiscoCCM');
+    bless $self, 'Classes::Cisco::CCM';
+    $self->debug('using Classes::Cisco::CCM');
   } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.746') {
-    bless $self, 'Classes::CiscoCCM';
-    $self->debug('using Classes::CiscoCCM');
+    bless $self, 'Classes::Cisco::CCM';
+    $self->debug('using Classes::Cisco::CCM');
   }
   if (ref($self) ne "Classes::Cisco") {
     $self->init();
