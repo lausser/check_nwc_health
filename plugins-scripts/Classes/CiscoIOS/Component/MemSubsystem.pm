@@ -13,11 +13,8 @@ sub check {
   my $self = shift;
   $self->add_info('checking mems');
   $self->blacklist('ff', '');
-  if (scalar (@{$self->{mems}}) == 0) {
-  } else {
-    foreach (@{$self->{mems}}) {
-      $_->check();
-    }
+  foreach (@{$self->{mems}}) {
+    $_->check();
   }
 }
 

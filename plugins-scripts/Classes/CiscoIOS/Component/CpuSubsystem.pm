@@ -50,7 +50,6 @@ sub check {
 package Classes::CiscoIOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
   my $self = shift;
@@ -69,7 +68,6 @@ sub finish {
   } else {
     $self->{entPhysicalName} = $self->{cpmCPUTotalIndex};
   }
-  return $self;
 }
 
 sub check {

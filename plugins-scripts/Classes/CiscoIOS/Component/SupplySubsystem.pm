@@ -13,11 +13,8 @@ sub check {
   my $self = shift;
   $self->add_info('checking supplies');
   $self->blacklist('ps', '');
-  if (scalar (@{$self->{supplies}}) == 0) {
-  } else {
-    foreach (@{$self->{supplies}}) {
-      $_->check();
-    }
+  foreach (@{$self->{supplies}}) {
+    $_->check();
   }
 }
 

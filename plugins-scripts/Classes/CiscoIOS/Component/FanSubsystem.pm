@@ -14,11 +14,8 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking fans');
   $self->blacklist('ff', '');
-  if (scalar (@{$self->{fans}}) == 0) {
-  } else {
-    foreach (@{$self->{fans}}) {
-      $_->check();
-    }
+  foreach (@{$self->{fans}}) {
+    $_->check();
   }
 }
 
@@ -26,7 +23,6 @@ sub check {
 package Classes::CiscoIOS::Component::FanSubsystem::Fan;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
