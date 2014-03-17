@@ -107,8 +107,27 @@ sub check {
     }
     printf "</table>\n";
     printf "<!--\nASCII_NOTIFICATION_START\n";
+    my $column_length = {};
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable ifSpeedText ifStatusDuration)) {
+      $column_length->{$_} = length($_);
+    }
+    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+      if ($unique->{$_->{ifDescr}}) {
+        $_->{ifDescr} .= ' '.$_->{ifIndex};
+      }
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
+        if (length($_->{$attr}) > $column_length->{$attr}) {
+          $column_length->{$attr} = length($_->{$attr});
+        }
+      }
+    }
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable ifSpeedText)) {
+      $column_length->{$_} = "%".($column_length->{$_} + 3)."s";
+    }
+    $column_length->{ifSpeed} = $column_length->{ifSpeedText};
+    $column_length->{Duration} = $column_length->{ifStatusDuration};
     foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable)) {
-      printf "%20s", $_;
+      printf $column_length->{$_}, $_;
     }
     printf "\n";
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
@@ -116,7 +135,7 @@ sub check {
         $_->{ifDescr} .= ' '.$_->{ifIndex};
       }
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
-        printf "%20s", $_->{$attr};
+        printf $column_length->{$attr}, $_->{$attr};
       }
       printf "\n";
     }

@@ -4,8 +4,9 @@ use strict;
 
 sub init {
   my $self = shift;
+  my $type = 0;
   $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
-      ['mems', 'ciscoMemoryPoolTable', 'Classes::CiscoIOS::Component::MemSubsystem::Mem'],
+      ['mems', 'ciscoMemoryPoolTable', 'Classes::CiscoIOS::Component::MemSubsystem::Mem', sub { my $o = shift; $o->{ciscoMemoryPoolType} ||= $type++; return 1; }],
   ]);
 }
 
@@ -25,6 +26,12 @@ sub check {
 package Classes::CiscoIOS::Component::MemSubsystem::Mem;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
+
+sub finish {
+  my $self = shift;
+  $self->{usage} = 100 * $self->{ciscoMemoryPoolUsed} /
+      ($self->{ciscoMemoryPoolFree} + $self->{ciscoMemoryPoolUsed});
+}
 
 sub check {
   my $self = shift;

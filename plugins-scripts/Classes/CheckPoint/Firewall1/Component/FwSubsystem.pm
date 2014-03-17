@@ -17,7 +17,9 @@ sub check {
   if ($self->{fwModuleState} ne 'Installed') {
     $self->add_critical(sprintf 'fw module is %s', $self->{fwPolicyName});
   } elsif ($self->mode =~ /device::fw::policy::installed/) {
-    if ($self->{fwPolicyName} eq $self->opts->name()) {
+    if (! $self->opts->name()) {
+      $self->add_unknown('please specify a policy with --name');
+    } elsif ($self->{fwPolicyName} eq $self->opts->name()) {
       $self->add_ok(sprintf 'fw policy is %s', $self->{fwPolicyName});
     } else {
       $self->add_critical(sprintf 'fw policy is %s, expected %s',

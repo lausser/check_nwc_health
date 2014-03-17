@@ -102,6 +102,9 @@ sub add_perfdata {
   if ($args{critical}) {
     $str .= ';'.$args{critical};
   }
+  if (! $args{warning} && ! $args{critical} && $args{uom} && $args{uom} eq '%') {
+##    $str .= ';0;100';
+  }
   push @{$self->{perfdata}}, $str;
 }
 

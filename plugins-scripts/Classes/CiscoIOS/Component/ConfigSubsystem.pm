@@ -9,6 +9,9 @@ sub init {
       ccmHistoryStartupLastChanged)));
   foreach ((qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
       ccmHistoryStartupLastChanged))) {
+    if (! defined $self->{$_}) {
+      $self->add_unknown(sprintf "%s is not defined", $_);
+    }
     $self->{$_} = time - $self->uptime() + $self->timeticks($self->{$_});
   }
 }
@@ -17,6 +20,9 @@ sub check {
   my $self = shift;
   my $info;
   $self->add_info('checking config');
+  if ($self->check_messages()) {
+    return;
+  }
   # ccmHistoryRunningLastChanged
   # ccmHistoryRunningLastSaved - saving is ANY write (local/remote storage, terminal)
   # ccmHistoryStartupLastChanged 

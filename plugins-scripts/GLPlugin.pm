@@ -1402,7 +1402,6 @@ sub make_symbolic {
               }
             } elsif ($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'} =~ /^OID::(.*)/) {
               my $othermib = $1;
-printf "%s %s %s\n", $mib, $symoid, $othermib;
               my @result = grep { $GLPlugin::SNMP::mibs_and_oids->{$othermib}->{$_} eq $result->{$fulloid} } keys %{$GLPlugin::SNMP::mibs_and_oids->{$othermib}};
               if (scalar(@result)) {
                 $mo->{$symoid} = $result[0];
