@@ -20,6 +20,8 @@ EXTRA_MODULES=\
   Classes/UPNP/AVM.pm \
   Classes/UPNP.pm \
   Classes/Server/Linux.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
   Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/SupplySubsystem.pm \

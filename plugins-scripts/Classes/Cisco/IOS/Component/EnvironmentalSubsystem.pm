@@ -9,25 +9,6 @@ sub init {
   # 
   $self->get_snmp_objects('CISCO-ENVMON-MIB', qw(
       ciscoEnvMonPresent));
-  my $ciscoEntitySensorPresent = $GLPlugin::SNMP::session->get_next_request(
-    -varbindlist => [
-        '1.3.6.1.4.1.9.9.91',
-    ]
-  );
-  # has no CISCO-ENTITY-SENSOR-MIB: '1.3.6.1.4.1.9.9.109.1.1.1.1.2.1' => 0
-  # has CISCO-ENTITY-SENSOR-MIB: '1.3.6.1.4.1.9.9.91.1.1.1.1.1.4' => 5
-  # '1.3.6.1.4.1.99.9.391' => 'endOfMibView' 
-  if ($ciscoEntitySensorPresent && 
-      ! exists $ciscoEntitySensorPresent->{'1.3.6.1.4.1.9.9.91'} &&
-      grep {
-          substr($_, 0, 19) eq '1.3.6.1.4.1.9.9.91.';
-      } keys %{$ciscoEntitySensorPresent}) {
-    $self->{ciscoEntitySensorPresent} = 1;
-    # CISCO-ENTITY-SENSOR-MIB hat keine skalaren oids, man muss nach 
-    # Spuren von Tabellen suchen.
-  } else {
-    $self->{ciscoEntitySensorPresent} = 0;
-  }
   if ($self->{ciscoEnvMonPresent} && 
       $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem} =
@@ -38,7 +19,7 @@ sub init {
         Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem->new();
     $self->{voltage_subsystem} =
         Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem->new();
-  } elsif ($self->{ciscoEntitySensorPresent}) {
+  } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     # (IOS can have ENVMON+ENTITY. Sensors are copies, so not needed)
     $self->{sensor_subsystem} =
         Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();

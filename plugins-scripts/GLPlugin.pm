@@ -674,6 +674,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $blacklist = undef;
   our $session = undef;
   our $rawdata = {};
+  our $tablecache = {};
   our $info = [];
   our $extendedinfo = [];
   our $summary = [];
@@ -931,9 +932,13 @@ sub discover_suitable_class {
     return $GLPlugin::SNMP::discover_ids->{$sysobj};
   }
 }
+
 sub implements_mib {
   my $self = shift;
   my $mib = shift;
+  if (! exists $GLPlugin::SNMP::mib_ids->{$mib}) {
+    return 0;
+  }
   my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
   $sysobj =~ s/^\.// if $sysobj;
   if ($sysobj && $sysobj eq $GLPlugin::SNMP::mib_ids->{$mib}) {
@@ -941,6 +946,19 @@ sub implements_mib {
   }
   if ($GLPlugin::SNMP::mib_ids->{$mib} eq
       substr $sysobj, 0, length $GLPlugin::SNMP::mib_ids->{$mib}) {
+    return 1;
+  }
+  # some mibs are only composed of tables
+  my $traces = $GLPlugin::SNMP::session->get_next_request(
+    -varbindlist => [
+        $GLPlugin::SNMP::mib_ids->{$mib}
+    ]
+  );
+  if ($traces && # must find oids following to the ident-oid
+      ! exists $traces->{$GLPlugin::SNMP::mib_ids->{$mib}} && # must not be the ident-oid
+      grep { # following oid is inside this tree
+          substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib};
+      } keys %{$traces}) {
     return 1;
   }
 }
@@ -1359,10 +1377,19 @@ sub get_snmp_tables {
     my $class = $info->[2];
     my $filter = $info->[3];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
-    foreach ($self->get_snmp_table_objects($mib, $table)) {
-      my $new_object = $class->new(%{$_});
-      next if (defined $filter && ! &$filter($new_object));
-      push(@{$self->{$arrayname}}, $new_object);
+    if (! exists $GLPlugin::SNMP::tablecache->{$mib} && ! exists $GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
+      $GLPlugin::SNMP::tablecache->{$mib}->{$table} = [];
+      foreach ($self->get_snmp_table_objects($mib, $table)) {
+        my $new_object = $class->new(%{$_});
+        next if (defined $filter && ! &$filter($new_object));
+        push(@{$self->{$arrayname}}, $new_object);
+        push(@{$GLPlugin::SNMP::tablecache->{$mib}->{$table}}, $new_object);
+      }
+    } else {
+      $self->debug(sprintf "get_snmp_tables %s %s cache hit", $mib, $table);
+      foreach (@{$GLPlugin::SNMP::tablecache->{$mib}->{$table}}) {
+        push(@{$self->{$arrayname}}, $_);
+      }
     }
   }
 }
