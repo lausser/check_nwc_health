@@ -11,7 +11,7 @@ sub init {
     $self->{productversion} = "4";
   }
   if ($self->mode =~ /device::hardware::health/) {
-    $self->analyze_and_check_environmental_subsystem(" Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem");
+    $self->analyze_and_check_environmental_subsystem("Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::F5::F5BIGIP::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
