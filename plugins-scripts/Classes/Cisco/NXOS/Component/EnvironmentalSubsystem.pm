@@ -18,6 +18,7 @@ sub check {
     $self->{fru_subsystem}->check();
   }
   if (! $self->check_messages()) {
+    $self->clear_ok();
     $self->add_ok("environmental hardware working fine");
   }
 }

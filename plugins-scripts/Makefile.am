@@ -22,6 +22,7 @@ EXTRA_MODULES=\
   Classes/Server/Linux.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/SupplySubsystem.pm \
   Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/SupplySubsystem.pm \
@@ -178,7 +179,7 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "#! #PERL# -w" | $(AWK) -f ./subst > $@
 	$(ECHO) >> $@
 	for m in ${EXTRA_MODULES}; do \
-		$(SED) -e 's/^1;//g' < $$m | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
+		$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
 	done
 	$(ECHO) "package main;" >> $@
 	$(CAT) check_nwc_health.pl | $(AWK) -f ./subst >> $@

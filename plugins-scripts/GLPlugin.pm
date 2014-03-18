@@ -1377,7 +1377,7 @@ sub get_snmp_tables {
     my $class = $info->[2];
     my $filter = $info->[3];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
-    if (! exists $GLPlugin::SNMP::tablecache->{$mib} && ! exists $GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
+    if (! exists $GLPlugin::SNMP::tablecache->{$mib} || ! exists $GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
       $GLPlugin::SNMP::tablecache->{$mib}->{$table} = [];
       foreach ($self->get_snmp_table_objects($mib, $table)) {
         my $new_object = $class->new(%{$_});
