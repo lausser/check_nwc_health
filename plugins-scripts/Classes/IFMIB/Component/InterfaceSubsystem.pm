@@ -184,7 +184,7 @@ sub save_interface_cache {
   my $self = shift;
   $self->create_statefilesdir();
   my $statefile = $self->create_interface_cache_file();
-  my $tmpfile = $Classes::Device::statefilesdir.'/check_nwc_health_tmp_'.$$;
+  my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
   my $fh = IO::File->new();
   $fh->open(">$tmpfile");
   $fh->print(Data::Dumper::Dumper($self->{interface_cache}));

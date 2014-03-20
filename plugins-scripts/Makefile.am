@@ -12,7 +12,6 @@ VPATH=$(top_srcdir) $(top_srcdir)/plugins-scripts $(top_srcdir)/plugins-scripts/
 libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
-  Nagios/MiniPlugin.pm \
   GLPlugin.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \

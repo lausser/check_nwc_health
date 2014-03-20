@@ -1,6 +1,5 @@
 package Classes::Device;
 our @ISA = qw(GLPlugin::SNMP GLPlugin::UPNP);
-
 use strict;
 use IO::File;
 use File::Basename;
@@ -8,29 +7,11 @@ use Digest::MD5  qw(md5_hex);
 use Errno;
 use AutoLoader;
 our $AUTOLOAD;
-
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-{
-  our $mode = undef;
-  our $plugin = undef;
-  our $blacklist = undef;
-  our $session = undef;
-  our $rawdata = {};
-  our $info = [];
-  our $extendedinfo = [];
-  our $summary = [];
-  our $statefilesdir = '/var/tmp/'.basename($0);
-  our $oidtrace = [];
-  our $uptime = 0;
-}
 
-sub new {
-  my $class = shift;
-  my $self = {
-    productname => 'unknown',
-  };
-  bless $self, $class;
+sub classify {
+  my $self = shift;
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     $self->add_unknown('either specify a hostname or a snmpwalk file');
   } else {
