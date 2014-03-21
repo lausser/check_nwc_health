@@ -518,6 +518,6 @@ my ($code, $message) = $plugin->opts->multiline ?
     $plugin->check_messages(join => ', ', join_all => ', ');
 $message .= sprintf "\n%s\n", $plugin->get_info("\n")
     if $plugin->opts->verbose >= 1;
-printf "%s\n", Data::Dumper::Dumper($plugin);
+#printf "%s\n", Data::Dumper::Dumper($plugin);
 $plugin->nagios_exit($code, $message);
 

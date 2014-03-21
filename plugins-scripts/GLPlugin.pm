@@ -36,6 +36,99 @@ sub statefilesdir {
 #
 # Plugin-related methods
 #
+sub nagios_exit {
+  my $self = shift;
+  return $GLPlugin::plugin->nagios_exit(@_);
+}
+
+sub mode {
+  my $self = shift;
+  return $GLPlugin::mode;
+}
+
+sub add_ok {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(OK, $message);
+}
+
+sub add_warning {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(WARNING, $message);
+}
+
+sub add_critical {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(CRITICAL, $message);
+}
+
+sub add_unknown {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(UNKNOWN, $message);
+}
+
+sub add_message {
+  my $self = shift;
+  my $level = shift;
+  my $message = shift || $self->{info};
+  $GLPlugin::plugin->add_message($level, $message)
+      unless $self->{blacklisted};
+  if (exists $self->{failed}) {
+    if ($level == UNKNOWN && $self->{failed} == OK) {
+      $self->{failed} = $level;
+    } elsif ($level > $self->{failed}) {
+      $self->{failed} = $level;
+    }
+  }
+}
+
+sub status_code {
+  my $self = shift;
+  return $GLPlugin::plugin->status_code(@_);
+}
+
+sub check_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->check_messages(@_);
+}
+
+sub clear_ok {
+  my $self = shift;
+  return $self->clear_messages(OK);
+}
+
+sub clear_warning {
+  my $self = shift;
+  return $self->clear_messages(WARNING);
+}
+
+sub clear_critical {
+  my $self = shift;
+  return $self->clear_messages(CRITICAL);
+}
+
+sub clear_unknown {
+  my $self = shift;
+  return $self->clear_messages(UNKNOWN);
+}
+
+sub clear_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->clear_messages(@_);
+}
+
+sub suppress_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->suppress_messages(@_);
+}
+
+sub add_perfdata {
+  my $self = shift;
+  $GLPlugin::plugin->add_perfdata(@_);
+}
 sub add_modes {
   my $self = shift;
   my $modes = shift;
@@ -230,94 +323,6 @@ sub is_blacklisted {
   return $blacklisted;
 }
 
-sub mode {
-  my $self = shift;
-  return $GLPlugin::mode;
-}
-
-sub add_ok {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(OK, $message);
-}
-
-sub add_warning {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(WARNING, $message);
-}
-
-sub add_critical {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(CRITICAL, $message);
-}
-
-sub add_unknown {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(UNKNOWN, $message);
-}
-
-sub add_message {
-  my $self = shift;
-  my $level = shift;
-  my $message = shift || $self->{info};
-  $GLPlugin::plugin->add_message($level, $message)
-      unless $self->{blacklisted};
-  if (exists $self->{failed}) {
-    if ($level == UNKNOWN && $self->{failed} == OK) {
-      $self->{failed} = $level;
-    } elsif ($level > $self->{failed}) {
-      $self->{failed} = $level;
-    }
-  }
-}
-
-sub status_code {
-  my $self = shift;
-  return $GLPlugin::plugin->status_code(@_);
-}
-
-sub check_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->check_messages(@_);
-}
-
-sub clear_ok {
-  my $self = shift;
-  return $self->clear_messages(OK);
-}
-
-sub clear_warning {
-  my $self = shift;
-  return $self->clear_messages(WARNING);
-}
-
-sub clear_critical {
-  my $self = shift;
-  return $self->clear_messages(CRITICAL);
-}
-
-sub clear_unknown {
-  my $self = shift;
-  return $self->clear_messages(UNKNOWN);
-}
-
-sub clear_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->clear_messages(@_);
-}
-
-sub suppress_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->suppress_messages(@_);
-}
-
-sub add_perfdata {
-  my $self = shift;
-  $GLPlugin::plugin->add_perfdata(@_);
-}
 
 sub set_thresholds {
   my $self = shift;
@@ -2681,6 +2686,8 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->check();
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
+  } else {
+    $self->debug("AUTOLOAD %s does not exist!!!\n", $AUTOLOAD);
   }
 }
 
