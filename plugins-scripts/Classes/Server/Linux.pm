@@ -1,59 +1,19 @@
 package Server::Linux;
-
+our @ISA = qw(Classes::Device);
 use strict;
 
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-our @ISA = qw(Classes::Device);
 
 sub init {
   my $self = shift;
-  $self->{components} = {
-      interface_subsystem => undef,
-  };
-  $self->{serial} = 'unknown';
-  $self->{product} = 'unknown';
-  $self->{romversion} = 'unknown';
-  if (! $self->check_messages()) {
-    if ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
-    }
+  if ($self->mode =~ /device::interfaces/) {
+    $self->analyze_and_check_interface_subsystem('Server::Linux::Component::InterfaceSubsystem');
   }
 }
 
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      Server::Linux::Component::InterfaceSubsystem->new();
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
 
 package Server::Linux::Component::InterfaceSubsystem;
-our @ISA = qw(Server::Linux);
-
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    interfaces => [],
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  $self->init(%params);
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -115,7 +75,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
@@ -127,51 +86,22 @@ sub check {
       $_->list();
     }
   } else {
-    if (scalar (@{$self->{interfaces}}) == 0) {
-    } else {
-      foreach (@{$self->{interfaces}}) {
-        $_->check();
-      }
+    foreach (@{$self->{interfaces}}) {
+      $_->check();
     }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{interfaces}}) {
-    $_->dump();
   }
 }
 
 
 package Server::Linux::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(Server::Linux::Component::InterfaceSubsystem);
-
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    ifDescr => $params{ifDescr},
-    ifSpeed => $params{ifSpeed},
-    ifInOctets => $params{ifInOctets},
-    ifInDiscards => $params{ifInDiscards},
-    ifInErrors => $params{ifInErrors},
-    ifOutOctets => $params{ifOutOctets},
-    ifOutDiscards => $params{ifOutDiscards},
-    ifOutErrors => $params{ifOutErrors},
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $key (keys %params) {
-    $self->{$key} = 0 if ! defined $params{$key};
+sub finish {
+  my $self = shift;
+  foreach (qw(ifSpeed ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors)) {
+    $self->{$_} = 0 if ! defined $self->{$_};
   }
-  bless $self, $class;
-  $self->init();
-  return $self;
 }
 
 sub init {
@@ -238,20 +168,19 @@ sub check {
   $self->blacklist('if', $self->{ifDescr});
   if ($self->mode =~ /device::interfaces::traffic/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
+    $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
         $self->{ifDescr}, 
         $self->{inputUtilization}, 
         sprintf("%.2f%s/s", $self->{inputRate},
             ($self->opts->units ? $self->opts->units : 'Bits')),
         $self->{outputUtilization},
         sprintf("%.2f%s/s", $self->{outputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits'));
-    $self->add_info($info);
+            ($self->opts->units ? $self->opts->units : 'Bits')));
     $self->set_thresholds(warning => 80, critical => 90);
     my $in = $self->check_thresholds($self->{inputUtilization});
     my $out = $self->check_thresholds($self->{outputUtilization});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_in',
         value => $self->{inputUtilization},
@@ -277,17 +206,16 @@ sub check {
         uom => $self->opts->units,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    my $info = sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
         'discards in:%.2f/s out:%.2f/s',
         $self->{ifDescr},
         $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate};
-    $self->add_info($info);
+        $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(warning => 1, critical => 10);
     my $in = $self->check_thresholds($self->{inputRate});
     my $out = $self->check_thresholds($self->{outputRate});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
@@ -318,15 +246,5 @@ sub check {
 sub list {
   my $self = shift;
   printf "%s\n", $self->{ifDescr};
-}
-
-sub dump {
-  my $self = shift;
-  printf "[IF_%s]\n", $self->{ifDescr};
-  foreach (qw(ifDescr ifSpeed ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

@@ -1,7 +1,6 @@
 package Classes::Cisco::IOS::Component::CpuSubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;
