@@ -64,7 +64,7 @@ sub init {
         $tmpif->{ifSpeed} = $self->opts->ifspeed * 1024*1024;
       }
       if (! defined $tmpif->{ifSpeed}) {
-        $self->add_message(UNKNOWN, sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
+        $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
       } else {
         push(@{$self->{interfaces}},
           Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
