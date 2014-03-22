@@ -17,7 +17,7 @@ use strict;
 
 sub init {
   my $self = shift;
-  my %params = @_;
+  $self->{interfaces} = [];
   if ($self->mode =~ /device::interfaces::list/) {
     foreach (glob "/sys/class/net/*") {
       my $name = $_;
