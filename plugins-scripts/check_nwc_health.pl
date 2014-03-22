@@ -490,13 +490,8 @@ $plugin->add_arg(
 
 
 $plugin->getopts();
-
-$plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
-
-$plugin->{info} = []; # gefrickel
-
-
 $plugin->classify();
+$plugin->validate_args();
 
 
 if (! $plugin->check_messages()) {

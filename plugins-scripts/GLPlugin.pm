@@ -172,10 +172,10 @@ sub add_mode {
 sub getopts {
   my $self = shift;
   $GLPlugin::plugin->getopts();
-  $self->validate_args();
 }
 
 sub override_opt {
+  my $self = shift;
   $GLPlugin::plugin->override_opt(@_);
 }
 
@@ -1250,7 +1250,6 @@ sub override_opt {
   my $key = shift;
   my $value = shift;
   $self->{opts}->{$key} = $value;
-  $self->create_opt($key);
 }
 
 sub get {
@@ -1366,10 +1365,6 @@ sub validate_args {
       $self->override_opt('hostname', undef);
     }
   }
-  
-  if ($self->opts->snmpwalk && $self->opts->hostname && $self->opts->mode eq 'walk') {
-  }
-
 }
 
 sub init {
