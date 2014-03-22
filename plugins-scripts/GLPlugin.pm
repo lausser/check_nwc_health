@@ -25,7 +25,6 @@ sub new {
   my $self = {};
   bless $self, $class;
   $GLPlugin::plugin = GLPlugin::Commandline->new(%params);
-  $self->validate_args();
   return $self;
 }
 
@@ -173,6 +172,7 @@ sub add_mode {
 sub getopts {
   my $self = shift;
   $GLPlugin::plugin->getopts();
+  $self->validate_args();
 }
 
 sub override_opt {

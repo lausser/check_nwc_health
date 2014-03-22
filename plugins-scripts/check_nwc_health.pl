@@ -490,7 +490,6 @@ $plugin->add_arg(
 
 
 $plugin->getopts();
-$plugin->validate_args();
 
 $plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
 
