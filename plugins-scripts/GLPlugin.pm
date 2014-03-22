@@ -25,12 +25,13 @@ sub new {
   my $self = {};
   bless $self, $class;
   $GLPlugin::plugin = GLPlugin::Commandline->new(%params);
+  $self->validate_args();
   return $self;
 }
 
 sub statefilesdir {
   my $self = shift;
-  return $self->statefilesdir();
+  return $GLPlugin::plugin->{statefilesdir};
 }
 
 #
