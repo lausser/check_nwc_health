@@ -78,7 +78,7 @@ sub check {
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
+    $self->add_unknown('no interfaces');
     return;
   }
   if ($self->mode =~ /device::interfaces::list/) {
