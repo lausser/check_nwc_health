@@ -102,10 +102,6 @@ sub finish {
   foreach (qw(ifSpeed ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors)) {
     $self->{$_} = 0 if ! defined $self->{$_};
   }
-}
-
-sub init {
-  my $self = shift;
   if ($self->mode =~ /device::interfaces::traffic/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors));
   } elsif ($self->mode =~ /device::interfaces::usage/) {

@@ -174,6 +174,10 @@ sub getopts {
   $GLPlugin::plugin->getopts();
 }
 
+sub override_opt {
+  $GLPlugin::plugin->override_opt(@_);
+}
+
 sub validate_args {
   my $self = shift;
   if ($self->opts->mode =~ /^my-([^\-.]+)/) {
@@ -1245,6 +1249,7 @@ sub override_opt {
   my $key = shift;
   my $value = shift;
   $self->{opts}->{$key} = $value;
+  $self->create_opt($key);
 }
 
 sub get {
