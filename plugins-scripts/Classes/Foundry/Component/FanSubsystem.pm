@@ -9,19 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking fans');
-  $self->blacklist('ps', '');
-  if (scalar (@{$self->{fans}}) == 0) {
-  } else {
-    foreach (@{$self->{fans}}) {
-      $_->check();
-    }
-  }
-}
-
 
 package Classes::Foundry::Component::FanSubsystem::Fan;
 our @ISA = qw(GLPlugin::TableItem);

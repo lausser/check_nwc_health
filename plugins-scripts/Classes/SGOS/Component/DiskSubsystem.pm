@@ -8,24 +8,11 @@ sub init {
       ['disks', 'deviceDiskValueTable', 'Classes::SGOS::Component::DiskSubsystem::Disk'],
   ]);
   $self->get_snmp_tables('USAGE-MIB', [
-      ['fss', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { my $o = shift; return lc $o->{deviceUsageName} eq 'disk' }],
+      ['filesystems', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { my $o = shift; return lc $o->{deviceUsageName} eq 'disk' }],
   ]);
   my $fs = 0;
-  foreach (@{$self->{fss}}) {
+  foreach (@{$self->{filesystems}}) {
     $_->{deviceUsageIndex} = $fs++;
-  }
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking disks');
-  $self->blacklist('ses', '');
-  foreach (@{$self->{disks}}) {
-    $_->check();
-  }
-  foreach (@{$self->{fss}}) {
-    $_->check();
   }
 }
 

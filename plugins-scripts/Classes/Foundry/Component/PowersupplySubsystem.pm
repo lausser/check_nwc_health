@@ -5,21 +5,8 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
-      ['supplies', 'snChasPwrSupplyTable', 'Classes::Foundry::Component::PowersupplySubsystem::Powersupply'],
+      ['powersupplies', 'snChasPwrSupplyTable', 'Classes::Foundry::Component::PowersupplySubsystem::Powersupply'],
   ]);
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking supplies');
-  $self->blacklist('ps', '');
-  if (scalar (@{$self->{supplies}}) == 0) {
-  } else {
-    foreach (@{$self->{supplies}}) {
-      $_->check();
-    }
-  }
 }
 
 

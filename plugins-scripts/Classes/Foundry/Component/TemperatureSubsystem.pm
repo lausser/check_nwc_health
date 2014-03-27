@@ -14,17 +14,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  if (scalar (@{$self->{temperatures}}) == 0) {
-    $self->overall_check();
-  } else {
-    foreach (@{$self->{temperatures}}) {
-      $_->check();
-    }
-  }
-}
-
 
 package Classes::Foundry::Component::TemperatureSubsystem::Temperature;
 our @ISA = qw(GLPlugin::TableItem);
