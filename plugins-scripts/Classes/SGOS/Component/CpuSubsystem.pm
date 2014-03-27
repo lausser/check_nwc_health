@@ -18,15 +18,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking cpus');
-  foreach (@{$self->{cpus}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::SGOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
