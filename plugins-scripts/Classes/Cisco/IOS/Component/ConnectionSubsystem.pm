@@ -9,17 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking connection states');
-  $self->blacklist('cs', '');
-  foreach (@{$self->{connectionstates}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::IOS::Component::ConnectionSubsystem::ConnectionState;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

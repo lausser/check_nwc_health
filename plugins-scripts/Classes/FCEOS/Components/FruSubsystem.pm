@@ -9,17 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking frus');
-  $self->blacklist('frus', '');
-  foreach (@{$self->{frus}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::FCEOS::Component::FruSubsystem::Fcu;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

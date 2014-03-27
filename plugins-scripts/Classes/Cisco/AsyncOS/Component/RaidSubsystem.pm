@@ -11,17 +11,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking raids');
-  $self->blacklist('r', '');
-  foreach (@{$self->{raids}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::AsyncOS::Component::RaidSubsystem::Raid;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

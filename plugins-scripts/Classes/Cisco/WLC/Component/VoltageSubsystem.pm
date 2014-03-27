@@ -13,17 +13,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking voltages');
-  $self->blacklist('ff', '');
-  foreach (@{$self->{voltages}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::IOS::Component::VoltageSubsystem::Voltage;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

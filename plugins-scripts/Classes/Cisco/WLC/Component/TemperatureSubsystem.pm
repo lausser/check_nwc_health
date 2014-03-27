@@ -13,17 +13,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking temperatures');
-  $self->blacklist('t', '');
-  foreach (@{$self->{temperatures}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
