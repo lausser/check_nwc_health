@@ -2711,6 +2711,18 @@ sub new {
   return $self;
 }
 
+sub check {
+  my $self = shift;
+  my $lists = shift;
+  my @lists = $lists ? @{$lists} : grep { ref($self->{$_}) eq "ARRAY" } keys %{$self};
+  foreach my $list (@lists) {
+    $self->add_info('checking '.$list);
+    foreach my $element (@{$self->{$list}}) {
+      $element->check();
+    }
+  }
+}
+
 
 package GLPlugin::TableItem;
 our @ISA = qw(GLPlugin::Item);
