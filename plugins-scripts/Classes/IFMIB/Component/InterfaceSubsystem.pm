@@ -1,18 +1,10 @@
 package Classes::IFMIB::Component::InterfaceSubsystem;
-our @ISA = qw(Classes::IFMIB);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
+  $self->{interfaces} = [];
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     foreach my $ifIndex (keys %{$self->{interface_cache}}) {
@@ -50,7 +42,7 @@ sub check {
   $self->add_info('checking interfaces');
   $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
+    $self->add_unknown('no interfaces');
     return;
   }
   if ($self->mode =~ /device::interfaces::list/) {
@@ -58,7 +50,7 @@ sub check {
     #foreach (sort @{$self->{interfaces}}) {
       $_->list();
     }
-    $self->add_message(OK, "have fun");
+    $self->add_ok("have fun");
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     foreach (@{$self->{interfaces}}) {
       $_->check();
@@ -68,11 +60,10 @@ sub check {
         scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
     my $available_interfaces =
         scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
-    my $info = sprintf "%d of %d (%d adm. up) interfaces are available",
-        $available_interfaces, $num_interfaces, $up_interfaces;
-    $self->add_info($info);
+    $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are available",
+        $available_interfaces, $num_interfaces, $up_interfaces);
     $self->set_thresholds(warning => "3:", critical => "2:");
-    $self->add_message($self->check_thresholds($available_interfaces), $info);
+    $self->add_message($self->check_thresholds($available_interfaces));
     $self->add_perfdata(
         label => 'num_interfaces',
         value => $num_interfaces,
@@ -84,7 +75,7 @@ sub check {
         critical => $self->{critical},
     );
 
-    printf "%s\n", $info;
+    printf "%s\n", $self->{info};
     printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
     printf "<tr>";
     foreach (qw(Index Descr Type Speed AdminStatus OperStatus Duration Available)) {
@@ -116,8 +107,27 @@ sub check {
     }
     printf "</table>\n";
     printf "<!--\nASCII_NOTIFICATION_START\n";
+    my $column_length = {};
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable ifSpeedText ifStatusDuration)) {
+      $column_length->{$_} = length($_);
+    }
+    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+      if ($unique->{$_->{ifDescr}}) {
+        $_->{ifDescr} .= ' '.$_->{ifIndex};
+      }
+      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
+        if (length($_->{$attr}) > $column_length->{$attr}) {
+          $column_length->{$attr} = length($_->{$attr});
+        }
+      }
+    }
+    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifStatusDuration ifAvailable ifSpeedText)) {
+      $column_length->{$_} = "%".($column_length->{$_} + 3)."s|";
+    }
+    $column_length->{ifSpeed} = $column_length->{ifSpeedText};
+    $column_length->{Duration} = $column_length->{ifStatusDuration};
     foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable)) {
-      printf "%20s", $_;
+      printf $column_length->{$_}, $_;
     }
     printf "\n";
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
@@ -125,7 +135,7 @@ sub check {
         $_->{ifDescr} .= ' '.$_->{ifIndex};
       }
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
-        printf "%20s", $_->{$attr};
+        printf $column_length->{$attr}, $_->{$attr};
       }
       printf "\n";
     }
@@ -174,7 +184,7 @@ sub save_interface_cache {
   my $self = shift;
   $self->create_statefilesdir();
   my $statefile = $self->create_interface_cache_file();
-  my $tmpfile = $Classes::Device::statefilesdir.'/check_nwc_health_tmp_'.$$;
+  my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
   my $fh = IO::File->new();
   $fh->open(">$tmpfile");
   $fh->print(Data::Dumper::Dumper($self->{interface_cache}));
@@ -243,18 +253,10 @@ sub get_interface_indices {
   return @indices;
 }
 
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{interfaces}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -400,7 +402,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
-        $Classes::Device::uptime - $self->timeticks($self->{ifLastChange});
+        $GLPlugin::SNMP::uptime - $self->timeticks($self->{ifLastChange});
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     if ($self->{ifAdminStatus} eq "down") {
       $self->{ifAvailable} = "true";
@@ -435,7 +437,7 @@ sub check {
   $self->blacklist('if', $self->{ifIndex});
   if ($self->mode =~ /device::interfaces::traffic/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    my $info = sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
+    $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
         $self->{ifDescr}, 
         $self->{inputUtilization}, 
         sprintf("%.2f%s/s", $self->{inputRate},
@@ -443,13 +445,12 @@ sub check {
         $self->{outputUtilization},
         sprintf("%.2f%s/s", $self->{outputRate},
             ($self->opts->units ? $self->opts->units : 'Bits')),
-        $self->{ifOperStatus} eq 'down' ? ' (down)' : '';
-    $self->add_info($info);
+        $self->{ifOperStatus} eq 'down' ? ' (down)' : '');
     $self->set_thresholds(warning => 80, critical => 90);
     my $in = $self->check_thresholds($self->{inputUtilization});
     my $out = $self->check_thresholds($self->{outputUtilization});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_in',
         value => $self->{inputUtilization},
@@ -475,17 +476,16 @@ sub check {
         uom => $self->opts->units,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    my $info = sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
         'discards in:%.2f/s out:%.2f/s',
         $self->{ifDescr},
         $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate};
-    $self->add_info($info);
+        $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(warning => 1, critical => 10);
     my $in = $self->check_thresholds($self->{inputRate});
     my $out = $self->check_thresholds($self->{outputRate});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level, $info);
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
@@ -531,12 +531,11 @@ sub check {
 #    if ($self->{ifOperStatus} ne 'up') {
 #      }
 #    } 
-    my $info = sprintf '%s is %s/%s',
-        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus};
-    $self->add_info($info);
-    $self->add_message(OK, $info);
+    $self->add_info(sprintf '%s is %s/%s',
+        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus});
+    $self->add_ok();
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
-      $self->add_message(CRITICAL, 
+      $self->add_critical(
           sprintf 'fault condition is presumed to exist on %s',
           $self->{ifDescr});
     }
@@ -548,11 +547,10 @@ sub check {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});
-    my $info = sprintf '%s is %savailable (%s/%s, since %s)',
+    $self->add_info(sprintf '%s is %savailable (%s/%s, since %s)',
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
         $self->{ifOperStatus}, $self->{ifAdminStatus},
-        $self->{ifStatusDuration};
-    $self->add_info($info);
+        $self->{ifStatusDuration});
   }
 }
 
@@ -568,30 +566,8 @@ sub list {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[IF32_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
-
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub dump {
-  my $self = shift;
-  printf "[IF64_%s]\n", $self->{ifIndex};
-  foreach (qw(ifIndex ifDescr ifType ifMtu ifSpeed ifPhysAddress ifAdminStatus ifOperStatus ifLastChange ifInOctets ifInUcastPkts ifInNUcastPkts ifInDiscards ifInErrors ifInUnknownProtos ifOutOctets ifOutUcastPkts ifOutNUcastPkts ifOutDiscards ifOutErrors ifOutQLen ifSpecific ifName ifInMulticastPkts ifInBroadcastPkts ifOutMulticastPkts ifOutBroadcastPkts ifHCInOctets ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts ifHCOutOctets ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts ifLinkUpDownTrapEnable ifHighSpeed ifPromiscuousMode ifConnectorPresent ifAlias ifCounterDiscontinuityTime)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
-}
-
 

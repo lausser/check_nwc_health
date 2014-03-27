@@ -42,21 +42,20 @@ sub check {
   my $self = shift;
   $self->add_info('checking link aggregation');
   if (scalar(@{$self->{components}->{interface_subsystem}->{interfaces}}) == 0) {
-    $self->add_message(UNKNOWN, 'no interfaces');
+    $self->add_unknown('no interfaces');
     return;
   }
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     my $down_info = scalar(@{$self->{down_if}}) ?
         sprintf " (down: %s)", join(", ", map { $_->{ifDescr} } @{$self->{down_if}}) : "";
-    my $info = sprintf 'aggregation %s availability is %.2f%% (%d of %d)%s',
+    $self->add_info(sprintf 'aggregation %s availability is %.2f%% (%d of %d)%s',
         $self->{name},
         $self->{availability}, $self->{num_up_if}, $self->{num_if},
-        $down_info;
-    $self->add_info($info);
+        $down_info);
     my $cavailability = $self->{num_if} ? (100 * 1 / $self->{num_if}) : 0;
     $cavailability = $cavailability == int($cavailability) ? $cavailability + 1: int($cavailability + 1.0);
     $self->set_thresholds(warning => '100:', critical => $cavailability.':');
-    $self->add_message($self->check_thresholds($self->{availability}), $info);
+    $self->add_message($self->check_thresholds($self->{availability}));
     $self->add_perfdata(
         label => 'aggr_'.$self->{name}.'_availability',
         value => $self->{availability},

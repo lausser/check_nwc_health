@@ -1,15 +1,6 @@
 package Classes::SGOS::Component::DiskSubsystem;
-our @ISA = qw(Classes::SGOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -17,34 +8,11 @@ sub init {
       ['disks', 'deviceDiskValueTable', 'Classes::SGOS::Component::DiskSubsystem::Disk'],
   ]);
   $self->get_snmp_tables('USAGE-MIB', [
-      ['fss', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { my $o = shift; return lc $o->{deviceUsageName} eq 'disk' }],
+      ['filesystems', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { my $o = shift; return lc $o->{deviceUsageName} eq 'disk' }],
   ]);
   my $fs = 0;
-  foreach (@{$self->{fss}}) {
+  foreach (@{$self->{filesystems}}) {
     $_->{deviceUsageIndex} = $fs++;
-  }
-}
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking disks');
-  $self->blacklist('ses', '');
-  foreach (@{$self->{disks}}) {
-    $_->check();
-  }
-  foreach (@{$self->{fss}}) {
-    $_->check();
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{disks}}) {
-    $_->dump();
-  }
-  foreach (@{$self->{fss}}) {
-    $_->dump();
   }
 }
 
@@ -62,7 +30,7 @@ sub check {
       $self->{deviceDiskRevision},
       $self->{deviceDiskStatus});
   if ($self->{deviceDiskStatus} eq "bad") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   }
 }
 
@@ -78,9 +46,9 @@ sub check {
       $self->{deviceUsageIndex},
       $self->{deviceUsagePercent});
   if ($self->{deviceUsageStatus} ne "ok") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
-    $self->add_ok($self->{info});
+    $self->add_ok();
   }
   $self->add_perfdata(
       label => 'disk_'.$self->{deviceUsageIndex}.'_usage',

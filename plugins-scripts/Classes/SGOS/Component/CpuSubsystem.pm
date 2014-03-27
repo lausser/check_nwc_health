@@ -1,15 +1,6 @@
 package Classes::SGOS::Component::CpuSubsystem;
-our @ISA = qw(Classes::SGOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -22,26 +13,10 @@ sub init {
   ]);
   if (scalar (@{$self->{cpus}}) == 0) {
     $self->get_snmp_tables('USAGE-MIB', [
-        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { my $cpu = shift; return $_->{deviceUsageName} !~ /CPU/ }],
+        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { my $cpu = shift; return $_->{deviceUsageName} =~ /CPU/ }],
     ]);
   }
 }
-
-sub check {
-  my $self = shift;
-  $self->add_info('checking cpus');
-  foreach (@{$self->{cpus}}) {
-    $_->check();
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{cpus}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::SGOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(GLPlugin::TableItem);
@@ -50,11 +25,10 @@ use strict;
 sub check {
   my $self = shift;
   $self->blacklist('c', $self->{flat_indices});
-  my $info = sprintf 'cpu %s usage is %.2f%%',
-      $self->{flat_indices}, $self->{sgProxyCpuCoreBusyPerCent};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu %s usage is %.2f%%',
+      $self->{flat_indices}, $self->{sgProxyCpuCoreBusyPerCent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{sgProxyCpuCoreBusyPerCent}), $info);
+  $self->add_message($self->check_thresholds($self->{sgProxyCpuCoreBusyPerCent}));
   $self->add_perfdata(
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{sgProxyCpuCoreBusyPerCent},
@@ -72,11 +46,10 @@ use strict;
 sub check {
   my $self = shift;
   $self->blacklist('c', $self->{flat_indices});
-  my $info = sprintf 'cpu %s usage is %.2f%%',
-      $self->{flat_indices}, $self->{deviceUsagePercent};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu %s usage is %.2f%%',
+      $self->{flat_indices}, $self->{deviceUsagePercent});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}), $info);
+  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}));
   $self->add_perfdata(
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{deviceUsagePercent},

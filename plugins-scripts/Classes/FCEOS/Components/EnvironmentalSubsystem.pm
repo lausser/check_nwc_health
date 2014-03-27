@@ -1,16 +1,6 @@
 package Classes::FCEOS::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::FCEOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->overall_init();
-  $self->init();
-  return $self;
-}
-
 
 sub overall_init {
   my $self = shift;
@@ -31,8 +21,8 @@ sub check {
     $self->add_ok("environmental hardware working fine");
   } else {
     if ($self->{fcEosSysOperStatus} eq "operational") {
-      $self->clear_messages(CRITICAL);
-      $self->clear_messages(WARNING);
+      $self->clear_critical();
+      $self->clear_warning();
     } elsif ($self->{fcEosSysOperStatus} eq "major-failure") {
       $self->add_critical("major device failure");
     } else {

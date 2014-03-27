@@ -1,15 +1,6 @@
 package Classes::CheckPoint::Firewall1::Component::MemSubsystem;
-our @ISA = qw(Classes::CheckPoint::Firewall1);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -21,11 +12,9 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $info = sprintf 'memory usage is %.2f%%',
-      $self->{memory_usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'memory usage is %.2f%%', $self->{memory_usage});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{memory_usage}), $info);
+  $self->add_message($self->check_thresholds($self->{memory_usage}));
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{memory_usage},

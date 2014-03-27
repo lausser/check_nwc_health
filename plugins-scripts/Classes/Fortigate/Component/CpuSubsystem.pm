@@ -1,15 +1,6 @@
 package Classes::Fortigate::Component::CpuSubsystem;
-our @ISA = qw(Classes::Fortigate);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -24,10 +15,9 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{fgSysCpuUsage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{fgSysCpuUsage});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{fgSysCpuUsage}), $info);
+  $self->add_message($self->check_thresholds($self->{fgSysCpuUsage}));
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{fgSysCpuUsage},
@@ -35,15 +25,5 @@ sub check {
       warning => $self->{warning},
       critical => $self->{critical},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU]\n";
-  foreach (qw(fgSysCpuUsage)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

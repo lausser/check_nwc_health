@@ -1,7 +1,6 @@
 package Classes::F5::F5BIGIP::Component::CpuSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -38,11 +37,10 @@ sub check {
   $self->add_info('checking cpus');
   $self->blacklist('cc', '');
   if ($self->mode =~ /load/) {
-    my $info = sprintf 'tmm cpu usage is %.2f%%',
-        $self->{cpu_usage};
-    $self->add_info($info);
+    $self->add_info(sprintf 'tmm cpu usage is %.2f%%',
+        $self->{cpu_usage});
     $self->set_thresholds(warning => 80, critical => 90);
-    $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+    $self->add_message($self->check_thresholds($self->{cpu_usage}));
     $self->add_perfdata(
         label => 'cpu_tmm_usage',
         value => $self->{cpu_usage},
@@ -52,42 +50,15 @@ sub check {
     );
     return;
   }
-  if (scalar (@{$self->{cpus}}) == 0) {
-  } else {
-    foreach (@{$self->{cpus}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
   foreach (@{$self->{cpus}}) {
-    $_->dump();
+    $_->check();
   }
 }
 
 
 package Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::CpuSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(qw(sysCpuIndex sysCpuTemperature sysCpuFanSpeed
-      sysCpuName sysCpuSlot)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -108,16 +79,5 @@ sub check {
       warning => undef,
       critical => undef,
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[CPU_%s]\n", $self->{sysCpuIndex};
-  foreach(qw(sysCpuIndex sysCpuTemperature sysCpuFanSpeed
-      sysCpuName sysCpuSlot)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

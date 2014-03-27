@@ -18,16 +18,9 @@ sub init {
     $self->analyze_and_check_svn_subsystem("Classes::CheckPoint::Firewall1::Component::SvnSubsystem");
   } elsif ($self->mode =~ /device::mngmt::/) {
     # not sure if this works fa25239716cb74c672f8dd390430dc4056caffa7
-    $self->analyze_mngmt_subsystem();
-    $self->check_mngmt_subsystem();
+    $self->analyze_and_check_mngmt_subsystem("Classes::CheckPoint::Firewall1::Component::MngmtSubsystem");
   } else {
     $self->no_such_mode();
   }
-}
-
-sub analyze_mngmt_subsystem {
-  my $self = shift;
-  $self->{components}->{mngmt_subsystem} =
-      Classes::CheckPoint::Firewall1::Component::MngmtSubsystem->new();
 }
 

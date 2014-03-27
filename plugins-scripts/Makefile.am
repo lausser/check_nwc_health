@@ -12,50 +12,54 @@ VPATH=$(top_srcdir) $(top_srcdir)/plugins-scripts $(top_srcdir)/plugins-scripts/
 libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
-  Nagios/MiniPlugin.pm \
   GLPlugin.pm \
-  UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
-  UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
-  UPNP/AVM/FritzBox7390.pm \
-  UPNP/AVM.pm \
-  UPNP.pm \
-  Server/Linux.pm \
-  Classes/CiscoIOS/Component/ConfigSubsystem.pm \
-  Classes/CiscoIOS/Component/CpuSubsystem.pm \
-  Classes/CiscoIOS/Component/MemSubsystem.pm \
-  Classes/CiscoIOS/Component/EnvironmentalSubsystem.pm \
-  Classes/CiscoIOS/Component/TemperatureSubsystem.pm \
-  Classes/CiscoIOS/Component/SupplySubsystem.pm \
-  Classes/CiscoIOS/Component/VoltageSubsystem.pm \
-  Classes/CiscoIOS/Component/FanSubsystem.pm \
-  Classes/CiscoIOS/Component/ConnectionSubsystem.pm \
-  Classes/CiscoIOS.pm \
-  Classes/CiscoNXOS/Component/CpuSubsystem.pm \
-  Classes/CiscoNXOS/Component/MemSubsystem.pm \
-  Classes/CiscoNXOS/Component/EnvironmentalSubsystem.pm \
-  Classes/CiscoNXOS/Component/SensorSubsystem.pm \
-  Classes/CiscoNXOS.pm \
-  Classes/CiscoWLC/Component/MemSubsystem.pm \
-  Classes/CiscoWLC/Component/CpuSubsystem.pm \
-  Classes/CiscoWLC/Component/EnvironmentalSubsystem.pm \
-  Classes/CiscoWLC/Component/WlanSubsystem.pm \
-  Classes/CiscoWLC.pm \
-  Classes/CiscoCCM/Component/PhoneSubsystem.pm \
-  Classes/CiscoCCM/Component/CmSubsystem.pm \
-  Classes/CiscoCCM.pm \
-  Classes/CiscoAsyncOS/Component/KeySubsystem.pm \
-  Classes/CiscoAsyncOS/Component/MemSubsystem.pm \
-  Classes/CiscoAsyncOS/Component/CpuSubsystem.pm \
-  Classes/CiscoAsyncOS/Component/TemperatureSubsystem.pm \
-  Classes/CiscoAsyncOS/Component/SupplySubsystem.pm \
-  Classes/CiscoAsyncOS/Component/FanSubsystem.pm \
-  Classes/CiscoAsyncOS/Component/RaidSubsystem.pm \
-  Classes/CiscoAsyncOS/Component/EnvironmentalSubsystem.pm \
-  Classes/CiscoAsyncOS.pm \
+  Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
+  Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
+  Classes/UPNP/AVM/FritzBox7390.pm \
+  Classes/UPNP/AVM.pm \
+  Classes/UPNP.pm \
+  Classes/Server/Linux.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/SupplySubsystem.pm \
+  Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/SupplySubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
+  Classes/Cisco/IOS/Component/CpuSubsystem.pm \
+  Classes/Cisco/IOS/Component/MemSubsystem.pm \
+  Classes/Cisco/IOS/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/IOS/Component/ConnectionSubsystem.pm \
+  Classes/Cisco/IOS.pm \
+  Classes/Cisco/NXOS/Component/CpuSubsystem.pm \
+  Classes/Cisco/NXOS/Component/MemSubsystem.pm \
+  Classes/Cisco/NXOS/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/NXOS.pm \
+  Classes/Cisco/WLC/Component/MemSubsystem.pm \
+  Classes/Cisco/WLC/Component/CpuSubsystem.pm \
+  Classes/Cisco/WLC/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/WLC/Component/WlanSubsystem.pm \
+  Classes/Cisco/WLC.pm \
+  Classes/Cisco/PrimeNCS.pm \
+  Classes/Cisco/CCM/Component/PhoneSubsystem.pm \
+  Classes/Cisco/CCM/Component/CmSubsystem.pm \
+  Classes/Cisco/CCM.pm \
+  Classes/Cisco/AsyncOS/Component/KeySubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/MemSubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/CpuSubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/TemperatureSubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/SupplySubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/FanSubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/RaidSubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/AsyncOS.pm \
   Classes/Cisco.pm \
   Classes/Nortel.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \
+  Classes/Juniper/NetScreen/Component/EnvironmentalSubsystem.pm \
   Classes/Juniper/NetScreen.pm \
   Classes/Juniper/IVE/Component/MemSubsystem.pm \
   Classes/Juniper/IVE/Component/CpuSubsystem.pm \
@@ -174,7 +178,7 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "#! #PERL# -w" | $(AWK) -f ./subst > $@
 	$(ECHO) >> $@
 	for m in ${EXTRA_MODULES}; do \
-		$(SED) -e 's/^1;//g' < $$m | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
+		$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
 	done
 	$(ECHO) "package main;" >> $@
 	$(CAT) check_nwc_health.pl | $(AWK) -f ./subst >> $@

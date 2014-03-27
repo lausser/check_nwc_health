@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::MemSubsystem;
-our @ISA = qw(Classes::AVOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -10,10 +10,6 @@ sub init {
   # AVOSV4:  memPressureValue - OIDs: 1.3.6.1.4.1.3417.2.8.2.3 (systemResourceMIB)
   # AVOSV5: sgProxyMemoryPressure - OIDs: 1.3.6.1.4.1.3417.2.11.2.3.4 (bluecoatSGProxyMIB)
   my $self = shift;
-  my %params = @_;
-  my $snmpwalk = $params{rawdata};
-  my $ignore_redundancy = $params{ignore_redundancy};
-  my $type = 0;
   $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(
       sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage sgProxyMemSysUsage)));
   if (! defined $self->{sgProxyMemPressure}) {
@@ -36,7 +32,7 @@ sub init {
 
 
 package Classes::AVOS::Component::MemSubsystem::AVOS3;
-our @ISA = qw(Classes::AVOS::Component::MemSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub check {
@@ -44,11 +40,10 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
-  my $info = sprintf 'memory usage is %.2f%%',
-      $self->{deviceUsagePercent};
-  $self->add_info($info);
+  $self->add_info(sprintf 'memory usage is %.2f%%',
+      $self->{deviceUsagePercent});
   $self->set_thresholds(warning => $self->{deviceUsageHigh} - 10, critical => $self->{deviceUsageHigh});
-  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}), $info);
+  $self->add_message($self->check_thresholds($self->{deviceUsagePercent}));
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{deviceUsagePercent},

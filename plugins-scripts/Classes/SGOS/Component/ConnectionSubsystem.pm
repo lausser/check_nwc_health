@@ -1,15 +1,7 @@
 package Classes::SGOS::Component::ConnectionSubsystem;
-our @ISA = qw(Classes::SGOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -27,11 +19,10 @@ sub check {
   my $self = shift;
   $self->add_info('checking connections');
   if ($self->mode =~ /device::connections::check/) {
-    my $info = sprintf 'average service time for http requests is %.5fs',
-        $self->{sgProxyHttpResponseTimeAll};
-    $self->add_info($info);
+    $self->add_info(sprintf 'average service time for http requests is %.5fs',
+        $self->{sgProxyHttpResponseTimeAll});
     $self->set_thresholds(warning => 5, critical => 10);
-    $self->add_message($self->check_thresholds($self->{sgProxyHttpResponseTimeAll}), $info);
+    $self->add_message($self->check_thresholds($self->{sgProxyHttpResponseTimeAll}));
     $self->add_perfdata(
         label => 'http_response_time',
         value => $self->{sgProxyHttpResponseTimeAll},
@@ -59,10 +50,9 @@ sub check {
       @selected = grep { $_->[0] eq $self->opts->name && $_->[1] eq $self->opts->name2 } @{$details};
     }
     foreach (@selected) {
-      my $info = sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1];
-      $self->add_info($info);
+      $self->add_info(sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1]);
       $self->set_thresholds(warning => 5000, critical => 10000);
-      $self->add_message($self->check_thresholds($self->{$_->[2]}), $info);
+      $self->add_message($self->check_thresholds($self->{$_->[2]}));
       $self->add_perfdata(
           label => $_->[0].'_connections_'.$_->[1],
           value => $self->{$_->[2]},

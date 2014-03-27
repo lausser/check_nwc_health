@@ -1,14 +1,6 @@
 package Classes::SGOS::Component::SensorSubsystem;
-our @ISA = qw(Classes::SGOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -16,23 +8,6 @@ sub init {
       ['sensors', 'deviceSensorValueTable', 'Classes::SGOS::Component::SensorSubsystem::Sensor'],
   ]);
 }
-
-sub check {
-  my $self = shift;
-  $self->add_info('checking sensors');
-  $self->blacklist('ses', '');
-  foreach (@{$self->{sensors}}) {
-    $_->check();
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{sensors}}) {
-    $_->dump();
-  }
-}
-
 
 package Classes::SGOS::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
@@ -54,14 +29,13 @@ sub check {
   } else {
     if ($self->{deviceSensorCode} ne "ok") {
       if ($self->{deviceSensorCode} =~ /warning/) {
-        $self->add_warning($self->{info});
+        $self->add_warning();
       } else {
-        $self->add_critical($self->{info});
+        $self->add_critical();
       }
     }
     $self->add_perfdata(
-        label => sprintf('sensor_%s', 
-            $self->{deviceSensorName}),
+        label => sprintf('sensor_%s', $self->{deviceSensorName}),
         value => $self->{deviceSensorValue},
     );
   }

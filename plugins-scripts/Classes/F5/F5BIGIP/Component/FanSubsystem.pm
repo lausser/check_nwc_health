@@ -1,15 +1,6 @@
 package Classes::F5::F5BIGIP::Component::FanSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -18,46 +9,9 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking fans');
-  $self->blacklist('ff', '');
-  if (scalar (@{$self->{fans}}) == 0) {
-  } else {
-    foreach (@{$self->{fans}}) {
-      $_->check();
-    }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{fans}}) {
-    $_->dump();
-  }
-}
-
-
 package Classes::F5::F5BIGIP::Component::FanSubsystem::Fan;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::FanSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(qw(sysChassisFanIndex sysChassisFanStatus
-      sysChassisFanSpeed)) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
@@ -69,7 +23,7 @@ sub check {
   if ($self->{sysChassisFanStatus} eq 'notpresent') {
   } else {
     if ($self->{sysChassisFanStatus} ne 'good') {
-      $self->add_message(CRITICAL, $self->{info});
+      $self->add_critical();
     }
     $self->add_perfdata(
         label => sprintf('fan_%s', $self->{sysChassisFanIndex}),
@@ -78,16 +32,5 @@ sub check {
         critical => undef,
     );
   }
-}
-
-sub dump {
-  my $self = shift;
-  printf "[FAN_%s]\n", $self->{sysChassisFanIndex};
-  foreach(qw(sysChassisFanIndex sysChassisFanStatus
-      sysChassisFanSpeed)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

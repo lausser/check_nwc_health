@@ -1,14 +1,6 @@
 package Classes::SGOS::Component::MemSubsystem;
-our @ISA = qw(Classes::SGOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
@@ -26,11 +18,10 @@ sub check {
   my $self = shift;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
-  my $info = sprintf 'memory usage is %.2f%%',
-      $self->{sgProxyMemPressure};
-  $self->add_info($info);
+  $self->add_info(sprintf 'memory usage is %.2f%%',
+      $self->{sgProxyMemPressure});
   $self->set_thresholds(warning => 75, critical => 90);
-  $self->add_message($self->check_thresholds($self->{sgProxyMemPressure}), $info);
+  $self->add_message($self->check_thresholds($self->{sgProxyMemPressure}));
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{sgProxyMemPressure},

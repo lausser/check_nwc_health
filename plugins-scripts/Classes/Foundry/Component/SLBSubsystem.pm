@@ -1,15 +1,6 @@
 package Classes::Foundry::Component::SLBSubsystem;
-our @ISA = qw(Classes::Foundry);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub update_caches {
   my $self = shift;
@@ -167,12 +158,10 @@ sub check {
   if ($self->mode =~ /device::lb::session::usage/) {
     $self->add_info('checking session usage');
     $self->blacklist('su', undef);
-    my $info = sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
-        $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit};
-    $self->add_info($info);
+    $self->add_info(sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
+        $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit});
     $self->set_thresholds(warning => 80, critical => 90);
-    $self->add_message($self->check_thresholds(
-        $self->{session_usage}), $info);
+    $self->add_message($self->check_thresholds($self->{session_usage}));
     $self->add_perfdata(
         label => 'session_usage',
         value => $self->{session_usage},
@@ -182,7 +171,7 @@ sub check {
     );
   } elsif ($self->mode =~ /device::lb::pool/) {
     if (scalar(@{$self->{virtualservers}}) == 0) {
-      $self->add_message(UNKNOWN, 'no vips');
+      $self->add_unknown('no vips');
       return;
     }
     if ($self->mode =~ /pool::list/) {
@@ -195,19 +184,12 @@ sub check {
         $_->check();
       }
       if (! $self->opts->name) {
-        $self->clear_messages(OK); # too much noise
+        $self->clear_ok(); # too much noise
         if (! $self->check_messages()) {
-          $self->add_message(OK, "virtual servers working fine");
+          $self->add_ok("virtual servers working fine");
         }
       }
     }
-  }
-}
-
-sub dump {
-  my $self = shift;
-  foreach (@{$self->{virtualservers}}) {
-    $_->dump();
   }
 }
 
@@ -220,36 +202,18 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    ports => [],
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('po', $self->{snL4VirtualServerName});
-  my $info = sprintf "vip %s is %s", 
+  $self->add_info(sprintf "vip %s is %s", 
       $self->{snL4VirtualServerName},
-      $self->{snL4VirtualServerAdminStatus};
-  $self->add_info($info);
+      $self->{snL4VirtualServerAdminStatus});
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
-    $self->add_message(WARNING, $info);
+    $self->add_warning();
   } else {
     foreach (@{$self->{ports}}) {
       $_->check();
@@ -263,53 +227,21 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[VIS_%s]\n", $self->{snL4VirtualServerName};
-  foreach(qw(snL4VirtualServerVirtualIP snL4VirtualServerAdminStatus
-      snL4VirtualServerSDAType snL4VirtualServerDeleteState)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  foreach (@{$self->{ports}}) {
-    $_->dump();
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-    ports => [],
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('vpo', $self->{snL4VirtualServerPortServerName}.':'.$self->{snL4VirtualServerPortPort});
-  my $info = sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
+  $self->add_info(sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort},
       $self->{snL4VirtualServerPortAdminStatus},
       $self->{snL4VirtualServerPortStatisticCurrentConnection},
-      scalar(@{$self->{ports}});
-  $self->add_info($info);
+      scalar(@{$self->{ports}}));
   my $num_ports = scalar(@{$self->{ports}});
   my $active_ports = scalar(grep { $_->{snL4RealServerPortStatusState} eq 'active' } @{$self->{ports}});
   # snL4RealServerPortStatusState: failed wird auch angezeigt durch snL4RealServerStatusFailedPortExists => 1
@@ -318,7 +250,7 @@ sub check {
   $self->{completeness} = $num_ports ? 100 * $active_ports / $num_ports : 0;
   if ($num_ports == 0) {
     $self->set_thresholds(warning => "0:", critical => "0:");
-    $self->add_message(WARNING, sprintf "%s:%d has no bindings", 
+    $self->add_warning(sprintf "%s:%d has no bindings", 
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort});
   } elsif ($active_ports == 1) {
@@ -327,7 +259,7 @@ sub check {
   } else {
     $self->set_thresholds(warning => "51:", critical => "26:");
   }
-  $self->add_message($self->check_thresholds($self->{completeness}), $info);
+  $self->add_message($self->check_thresholds($self->{completeness}));
   foreach (@{$self->{ports}}) {
     $_->check();
   }
@@ -392,46 +324,16 @@ sub check {
   }
 }
 
-sub dump {
-  my $self = shift;
-  printf "[VIP_%s_%s]\n", $self->{snL4VirtualServerPortServerName}, $self->{snL4VirtualServerPortPort};
-  foreach(qw(snL4VirtualServerPortServerName snL4VirtualServerPortPort
-      snL4VirtualServerPortAdminStatus snL4VirtualServerPortStatisticCurrentConnection)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  foreach (@{$self->{ports}}) {
-    $_->dump();
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::RealServer;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
   if ($self->{slbPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{slbPoolMbrStatusAvailState} ne "green") {
-      $self->add_message(CRITICAL, sprintf
+      $self->add_critical(sprintf
           "member %s is %s/%s (%s)",
           $self->{slbPoolMemberNodeName},
           $self->{slbPoolMemberMonitorState},
@@ -441,93 +343,28 @@ sub check {
   }
 }
 
-sub dump { 
-  my $self = shift;
-  printf "[POOL_%s_MEMBER]\n", $self->{slbPoolMemberPoolName};
-  foreach(qw(slbPoolMemberPoolName slbPoolMemberNodeName
-      slbPoolMemberAddr slbPoolMemberPort
-      slbPoolMemberMonitorRule
-      slbPoolMemberMonitorState slbPoolMemberMonitorStatus
-      slbPoolMbrStatusAvailState  slbPoolMbrStatusEnabledState slbPoolMbrStatusDetailReason)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::RealServerPort;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
   my %params = @_;
   $self->blacklist('rpo', $self->{snL4RealServerPortStatusServerName}.':'.$self->{snL4RealServerPortStatusPort});
-  my $info = sprintf "rpo %s:%d is %s",
+  $self->add_info(sprintf "rpo %s:%d is %s",
       $self->{snL4RealServerPortStatusServerName},
       $self->{snL4RealServerPortStatusPort},
-      $self->{snL4RealServerPortStatusState};
-  $self->add_info($info);
-  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL, $info);
+      $self->{snL4RealServerPortStatusState});
+  $self->add_message($self->{snL4RealServerPortStatusState} eq 'active' ? OK : CRITICAL);
   # snL4VirtualServerPortStatisticTable dazumischen
   # snL4VirtualServerPortStatisticTable:   snL4VirtualServerPortStatisticCurrentConnection*
   # realports connecten und den status ermitteln
 }
 
-sub dump {
-  my $self = shift;
-  printf "[REP_%s_%s]\n", $self->{snL4RealServerPortStatusServerName}, $self->{snL4RealServerPortStatusPort};
-  printf "info: %s\n", $self->{info};
-  foreach(qw(snL4RealServerPortStatusServerName snL4RealServerPortStatusPort snL4RealServerPortStatusState
-      snL4RealServerPortStatusCurrentConnection)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "\n";
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::Binding;
-our @ISA = qw(Classes::Foundry::Component::SLBSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
-  return $self;
-}
-
-sub dump { 
-  my $self = shift;
-  printf "[BINDING_%s_%d_%s_%d]\n", 
-      $self->{snL4BindVirtualServerName},
-      $self->{snL4BindVirtualPortNumber},
-      $self->{snL4BindRealServerName},
-      $self->{snL4BindRealPortNumber};
-}
-
 

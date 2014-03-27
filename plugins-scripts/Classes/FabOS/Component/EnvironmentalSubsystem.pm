@@ -1,7 +1,6 @@
 package Classes::FabOS::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::FabOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;
@@ -13,7 +12,7 @@ sub check {
   my $self = shift;
   $self->{sensor_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 

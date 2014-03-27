@@ -1,5 +1,5 @@
 package Classes::BGP::Component::PeerSubsystem;
-our @ISA = qw(Classes::BGP);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 our $errorcodes = {
@@ -56,7 +56,7 @@ our $errorcodes = {
 
 sub init {
   my $self = shift;
-  my %params = @_;
+  $self->{peers} = [];
   if ($self->mode =~ /device::bgp::peer::list/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }
@@ -126,7 +126,7 @@ sub check {
       
     }
     if ($self->opts->report eq "short") {
-      $self->clear_messages(OK);
+      $self->clear_ok();
       $self->add_ok('no problems') if ! $self->check_messages();
     }
   }

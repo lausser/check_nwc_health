@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->no_such_mode();
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::AlliedTelesyn::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {

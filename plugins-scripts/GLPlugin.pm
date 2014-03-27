@@ -1,9 +1,8 @@
 package GLPlugin;
-
 use strict;
 use IO::File;
 use File::Basename;
-use Digest::MD5  qw(md5_hex);
+use Digest::MD5 qw(md5_hex);
 use Errno;
 use AutoLoader;
 our $AUTOLOAD;
@@ -13,19 +12,231 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 {
   our $mode = undef;
   our $plugin = undef;
+  our $pluginname = basename($0);
   our $blacklist = undef;
   our $info = [];
   our $extendedinfo = [];
   our $summary = [];
-  our $statefilesdir = undef;
 }
 
 sub new {
   my $class = shift;
+  my %params = @_;
   my $self = {};
   bless $self, $class;
+  $GLPlugin::plugin = GLPlugin::Commandline->new(%params);
   return $self;
 }
+
+sub statefilesdir {
+  my $self = shift;
+  return $GLPlugin::plugin->{statefilesdir};
+}
+
+#
+# Plugin-related methods
+#
+sub nagios_exit {
+  my $self = shift;
+  return $GLPlugin::plugin->nagios_exit(@_);
+}
+
+sub mode {
+  my $self = shift;
+  return $GLPlugin::mode;
+}
+
+sub add_ok {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(OK, $message);
+}
+
+sub add_warning {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(WARNING, $message);
+}
+
+sub add_critical {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(CRITICAL, $message);
+}
+
+sub add_unknown {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(UNKNOWN, $message);
+}
+
+sub add_message {
+  my $self = shift;
+  my $level = shift;
+  my $message = shift || $self->{info};
+  $GLPlugin::plugin->add_message($level, $message)
+      unless $self->{blacklisted};
+  if (exists $self->{failed}) {
+    if ($level == UNKNOWN && $self->{failed} == OK) {
+      $self->{failed} = $level;
+    } elsif ($level > $self->{failed}) {
+      $self->{failed} = $level;
+    }
+  }
+}
+
+sub status_code {
+  my $self = shift;
+  return $GLPlugin::plugin->status_code(@_);
+}
+
+sub check_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->check_messages(@_);
+}
+
+sub clear_ok {
+  my $self = shift;
+  return $self->clear_messages(OK);
+}
+
+sub clear_warning {
+  my $self = shift;
+  return $self->clear_messages(WARNING);
+}
+
+sub clear_critical {
+  my $self = shift;
+  return $self->clear_messages(CRITICAL);
+}
+
+sub clear_unknown {
+  my $self = shift;
+  return $self->clear_messages(UNKNOWN);
+}
+
+sub clear_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->clear_messages(@_);
+}
+
+sub suppress_messages {
+  my $self = shift;
+  return $GLPlugin::plugin->suppress_messages(@_);
+}
+
+sub add_perfdata {
+  my $self = shift;
+  $GLPlugin::plugin->add_perfdata(@_);
+}
+sub add_modes {
+  my $self = shift;
+  my $modes = shift;
+  my $modestring = "";
+  my @modes = @{$modes};
+  my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
+  my $format = "       %-".
+      (length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0])).
+      "s\t(%s)\n";
+  foreach (@modes) {
+    $modestring .= sprintf $format, $_->[1], $_->[3];
+  }
+  $modestring .= sprintf "\n";
+  $GLPlugin::plugin->{modestring} = $modestring;
+}
+
+sub add_arg {
+  my $self = shift;
+  my %args = @_;
+  if ($args{help} =~ /^--mode/) {
+    $args{help} .= "\n".$GLPlugin::plugin->{modestring};
+  }
+  $GLPlugin::plugin->{opts}->add_arg(%args);
+}
+
+sub add_mode {
+  my $self = shift;
+  my %args = @_;
+  push(@{$GLPlugin::plugin->{modes}}, \%args);
+  my $longest = length ((reverse sort {length $a <=> length $b} map { $_->{spec} } @{$GLPlugin::plugin->{modes}})[0]);
+  my $format = "       %-".
+      (length ((reverse sort {length $a <=> length $b} map { $_->{spec} } @{$GLPlugin::plugin->{modes}})[0])).
+      "s\t(%s)\n";
+  $GLPlugin::plugin->{modestring} = "";
+  foreach (@{$GLPlugin::plugin->{modes}}) {
+    $GLPlugin::plugin->{modestring} .= sprintf $format, $_->{spec}, $_->{help};
+  }
+  $GLPlugin::plugin->{modestring} .= "\n";
+}
+
+sub getopts {
+  my $self = shift;
+  $GLPlugin::plugin->getopts();
+}
+
+sub override_opt {
+  my $self = shift;
+  $GLPlugin::plugin->override_opt(@_);
+}
+
+sub validate_args {
+  my $self = shift;
+  if ($self->opts->mode =~ /^my-([^\-.]+)/) {
+    my $param = $self->opts->mode;
+    $param =~ s/\-/::/g;
+    $self->add_mode(
+        internal => $param,
+        spec => $self->opts->mode,
+        alias => undef,
+        help => 'my extension',
+    );
+  } elsif ($self->opts->mode eq 'encode') {
+    my $input = <>;
+    chomp $input;
+    $input =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
+    printf "%s\n", $input;
+    exit 0;
+  } elsif ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$GLPlugin::plugin->{modes}}) &&
+      (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$GLPlugin::plugin->{modes}})) {
+    printf "UNKNOWN - mode %s\n", $self->opts->mode;
+    $self->opts->print_help();
+    exit 3;
+  }
+  if ($self->opts->name && $self->opts->name =~ /(%22)|(%27)/) {
+    my $name = $self->opts->name;
+    $name =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
+    $self->override_opt('name', $name);
+  }
+  $GLPlugin::mode = (
+      map { $_->{internal} }
+      grep {
+         ($self->opts->mode eq $_->{spec}) ||
+         ( defined $_->{alias} && grep { $self->opts->mode eq $_ } @{$_->{alias}})
+      } @{$GLPlugin::plugin->{modes}}
+  )[0];
+  if ($self->opts->multiline) {
+    $ENV{NRPE_MULTILINESUPPORT} = 1;
+  } else {
+    $ENV{NRPE_MULTILINESUPPORT} = 0;
+  }
+  if (! $self->opts->statefilesdir) {
+    if (exists $ENV{NAGIOS__SERVICESTATEFILESDIR}) {
+      $self->override_opt('statefilesdir', $ENV{NAGIOS__SERVICESTATEFILESDIR});
+    } elsif (exists $ENV{OMD_ROOT}) {
+      $self->override_opt('statefilesdir', $ENV{OMD_ROOT}."/var/tmp/".$GLPlugin::plugin->{name});
+    } else {
+      $self->override_opt('statefilesdir', "/var/tmp/".$GLPlugin::plugin->{name});
+    }
+  }
+  $GLPlugin::plugin->{statefilesdir} = $self->opts->statefilesdir;
+  $SIG{'ALRM'} = sub {
+    printf "UNKNOWN - %s timed out after %d seconds\n",
+        $GLPlugin::plugin->{name}, $self->opts->timeout;
+    exit 3;
+  };
+  alarm($self->opts->timeout);
+}
+
 
 sub init {
   my $self = shift;
@@ -117,74 +328,6 @@ sub is_blacklisted {
   return $blacklisted;
 }
 
-sub mode {
-  my $self = shift;
-  return $GLPlugin::mode;
-}
-
-sub add_ok {
-  my $self = shift;
-  my $message = shift;
-  $self->add_message(OK, $message);
-}
-
-sub add_warning {
-  my $self = shift;
-  my $message = shift;
-  $self->add_message(WARNING, $message);
-}
-
-sub add_critical {
-  my $self = shift;
-  my $message = shift;
-  $self->add_message(CRITICAL, $message);
-}
-
-sub add_unknown {
-  my $self = shift;
-  my $message = shift;
-  $self->add_message(UNKNOWN, $message);
-}
-
-sub add_message {
-  my $self = shift;
-  my $level = shift;
-  my $message = shift;
-  $GLPlugin::plugin->add_message($level, $message)
-      unless $self->{blacklisted};
-  if (exists $self->{failed}) {
-    if ($level == UNKNOWN && $self->{failed} == OK) {
-      $self->{failed} = $level;
-    } elsif ($level > $self->{failed}) {
-      $self->{failed} = $level;
-    }
-  }
-}
-
-sub status_code {
-  my $self = shift;
-  return $GLPlugin::plugin->status_code(@_);
-}
-
-sub check_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->check_messages(@_);
-}
-
-sub clear_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->clear_messages(@_);
-}
-
-sub suppress_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->suppress_messages(@_);
-}
-
-sub add_perfdata {
-  my $self = shift;
-  $GLPlugin::plugin->add_perfdata(@_);
-}
 
 sub set_thresholds {
   my $self = shift;
@@ -391,18 +534,18 @@ sub valdiff {
 
 sub create_statefilesdir {
   my $self = shift;
-  if (! -d $GLPlugin::statefilesdir) {
+  if (! -d $self->statefilesdir()) {
     eval {
       use File::Path;
-      mkpath $GLPlugin::statefilesdir;
+      mkpath $self->statefilesdir();
     };
-    if ($@ || ! -w $GLPlugin::statefilesdir) {
+    if ($@ || ! -w $self->statefilesdir()) {
       $self->add_message(UNKNOWN,
-        sprintf "cannot create status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $GLPlugin::statefilesdir);
+        sprintf "cannot create status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $self->statefilesdir());
     }
-  } elsif (! -w $GLPlugin::statefilesdir) {
+  } elsif (! -w $self->statefilesdir()) {
     $self->add_message(UNKNOWN,
-        sprintf "cannot write status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $GLPlugin::statefilesdir);
+        sprintf "cannot write status dir %s! check your filesystem (permissions/usage/integrity) and disk devices", $self->statefilesdir());
   }
 }
 
@@ -420,22 +563,56 @@ sub create_statefile {
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
   if ($self->opts->snmpwalk && ! $self->opts->hostname) {
-    return sprintf "%s/%s_%s%s", $GLPlugin::statefilesdir,
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
         $self->opts->mode, lc $extension;
   } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
-    return sprintf "%s/%s_%s%s", $GLPlugin::statefilesdir,
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
         $self->opts->mode, lc $extension;
   } else {
-    return sprintf "%s/%s_%s%s", $GLPlugin::statefilesdir,
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
         $self->opts->hostname, $self->opts->mode, lc $extension;
   }
 }
 
 sub schimpf {
   my $self = shift;
-  printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $GLPlugin::statefilesdir;
+  printf "statefilesdir %s is not writable.\nYou didn't run this plugin as root, didn't you?\n", $self->statefilesdir();
+}
+
+# $self->protect_value('1.1-flat_index', 'cpu_busy', 'percent');
+sub protect_value {
+  my $self = shift;
+  my $ident = shift;
+  my $key = shift;
+  my $validfunc = shift;
+  if (ref($validfunc) ne "CODE" && $validfunc eq "percent") {
+    $validfunc = sub {
+      my $value = shift;
+      return ($value < 0 || $value > 100) ? 0 : 1;
+    };
+  }
+  if (&$validfunc($self->{$key})) {
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $self->{$key},
+        exception => 0,
+    });
+  } else {
+    # if the device gives us an clearly wrong value, simply use the last value.
+    my $laststate = $self->load_state(name => 'protect_'.$ident.'_'.$key);
+    $self->debug(sprintf "self->{%s} is %s and invalid for the %dth time",
+        $key, $self->{$key}, $laststate->{exception} + 1);
+    if ($laststate->{exception} <= 5) {
+      # but only 5 times.
+      # if the error persists, somebody has to check the device.
+      $self->{$key} = $laststate->{$key};
+    }
+    $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
+        $key => $laststate->{$key},
+        exception => $laststate->{exception}++,
+    });
+  }
 }
 
 sub save_state {
@@ -586,14 +763,14 @@ sub dump {
   } else {
     printf "[%s]\n", uc $class;
   }
-  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
     printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
   }
   if ($self->{info}) {
     printf "info: %s\n", $self->{info};
   }
   printf "\n";
-  foreach (grep !/^(trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
     if (defined $self->{$_} && ref($self->{$_}) eq "ARRAY") {
       foreach my $obj (@{$self->{$_}}) {
         $obj->dump();
@@ -603,11 +780,523 @@ sub dump {
 }
 
 
+package GLPlugin::Commandline;
+use strict;
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3, DEPENDENT => 4 };
+our %ERRORS = (
+    'OK'        => OK,
+    'WARNING'   => WARNING,
+    'CRITICAL'  => CRITICAL,
+    'UNKNOWN'   => UNKNOWN,
+    'DEPENDENT' => DEPENDENT,
+);
+
+our %STATUS_TEXT = reverse %ERRORS;
+
+
+sub new {
+  my $class = shift;
+  my %params = @_;
+  my $self = {
+       perfdata => [],
+       messages => {
+         ok => [],
+         warning => [],
+         critical => [],
+         unknown => [],
+       },
+       args => [],
+       opts => GLPlugin::Commandline::Getopt->new(%params),
+       modes => [],
+       statefilesdir => undef,
+  };
+  foreach (qw(shortname usage version url plugin blurb extra
+      license timeout)) {
+    $self->{$_} = $params{$_};
+  }
+  bless $self, $class;
+  $self->{name} = $self->{plugin};
+  $GLPlugin::plugin = $self;
+}
+
+sub add_arg {
+  my $self = shift;
+  $self->{opts}->add_arg(@_);
+}
+
+sub getopts {
+  my $self = shift;
+  $self->{opts}->getopts();
+}
+
+sub override_opt {
+  my $self = shift;
+  $self->{opts}->override_opt(@_);
+}
+
+sub create_opt {
+  my $self = shift;
+  $self->{opts}->create_opt(@_);
+}
+
+sub opts {
+  my $self = shift;
+  return $self->{opts};
+}
+
+sub add_message {
+  my $self = shift;
+  my ($code, @messages) = @_;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = lc $code;
+  push @{$self->{messages}->{$code}}, @messages;
+}
+
+sub add_perfdata {
+  my ($self, %args) = @_;
+  $args{label} = '\''.$args{label}.'\'';
+  if (! exists $args{places}) {
+    $args{places} = 2;
+  }
+  my $format = '%d';
+  if ($args{value} =~ /\./) {
+    $format = '%.'.$args{places}.'f';
+  }
+  my $str = $args{label}.'='.sprintf $format, $args{value};
+  if ($args{uom}) {
+    $str .= $args{uom};
+  }
+  if ($args{warning}) {
+    $str .= ';'.$args{warning};
+  }
+  if ($args{critical}) {
+    $str .= ';'.$args{critical};
+  }
+  if (! $args{warning} && ! $args{critical} && $args{uom} && $args{uom} eq '%') {
+    $str .= ';0;100';
+  }
+  push @{$self->{perfdata}}, $str;
+}
+
+sub add_html {
+  my $self = shift;
+  my $line = shift;
+  push @{$self->{html}}, $line;
+}
+
+sub suppress_messages {
+  my $self = shift;
+  $self->{suppress_messages} = 1;
+}
+
+sub clear_messages {
+  my $self = shift;
+  my $code = shift;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = lc $code;
+  $self->{messages}->{$code} = [];
+}
+
+sub check_messages {
+  my $self = shift;
+  my %args = @_;
+
+  # Add object messages to any passed in as args
+  for my $code (qw(critical warning unknown ok)) {
+    my $messages = $self->{messages}->{$code} || [];
+    if ($args{$code}) {
+      unless (ref $args{$code} eq 'ARRAY') {
+        if ($code eq 'ok') {
+          $args{$code} = [ $args{$code} ];
+        }
+      }
+      push @{$args{$code}}, @$messages;
+    } else {
+      $args{$code} = $messages;
+    }
+  }
+  my %arg = %args;
+  $arg{join} = ' ' unless defined $arg{join};
+
+  # Decide $code
+  my $code = OK;
+  $code ||= CRITICAL  if @{$arg{critical}};
+  $code ||= WARNING   if @{$arg{warning}};
+  $code ||= UNKNOWN   if @{$arg{unknown}};
+  return $code unless wantarray;
+
+  # Compose message
+  my $message = '';
+  if ($arg{join_all}) {
+      $message = join( $arg{join_all},
+          map { @$_ ? join( $arg{'join'}, @$_) : () }
+              $arg{critical},
+              $arg{warning},
+              $arg{unknown},
+              $arg{ok} ? (ref $arg{ok} ? $arg{ok} : [ $arg{ok} ]) : []
+      );
+  }
+
+  else {
+      $message ||= join( $arg{'join'}, @{$arg{critical}} )
+          if $code == CRITICAL;
+      $message ||= join( $arg{'join'}, @{$arg{warning}} )
+          if $code == WARNING;
+      $message ||= join( $arg{'join'}, @{$arg{unknown}} )
+          if $code == UNKNOWN;
+      $message ||= ref $arg{ok} ? join( $arg{'join'}, @{$arg{ok}} ) : $arg{ok}
+          if $arg{ok};
+  }
+
+  return ($code, $message);
+}
+
+sub status_code {
+  my $self = shift;
+  my $code = shift;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = uc $code;
+  $code = $ERRORS{$code} if defined $code && exists $ERRORS{$code};
+  $code = UNKNOWN unless defined $code && exists $STATUS_TEXT{$code};
+  return "$STATUS_TEXT{$code}";
+}
+
+sub perfdata_string {
+  my $self = shift;
+  if (scalar (@{$self->{perfdata}})) {
+    return join(" ", @{$self->{perfdata}});
+  } else {
+    return "";
+  }
+}
+
+sub html_string {
+  my $self = shift;
+  if (scalar (@{$self->{html}})) {
+    return join(" ", @{$self->{html}});
+  } else {
+    return "";
+  }
+}
+
+sub nagios_exit {
+  my $self = shift;
+  my ($code, $message, $arg) = @_;
+  $code = $ERRORS{$code} if defined $code && exists $ERRORS{$code};
+  $code = UNKNOWN unless defined $code && exists $STATUS_TEXT{$code};
+  $message = '' unless defined $message;
+  if (ref $message && ref $message eq 'ARRAY') {
+      $message = join(' ', map { chomp; $_ } @$message);
+  } else {
+      chomp $message;
+  }
+  my $output = "$STATUS_TEXT{$code}";
+  $output .= " - $message" if defined $message && $message ne '';
+  if (scalar (@{$self->{perfdata}})) {
+    $output .= " | ".$self->perfdata_string();
+  }
+  $output .= "\n";
+  if (! exists $self->{suppress_messages}) {
+    print $output;
+  }
+  exit $code;
+}
+
+sub set_thresholds {
+  my $self = shift;
+  my %params = @_;
+  if (exists $params{metric}) {
+    my $metric = $params{metric};
+    $self->{thresholds}->{$metric}->{warning} = $params{warning};
+    $self->{thresholds}->{$metric}->{critical} = $params{critical};
+    if ($self->opts->warningx) {
+      foreach my $key (keys %{$self->opts->warningx}) {
+        next if $key ne $metric;
+        $self->{thresholds}->{$metric}->{warning} = $self->opts->warningx->{$key};
+      }
+    }
+    if ($self->opts->criticalx) {
+      foreach my $key (keys %{$self->opts->criticalx}) {
+        next if $key ne $metric;
+        $self->{thresholds}->{$metric}->{critical} = $self->opts->criticalx->{$key};
+      }
+    }
+  } else {
+    $self->{thresholds}->{default}->{warning} =
+        $self->opts->warning || $params{warning} || 0;
+    $self->{thresholds}->{default}->{critical} =
+        $self->opts->critical || $params{critical} || 0;
+  }
+}
+
+sub force_thresholds {
+  my $self = shift;
+  my %params = @_;
+  $self->{mywarning} = $params{warning} || 0;
+  $self->{mycritical} = $params{critical} || 0;
+}
+
+sub get_thresholds {
+  my $self = shift;
+  return ($self->{mywarning}, $self->{mycritical});
+}
+
+sub check_thresholds {
+  my $self = shift;
+  my @params = @_;
+  my $level = $ERRORS{OK};
+  my $warningrange;
+  my $criticalrange;
+  my $value;
+  if (scalar(@params) > 1) {
+    my %params = @params;
+    $value = $params{value};
+    my $metric = $params{metric};
+    if ($metric ne 'default') {
+      $warningrange = $self->{thresholds}->{$metric}->{warning};
+      $criticalrange = $self->{thresholds}->{$metric}->{critical};
+    } else {
+      $warningrange = (defined $params{warning}) ?
+          $params{warning} : $self->{thresholds}->{default}->{warning};
+      $criticalrange = (defined $params{critical}) ?
+          $params{critical} : $self->{thresholds}->{default}->{critical};
+    }
+  } else {
+    $value = $params[0];
+    $warningrange = $self->{thresholds}->{default}->{warning};
+    $criticalrange = $self->{thresholds}->{default}->{critical};
+  }
+  if ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = 10, warn if > 10 or < 0
+    $level = $ERRORS{WARNING}
+        if ($value > $1 || $value < 0);
+  } elsif ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+):$/) {
+    # warning = 10:, warn if < 10
+    $level = $ERRORS{WARNING}
+        if ($value < $1);
+  } elsif ($warningrange =~ /^~:([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = ~:10, warn if > 10
+    $level = $ERRORS{WARNING}
+        if ($value > $1);
+  } elsif ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = 10:20, warn if < 10 or > 20
+    $level = $ERRORS{WARNING}
+        if ($value < $1 || $value > $2);
+  } elsif ($warningrange =~ /^@([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = @10:20, warn if >= 10 and <= 20
+    $level = $ERRORS{WARNING}
+        if ($value >= $1 && $value <= $2);
+  }
+  if ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = 10, crit if > 10 or < 0
+    $level = $ERRORS{CRITICAL}
+        if ($value > $1 || $value < 0);
+  } elsif ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+):$/) {
+    # critical = 10:, crit if < 10
+    $level = $ERRORS{CRITICAL}
+        if ($value < $1);
+  } elsif ($criticalrange =~ /^~:([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = ~:10, crit if > 10
+    $level = $ERRORS{CRITICAL}
+        if ($value > $1);
+  } elsif ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = 10:20, crit if < 10 or > 20
+    $level = $ERRORS{CRITICAL}
+        if ($value < $1 || $value > $2);
+  } elsif ($criticalrange =~ /^@([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = @10:20, crit if >= 10 and <= 20
+    $level = $ERRORS{CRITICAL}
+        if ($value >= $1 && $value <= $2);
+  }
+  return $level;
+}
+
+
+package GLPlugin::Commandline::Getopt;
+use strict;
+use File::Basename;
+use Getopt::Long qw(:config no_ignore_case bundling);
+
+# Standard defaults
+my %DEFAULT = (
+  timeout => 15,
+  verbose => 0,
+  license =>
+"This monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
+It may be used, redistributed and/or modified under the terms of the GNU
+General Public Licence (see http://www.fsf.org/licensing/licenses/gpl.txt).",
+);
+# Standard arguments
+my @ARGS = ({
+    spec => 'usage|?',
+    help => "-?, --usage\n   Print usage information",
+  }, {
+    spec => 'help|h',
+    help => "-h, --help\n   Print detailed help screen",
+  }, {
+    spec => 'version|V',
+    help => "-V, --version\n   Print version information",
+  }, {
+    #spec => 'extra-opts:s@',
+    #help => "--extra-opts=[<section>[@<config_file>]]\n   Section and/or config_file from which to load extra options (may repeat)",
+  }, {
+    spec => 'timeout|t=i',
+    help => sprintf("-t, --timeout=INTEGER\n   Seconds before plugin times out (default: %s)", $DEFAULT{timeout}),
+    default => $DEFAULT{timeout},
+  }, {
+    spec => 'verbose|v+',
+    help => "-v, --verbose\n   Show details for command-line debugging (can repeat up to 3 times)",
+    default => $DEFAULT{verbose},
+  },
+);
+# Standard arguments we traditionally display last in the help output
+my %DEFER_ARGS = map { $_ => 1 } qw(timeout verbose);
+
+sub _init {
+  my $self = shift;
+  my %params = @_;
+  # Check params
+  my $plugin = basename($0);
+  #my %attr = validate( @_, {
+  my %attr = (
+    usage => 1,
+    version => 0,
+    url => 0,
+    plugin => { default => $plugin },
+    blurb => 0,
+    extra => 0,
+    'extra-opts' => 0,
+    license => { default => $DEFAULT{license} },
+    timeout => { default => $DEFAULT{timeout} },
+  );
+
+  # Add attr to private _attr hash (except timeout)
+  $self->{timeout} = delete $attr{timeout};
+  $self->{_attr} = { %attr };
+  foreach (keys %{$self->{_attr}}) {
+    if (exists $params{$_}) {
+      $self->{_attr}->{$_} = $params{$_};
+    } else {
+      $self->{_attr}->{$_} = $self->{_attr}->{$_}->{default}
+          if ref ($self->{_attr}->{$_}) eq 'HASH' &&
+              exists $self->{_attr}->{$_}->{default};
+    }
+  }
+  # Chomp _attr values
+  chomp foreach values %{$self->{_attr}};
+
+  # Setup initial args list
+  $self->{_args} = [ grep { exists $_->{spec} } @ARGS ];
+
+  $self
+}
+
+sub new {
+  my $class = shift;
+  my $self = bless {}, $class;
+  $self->_init(@_);
+}
+
+sub add_arg {
+  my $self = shift;
+  my %arg = @_;
+  push (@{$self->{_args}}, \%arg);
+}
+
+sub getopts {
+  my $self = shift;
+  my %commandline = ();
+  my @params = map { $_->{spec} } @{$self->{_args}};
+  if (! GetOptions(\%commandline, @params)) {
+    $self->print_help();
+    exit 0;
+  } else {
+    no strict 'refs';
+    do { $self->print_help(); exit 0; } if $commandline{help};
+    do { $self->print_version(); exit 0 } if $commandline{version};
+    do { $self->print_usage(); exit 3 } if $commandline{usage};
+    foreach (map { $_->{spec} =~ /^([\w\-]+)/; $1; } @{$self->{_args}}) {
+      my $field = $_;
+      *{"$field"} = sub {
+        return $self->{opts}->{$field};
+      };
+    }
+    foreach (map { $_->{spec} =~ /^([\w\-]+)/; $1; }
+        grep { exists $_->{required} && $_->{required} } @{$self->{_args}}) {
+      do { $self->print_usage(); exit 0 } if ! exists $commandline{$_};
+    }
+    foreach (grep { exists $_->{default} } @{$self->{_args}}) {
+      $_->{spec} =~ /^([\w\-]+)/;
+      my $spec = $1;
+      $self->{opts}->{$spec} = $_->{default};
+    }
+    foreach (keys %commandline) {
+      $self->{opts}->{$_} = $commandline{$_};
+    }
+  }
+}
+
+sub create_opt {
+  my $self = shift;
+  my $key = shift;
+  no strict 'refs';
+  *{"$key"} = sub {
+      return $self->{opts}->{$key};
+  };
+}
+
+sub override_opt {
+  my $self = shift;
+  my $key = shift;
+  my $value = shift;
+  $self->{opts}->{$key} = $value;
+}
+
+sub get {
+  my $self = shift;
+  my $opt = shift;
+  return $self->{opts}->{$opt};
+}
+
+sub print_help {
+  my $self = shift;
+  $self->print_version();
+  printf "\n%s\n", $self->{_attr}->{license};
+  printf "\n%s\n\n", $self->{_attr}->{blurb};
+  $self->print_usage();
+  foreach (@{$self->{_args}}) {
+    printf " %s\n", $_->{help};
+  }
+  exit 0;
+}
+
+sub print_usage {
+  my $self = shift;
+  printf $self->{_attr}->{usage}, $self->{_attr}->{plugin};
+  print "\n";
+}
+
+sub print_version {
+  my $self = shift;
+  printf "%s %s", $self->{_attr}->{plugin}, $self->{_attr}->{version};
+  printf " [%s]", $self->{_attr}->{url} if $self->{_attr}->{url};
+  print "\n";
+}
+
+sub print_license {
+  my $self = shift;
+  printf "%s\n", $self->{_attr}->{license};
+  print "\n";
+}
+
+
 package GLPlugin::SNMP;
 our @ISA = qw(GLPlugin);
 
 use strict;
 use File::Basename;
+use Digest::MD5 qw(md5_hex);
+use Data::Dumper;
 use AutoLoader;
 our $AUTOLOAD;
 
@@ -619,12 +1308,63 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $blacklist = undef;
   our $session = undef;
   our $rawdata = {};
+  our $tablecache = {};
   our $info = [];
   our $extendedinfo = [];
   our $summary = [];
-  our $statefilesdir = '/var/tmp/check_'.basename($0).'_health';
   our $oidtrace = [];
   our $uptime = 0;
+}
+
+sub validate_args {
+  my $self = shift;
+  $self->SUPER::validate_args();
+  if ($self->opts->community) {
+    if ($self->opts->community =~ /^snmpv3(.)(.+)/) {
+      my $separator = $1;
+      my ($authprotocol, $authpassword, $privprotocol, $privpassword, $username) =
+          split(/$separator/, $2);
+      $self->override_opt('authprotocol', $authprotocol) 
+          if defined($authprotocol) && $authprotocol;
+      $self->override_opt('authpassword', $authpassword) 
+          if defined($authpassword) && $authpassword;
+      $self->override_opt('privprotocol', $privprotocol) 
+          if defined($privprotocol) && $privprotocol;
+      $self->override_opt('privpassword', $privpassword) 
+          if defined($privpassword) && $privpassword;
+      $self->override_opt('username', $username) 
+          if defined($username) && $username;
+      $self->override_opt('protocol', '3') ;
+    }
+  }
+  if ($self->opts->mode eq 'walk') {
+    if ($self->opts->snmpwalk && $self->opts->hostname) {
+      # snmp agent wird abgefragt, die ergebnisse landen in einem file
+      # opts->snmpwalk ist der filename. da sich die ganzen get_snmp_table/object-aufrufe
+      # an das walkfile statt an den agenten halten wuerden, muss opts->snmpwalk geloescht
+      # werden. stattdessen wird opts->snmpdump als traeger des dateinamens mitgegeben.
+      # nur sinnvoll mit mode=walk
+      $self->create_opt('snmpdump');
+      $self->override_opt('snmpdump', $self->opts->snmpwalk);
+      $self->override_opt('snmpwalk', undef);
+    } elsif (! $self->opts->snmpwalk && $self->opts->hostname && $self->opts->mode eq 'walk') {   
+      # snmp agent wird abgefragt, die ergebnisse landen in einem file, dessen name
+      # nicht vorgegeben ist
+      $self->create_opt('snmpdump');
+    }
+  } else {    
+    if (exists $ENV{NAGIOS__HOSTSNMPWALK} || exists $ENV{NAGIOS__SERVICESNMPWALK}) {
+      $self->override_opt('snmpwalk', $ENV{NAGIOS__SERVICESNMPWALK} || $ENV{NAGIOS__HOSTSNMPWALK}); 
+      $self->override_opt('offline', $ENV{NAGIOS__SERVICEOFFLINE} || $ENV{NAGIOS__HOSTOFFLIN});
+    }
+    if ($self->opts->snmpwalk && ! $self->opts->hostname) {
+      # normaler aufruf, mode != walk, oid-quelle ist eine datei
+      $self->override_opt('hostname', 'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
+    } elsif ($self->opts->snmpwalk && $self->opts->hostname) {
+      # snmpwalk hat vorrang
+      $self->override_opt('hostname', undef);
+    }
+  }
 }
 
 sub init {
@@ -658,8 +1398,7 @@ sub init {
       $SIG{'ALRM'} = sub {
         $timedout = 1;
         printf "UNKNOWN - %s timed out after %d seconds\n",
-            basename($0),
-            $self->opts->timeout;
+            $GLPlugin::plugin->{name}, $self->opts->timeout;
         kill 9, $snmpwalkpid;
       };
       alarm($self->opts->timeout);
@@ -700,7 +1439,6 @@ sub init {
     }
     exit 0;
   } elsif ($self->mode =~ /device::uptime/) {
-    $self->{uptime} /= 60;
     my $info = sprintf 'device is up since %s',
         $self->human_timeticks($self->{uptime});
     $self->add_info($info);
@@ -708,7 +1446,7 @@ sub init {
     $self->add_message($self->check_thresholds($self->{uptime}), $info);
     $self->add_perfdata(
         label => 'uptime',
-        value => $self->{uptime},
+        value => $self->{uptime} / 60,
         warning => $self->{warning},
         critical => $self->{critical},
     );
@@ -804,7 +1542,11 @@ sub check_snmp_and_model {
       my %params = ();
       my $net_snmp_version = Net::SNMP->VERSION(); # 5.002000 or 6.000000
       $params{'-translate'} = [ # because we see "NULL" coming from socomec devices
-        -all => 0x0
+        -all => 0x0,
+        -nosuchobject => 1,
+        -nosuchinstance => 1,
+        -endofmibview => 1,
+        -unsigned => 1,
       ];
       $params{'-hostname'} = $self->opts->hostname;
       $params{'-version'} = $self->opts->protocol;
@@ -873,9 +1615,13 @@ sub discover_suitable_class {
     return $GLPlugin::SNMP::discover_ids->{$sysobj};
   }
 }
+
 sub implements_mib {
   my $self = shift;
   my $mib = shift;
+  if (! exists $GLPlugin::SNMP::mib_ids->{$mib}) {
+    return 0;
+  }
   my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
   $sysobj =~ s/^\.// if $sysobj;
   if ($sysobj && $sysobj eq $GLPlugin::SNMP::mib_ids->{$mib}) {
@@ -883,6 +1629,19 @@ sub implements_mib {
   }
   if ($GLPlugin::SNMP::mib_ids->{$mib} eq
       substr $sysobj, 0, length $GLPlugin::SNMP::mib_ids->{$mib}) {
+    return 1;
+  }
+  # some mibs are only composed of tables
+  my $traces = $GLPlugin::SNMP::session->get_next_request(
+    -varbindlist => [
+        $GLPlugin::SNMP::mib_ids->{$mib}
+    ]
+  );
+  if ($traces && # must find oids following to the ident-oid
+      ! exists $traces->{$GLPlugin::SNMP::mib_ids->{$mib}} && # must not be the ident-oid
+      grep { # following oid is inside this tree
+          substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib};
+      } keys %{$traces}) {
     return 1;
   }
 }
@@ -908,6 +1667,8 @@ sub timeticks {
   } elsif ($timestr =~ /(\d+)\.\d+\s*second[s]/) {
     # Timeticks: 01.02 seconds
     $timestr = $1;
+  } elsif ($timestr =~ /^(\d+)$/) {
+    $timestr = $1 / 100;
   }
   return $timestr;
 }
@@ -937,9 +1698,8 @@ sub get_snmp_object {
     my $response = $self->get_request(-varbindlist => [$oid]);
     if (defined $response->{$oid}) {
       if ($response->{$oid} eq 'noSuchInstance') {
-        return undef;
-      }
-      if (my @symbols = $self->make_symbolic($mib, $response, [[$index]])) {
+        $response->{$oid} = undef;
+      } elsif (my @symbols = $self->make_symbolic($mib, $response, [[$index]])) {
         $response->{$oid} = $symbols[0]->{$mo};
       }
     }
@@ -1300,9 +2060,19 @@ sub get_snmp_tables {
     my $class = $info->[2];
     my $filter = $info->[3];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
-    foreach ($self->get_snmp_table_objects($mib, $table)) {
-      next if (defined $filter && &$filter($_));
-      push(@{$self->{$arrayname}}, $class->new(%{$_}));
+    if (! exists $GLPlugin::SNMP::tablecache->{$mib} || ! exists $GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
+      $GLPlugin::SNMP::tablecache->{$mib}->{$table} = [];
+      foreach ($self->get_snmp_table_objects($mib, $table)) {
+        my $new_object = $class->new(%{$_});
+        next if (defined $filter && ! &$filter($new_object));
+        push(@{$self->{$arrayname}}, $new_object);
+        push(@{$GLPlugin::SNMP::tablecache->{$mib}->{$table}}, $new_object);
+      }
+    } else {
+      $self->debug(sprintf "get_snmp_tables %s %s cache hit", $mib, $table);
+      foreach (@{$GLPlugin::SNMP::tablecache->{$mib}->{$table}}) {
+        push(@{$self->{$arrayname}}, $_);
+      }
     }
   }
 }
@@ -1338,6 +2108,14 @@ sub make_symbolic {
             if (ref($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'}) eq 'HASH') {
               if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$fulloid}}) {
                 $mo->{$symoid} = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'}->{$result->{$fulloid}};
+              } else {
+                $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
+              }
+            } elsif ($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'} =~ /^OID::(.*)/) {
+              my $othermib = $1;
+              my @result = grep { $GLPlugin::SNMP::mibs_and_oids->{$othermib}->{$_} eq $result->{$fulloid} } keys %{$GLPlugin::SNMP::mibs_and_oids->{$othermib}};
+              if (scalar(@result)) {
+                $mo->{$symoid} = $result[0];
               } else {
                 $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
               }
@@ -1547,7 +2325,7 @@ sub create_interface_cache_file {
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  return sprintf "%s/%s_interface_cache_%s", $GLPlugin::statefilesdir,
+  return sprintf "%s/%s_interface_cache_%s", $self->statefilesdir(),
       $self->opts->hostname, lc $extension;
 }
 
@@ -1739,7 +2517,7 @@ sub update_entry_cache {
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $GLPlugin::statefilesdir, $self->opts->hostname,
+      $self->statefilesdir(), $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
   my $update = time - 3600;
   #my $update = time - 1;
@@ -1809,7 +2587,7 @@ sub save_cache {
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $GLPlugin::statefilesdir, $self->opts->hostname,
+      $self->statefilesdir(), $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
   open(STATE, ">".$statefile.".".$$);
   printf STATE Data::Dumper::Dumper($self->{$cache});
@@ -1830,7 +2608,7 @@ sub load_cache {
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
   my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $GLPlugin::statefilesdir, $self->opts->hostname,
+      $self->statefilesdir(), $self->opts->hostname,
       $self->opts->mode, $mib, $table, join('#', @{$key_attr});
   $self->{$cache} = {};
   if ( -f $statefile) {
@@ -1874,14 +2652,18 @@ sub no_such_mode {
       $self->init();
     }
   }
-  printf "Mode %s is not implemented for this type of device\n",
-      $self->opts->mode;
-  exit 3;
+  if (ref($self) eq "GLPlugin::SNMP") {
+    printf "Mode %s is not implemented for this type of device\n",
+        $self->opts->mode;
+    exit 3;
+  }
 }
 
 sub AUTOLOAD {
   my $self = shift;
   return if ($AUTOLOAD =~ /DESTROY/);
+  $self->debug("AUTOLOAD %s\n", $AUTOLOAD)
+        if $self->opts->verbose >= 2;
   if ($AUTOLOAD =~ /^(.*)::analyze_and_check_(.*)_subsystem$/) {
     my $class = $1;
     my $subsystem = $2;
@@ -1892,8 +2674,11 @@ sub AUTOLOAD {
       # analyzer class
       my $subsystem_class = shift @params;
       $self->{components}->{$subsystem.'_subsystem'} = $subsystem_class->new();
+      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new()",
+          $subsystem, $subsystem_class);
     } else {
       $self->$analyze();
+      $self->debug("call %s()", $analyze);
     }
     $self->$check();
   } elsif ($AUTOLOAD =~ /^(.*)::check_(.*)_subsystem$/) {
@@ -1902,6 +2687,8 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->check();
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
+  } else {
+    $self->debug("AUTOLOAD %s does not exist!!!\n", $AUTOLOAD);
   }
 }
 
@@ -1924,23 +2711,18 @@ sub new {
   return $self;
 }
 
-sub dump {
+sub check {
   my $self = shift;
-  my $class = ref($self);
-  $class =~ s/^.*:://;
-  if (exists $self->{flat_indices}) {
-    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
-  } else {
-    printf "[%s]\n", uc $class;
+  my $lists = shift;
+  my @lists = $lists ? @{$lists} : grep { ref($self->{$_}) eq "ARRAY" } keys %{$self};
+  foreach my $list (@lists) {
+    $self->add_info('checking '.$list);
+    foreach my $element (@{$self->{$list}}) {
+      $element->check();
+    }
   }
-  foreach (grep !/^(warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, keys %{$self}) {
-    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
-  }
-  if ($self->{info}) {
-    printf "info: %s\n", $self->{info};
-  }
-  printf "\n";
 }
+
 
 package GLPlugin::TableItem;
 our @ISA = qw(GLPlugin::Item);
@@ -1955,7 +2737,98 @@ sub new {
   foreach (keys %params) {
     $self->{$_} = $params{$_};
   }
+  if ($self->can("finish")) {
+    $self->finish(%params);
+  }
   return $self;
 }
 
+sub ensure_index {
+  my $self = shift;
+  my $key = shift;
+  $self->{$key} ||= $self->{flat_indices};
+}
+
+
+package GLPlugin::UPNP;
+our @ISA = qw(GLPlugin);
+
+use strict;
+use File::Basename;
+use Digest::MD5 qw(md5_hex);
+use AutoLoader;
+our $AUTOLOAD;
+
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
+
+{
+  our $mode = undef;
+  our $plugin = undef;
+  our $blacklist = undef;
+  our $session = undef;
+  our $rawdata = {};
+  our $info = [];
+  our $extendedinfo = [];
+  our $summary = [];
+  our $oidtrace = [];
+  our $uptime = 0;
+}
+
+sub init {
+  my $self = shift;
+  if ($self->mode =~ /device::walk/) {
+  } elsif ($self->mode =~ /device::uptime/) {
+    my $info = sprintf 'device is up since %s',
+        $self->human_timeticks($self->{uptime});
+    $self->add_info($info);
+    $self->set_thresholds(warning => '15:', critical => '5:');
+    $self->add_message($self->check_thresholds($self->{uptime}), $info);
+    $self->add_perfdata(
+        label => 'uptime',
+        value => $self->{uptime} / 60,
+        warning => $self->{warning},
+        critical => $self->{critical},
+    );
+    my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+    $GLPlugin::plugin->nagios_exit($code, $message);
+  }
+}
+
+sub check_upnp_and_model {
+  my $self = shift;
+  if (eval "require SOAP::Lite") {
+    require XML::LibXML;
+  } else {
+    $self->add_critical('could not find SOAP::Lite module');
+  }
+  if (! $self->check_messages()) {
+    eval {
+      my $igddesc = sprintf "http://%s:%s/igddesc.xml",
+          $self->opts->hostname, $self->opts->port;
+      my $parser = XML::LibXML->new();
+      my $doc = $parser->parse_file($igddesc);
+      my $root = $doc->documentElement();
+      my $xpc = XML::LibXML::XPathContext->new( $root );
+      $xpc->registerNs('n', 'urn:schemas-upnp-org:device-1-0');
+      $self->{productname} = $xpc->findvalue('(//n:device)[position()=1]/n:modelName' );
+    };
+    if ($@) {
+      $self->add_critical($@);
+    }
+  }
+  if (! $self->check_messages()) {
+    eval {
+      my $som = SOAP::Lite
+          -> proxy(sprintf 'http://%s:%s/upnp/control/WANIPConn1',
+              $self->opts->hostname, $self->opts->port)
+          -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
+          -> GetStatusInfo();
+      $self->{uptime} = $som->valueof("//GetStatusInfoResponse/NewUptime");
+      $self->{uptime} /= 1.0;
+    };
+    if ($@) {
+      $self->add_critical("could not get uptime: ".$@);
+    }
+  }
+}
 

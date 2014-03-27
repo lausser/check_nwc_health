@@ -1,7 +1,6 @@
 package Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem;
-our @ISA = qw(Classes::F5::F5BIGIP);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
   my $class = shift;
@@ -30,7 +29,7 @@ sub check {
   $self->{temperature_subsystem}->check();
   $self->{powersupply_subsystem}->check();
   if (! $self->check_messages()) {
-    $self->add_message(OK, "environmental hardware working fine");
+    $self->add_ok("environmental hardware working fine");
   }
 }
 
@@ -42,4 +41,3 @@ sub dump {
   $self->{powersupply_subsystem}->dump();
 }
 
-1;

@@ -102,6 +102,9 @@ sub add_perfdata {
   if ($args{critical}) {
     $str .= ';'.$args{critical};
   }
+  if (! $args{warning} && ! $args{critical} && $args{uom} && $args{uom} eq '%') {
+##    $str .= ';0;100';
+  }
   push @{$self->{perfdata}}, $str;
 }
 
@@ -267,47 +270,47 @@ sub check_thresholds {
     $warningrange = $self->{mywarning};
     $criticalrange = $self->{mycritical};
   }
-  if ($warningrange =~ /^(-*\d+)$/) {
+  if ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
     # warning = 10, warn if > 10 or < 0
     $level = $ERRORS{WARNING}
         if ($value > $1 || $value < 0);
-  } elsif ($warningrange =~ /^(-*\d+):$/) {
-    # warning = 10:, warn if < 10
+  } elsif ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+):$/) {
+    # warning = 10:, warn if < 10 
     $level = $ERRORS{WARNING}
         if ($value < $1);
-  } elsif ($warningrange =~ /^~:(-*\d+)$/) {
-    # warning = ~:10, warn if > 10
+  } elsif ($warningrange =~ /^~:([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = ~:10, warn if > 10 
     $level = $ERRORS{WARNING}
         if ($value > $1);
-  } elsif ($warningrange =~ /^(-*\d+):(-*\d+)$/) {
-    # warning = 10:20, warn if < 10 or > 20
+  } elsif ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # warning = 10:20, warn if < 10 or > 20 
     $level = $ERRORS{WARNING}
         if ($value < $1 || $value > $2);
-  } elsif ($warningrange =~ /^@(-*\d+):(-*\d+)$/) {
+  } elsif ($warningrange =~ /^@([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
     # warning = @10:20, warn if >= 10 and <= 20
     $level = $ERRORS{WARNING}
-        if ($value >= $1 && $value <= $2);
+        if ($value >= $1 && $value <= $2); 
   }
-  if ($criticalrange =~ /^(-*\d+)$/) {
+  if ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
     # critical = 10, crit if > 10 or < 0
     $level = $ERRORS{CRITICAL}
         if ($value > $1 || $value < 0);
-  } elsif ($criticalrange =~ /^(-*\d+):$/) {
-    # critical = 10:, crit if < 10
+  } elsif ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+):$/) {
+    # critical = 10:, crit if < 10 
     $level = $ERRORS{CRITICAL}
         if ($value < $1);
-  } elsif ($criticalrange =~ /^~:(-*\d+)$/) {
-    # critical = ~:10, crit if > 10
+  } elsif ($criticalrange =~ /^~:([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = ~:10, crit if > 10 
     $level = $ERRORS{CRITICAL}
         if ($value > $1);
-  } elsif ($criticalrange =~ /^(-*\d+):(-*\d+)$/) {
-    # critical = 10:20, crit if < 10 or > 20
+  } elsif ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
+    # critical = 10:20, crit if < 10 or > 20 
     $level = $ERRORS{CRITICAL}
         if ($value < $1 || $value > $2);
-  } elsif ($criticalrange =~ /^@(-*\d+):(-*\d+)$/) {
+  } elsif ($criticalrange =~ /^@([-+]?[0-9]*\.?[0-9]+):([-+]?[0-9]*\.?[0-9]+)$/) {
     # critical = @10:20, crit if >= 10 and <= 20
     $level = $ERRORS{CRITICAL}
-        if ($value >= $1 && $value <= $2);
+        if ($value >= $1 && $value <= $2); 
   }
   return $level;
 }

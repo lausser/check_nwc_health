@@ -1,6 +1,5 @@
 package Classes::Device;
-our @ISA = qw(GLPlugin::SNMP);
-
+our @ISA = qw(GLPlugin::SNMP GLPlugin::UPNP);
 use strict;
 use IO::File;
 use File::Basename;
@@ -8,35 +7,18 @@ use Digest::MD5  qw(md5_hex);
 use Errno;
 use AutoLoader;
 our $AUTOLOAD;
-
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-{
-  our $mode = undef;
-  our $plugin = undef;
-  our $blacklist = undef;
-  our $session = undef;
-  our $rawdata = {};
-  our $info = [];
-  our $extendedinfo = [];
-  our $summary = [];
-  our $statefilesdir = '/var/tmp/'.basename($0);
-  our $oidtrace = [];
-  our $uptime = 0;
-}
 
-sub new {
-  my $class = shift;
-  my $self = {
-    productname => 'unknown',
-  };
-  bless $self, $class;
+sub classify {
+  my $self = shift;
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
-    $self->add_message(UNKNOWN, 'either specify a hostname or a snmpwalk file');
+    $self->add_unknown('either specify a hostname or a snmpwalk file');
   } else {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
     } elsif ($self->opts->port && $self->opts->port == 49000) {
       $self->{productname} = 'upnp';
+      $self->check_upnp_and_model();
     } else {
       $self->check_snmp_and_model();
     }
@@ -57,8 +39,14 @@ sub new {
         printf "I am a %s\n", $self->{productname};
       }
       if ($self->{productname} =~ /upnp/i) {
-        bless $self, 'UPNP';
-        $self->debug('using UPNP');
+        bless $self, 'Classes::UPNP';
+        $self->debug('using Classes::UPNP');
+      } elsif ($self->{productname} =~ /FRITZ/i) {
+        bless $self, 'Classes::UPNP::AVM';
+        $self->debug('using Classes::UPNP::AVM');
+      } elsif ($self->{productname} =~ /linuxlocal/i) {
+        bless $self, 'Server::Linux';
+        $self->debug('using Server::Linux');
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
@@ -99,6 +87,10 @@ sub new {
         # Juniper Networks,Inc,MAG-4610,7.2R10
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
+      } elsif ($self->{productname} =~ /Juniper.*MAG\-SM\d+/i) {
+        # Juniper Networks,Inc,MAG-SMx60,7.4R8
+        bless $self, 'Classes::Juniper::IVE';
+        $self->debug('using Classes::Juniper::IVE');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
@@ -132,9 +124,6 @@ sub new {
       } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
         bless $self, 'Classes::Fortigate';
         $self->debug('using Classes::Fortigate');
-      } elsif ($self->{productname} =~ /linuxlocal/i) {
-        bless $self, 'Server::Linux';
-        $self->debug('using Server::Linux');
       } elsif ($self->{productname} eq "ifmib") {
         bless $self, 'Classes::Generic';
         $self->debug('using Classes::Generic');
@@ -167,11 +156,11 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
-    $self->analyze_and_check_aggregation_subsystem("NWC::IFMIB::Component::LinkAggregation");
+    $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
   } elsif ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem("NWC::IFMIB::Component::InterfaceSubsystem");
+    $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::bgp/) {
-    $self->analyze_and_check_bgp_subsystem("NWC::BGP::Component::PeerSubsystem");
+    $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
   } else {
     bless $self, 'GLPlugin::SNMP';
     $self->no_such_mode();

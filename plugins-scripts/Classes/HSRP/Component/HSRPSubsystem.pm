@@ -1,10 +1,10 @@
 package Classes::HSRP::Component::HSRPSubsystem;
-our @ISA = qw(Classes::HSRP);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my $self = shift;
+  $self->{groups} = [];
   if ($self->mode =~ /device::hsrp/) {
     foreach ($self->get_snmp_table_objects(
         'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
@@ -26,7 +26,7 @@ sub check {
     }
   } elsif ($self->mode =~ /device::hsrp/) {
     if (scalar (@{$self->{groups}}) == 0) {
-      $self->add_message(UNKNOWN, 'no hsrp groups');
+      $self->add_unknown('no hsrp groups');
     } else {
       foreach (@{$self->{groups}}) {
         $_->check();
@@ -37,35 +37,16 @@ sub check {
 
 
 package Classes::HSRP::Component::HSRPSubsystem::Group;
-our @ISA = qw(Classes::HSRP::Component::HSRPSubsystem);
+our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
+sub finish {
+  my $self = shift;
   my %params = @_;
-  my $self = {
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  bless $self, $class;
-  foreach ($self->get_snmp_table_attributes(
-      'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
-    $self->{$_} = $params{$_};
-  }
   $self->{ifIndex} = $params{indices}->[0];
   $self->{cHsrpGrpNumber} = $params{indices}->[1];
   $self->{name} = $self->{cHsrpGrpNumber}.':'.$self->{ifIndex};
-  foreach my $key (keys %params) {
-    $self->{$key} = 0 if ! defined $params{$key};
-  }
-  $self->init();
-  return $self;
-}
-
-sub init {
-  my $self = shift;
   if ($self->mode =~ /device::hsrp::state/) {
     if (! $self->opts->role()) {
       $self->opts->override_opt('role', 'active');
@@ -78,41 +59,40 @@ sub check {
   my $self = shift;
   $self->blacklist('hsrp', $self->{name});
   if ($self->mode =~ /device::hsrp::state/) {
-    my $info = sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
+    $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
         $self->{cHsrpGrpStandbyState},
-        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
-    $self->add_info($info);
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
-        $self->add_message(OK, $info);
+        $self->add_ok();
     } else {
-      $self->add_message(CRITICAL, 
+      $self->add_critical(
           sprintf 'state in group %s (interface %s) is %s instead of %s',
               $self->{cHsrpGrpNumber}, $self->{ifIndex},
               $self->{cHsrpGrpStandbyState},
               $self->opts->role());
     }
   } elsif ($self->mode =~ /device::hsrp::failover/) {
-    my $info = sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',
+    $self->add_info(sprintf 'hsrp group %s/%s: active node is %s, standby node is %s',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
-        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
+        $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     if (my $laststate = $self->load_state( name => $self->{name} )) {
       if ($laststate->{active} ne $self->{cHsrpGrpActiveRouter}) {
-        $self->add_message(CRITICAL, sprintf 'hsrp group %s/%s: active node %s --> %s',
+        $self->add_critical(sprintf 'hsrp group %s/%s: active node %s --> %s',
             $self->{cHsrpGrpNumber}, $self->{ifIndex},
             $laststate->{active}, $self->{cHsrpGrpActiveRouter});
       }
       if ($laststate->{standby} ne $self->{cHsrpGrpStandbyRouter}) {
-        $self->add_message(WARNING, sprintf 'hsrp group %s/%s: standby node %s --> %s',
+        $self->add_warning(sprintf 'hsrp group %s/%s: standby node %s --> %s',
             $self->{cHsrpGrpNumber}, $self->{ifIndex},
             $laststate->{standby}, $self->{cHsrpGrpStandbyRouter});
       }
       if (($laststate->{active} eq $self->{cHsrpGrpActiveRouter}) &&
           ($laststate->{standby} eq $self->{cHsrpGrpStandbyRouter})) {
-        $self->add_message(OK, $info);
+        $self->add_ok();
       }
     } else {
-      $self->add_message(OK, 'initializing....');
+      $self->add_ok('initializing....');
     }
     $self->save_state( name => $self->{name}, save => {
         active => $self->{cHsrpGrpActiveRouter},
@@ -125,15 +105,5 @@ sub list {
   my $self = shift;
   printf "%s %s %s %s\n", $self->{name}, $self->{cHsrpGrpVirtualIpAddr},
       $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
-}
-
-sub dump {
-  my $self = shift;
-  printf "[HSRPGRP_%s]\n", $self->{name};
-  foreach (qw(cHsrpGrpNumber cHsrpGrpVirtualIpAddr cHsrpGrpStandbyState cHsrpGrpActiveRouter cHsrpGrpStandbyRouter cHsrpGrpEntryRowStatus)) {
-    printf "%s: %s\n", $_, defined $self->{$_} ? $self->{$_} : 'undefined';
-  }
-#  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

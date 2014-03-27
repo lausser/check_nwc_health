@@ -1,176 +1,273 @@
-#! /usr/bin/perl
+# /usr/bin/perl -w
 
 use strict;
-use Digest::MD5 qw(md5_hex);
-
-use vars qw ($PROGNAME $REVISION $CONTACT $TIMEOUT $STATEFILESDIR $needs_restart %commandline);
-
-$PROGNAME = "check_nwc_health";
-$REVISION = '$Revision: #PACKAGE_VERSION# $';
-$CONTACT = 'gerhard.lausser@consol.de';
-$TIMEOUT = 60;
-$STATEFILESDIR = '/var/tmp/check_nwc_health';
-
-use constant OK         => 0;
-use constant WARNING    => 1;
-use constant CRITICAL   => 2;
-use constant UNKNOWN    => 3;
-use constant DEPENDENT  => 4;
-
-my @modes = (
-  ['device::uptime',
-      'uptime', undef,
-      'Check the uptime of the device' ],
-  ['device::hardware::health',
-      'hardware-health', undef,
-      'Check the status of environmental equipment (fans, temperatures, power)' ],
-  ['device::hardware::load',
-      'cpu-load', ['cpu-usage'],
-      'Check the CPU load of the device' ],
-  ['device::hardware::memory',
-      'memory-usage', undef,
-      'Check the memory usage of the device' ],
-#  ['device::interfaces::traffic',
-#      'interface-traffic', undef,
-#      'Check the in- and outgoing traffic on interfaces' ],
-  ['device::interfaces::usage',
-      'interface-usage', undef,
-      'Check the utilization of interfaces' ],
-  ['device::interfaces::errors',
-      'interface-errors', undef,
-      'Check the error-rate of interfaces (errors+discards per sec)' ],
-  ['device::interfaces::operstatus',
-      'interface-status', undef,
-      'Check the status of interfaces (oper/admin)' ],
-  ['device::interfaces::list',
-      'list-interfaces', undef,
-      'Show the interfaces of the device and update the name cache' ],
-  ['device::interfaces::listdetail',
-      'list-interfaces-detail', undef,
-      'Show the interfaces of the device and some details' ],
-  ['device::interfaces::availability',
-      'interface-availability', undef,
-      'Show the availability (oper != up) of interfaces' ],
-  ['device::interfaces::aggregation::availability',
-      'link-aggregation-availability', undef,
-      'Check the percentage of up interfaces in a link aggregation' ],
-  ['device::shinken::interface',
-      'create-shinken-service', undef,
-      'Create a Shinken service definition' ],
-  ['device::hsrp::state',
-      'hsrp-state', undef,
-      'Check the state in a HSRP group' ],
-  ['device::hsrp::failover',
-      'hsrp-failover', undef,
-      'Check if a HSRP group\'s nodes have changed their roles' ],
-  ['device::hsrp::list',
-      'list-hsrp-groups', undef,
-      'Show the HSRP groups configured on this device' ],
-  ['device::bgp::peer::status',
-      'bgp-peer-status', undef,
-      'Check status of BGP peers' ],
-  ['device::bgp::peer::list',
-      'list-bgp-peers', undef,
-      'Show BGP peers known to this device' ],
-  ['device::ha::role',
-      'ha-role', undef,
-      'Check the role in a ha group' ],
-  ['device::svn::status',
-      'svn-status', undef,
-      'Check the status of the svn subsystem' ],
-  ['device::mngmt::status',
-      'mngmt-status', undef,
-      'Check the status of the management subsystem' ],
-  ['device::fw::policy::installed',
-      'fw-policy', undef,
-      'Check the installed firewall policy' ],
-  ['device::fw::policy::connections',
-      'fw-connections', undef,
-      'Check the number of firewall policy connections' ],
-  ['device::lb::pool::completeness',
-      'pool-completeness', undef,
-      'Check the members of a load balancer pool' ],
-  ['device::lb::session::usage',
-      'session-usage', undef,
-      'Check the session limits of a load balancer' ],
-  ['device::security',
-      'security-status', undef,
-      'Check if there are security-relevant incidents' ],
-  ['device::lb::pool::list',
-      'list-pools', undef,
-      'List load balancer pools' ],
-  ['device::licenses::validate',
-      'check-licenses', undef,
-      'Check the installed licences/keys' ],
-  ['device::users::count',
-      'count-users', ['count-sessions', 'count-connections'],
-      'Count the (connected) users/sessions' ],
-  ['device::config::status',
-      'check-config', undef,
-      'Check the status of configs (cisco, unsaved config changes)' ],
-  ['device::connections::check',
-      'check-connections', undef,
-      'Check the quality of connections' ],
-  ['device::connections::count',
-      'count-connections', ['count-connections-client', 'count-connections-server'],
-      'Check the number of connections (-client, -server is possible)' ],
-  ['device::wlan::aps::status',
-      'accesspoint-status', undef,
-      'Check the status of access points' ],
-  ['device::wlan::aps::count',
-      'count-accesspoints', undef,
-      'Check if the number of access points is within a certain range' ],
-  ['device::wlan::aps::watch',
-      'watch-accesspoints', undef,
-      'Check if access points appear and disappear (use --lookup)' ],
-  ['device::wlan::aps::list',
-      'list-accesspoints', undef,
-      'List access points managed by this device' ],
-  ['device::phone::cmstatus',
-      'phone-cm-status', undef,
-      'Check if the callmanager is up' ],
-  ['device::phone::status',
-      'phone-status', undef,
-      'Check the number of registered/unregistered/rejected phones'],
-  ['device::smarthome::device::list',
-      'list-smart-home-devices', undef,
-      'List Fritz!DECT 200 plugs managed by this device' ],
-  ['device::smarthome::device::status',
-      'smart-home-device-status', undef,
-      'Check if a Fritz!DECT 200 plug is on' ],
-  ['device::smarthome::device::energy',
-      'smart-home-device-energy', undef,
-      'Show the current power consumption of a Fritz!DECT 200 plug' ],
-  ['device::smarthome::device::consumption',
-      'smart-home-device-consumption', undef,
-      'Show the cumulated power consumption of a Fritz!DECT 200 plug' ],
-  ['device::walk',
-      'walk', undef,
-      'Show snmpwalk command with the oids necessary for a simulation' ],
-  # todo device::modules::{filtering,management,ha,svn}
-);
-my $modestring = "";
-my $longest = length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0]);
-my $format = "       %-".
-  (length ((reverse sort {length $a <=> length $b} map { $_->[1] } @modes)[0])).
-  "s\t(%s)\n";
-foreach (@modes) {
-  $modestring .= sprintf $format, $_->[1], $_->[3];
-}
-$modestring .= sprintf "\n";
+use File::Basename;
 
 
-my $plugin = Nagios::MiniPlugin->new(
+
+my $plugin = Classes::Device->new(
     shortname => '',
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
         '--mode <what-to-do> '.
         '--hostname <network-component> --community <snmp-community>'.
         '  ...]',
-    version => $REVISION,
+    version => '$Revision: #PACKAGE_VERSION# $',
     blurb => 'This plugin checks various parameters of network components ',
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
-    shortname => '',
+    plugin => basename($0),
+);
+$plugin->add_mode(
+    internal => 'device::uptime',
+    spec => 'uptime',
+    alias => undef,
+    help => 'Check the uptime of the device',
+);
+$plugin->add_mode(
+    internal => 'device::hardware::health',
+    spec => 'hardware-health',
+    alias => undef,
+    help => 'Check the status of environmental equipment (fans, temperatures, power)',
+);
+$plugin->add_mode(
+    internal => 'device::hardware::load',
+    spec => 'cpu-load',
+    alias => ['cpu-usage'],
+    help => 'Check the CPU load of the device',
+);
+$plugin->add_mode(
+    internal => 'device::hardware::memory',
+    spec => 'memory-usage',
+    alias => undef,
+    help => 'Check the memory usage of the device',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::usage',
+    spec => 'interface-usage',
+    alias => undef,
+    help => 'Check the utilization of interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::errors',
+    spec => 'interface-errors',
+    alias => undef,
+    help => 'Check the error-rate of interfaces (errors+discards per sec)',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::operstatus',
+    spec => 'interface-status',
+    alias => undef,
+    help => 'Check the status of interfaces (oper/admin)',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::list',
+    spec => 'list-interfaces',
+    alias => undef,
+    help => 'Show the interfaces of the device and update the name cache',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::listdetail',
+    spec => 'list-interfaces-detail',
+    alias => undef,
+    help => 'Show the interfaces of the device and some details',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::availability',
+    spec => 'interface-availability',
+    alias => undef,
+    help => 'Show the availability (oper != up) of interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::aggregation::availability',
+    spec => 'link-aggregation-availability',
+    alias => undef,
+    help => 'Check the percentage of up interfaces in a link aggregation',
+);
+$plugin->add_mode(
+    internal => 'device::shinken::interface',
+    spec => 'create-shinken-service',
+    alias => undef,
+    help => 'Create a Shinken service definition',
+);
+$plugin->add_mode(
+    internal => 'device::hsrp::state',
+    spec => 'hsrp-state',
+    alias => undef,
+    help => 'Check the state in a HSRP group',
+);
+$plugin->add_mode(
+    internal => 'device::hsrp::failover',
+    spec => 'hsrp-failover',
+    alias => undef,
+    help => 'Check if a HSRP group\'s nodes have changed their roles',
+);
+$plugin->add_mode(
+    internal => 'device::hsrp::list',
+    spec => 'list-hsrp-groups',
+    alias => undef,
+    help => 'Show the HSRP groups configured on this device',
+);
+$plugin->add_mode(
+    internal => 'device::bgp::peer::status',
+    spec => 'bgp-peer-status',
+    alias => undef,
+    help => 'Check status of BGP peers',
+);
+$plugin->add_mode(
+    internal => 'device::bgp::peer::list',
+    spec => 'list-bgp-peers',
+    alias => undef,
+    help => 'Show BGP peers known to this device',
+);
+$plugin->add_mode(
+    internal => 'device::ha::role',
+    spec => 'ha-role',
+    alias => undef,
+    help => 'Check the role in a ha group',
+);
+$plugin->add_mode(
+    internal => 'device::svn::status',
+    spec => 'svn-status',
+    alias => undef,
+    help => 'Check the status of the svn subsystem',
+);
+$plugin->add_mode(
+    internal => 'device::mngmt::status',
+    spec => 'mngmt-status',
+    alias => undef,
+    help => 'Check the status of the management subsystem',
+);
+$plugin->add_mode(
+    internal => 'device::fw::policy::installed',
+    spec => 'fw-policy',
+    alias => undef,
+    help => 'Check the installed firewall policy',
+);
+$plugin->add_mode(
+    internal => 'device::fw::policy::connections',
+    spec => 'fw-connections',
+    alias => undef,
+    help => 'Check the number of firewall policy connections',
+);
+$plugin->add_mode(
+    internal => 'device::lb::pool::completeness',
+    spec => 'pool-completeness',
+    alias => undef,
+    help => 'Check the members of a load balancer pool',
+);
+$plugin->add_mode(
+    internal => 'device::lb::session::usage',
+    spec => 'session-usage',
+    alias => undef,
+    help => 'Check the session limits of a load balancer',
+);
+$plugin->add_mode(
+    internal => 'device::security',
+    spec => 'security-status',
+    alias => undef,
+    help => 'Check if there are security-relevant incidents',
+);
+$plugin->add_mode(
+    internal => 'device::lb::pool::list',
+    spec => 'list-pools',
+    alias => undef,
+    help => 'List load balancer pools',
+);
+$plugin->add_mode(
+    internal => 'device::licenses::validate',
+    spec => 'check-licenses',
+    alias => undef,
+    help => 'Check the installed licences/keys',
+);
+$plugin->add_mode(
+    internal => 'device::users::count',
+    spec => 'count-users',
+    alias => ['count-sessions', 'count-connections'],
+    help => 'Count the (connected) users/sessions',
+);
+$plugin->add_mode(
+    internal => 'device::config::status',
+    spec => 'check-config',
+    alias => undef,
+    help => 'Check the status of configs (cisco, unsaved config changes)',
+);
+$plugin->add_mode(
+    internal => 'device::connections::check',
+    spec => 'check-connections',
+    alias => undef,
+    help => 'Check the quality of connections',
+);
+$plugin->add_mode(
+    internal => 'device::connections::count',
+    spec => 'count-connections',
+    alias => ['count-connections-client', 'count-connections-server'],
+    help => 'Check the number of connections (-client, -server is possible)',
+);
+$plugin->add_mode(
+    internal => 'device::wlan::aps::status',
+    spec => 'accesspoint-status',
+    alias => undef,
+    help => 'Check the status of access points',
+);
+$plugin->add_mode(
+    internal => 'device::wlan::aps::count',
+    spec => 'count-accesspoints',
+    alias => undef,
+    help => 'Check if the number of access points is within a certain range',
+);
+$plugin->add_mode(
+    internal => 'device::wlan::aps::watch',
+    spec => 'watch-accesspoints',
+    alias => undef,
+    help => 'Check if access points appear and disappear (use --lookup)',
+);
+$plugin->add_mode(
+    internal => 'device::wlan::aps::list',
+    spec => 'list-accesspoints',
+    alias => undef,
+    help => 'List access points managed by this device',
+);
+$plugin->add_mode(
+    internal => 'device::phone::cmstatus',
+    spec => 'phone-cm-status',
+    alias => undef,
+    help => 'Check if the callmanager is up',
+);
+$plugin->add_mode(
+    internal => 'device::phone::status',
+    spec => 'phone-status',
+    alias => undef,
+    help => 'Check the number of registered/unregistered/rejected phones',
+);
+$plugin->add_mode(
+    internal => 'device::smarthome::device::list',
+    spec => 'list-smart-home-devices',
+    alias => undef,
+    help => 'List Fritz!DECT 200 plugs managed by this device',
+);
+$plugin->add_mode(
+    internal => 'device::smarthome::device::status',
+    spec => 'smart-home-device-status',
+    alias => undef,
+    help => 'Check if a Fritz!DECT 200 plug is on',
+);
+$plugin->add_mode(
+    internal => 'device::smarthome::device::energy',
+    spec => 'smart-home-device-energy',
+    alias => undef,
+    help => 'Show the current power consumption of a Fritz!DECT 200 plug',
+);
+$plugin->add_mode(
+    internal => 'device::smarthome::device::consumption',
+    spec => 'smart-home-device-consumption',
+    alias => undef,
+    help => 'Show the cumulated power consumption of a Fritz!DECT 200 plug',
+);
+$plugin->add_mode(
+    internal => 'device::walk',
+    spec => 'walk',
+    alias => undef,
+    help => 'Show snmpwalk command with the oids necessary for a simulation',
 );
 $plugin->add_arg(
     spec => 'blacklist|b=s',
@@ -179,20 +276,6 @@ $plugin->add_arg(
     required => 0,
     default => '',
 );
-#$plugin->add_arg(
-#    spec => 'customthresholds|c=s',
-#    help => '--customthresholds
-#   Use custom thresholds for certain temperatures',
-#    required => 0,
-#);
-#$plugin->add_arg(
-#    spec => 'perfdata=s',
-#    help => '--perfdata=[short]
-#   Output performance data. If your performance data string becomes
-#   too long and is truncated by Nagios, then you can use --perfdata=short
-#   instead. This will output temperature tags without location information',
-#    required => 0,
-#);
 $plugin->add_arg(
     spec => 'hostname|H=s',
     help => '--hostname
@@ -258,16 +341,9 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'warning=s',
-    help => '--warning
-   The warning threshold',
-    required => 0,
-);
-$plugin->add_arg(
     spec => 'mode=s',
     help => "--mode
-   A keyword which tells the plugin what to do
-$modestring",
+   A keyword which tells the plugin what to do",
     required => 1,
 );
 $plugin->add_arg(
@@ -348,6 +424,24 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'warning=s',
+    help => '--warning
+   The warning threshold',
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'warningx=s%',
+    help => '--warningx
+   The extended warning thresholds',
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'criticalx=s%',
+    help => '--criticalx
+   The extended critical thresholds',
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'mitigation=s',
     help => "--mitigation
    The parameter allows you to change a critical error to a warning.",
@@ -394,164 +488,30 @@ $plugin->add_arg(
     required => 0,
 );
 
+
 $plugin->getopts();
-if ($plugin->opts->multiline) {
-  $ENV{NRPE_MULTILINESUPPORT} = 1;
-} else {
-  $ENV{NRPE_MULTILINESUPPORT} = 0;
-}
-if ($plugin->opts->community) {
-  if ($plugin->opts->community =~ /^snmpv3(.)(.+)/) {
-    my $separator = $1;
-    my ($authprotocol, $authpassword, $privprotocol, $privpassword, $username) =
-        split(/$separator/, $2);
-    $plugin->override_opt('authprotocol', $authprotocol) 
-        if defined($authprotocol) && $authprotocol;
-    $plugin->override_opt('authpassword', $authpassword) 
-        if defined($authpassword) && $authpassword;
-    $plugin->override_opt('privprotocol', $privprotocol) 
-        if defined($privprotocol) && $privprotocol;
-    $plugin->override_opt('privpassword', $privpassword) 
-        if defined($privpassword) && $privpassword;
-    $plugin->override_opt('username', $username) 
-        if defined($username) && $username;
-    $plugin->override_opt('protocol', '3') ;
-  }
-}
-if ($plugin->opts->mode eq 'walk') {
-  if ($plugin->opts->snmpwalk && $plugin->opts->hostname) {
-    # snmp agent wird abgefragt, die ergebnisse landen in einem file
-    # opts->snmpwalk ist der filename. da sich die ganzen get_snmp_table/object-aufrufe
-    # an das walkfile statt an den agenten halten wuerden, muss opts->snmpwalk geloescht
-    # werden. stattdessen wird opts->snmpdump als traeger des dateinamens mitgegeben.
-    # nur sinnvoll mit mode=walk
-    $plugin->create_opt('snmpdump');
-    $plugin->override_opt('snmpdump', $plugin->opts->snmpwalk);
-    $plugin->override_opt('snmpwalk', undef);
-  } elsif (! $plugin->opts->snmpwalk && $plugin->opts->hostname && $plugin->opts->mode eq 'walk') {
-    # snmp agent wird abgefragt, die ergebnisse landen in einem file, dessen name
-    # nicht vorgegeben ist
-    $plugin->create_opt('snmpdump');
-  }
-} else {
-  if (exists $ENV{NAGIOS__HOSTSNMPWALK} || exists $ENV{NAGIOS__SERVICESNMPWALK}) {
-    $plugin->override_opt('snmpwalk', $ENV{NAGIOS__SERVICESNMPWALK} || $ENV{NAGIOS__HOSTSNMPWALK});
-    $plugin->override_opt('offline', $ENV{NAGIOS__SERVICEOFFLINE} || $ENV{NAGIOS__HOSTOFFLIN});
-  }
-  if ($plugin->opts->snmpwalk && ! $plugin->opts->hostname) {
-    # normaler aufruf, mode != walk, oid-quelle ist eine datei
-    $plugin->override_opt('hostname', 'snmpwalk.file'.md5_hex($plugin->opts->snmpwalk)) 
-  } elsif ($plugin->opts->snmpwalk && $plugin->opts->hostname) {
-    # snmpwalk hat vorrang
-    $plugin->override_opt('hostname', undef);
-  }
-}
-
-if ($plugin->opts->snmpwalk && $plugin->opts->hostname && $plugin->opts->mode eq 'walk') {
-}
-if (! $plugin->opts->statefilesdir) {
-  if (exists $ENV{OMD_ROOT}) {
-    $plugin->override_opt('statefilesdir', $ENV{OMD_ROOT}."/var/tmp/check_nwc_health");
-  } else {
-    $plugin->override_opt('statefilesdir', $STATEFILESDIR);
-  }
-}
+$plugin->classify();
+$plugin->validate_args();
 
 
-$plugin->{messages}->{unknown} = []; # wg. add_message(UNKNOWN,...)
-
-$plugin->{info} = []; # gefrickel
-
-if ($plugin->opts->mode =~ /^my-([^\-.]+)/) {
-  my $param = $plugin->opts->mode;
-  $param =~ s/\-/::/g;
-  push(@modes, [$param, $plugin->opts->mode, undef, 'my extension']);
-} elsif ($plugin->opts->mode eq 'encode') {
-  my $input = <>;
-  chomp $input;
-  $input =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
-  printf "%s\n", $input;
-  exit 0;
-} elsif ((! grep { $plugin->opts->mode eq $_ } map { $_->[1] } @modes) &&
-    (! grep { $plugin->opts->mode eq $_ } map { defined $_->[2] ? @{$_->[2]} : () } @modes)) {
-  printf "UNKNOWN - mode %s\n", $plugin->opts->mode;
-  $plugin->opts->print_help();
-  exit 3;
-}
-if ($plugin->opts->name && $plugin->opts->name =~ /(%22)|(%27)/) {
-  my $name = $plugin->opts->name;
-  $name =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
-  $plugin->override_opt('name', $name);
-}
-
-$SIG{'ALRM'} = sub {
-  printf "UNKNOWN - check_nwc_health timed out after %d seconds\n", 
-      $plugin->opts->timeout;
-  exit $ERRORS{UNKNOWN};
-};
-alarm($plugin->opts->timeout);
-
-$GLPlugin::plugin = $plugin;
-$GLPlugin::statefilesdir = $plugin->opts->statefilesdir;
-$GLPlugin::mode = (
-    map { $_->[0] }
-    grep {
-       ($plugin->opts->mode eq $_->[1]) ||
-       ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
-    } @modes
-)[0];
-my $device = Classes::Device->new();
-#$device->dumper();
 if (! $plugin->check_messages()) {
-  $device->init();
+  $plugin->init();
   if (! $plugin->check_messages()) {
-    $plugin->add_message(OK, $device->get_summary())
-        if $device->get_summary();
-    $plugin->add_message(OK, $device->get_extendedinfo(" "))
-        if $device->get_extendedinfo();
+    $plugin->add_ok($plugin->get_summary())
+        if $plugin->get_summary();
+    $plugin->add_ok($plugin->get_extendedinfo(" "))
+        if $plugin->get_extendedinfo();
   }
 } elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
   ;
 } else {
-  $plugin->add_message(CRITICAL, 'wrong device');
+  $plugin->add_critical('wrong device');
 }
 my ($code, $message) = $plugin->opts->multiline ?
     $plugin->check_messages(join => "\n", join_all => ', ') :
     $plugin->check_messages(join => ', ', join_all => ', ');
-$message .= sprintf "\n%s\n", $device->get_info("\n")
+$message .= sprintf "\n%s\n", $plugin->get_info("\n")
     if $plugin->opts->verbose >= 1;
-#printf "%s\n", Data::Dumper::Dumper($plugin->{info});
-$plugin->nagios_exit($code, $message);
-
-__END__
-$Classes::Device::plugin = $plugin;
-$Classes::Device::mode = (
-    map { $_->[0] }
-    grep {
-       ($plugin->opts->mode eq $_->[1]) ||
-       ( defined $_->[2] && grep { $plugin->opts->mode eq $_ } @{$_->[2]})
-    } @modes
-)[0];
-my $server = Classes::Device->new();
-#$server->dumper();
-if (! $plugin->check_messages()) {
-  $server->init();
-  if (! $plugin->check_messages()) {
-    $plugin->add_message(OK, $server->get_summary()) 
-        if $server->get_summary();
-    $plugin->add_message(OK, $server->get_extendedinfo()) 
-        if $server->get_extendedinfo();
-  } 
-} elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
-  ;
-} else {
-  $plugin->add_message(CRITICAL, 'wrong device');
-}
-my ($code, $message) = $plugin->opts->multiline ? 
-    $plugin->check_messages(join => "\n", join_all => ', ') :
-    $plugin->check_messages(join => ', ', join_all => ', ');
-$message .= sprintf "\n%s\n", join("\n", @{$Classes::Device::info})
-    if $plugin->opts->verbose >= 1;
-#printf "%s\n", Data::Dumper::Dumper($plugin->{info});
+#printf "%s\n", Data::Dumper::Dumper($plugin);
 $plugin->nagios_exit($code, $message);
 

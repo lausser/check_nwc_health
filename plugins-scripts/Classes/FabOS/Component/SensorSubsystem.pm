@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::SensorSubsystem;
-our @ISA = qw(Classes::FabOS::Component::EnvironmentalSubsystem);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -8,19 +8,6 @@ sub init {
       ['sensors', 'swSensorTable', 'Classes::FabOS::Component::SensorSubsystem::Sensor'],
   ]);
 }
-
-sub check {
-  my $self = shift;
-  $self->add_info('checking sensors');
-  $self->blacklist('ses', '');
-  if (scalar (@{$self->{sensors}}) == 0) {
-  } else {
-    foreach (@{$self->{sensors}}) {
-      $_->check();
-    }
-  }
-}
-
 
 package Classes::FabOS::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
@@ -36,15 +23,15 @@ sub check {
       $self->{swSensorInfo},
       $self->{swSensorStatus});
   if ($self->{swSensorStatus} eq "faulty") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } elsif ($self->{swSensorStatus} eq "absent") {
   } elsif ($self->{swSensorStatus} eq "unknown") {
-    $self->add_critical($self->{info});
+    $self->add_critical();
   } else {
     if ($self->{swSensorStatus} eq "nominal") {
-      #$self->add_ok($self->{info});
+      #$self->add_ok();
     } else {
-      $self->add_critical($self->{info});
+      $self->add_critical();
     }
     $self->add_perfdata(
         label => sprintf('sensor_%s_%s', 

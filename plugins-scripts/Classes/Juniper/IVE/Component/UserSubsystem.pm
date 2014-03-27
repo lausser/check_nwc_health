@@ -1,34 +1,31 @@
 package Classes::Juniper::IVE::Component::UserSubsystem;
-our @ISA = qw(Classes::Juniper::IVE);
+our @ISA = qw(GLPlugin::Item);
 use strict;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
 
 sub init {
   my $self = shift;
-  foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
-    $self->{$_} = $self->valid_response('JUNIPER-IVE-MIB', $_) || 0;
-  }
+  $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
+      iveSSLConnections iveVPNTunnels 
+      signedInWebUsers signedInMailUsers meetingUserCount
+      iveConcurrentUsers clusterConcurrentUsers)));
 }
 
 sub check {
   my $self = shift;
   $self->add_info('checking memory');
   $self->blacklist('m', '');
-  my $info = sprintf 'Users:  cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
-      $self->{clusterConcurrentUsers}, $self->{iveConcurrentUsers},
+  $self->add_info(sprintf 'Users: sslconns=%d cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
+      $self->{iveSSLConnections},
+      $self->{clusterConcurrentUsers},
+      $self->{iveConcurrentUsers},
       $self->{signedInWebUsers},
       $self->{signedInMailUsers},
-      $self->{meetingUserCount};
-  $self->add_info($info);
-  $self->add_message(OK, $info);
+      $self->{meetingUserCount});
+  $self->add_ok();
+  $self->add_perfdata(
+      label => 'sslconns',
+      value => $self->{iveSSLConnections},
+  );
   $self->add_perfdata(
       label => 'web_users',
       value => $self->{signedInWebUsers},
@@ -49,15 +46,5 @@ sub check {
       label => 'cluster_concurrent_users',
       value => $self->{clusterConcurrentUsers},
   );
-}
-
-sub dump {
-  my $self = shift;
-  printf "[USERS]\n";
-  foreach (qw(signedInWebUsers signedInMailUsers meetingUserCount iveConcurrentUsers clusterConcurrentUsers)) {
-    printf "%s: %s\n", $_, $self->{$_};
-  }
-  printf "info: %s\n", $self->{info};
-  printf "\n";
 }
 

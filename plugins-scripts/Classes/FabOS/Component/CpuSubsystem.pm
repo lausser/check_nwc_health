@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::CpuSubsystem;
-our @ISA = qw(Classes::FabOS);
+our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
@@ -17,11 +17,10 @@ sub check {
   $self->add_info('checking cpus');
   $self->blacklist('c', undef);
   if (defined $self->{swCpuUsage}) {
-    my $info = sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage};
-    $self->add_info($info);
+    $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage});
     $self->set_thresholds(warning => $self->{swCpuUsageLimit},
         critical => $self->{swCpuUsageLimit});
-    $self->add_message($self->check_thresholds($self->{swCpuUsage}), $info);
+    $self->add_message($self->check_thresholds($self->{swCpuUsage}));
     $self->add_perfdata(
         label => 'cpu_usage',
         value => $self->{swCpuUsage},
