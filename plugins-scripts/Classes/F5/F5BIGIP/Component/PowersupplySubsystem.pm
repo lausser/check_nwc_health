@@ -9,16 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking powersupplies');
-  $self->blacklist('pp', '');
-  foreach (@{$self->{powersupplies}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::F5::F5BIGIP::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

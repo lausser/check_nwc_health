@@ -10,16 +10,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking mems');
-  $self->blacklist('ff', '');
-  foreach (@{$self->{mems}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::IOS::Component::MemSubsystem::Mem;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

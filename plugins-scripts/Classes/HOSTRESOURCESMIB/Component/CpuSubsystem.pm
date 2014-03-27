@@ -13,16 +13,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking cpus');
-  $self->blacklist('cpus', '');
-  foreach (@{$self->{cpus}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::HOSTRESOURCESMIB::Component::CpuSubsystem::Cpu;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

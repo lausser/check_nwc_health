@@ -28,16 +28,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking sensors');
-  $self->blacklist('s', '');
-  foreach (@{$self->{sensors}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

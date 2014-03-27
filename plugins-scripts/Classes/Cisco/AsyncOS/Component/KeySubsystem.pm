@@ -9,16 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking keys');
-  $self->blacklist('k', '');
-  foreach (@{$self->{keys}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::AsyncOS::Component::KeySubsystem::Key;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

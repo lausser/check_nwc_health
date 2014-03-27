@@ -19,16 +19,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking fans');
-  $self->blacklist('ff', '');
-  foreach (@{$self->{fans}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem::Fan;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

@@ -12,16 +12,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking sensors');
-  $self->blacklist('ses', '');
-  foreach (@{$self->{sensors}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::FCMGMT::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

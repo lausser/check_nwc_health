@@ -9,16 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking disks');
-  $self->blacklist('ses', '');
-  foreach (@{$self->{storages}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

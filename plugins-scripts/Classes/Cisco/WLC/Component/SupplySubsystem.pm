@@ -9,16 +9,6 @@ sub init {
   ]);
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking supplies');
-  $self->blacklist('ps', '');
-  foreach (@{$self->{supplies}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::IOS::Component::SupplySubsystem::Supply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;

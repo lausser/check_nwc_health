@@ -39,16 +39,6 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking cpus');
-  $self->blacklist('ff', '');
-  foreach (@{$self->{cpus}}) {
-    $_->check();
-  }
-}
-
-
 package Classes::Cisco::NXOS::Component::CpuSubsystem::Cpu;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
