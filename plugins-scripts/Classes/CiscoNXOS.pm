@@ -10,6 +10,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("Classes::CiscoNXOS::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::CiscoNXOS::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::hsrp/) {
+    $self->analyze_and_check_hsrp_subsystem("Classes::HSRP::Component::HSRPSubsystem");
   } else {
     $self->no_such_mode();
   }
