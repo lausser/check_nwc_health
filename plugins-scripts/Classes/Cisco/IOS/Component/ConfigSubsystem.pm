@@ -57,7 +57,7 @@ sub dump {
   printf "[CONFIG]\n";
   foreach (qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
       ccmHistoryStartupLastChanged)) {
-    printf "%s: %s %s\n", $_, $self->{$_}, scalar localtime $self->{$_};
+    printf "%s: %s (%s)\n", $_, $self->{$_}, scalar localtime $self->{$_};
   }
 }
 
