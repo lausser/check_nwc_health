@@ -132,9 +132,7 @@ sub check_interface_subsystem {
 sub check_cpu_subsystem {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{cpu_usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 40, critical => 60);
   $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
   $self->add_perfdata(
@@ -149,9 +147,7 @@ sub check_cpu_subsystem {
 sub check_mem_subsystem {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m', undef);
-  my $info = sprintf 'memory usage is %.2f%%', $self->{ram_used};
-  $self->add_info($info);
+  $self->add_info(sprintf 'memory usage is %.2f%%', $self->{ram_used});
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_message($self->check_thresholds($self->{ram_used}), $info);
   $self->add_perfdata(

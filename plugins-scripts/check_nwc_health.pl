@@ -150,12 +150,6 @@ $plugin->add_mode(
     help => 'Check the number of firewall policy connections',
 );
 $plugin->add_mode(
-    internal => 'device::lb::pool::completeness',
-    spec => 'pool-completeness',
-    alias => undef,
-    help => 'Check the members of a load balancer pool',
-);
-$plugin->add_mode(
     internal => 'device::lb::session::usage',
     spec => 'session-usage',
     alias => undef,
@@ -166,6 +160,12 @@ $plugin->add_mode(
     spec => 'security-status',
     alias => undef,
     help => 'Check if there are security-relevant incidents',
+);
+$plugin->add_mode(
+    internal => 'device::lb::pool::completeness',
+    spec => 'pool-completeness',
+    alias => undef,
+    help => 'Check the members of a load balancer pool',
 );
 $plugin->add_mode(
     internal => 'device::lb::pool::list',
