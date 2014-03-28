@@ -20,6 +20,7 @@ sub init {
 sub check {
   my $self = shift;
   my $info;
+  my $runChangedMarginAfterReload = 60;
   $self->add_info('checking config');
   if ($self->check_messages()) {
     return;
@@ -32,23 +33,25 @@ sub check {
   # How much is ccmHistoryRunningLastChanged ahead of ccmHistoryStartupLastChanged
   # the running config could have been saved for backup purposes.
   # The saved config can still be identical to the saved running config.
-  my $unsaved_since = 
-      $self->{ccmHistoryRunningLastChanged} > $self->{ccmHistoryStartupLastChanged} ?
-      time - $self->{ccmHistoryRunningLastChanged} : 0;
-  if ($unsaved_since) {
-    $self->add_info(sprintf "running config is modified and unsaved since %d minutes. your changes may be lost in case of a reboot",
-        $unsaved_since / 60);
+
+  # If running config has changed after the startup config
+  if ($self->{ccmHistoryRunningLastChanged} > $self->{ccmHistoryStartupLastChanged}) {
+    # If running config has changed since boot (with 60 second margin)
+    # The margin is use because after a reload the running config is ahead of the startup config by 20-40 seconds
+    if ((time - $self->{ccmHistoryRunningLastChanged}) > ($self->uptime() + $runChangedMarginAfterReload)) {
+      my $unsaved_since = time - $self->{ccmHistoryRunningLastChanged};
+      my $errorlevel = $self->check_thresholds($unsaved_since);
+      if ($errorlevel != OK && defined $self->opts->mitigation()) {
+        $errorlevel = $self->opts->mitigation();
+      }
+      $self->add_info(sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
+          $unsaved_since / 60);
+      $self->add_message($errorlevel);
+    } else {
+      $self->add_info(sprintf("running config has not changed since (%d seconds after) reload", $runChangedMarginAfterReload));
+    }
   } else {
     $self->add_info("saved config is up to date");
-  }
-  if ($unsaved_since) {
-    my $errorlevel = $self->check_thresholds($unsaved_since);
-    if ($errorlevel != OK && defined $self->opts->mitigation()) {
-      $errorlevel = $self->opts->mitigation();
-    }
-    $self->add_info(sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
-        $unsaved_since / 60);
-    $self->add_message($errorlevel);
   }
 }
 
