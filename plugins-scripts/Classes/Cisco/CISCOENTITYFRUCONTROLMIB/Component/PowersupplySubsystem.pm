@@ -1,12 +1,12 @@
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
-    ['powersupplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::Supply'],
-    ['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::SupplyGroup'],
+    ['powersupplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply'],
+    ['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup'],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
@@ -22,7 +22,7 @@ sub init {
 }
 
 
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::Supply;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
@@ -44,7 +44,7 @@ return;
 }
 
 
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::SupplyGroup;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 

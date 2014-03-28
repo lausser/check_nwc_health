@@ -12,7 +12,7 @@ sub init {
   $self->{temperature_subsystem} =
       Classes::Cisco::AsyncOS::Component::TemperatureSubsystem->new();
   $self->{powersupply_subsystem} = 
-      Classes::Cisco::AsyncOS::Component::SupplySubsystem->new();
+      Classes::Cisco::AsyncOS::Component::PowersupplySubsystem->new();
   $self->{raid_subsystem} = 
       Classes::Cisco::AsyncOS::Component::RaidSubsystem->new();
 }

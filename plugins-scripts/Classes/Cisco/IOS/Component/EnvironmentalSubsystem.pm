@@ -16,7 +16,7 @@ sub init {
     $self->{temperature_subsystem} =
         Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem->new();
     $self->{powersupply_subsystem} = 
-        Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem->new();
+        Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem->new();
     $self->{voltage_subsystem} =
         Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem->new();
   } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {

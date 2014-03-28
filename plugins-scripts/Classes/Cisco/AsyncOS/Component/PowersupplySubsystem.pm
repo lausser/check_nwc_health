@@ -1,15 +1,15 @@
-package Classes::Cisco::AsyncOS::Component::SupplySubsystem;
+package Classes::Cisco::AsyncOS::Component::PowersupplySubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
-      ['supplies', 'powerSupplyTable', 'Classes::Cisco::AsyncOS::Component::SupplySubsystem::Supply'],
+      ['supplies', 'powerSupplyTable', 'Classes::Cisco::AsyncOS::Component::PowersupplySubsystem::Powersupply'],
   ]);
 }
 
-package Classes::Cisco::AsyncOS::Component::SupplySubsystem::Supply;
+package Classes::Cisco::AsyncOS::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 

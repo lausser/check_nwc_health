@@ -1,15 +1,15 @@
-package Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem;
+package Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
-      ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem::Supply'],
+      ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem::Powersupply'],
   ]);
 }
 
-package Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem::Supply;
+package Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
