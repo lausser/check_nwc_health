@@ -134,7 +134,7 @@ sub check_cpu_subsystem {
   $self->add_info('checking cpus');
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 40, critical => 60);
-  $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+  $self->add_message($self->check_thresholds($self->{cpu_usage}), $self->{info});
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{cpu_usage},
@@ -149,7 +149,7 @@ sub check_mem_subsystem {
   $self->add_info('checking memory');
   $self->add_info(sprintf 'memory usage is %.2f%%', $self->{ram_used});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{ram_used}), $info);
+  $self->add_message($self->check_thresholds($self->{ram_used}), $self->{info});
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{ram_used},
