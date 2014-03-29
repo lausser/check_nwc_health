@@ -2,6 +2,15 @@ package Classes::UPNP::AVM::FritzBox7390;
 our @ISA = qw(Classes::UPNP::AVM);
 use strict;
 
+{
+  our $sid = undef;
+}
+
+sub sid : lvalue {
+  my $self = shift;
+  return $Classes::UPNP::AVM::FritzBox7390::sid;
+}
+
 sub init {
   my $self = shift;
   foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
@@ -9,6 +18,7 @@ sub init {
       $self->add_unknown("could not find $module module");
     }
   }
+  # hier login-zeugs, sid in eine Klassenvariable
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
@@ -66,6 +76,7 @@ sub http_get {
   my $resp = $ua->get($ecourl);
   if (! $resp->is_success()) {
     $self->add_critical($resp->status_line());
+  } else {
   }
   return $resp->content();
 }
