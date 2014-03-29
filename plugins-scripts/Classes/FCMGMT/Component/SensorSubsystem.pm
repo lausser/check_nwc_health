@@ -18,7 +18,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('se', $self->{swSensorIndex});
   $self->add_info(sprintf '%s sensor %s (%s) is %s (%s)',
       $self->{fcConnUnitSensorType},
       $self->{fcConnUnitSensorIndex},

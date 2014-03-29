@@ -11,7 +11,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking disks');
-  $self->blacklist('di', '');
   $self->add_info(sprintf 'disk is %.2f%% full',
       $self->{diskFullPercent});
   $self->set_thresholds(warning => 80, critical => 90);

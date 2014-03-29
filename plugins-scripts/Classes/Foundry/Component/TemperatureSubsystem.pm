@@ -22,7 +22,6 @@ use strict;
 sub check {
   my $self = shift;
   $self->{snAgentTempValue} /= 2;
-  $self->blacklist('t', undef);
   $self->add_info(sprintf 'temperature %s is %.2fC', 
       $self->{snAgentTempSlotNum}, $self->{snAgentTempValue});
   $self->set_thresholds(warning => 60, critical => 70);

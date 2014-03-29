@@ -13,7 +13,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking disks');
-  $self->blacklist('di', '');
   if (! defined $self->{usage}) {
     $self->add_info(sprintf 'system has no disk');
     return;

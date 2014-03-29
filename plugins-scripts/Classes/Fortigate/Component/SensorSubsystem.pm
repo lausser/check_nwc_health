@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('se', $self->{fgHwSensorEntIndex});
   $self->add_info(sprintf 'sensor %s alarm status is %s',
       $self->{fgHwSensorEntName},
       $self->{fgHwSensorEntValueStatus});

@@ -16,7 +16,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('f', $self->{snChasFanIndex});
   $self->add_info(sprintf 'fan %d is %s',
       $self->{snChasFanIndex},
       $self->{snChasFanOperStatus});

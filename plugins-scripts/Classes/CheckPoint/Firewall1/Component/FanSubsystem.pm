@@ -23,7 +23,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{sensorsFanIndex});
   $self->add_info(sprintf 'fan %s is %s (%d %s)', 
       $self->{sensorsFanName}, $self->{sensorsFanStatus},
       $self->{sensorsFanValue}, $self->{sensorsFanUOM});

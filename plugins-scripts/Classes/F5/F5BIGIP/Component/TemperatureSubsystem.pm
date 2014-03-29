@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{sysChassisTempIndex});
   $self->add_info(sprintf 'chassis temperature %d is %sC',
       $self->{sysChassisTempIndex},
       $self->{sysChassisTempTemperature});

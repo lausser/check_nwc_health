@@ -23,7 +23,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{sensorsVoltageIndex});
   $self->add_info(sprintf 'voltage %s is %s (%.2f %s)', 
       $self->{sensorsVoltageName}, $self->{sensorsVoltageStatus},
       $self->{sensorsVoltageValue}, $self->{sensorsVoltageUOM});

@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', $self->{cfwConnectionStatDescription});
   if ($self->{cfwConnectionStatDescription} !~ /number of connections currently in use/i) {
     $self->add_blacklist(sprintf 'c:%s', $self->{cfwConnectionStatDescription});
     $self->add_info(sprintf '%d connections currently in use',

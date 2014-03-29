@@ -16,7 +16,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('f', $self->{snChasPwrSupplyIndex});
   $self->add_info(sprintf 'powersupply %d is %s',
       $self->{snChasPwrSupplyIndex},
       $self->{snChasPwrSupplyOperStatus});

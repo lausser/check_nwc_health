@@ -23,7 +23,6 @@ sub finish {
 sub check {
   my $self = shift;
   $self->{ciscoMemoryPoolType} ||= 0;
-  $self->blacklist('m', $self->{flat_indices});
   $self->add_info(sprintf 'mempool %s usage is %.2f%%',
       $self->{ciscoMemoryPoolName}, $self->{usage});
   if ($self->{ciscoMemoryPoolName} eq 'lsmpi_io' && 

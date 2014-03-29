@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('fru', $self->{swSensorIndex});
   $self->add_info(sprintf '%s fru (pos %s) is %s',
       $self->{fcEosFruCode},
       $self->{fcEosFruPosition},

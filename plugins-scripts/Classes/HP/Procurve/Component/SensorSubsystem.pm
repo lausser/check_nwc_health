@@ -12,7 +12,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking sensors');
-  $self->blacklist('ses', '');
   if (scalar (@{$self->{sensors}}) == 0) {
     $self->add_ok('no sensors');
   } else {
@@ -29,7 +28,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('se', $self->{hpicfSensorIndex});
   $self->add_info(sprintf 'sensor %s (%s) is %s',
       $self->{hpicfSensorIndex},
       $self->{hpicfSensorDescr},

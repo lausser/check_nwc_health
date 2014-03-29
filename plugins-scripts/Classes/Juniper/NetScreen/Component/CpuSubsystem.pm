@@ -11,7 +11,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c', undef);
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{nsResCpuAvg});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds($self->{nsResCpuAvg}));
@@ -31,7 +30,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', undef);
   $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});

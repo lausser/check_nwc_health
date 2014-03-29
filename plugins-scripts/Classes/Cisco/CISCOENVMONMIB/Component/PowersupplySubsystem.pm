@@ -16,7 +16,6 @@ use strict;
 sub check {
   my $self = shift;
   $self->ensure_index('ciscoEnvMonSupplyStatusIndex');
-  $self->blacklist('f', $self->{ciscoEnvMonSupplyStatusIndex});
   $self->add_info(sprintf 'powersupply %d (%s) is %s',
       $self->{ciscoEnvMonSupplyStatusIndex},
       $self->{ciscoEnvMonSupplyStatusDescr},

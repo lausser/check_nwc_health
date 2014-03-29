@@ -19,7 +19,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking hsrp groups');
-  $self->blacklist('hhsrp', '');
   if ($self->mode =~ /device::hsrp::list/) {
     foreach (@{$self->{groups}}) {
       $_->list();
@@ -57,7 +56,6 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->blacklist('hsrp', $self->{name});
   if ($self->mode =~ /device::hsrp::state/) {
     $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},

@@ -15,7 +15,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m', '');
   if (defined $self->{swMemUsage}) {
     $self->add_info(sprintf 'memory usage is %.2f%%',
         $self->{swMemUsage});

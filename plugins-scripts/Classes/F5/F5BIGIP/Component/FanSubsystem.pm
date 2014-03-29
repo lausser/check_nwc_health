@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('f', $self->{sysChassisFanIndex});
   $self->add_info(sprintf 'chassis fan %d is %s (%drpm)',
       $self->{sysChassisFanIndex},
       $self->{sysChassisFanStatus},

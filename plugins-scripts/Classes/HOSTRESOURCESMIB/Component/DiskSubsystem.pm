@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('st', $self->{hrStorageIndex});
   my $free = 100 - 100 * $self->{hrStorageUsed} / $self->{hrStorageSize};
   $self->add_info(sprintf 'storage %s (%s) has %.2f%% free space left',
       $self->{hrStorageIndex},

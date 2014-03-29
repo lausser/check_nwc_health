@@ -16,7 +16,6 @@ use strict;
 sub check {
   my $self = shift;
   $self->ensure_index('ciscoEnvMonFanStatusIndex');
-  $self->blacklist('f', $self->{ciscoEnvMonFanStatusIndex});
   $self->add_info(sprintf 'fan %d (%s) is %s',
       $self->{ciscoEnvMonFanStatusIndex},
       $self->{ciscoEnvMonFanStatusDescr},

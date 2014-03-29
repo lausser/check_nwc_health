@@ -32,7 +32,6 @@ sub new {
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{ciscoEnvMonTemperatureStatusIndex});
   if ($self->{ciscoEnvMonTemperatureStatusValue} >
       $self->{ciscoEnvMonTemperatureThreshold}) {
     $self->add_info(sprintf 'temperature %d %s is too high (%d of %d max = %s)',
@@ -71,7 +70,6 @@ sub check {
   my $self = shift;
   $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
   $self->{ciscoEnvMonTemperatureStatusDescr} ||= 0;
-  $self->blacklist('t', $self->{ciscoEnvMonTemperatureStatusIndex});
   $self->add_info(sprintf 'temperature %d %s is %s',
       $self->{ciscoEnvMonTemperatureStatusIndex},
       $self->{ciscoEnvMonTemperatureStatusDescr},

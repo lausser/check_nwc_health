@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('se', $self->{deviceSensorIndex});
   if ($self->{deviceSensorScale}) {
     $self->{deviceSensorValue} *= 10 ** $self->{deviceSensorScale};
   }

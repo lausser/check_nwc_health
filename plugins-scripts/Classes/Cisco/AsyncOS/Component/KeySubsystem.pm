@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('k', $self->{keyExpirationIndex});
   $self->{keyDaysUntilExpire} = int($self->{keySecondsUntilExpire} / 86400);
   if ($self->{keyIsPerpetual} eq 'true') {
     $self->add_info(sprintf 'perpetual key %d (%s) never expires',

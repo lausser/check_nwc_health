@@ -23,7 +23,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('di', $self->{flat_indices});
   $self->add_info(sprintf 'disk %s (%s %s) is %s',
       $self->{flat_indices},
       $self->{deviceDiskVendor},
@@ -41,7 +40,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('fs', $self->{deviceUsageIndex});
   $self->add_info(sprintf 'disk %s usage is %.2f%%',
       $self->{deviceUsageIndex},
       $self->{deviceUsagePercent});
