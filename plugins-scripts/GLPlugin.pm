@@ -1697,7 +1697,7 @@ sub get_snmp_object {
         (defined $index ? '.'.$index : '');
     my $response = $self->get_request(-varbindlist => [$oid]);
     if (defined $response->{$oid}) {
-      if ($response->{$oid} eq 'noSuchInstance') {
+      if ($response->{$oid} eq 'noSuchInstance' || $response->{$oid} eq 'noSuchObject') {
         $response->{$oid} = undef;
       } elsif (my @symbols = $self->make_symbolic($mib, $response, [[$index]])) {
         $response->{$oid} = $symbols[0]->{$mo};
