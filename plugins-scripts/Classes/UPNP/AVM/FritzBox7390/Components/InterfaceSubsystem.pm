@@ -84,6 +84,7 @@ sub init {
       $self->{Layer1UpstreamMaxKBRate} =
           ($self->{Layer1UpstreamMaxBitRate} / 8) / 1024;
     } elsif ($self->mode =~ /device::interfaces::operstatus/) {
+    } elsif ($self->mode =~ /device::interfaces::list/) {
     } else {
       $self->no_such_mode();
     }
@@ -141,6 +142,9 @@ sub check {
     } else {
       $self->add_critical();
     }
+  } elsif ($self->mode =~ /device::interfaces::list/) {
+    printf "%s\n", $self->{ifDescr};
+    $self->add_ok("have fun");
   }
 }
 
