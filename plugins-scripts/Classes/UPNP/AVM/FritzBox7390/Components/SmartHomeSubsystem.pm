@@ -39,7 +39,7 @@ sub create_device_cache_file {
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  return sprintf "%s/%s_interface_cache_%s", $GLPlugin::statefilesdir,
+  return sprintf "%s/%s_interface_cache_%s", $self->statefilesdir(),
       $self->opts->hostname, lc $extension;
 }
 
@@ -52,7 +52,7 @@ sub update_device_cache {
     $self->debug('force update of device cache');
     $self->{device_cache} = {};
     my $switchlist = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=getswitchlist');
-    my @ains = split(":", $switchlist);
+    my @ains = split(",", $switchlist);
     foreach my $ain (@ains) {
       chomp $ain;
       my $name = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=getswitchname&ain='.$ain);
@@ -68,7 +68,7 @@ sub save_device_cache {
   my $self = shift;
   $self->create_statefilesdir();
   my $statefile = $self->create_device_cache_file();
-  my $tmpfile = $GLPlugin::statefilesdir.'/check_nwc_health_tmp_'.$$;
+  my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
   my $fh = IO::File->new();
   $fh->open(">$tmpfile");
   $fh->print(Data::Dumper::Dumper($self->{device_cache}));
