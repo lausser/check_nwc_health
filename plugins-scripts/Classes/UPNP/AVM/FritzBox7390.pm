@@ -31,7 +31,6 @@ sub init {
       $self->check_mem_subsystem();
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_and_check_interface_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem");
-      $self->check_interface_subsystem();
     } elsif ($self->mode =~ /device::smarthome/) {
       $self->analyze_and_check_smarthome_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem");
     } else {
