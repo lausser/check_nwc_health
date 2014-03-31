@@ -2247,6 +2247,34 @@ sub get_entries {
       }
     }
     foreach my $key (keys %{$result}) {
+      if (substr($key, -1) eq " ") {
+        my $value = $result->{$key};
+        delete $result->{$key};
+        $key =~ s/\s+$//g;
+        $result->{$key} = $value;
+        #
+        # warum?
+        #
+        # %newparams ist:
+        #  '-columns' => [
+        #                  '1.3.6.1.2.1.2.2.1.8',
+        #                  '1.3.6.1.2.1.2.2.1.13',
+        #                  ...
+        #                  '1.3.6.1.2.1.2.2.1.16'
+        #                ],
+        #  '-startindex' => '2', 
+        #  '-endindex' => '2'
+        #
+        # und $result ist:
+        #  ...
+        #  '1.3.6.1.2.1.2.2.1.2.2' => 'Adaptive Security Appliance \'outside\' interface',
+        #  '1.3.6.1.2.1.2.2.1.16.2 ' => 4281465004,
+        #  '1.3.6.1.2.1.2.2.1.13.2' => 0,
+        #  ...
+        #
+        # stinkstiefel!
+        #
+      }
       $self->add_rawdata($key, $result->{$key});
     }
   } else {
