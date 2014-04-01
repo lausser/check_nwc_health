@@ -12,7 +12,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m', '');
   if (scalar (@{$self->{mem}}) == 0) {
   } else {
     foreach (@{$self->{mem}}) {
@@ -28,7 +27,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('m', $self->{hpicfMemIndex});
   $self->{usage} = $self->{hpLocalMemAllocBytes} / 
       $self->{hpLocalMemTotalBytes} * 100;
   $self->add_info(sprintf 'memory %s usage is %.2f',

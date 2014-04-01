@@ -18,7 +18,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking disks');
-  $self->blacklist('ses', '');
   if (scalar (@{$self->{storages}}) == 0) {
     $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
         diskPercent diskPercent)));
@@ -53,7 +52,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('vo', $self->{volumesVolumeID});
   $self->add_info(sprintf 'volume %s with %d disks is %s',
       $self->{volumesVolumeID},
       $self->{volumesNumberOfDisks},
@@ -75,7 +73,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('di', $self->{disksVolumeID}.'.'.$self->{disksIndex});
   $self->add_info(sprintf 'disk %s (vol %s) is %s',
       $self->{disksIndex},
       $self->{disksVolumeID},

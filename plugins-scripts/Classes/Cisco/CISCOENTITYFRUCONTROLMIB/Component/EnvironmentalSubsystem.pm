@@ -7,7 +7,7 @@ sub init {
   $self->{fan_subsystem} =
       Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem->new();
   $self->{supply_subsystem} =
-      Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem->new();
+      Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem->new();
 }
 
 sub check {

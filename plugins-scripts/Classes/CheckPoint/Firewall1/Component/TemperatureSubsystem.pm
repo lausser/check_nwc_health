@@ -24,7 +24,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{sensorsTemperatureIndex});
   $self->add_info(sprintf 'temperature %s is %s (%d %s)', 
       $self->{sensorsTemperatureName}, $self->{sensorsTemperatureStatus},
       $self->{sensorsTemperatureValue}, $self->{sensorsTemperatureUOM});

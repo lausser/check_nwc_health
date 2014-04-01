@@ -11,7 +11,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m');
   $self->add_info(sprintf 'memory usage is %.2f%% (%s)',
       $self->{perCentMemoryUtilization}, $self->{memoryAvailabilityStatus});
   $self->set_thresholds(warning => 80, critical => 90);

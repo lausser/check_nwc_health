@@ -75,7 +75,7 @@ sub add_message {
   my $level = shift;
   my $message = shift || $self->{info};
   $GLPlugin::plugin->add_message($level, $message)
-      unless $self->{blacklisted};
+      unless $self->is_blacklisted();
   if (exists $self->{failed}) {
     if ($level == UNKNOWN && $self->{failed} == OK) {
       $self->{failed} = $level;
@@ -292,9 +292,7 @@ sub filter_name {
 
 sub blacklist {
   my $self = shift;
-  my $type = shift;
-  my $name = shift;
-  $self->{blacklisted} = $self->is_blacklisted($type, $name);
+  $self->{blacklisted} = 1;
 }
 
 sub add_blacklist {
@@ -306,26 +304,38 @@ sub add_blacklist {
 
 sub is_blacklisted {
   my $self = shift;
-  my $type = shift;
-  my $name = shift;
-  my $blacklisted = 0;
-  foreach my $bl_items (split(/\//, $self->opts->blacklist)) {
-    if ($bl_items =~ /^(\w+):([\:\d\-,]+)$/) {
-      my $bl_type = $1;
-      my $bl_names = $2;
-      foreach my $bl_name (split(/,/, $bl_names)) {
-        if ($bl_type eq $type && $bl_name eq $name) {
-          $blacklisted = 1;
-        }
-      }
-    } elsif ($bl_items =~ /^(\w+)$/) {
-      my $bl_type = $1;
-      if ($bl_type eq $type) {
-        $blacklisted = 1;
+  if (! exists $self->{blacklisted}) {
+    $self->{blacklisted} = 0;
+  }
+  if (exists $self->{blacklisted} && $self->{blacklisted}) {
+    return $self->{blacklisted};
+  }
+  # FAN:459,203/TEMP:102229/ENVSUBSYSTEM
+  # FAN_459,FAN_203,TEMP_102229,ENVSUBSYSTEM
+  if ($self->opts->blacklist =~ /_/) {
+    foreach my $bl_item (split(/,/, $self->opts->blacklist)) {
+      if ($bl_item eq $self->internal_name()) {
+        $self->{blacklisted} = 1;
       }
     }
-  }
-  return $blacklisted;
+  } else {
+    foreach my $bl_items (split(/\//, $self->opts->blacklist)) {
+      if ($bl_items =~ /^(\w+):([\:\d\-,]+)$/) {
+        my $bl_type = $1;
+        my $bl_names = $2;
+        foreach my $bl_name (split(/,/, $bl_names)) {
+          if ($bl_type."_".$bl_name eq $self->internal_name()) {
+            $self->{blacklisted} = 1;
+          }
+        }
+      } elsif ($bl_items =~ /^(\w+)$/) {
+        if ($bl_items eq $self->internal_name()) {
+          $self->{blacklisted} = 1;
+        }
+      }
+    }
+  } 
+  return $self->{blacklisted};
 }
 
 
@@ -386,7 +396,7 @@ sub get_level {
 sub add_info {
   my $self = shift;
   my $info = shift;
-  $info = $self->{blacklisted} ? $info.' (blacklisted)' : $info;
+  $info = $self->is_blacklisted() ? $info.' (blacklisted)' : $info;
   $self->{info} = $info;
   push(@{$GLPlugin::info}, $info);
 }
@@ -2237,6 +2247,34 @@ sub get_entries {
       }
     }
     foreach my $key (keys %{$result}) {
+      if (substr($key, -1) eq " ") {
+        my $value = $result->{$key};
+        delete $result->{$key};
+        $key =~ s/\s+$//g;
+        $result->{$key} = $value;
+        #
+        # warum?
+        #
+        # %newparams ist:
+        #  '-columns' => [
+        #                  '1.3.6.1.2.1.2.2.1.8',
+        #                  '1.3.6.1.2.1.2.2.1.13',
+        #                  ...
+        #                  '1.3.6.1.2.1.2.2.1.16'
+        #                ],
+        #  '-startindex' => '2', 
+        #  '-endindex' => '2'
+        #
+        # und $result ist:
+        #  ...
+        #  '1.3.6.1.2.1.2.2.1.2.2' => 'Adaptive Security Appliance \'outside\' interface',
+        #  '1.3.6.1.2.1.2.2.1.16.2 ' => 4281465004,
+        #  '1.3.6.1.2.1.2.2.1.13.2' => 0,
+        #  ...
+        #
+        # stinkstiefel!
+        #
+      }
       $self->add_rawdata($key, $result->{$key});
     }
   } else {
@@ -2692,6 +2730,17 @@ sub AUTOLOAD {
   }
 }
 
+sub internal_name {
+  my $self = shift;
+  my $class = ref($self);
+  $class =~ s/^.*:://;
+  if (exists $self->{flat_indices}) {
+    return sprintf "%s_%s", uc $class, $self->{flat_indices};
+  } else {
+    return sprintf "%s", uc $class;
+  }
+}
+
 
 package GLPlugin::Item;
 our @ISA = qw(GLPlugin::SNMP);
@@ -2718,6 +2767,7 @@ sub check {
   foreach my $list (@lists) {
     $self->add_info('checking '.$list);
     foreach my $element (@{$self->{$list}}) {
+      $element->blacklist() if $self->is_blacklisted();
       $element->check();
     }
   }
@@ -2747,6 +2797,13 @@ sub ensure_index {
   my $self = shift;
   my $key = shift;
   $self->{$key} ||= $self->{flat_indices};
+}
+
+sub check {
+  my $self = shift;
+  # some tableitems are not checkable, they are only used to enhance other
+  # items (e.g. sensorthresholds enhance sensors)
+  # normal tableitems should have their own check-method
 }
 
 

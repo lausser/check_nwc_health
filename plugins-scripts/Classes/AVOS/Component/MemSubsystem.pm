@@ -39,7 +39,6 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking memory');
-  $self->blacklist('m', '');
   $self->add_info(sprintf 'memory usage is %.2f%%',
       $self->{deviceUsagePercent});
   $self->set_thresholds(warning => $self->{deviceUsageHigh} - 10, critical => $self->{deviceUsageHigh});

@@ -21,10 +21,10 @@ EXTRA_MODULES=\
   Classes/Server/Linux.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
-  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/SupplySubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
-  Classes/Cisco/CISCOENVMONMIB/Component/SupplySubsystem.pm \
+  Classes/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
   Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
@@ -50,7 +50,7 @@ EXTRA_MODULES=\
   Classes/Cisco/AsyncOS/Component/MemSubsystem.pm \
   Classes/Cisco/AsyncOS/Component/CpuSubsystem.pm \
   Classes/Cisco/AsyncOS/Component/TemperatureSubsystem.pm \
-  Classes/Cisco/AsyncOS/Component/SupplySubsystem.pm \
+  Classes/Cisco/AsyncOS/Component/PowersupplySubsystem.pm \
   Classes/Cisco/AsyncOS/Component/FanSubsystem.pm \
   Classes/Cisco/AsyncOS/Component/RaidSubsystem.pm \
   Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \

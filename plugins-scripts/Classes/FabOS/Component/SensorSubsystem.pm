@@ -16,7 +16,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
-  $self->blacklist('se', $self->{swSensorIndex});
   $self->add_info(sprintf '%s sensor %s (%s) is %s',
       $self->{swSensorType},
       $self->{swSensorIndex},

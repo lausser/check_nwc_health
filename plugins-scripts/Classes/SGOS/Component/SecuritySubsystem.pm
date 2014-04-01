@@ -13,7 +13,6 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking attacks');
-  $self->blacklist('at', '');
   if (scalar (@{$self->{attacks}}) == 0) {
     $self->add_info('no security incidents');
   } else {
@@ -34,7 +33,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('s', $self->{deviceAttackIndex});
   $self->{deviceAttackTime} = $self->timeticks(
       $self->{deviceAttackTime});
   $self->{count_me} = 0;

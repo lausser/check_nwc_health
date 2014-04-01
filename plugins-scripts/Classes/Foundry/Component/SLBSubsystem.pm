@@ -154,10 +154,8 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking slb virtual servers');
-  $self->blacklist('vip', '');
   if ($self->mode =~ /device::lb::session::usage/) {
     $self->add_info('checking session usage');
-    $self->blacklist('su', undef);
     $self->add_info(sprintf 'session usage is %.2f%% (%d of %d)', $self->{session_usage},
         $self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}, $self->{snL4MaxSessionLimit});
     $self->set_thresholds(warning => 80, critical => 90);
@@ -208,7 +206,6 @@ use strict;
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->blacklist('po', $self->{snL4VirtualServerName});
   $self->add_info(sprintf "vip %s is %s", 
       $self->{snL4VirtualServerName},
       $self->{snL4VirtualServerAdminStatus});
@@ -235,7 +232,6 @@ use strict;
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->blacklist('vpo', $self->{snL4VirtualServerPortServerName}.':'.$self->{snL4VirtualServerPortPort});
   $self->add_info(sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort},
@@ -352,7 +348,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->blacklist('rpo', $self->{snL4RealServerPortStatusServerName}.':'.$self->{snL4RealServerPortStatusPort});
   $self->add_info(sprintf "rpo %s:%d is %s",
       $self->{snL4RealServerPortStatusServerName},
       $self->{snL4RealServerPortStatusPort},

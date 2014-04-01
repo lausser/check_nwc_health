@@ -11,7 +11,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c');
   $self->add_info(sprintf 'cpu usage is %.2f%%',
       $self->{perCentCPUUtilization});
   $self->set_thresholds(warning => 80, critical => 90);

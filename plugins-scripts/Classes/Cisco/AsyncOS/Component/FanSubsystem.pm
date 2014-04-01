@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('f', $self->{fanIndex});
   $self->add_info(sprintf 'fan %d (%s) has %s rpm',
       $self->{fanIndex},
       $self->{fanName},

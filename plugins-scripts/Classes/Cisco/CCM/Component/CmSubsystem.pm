@@ -29,7 +29,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
-  $self->blacklist('cm', $self->{ccmIndex});
   $self->add_info(sprintf 'cm %s is %s',
       $self->{ccmName},
       $self->{ccmStatus});

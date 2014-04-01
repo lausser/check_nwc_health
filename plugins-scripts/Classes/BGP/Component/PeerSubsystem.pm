@@ -73,7 +73,6 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking bgp peers');
-  $self->blacklist('bgp', '');
   if (scalar(@{$self->{peers}}) == 0) {
     $self->add_unknown('no peers');
     return;

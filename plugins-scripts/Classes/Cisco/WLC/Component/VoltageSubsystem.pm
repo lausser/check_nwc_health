@@ -19,7 +19,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('v', $self->{ciscoEnvMonVoltageStatusIndex});
   $self->add_info(sprintf 'voltage %d (%s) is %s',
       $self->{ciscoEnvMonVoltageStatusIndex},
       $self->{ciscoEnvMonVoltageStatusDescr},

@@ -40,7 +40,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking interfaces');
-  $self->blacklist('ff', '');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
     return;
@@ -434,7 +433,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  $self->blacklist('if', $self->{ifIndex});
   if ($self->mode =~ /device::interfaces::traffic/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',

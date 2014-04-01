@@ -15,7 +15,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c', undef);
   if (defined $self->{swCpuUsage}) {
     $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage});
     $self->set_thresholds(warning => $self->{swCpuUsageLimit},

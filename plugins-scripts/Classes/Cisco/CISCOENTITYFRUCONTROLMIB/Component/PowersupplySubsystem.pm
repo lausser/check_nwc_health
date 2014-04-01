@@ -1,16 +1,17 @@
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
-    ['supplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::Supply'],
-    ['supplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::SupplyGroup'],
+    ['powersupplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply'],
+    ['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup'],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
   ]);
+  @{$self->{entities}} = grep { $_->{entPhysicalClass} eq 'powerSupply' } @{$self->{entities}};
   foreach my $supply (@{$self->{supplies}}) {
     foreach my $entity (@{$self->{entities}}) {
       if ($supply->{flat_indices} eq $entity->{entPhysicalIndex}) {
@@ -20,26 +21,13 @@ sub init {
   }
 }
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking power supplies');
-  $self->blacklist('pp', '');
-  foreach (@{$self->{supplies}}) {
-    $_->check();
-  }
-  foreach (@{$self->{supplygroups}}) {
-    $_->check();
-  }
-}
 
-
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::Supply;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('p', $self->{flat_indices});
   $self->add_info(sprintf 'power supply %s%s admin status is %s, oper status is %s',
       $self->{flat_indices},
       #exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.' idx '.$self->{entity}->{entPhysicalIndex}.' class '.$self->{entity}->{entPhysicalClass}.')' : '',
@@ -56,7 +44,7 @@ return;
 }
 
 
-package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::SupplySubsystem::SupplyGroup;
+package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 

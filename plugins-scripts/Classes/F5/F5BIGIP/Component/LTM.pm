@@ -25,7 +25,6 @@ sub new {
 sub check {
   my $self = shift;
   $self->add_info('checking ltm pools');
-  $self->blacklist('poo', '');
   if (scalar(@{$self->{pools}}) == 0) {
     $self->add_unknown('no pools');
     return;
@@ -152,7 +151,6 @@ sub check {
   my $self = shift;
   $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
   $self->{name} = $self->{ltmPoolName};
-  $self->blacklist('po', $self->{ltmPoolName});
   $self->add_info(sprintf "pool %s is %s, avail state is %s, active members: %d of %d", 
       $self->{ltmPoolName},
       $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState},
@@ -313,7 +311,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->blacklist('po', $self->{poolName});
   $self->add_info(sprintf 'pool %s active members: %d of %d', $self->{poolName},
       $self->{poolActiveMemberCount},
       $self->{poolMemberQty});

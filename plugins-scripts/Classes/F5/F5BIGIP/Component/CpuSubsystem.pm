@@ -35,7 +35,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('cc', '');
   if ($self->mode =~ /load/) {
     $self->add_info(sprintf 'tmm cpu usage is %.2f%%',
         $self->{cpu_usage});
@@ -62,7 +61,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', $self->{sysCpuIndex});
   $self->add_info(sprintf 'cpu %d has %dC (%drpm)',
       $self->{sysCpuIndex},
       $self->{sysCpuTemperature},

@@ -13,7 +13,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m', '');
   $self->add_info(sprintf 'Users: sslconns=%d cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
       $self->{iveSSLConnections},
       $self->{clusterConcurrentUsers},

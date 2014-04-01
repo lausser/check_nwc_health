@@ -19,7 +19,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('cpu', $self->{hrProcessorIndex});
   $self->add_info(sprintf 'cpu %s is %.2f%%',
       $self->{hrProcessorIndex},
       $self->{hrProcessorLoad});

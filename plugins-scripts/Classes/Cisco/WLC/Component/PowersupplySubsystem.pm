@@ -1,22 +1,21 @@
-package Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem;
+package Classes::Cisco::IOS::Component::PowersupplySubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
-      ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem::Supply'],
+      ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::Cisco::IOS::Component::PowersupplySubsystem::Powersupply'],
   ]);
 }
 
-package Classes::Cisco::CISCOENVMONMIB::Component::SupplySubsystem::Supply;
+package Classes::Cisco::IOS::Component::PowersupplySubsystem::Powersupply;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
 sub check {
   my $self = shift;
-  $self->ensure_index('ciscoEnvMonSupplyStatusIndex');
-  $self->blacklist('f', $self->{ciscoEnvMonSupplyStatusIndex});
+  $self->{ciscoEnvMonSupplyStatusIndex} ||= 0;
   $self->add_info(sprintf 'powersupply %d (%s) is %s',
       $self->{ciscoEnvMonSupplyStatusIndex},
       $self->{ciscoEnvMonSupplyStatusDescr},

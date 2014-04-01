@@ -17,7 +17,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('r', $self->{raidIndex});
   $self->add_info(sprintf 'raid %d has status %s',
       $self->{raidIndex},
       $self->{raidStatus});

@@ -15,7 +15,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('t', $self->{temperatureIndex});
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_info(sprintf 'temperature %d (%s) is %s degree C',
         $self->{temperatureIndex},

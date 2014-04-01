@@ -11,7 +11,6 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c', undef);
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{iveCpuUtil});
   # http://www.juniper.net/techpubs/software/ive/guides/howtos/SA-IC-MAG-SNMP-Monitoring-Guide.pdf
   $self->set_thresholds(warning => 50, critical => 90);
@@ -38,7 +37,6 @@ sub unix_check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking loads');
-  $self->blacklist('c', '');
   foreach (@{$self->{loads}}) {
     $_->check();
   }
@@ -58,7 +56,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', undef);
   $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
   $self->set_thresholds(warning => $self->{laConfig},
       critical => $self->{laConfig});

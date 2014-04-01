@@ -24,7 +24,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', $self->{flat_indices});
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{sgProxyCpuCoreBusyPerCent});
   $self->set_thresholds(warning => 80, critical => 90);
@@ -45,7 +44,6 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', $self->{flat_indices});
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{deviceUsagePercent});
   $self->set_thresholds(warning => 80, critical => 90);

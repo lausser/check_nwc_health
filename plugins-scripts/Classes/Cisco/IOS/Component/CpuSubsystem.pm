@@ -61,7 +61,6 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->blacklist('c', $self->{cpmCPUTotalPhysicalIndex});
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
       $self->{entPhysicalName}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);

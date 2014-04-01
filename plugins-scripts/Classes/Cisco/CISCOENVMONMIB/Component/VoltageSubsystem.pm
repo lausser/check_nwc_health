@@ -14,7 +14,6 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking voltages');
-  $self->blacklist('ff', '');
   if (scalar (@{$self->{voltages}}) == 0) {
   } else {
     foreach (@{$self->{voltages}}) {
@@ -31,7 +30,6 @@ use strict;
 sub check {
   my $self = shift;
   $self->ensure_index('ciscoEnvMonVoltageStatusIndex');
-  $self->blacklist('v', $self->{ciscoEnvMonVoltageStatusIndex});
   $self->add_info(sprintf 'voltage %d (%s) is %s',
       $self->{ciscoEnvMonVoltageStatusIndex},
       $self->{ciscoEnvMonVoltageStatusDescr},

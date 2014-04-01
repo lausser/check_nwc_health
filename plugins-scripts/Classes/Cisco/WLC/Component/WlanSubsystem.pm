@@ -27,7 +27,6 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking access points');
-  $self->blacklist('ap', '');
   $self->{numOfAPs} = scalar (@{$self->{aps}});
   $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
   if (scalar (@{$self->{aps}}) == 0) {
@@ -127,7 +126,6 @@ sub check {
   if ($self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   }
-  $self->blacklist('ap', $self->{bsnAPName});
   $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
       $self->{bsnAPName}, $self->{bsnAPOperationStatus},
       scalar(@{$self->{interfaces}}), $self->{NumOfClients});

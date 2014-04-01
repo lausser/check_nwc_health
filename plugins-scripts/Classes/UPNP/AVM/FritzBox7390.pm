@@ -2,6 +2,15 @@ package Classes::UPNP::AVM::FritzBox7390;
 our @ISA = qw(Classes::UPNP::AVM);
 use strict;
 
+{
+  our $sid = undef;
+}
+
+sub sid : lvalue {
+  my $self = shift;
+  $Classes::UPNP::AVM::FritzBox7390::sid;
+}
+
 sub init {
   my $self = shift;
   foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
@@ -9,6 +18,7 @@ sub init {
       $self->add_unknown("could not find $module module");
     }
   }
+  $self->login();
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
       $self->analyze_environmental_subsystem();
@@ -20,66 +30,80 @@ sub init {
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
     } elsif ($self->mode =~ /device::interfaces/) {
-      $self->analyze_interface_subsystem();
-      $self->check_interface_subsystem();
+      $self->analyze_and_check_interface_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem");
     } elsif ($self->mode =~ /device::smarthome/) {
-      $self->analyze_smarthome_subsystem();
-      $self->check_smarthome_subsystem();
+      $self->analyze_and_check_smarthome_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem");
     } else {
+      $self->logout();
       $self->no_such_mode();
     }
   }
+  $self->logout();
+}
+
+sub login {
+  my $self = shift;
+  my $ua = LWP::UserAgent->new;
+  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
+  my $resp = $ua->get($loginurl);
+  my $content = $resp->content();
+  my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
+  my $input = $challenge . '-' . $self->opts->community;
+  Encode::from_to($input, 'ascii', 'utf16le');
+  my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
+  $resp = HTTP::Request->new(POST => $loginurl);
+  $resp->content_type("application/x-www-form-urlencoded");
+  my $login = "response=$challengeresponse";
+  if ($self->opts->username) {
+      $login .= "&username=" . $self->opts->username;
+  }
+  $resp->content($login);
+  my $loginresp = $ua->request($resp);
+  $content = $loginresp->content();
+  $self->sid() = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
+  if (! $loginresp->is_success() || ! $self->sid() || $self->sid() =~ /^0+$/) {
+    $self->add_critical($loginresp->status_line());
+  } else {
+    $self->debug("logged in with sid ".$self->sid());
+  }
+}
+
+sub logout {
+  my $self = shift;
+  return if ! $self->sid();
+  my $ua = LWP::UserAgent->new;
+  my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
+  my $resp = HTTP::Request->new(POST => $loginurl);
+  $resp->content_type("application/x-www-form-urlencoded");
+  my $logout = "sid=".$self->sid()."&security:command/logout=1";
+  $resp->content($logout);
+  my $logoutresp = $ua->request($resp);
+  $self->sid() = undef;
+  $self->debug("logged out");
+}
+
+sub DESTROY {
+  my $self = shift;
+  $self->logout();
 }
 
 sub http_get {
   my $self = shift;
   my $page = shift;
   my $ua = LWP::UserAgent->new;
-  if (! $self->{sid}) {
-    my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
-    my $resp = $ua->get($loginurl);
-    my $content = $resp->content();
-    my $challenge = ($content =~ /<Challenge>(.*?)<\/Challenge>/ && $1);
-    my $input = $challenge . '-' . $self->opts->community;
-    Encode::from_to($input, 'ascii', 'utf16le');
-    my $challengeresponse = $challenge . '-' . lc(Digest::MD5::md5_hex($input));
-    $resp = HTTP::Request->new(POST => $loginurl);
-    $resp->content_type("application/x-www-form-urlencoded");
-    my $login = "response=$challengeresponse";
-    if ($self->opts->username) {
-        $login .= "&username=" . $self->opts->username;
-    }
-    $resp->content($login);
-    my $loginresp = $ua->request($resp);
-    $content = $loginresp->content();
-    $self->{sid} = ($content =~ /<SID>(.*?)<\/SID>/ && $1);
-    if (! $loginresp->is_success()) {
-      $self->add_critical($loginresp->status_line());
-    }
-  }
   if ($page =~ /\?/) {
-    $page .= "&sid=$self->{sid}";
+    $page .= "&sid=".$self->sid();
   } else {
-    $page .= "?sid=$self->{sid}";
+    $page .= "?sid=".$self->sid();
   }
-  my $ecourl = sprintf "http://%s/%s", $self->opts->hostname, $page;
-  my $resp = $ua->get($ecourl);
+  my $url = sprintf "http://%s/%s", $self->opts->hostname, $page;
+  $self->debug("http get ".$url);
+  my $resp = $ua->get($url);
   if (! $resp->is_success()) {
     $self->add_critical($resp->status_line());
+  } else {
   }
   return $resp->content();
-}
-
-sub analyze_smarthome_subsystem {
-  my $self = shift;
-  $self->{components}->{smarthome_subsystem} =
-      Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem->new();
-}
-
-sub analyze_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem} =
-      Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem->new();
 }
 
 sub analyze_cpu_subsystem {
@@ -115,28 +139,12 @@ sub analyze_mem_subsystem {
   }
 }
 
-sub check_smarthome_subsystem {
-  my $self = shift;
-  $self->{components}->{smarthome_subsystem}->check();
-  $self->{components}->{smarthome_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
-sub check_interface_subsystem {
-  my $self = shift;
-  $self->{components}->{interface_subsystem}->check();
-  $self->{components}->{interface_subsystem}->dump()
-      if $self->opts->verbose >= 2;
-}
-
 sub check_cpu_subsystem {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->blacklist('c', undef);
-  my $info = sprintf 'cpu usage is %.2f%%', $self->{cpu_usage};
-  $self->add_info($info);
+  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 40, critical => 60);
-  $self->add_message($self->check_thresholds($self->{cpu_usage}), $info);
+  $self->add_message($self->check_thresholds($self->{cpu_usage}), $self->{info});
   $self->add_perfdata(
       label => 'cpu_usage',
       value => $self->{cpu_usage},
@@ -149,11 +157,9 @@ sub check_cpu_subsystem {
 sub check_mem_subsystem {
   my $self = shift;
   $self->add_info('checking memory');
-  $self->blacklist('m', undef);
-  my $info = sprintf 'memory usage is %.2f%%', $self->{ram_used};
-  $self->add_info($info);
+  $self->add_info(sprintf 'memory usage is %.2f%%', $self->{ram_used});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{ram_used}), $info);
+  $self->add_message($self->check_thresholds($self->{ram_used}), $self->{info});
   $self->add_perfdata(
       label => 'memory_usage',
       value => $self->{ram_used},
