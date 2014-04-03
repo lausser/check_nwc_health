@@ -2211,8 +2211,21 @@ sub get_table {
         $self->debug("get_table error: no more fallbacks. Try --protocol 1");
       }
     }
+    # Drecksstinkstiefel Net::SNMP
+    # '1.3.6.1.2.1.2.2.1.22.4 ' => 'endOfMibView',
+    # '1.3.6.1.2.1.2.2.1.22.4' => '0.0',
     foreach my $key (keys %{$result}) {
-      $self->add_rawdata($key, $result->{$key});
+      if (substr($key, -1) eq " ") {
+        my $value = $result->{$key};
+        delete $result->{$key};
+        (my $shortkey = $key) =~ s/\s+$//g;
+        if (! exists $result->{shortkey}) {
+          $result->{$shortkey} = $value;
+        }
+        $self->add_rawdata($key, $result->{$key}) if exists $result->{$key};
+      } else {
+        $self->add_rawdata($key, $result->{$key});
+      }
     }
   }
   return $self->get_matching_oids(
