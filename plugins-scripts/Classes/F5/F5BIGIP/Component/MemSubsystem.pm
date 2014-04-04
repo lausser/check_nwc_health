@@ -26,8 +26,10 @@ sub check {
   );
   $self->add_info(sprintf 'host memory usage is %.2f%%',
       $self->{host_mem_usage});
+printf "%s\n", Data::Dumper::Dumper($self);
   $self->set_thresholds(warning => 80, critical => 90);
   $self->add_ok();
+printf "%s\n", Data::Dumper::Dumper($self);
   $self->add_perfdata(
       label => 'host_usage',
       value => $self->{host_mem_usage},

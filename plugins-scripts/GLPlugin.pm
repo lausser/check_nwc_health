@@ -352,8 +352,8 @@ sub force_thresholds {
 sub check_thresholds {
   my $self = shift;
   my @params = @_;
-  ($self->{warning}, $self->{critical}) =
-      $GLPlugin::plugin->get_thresholds(@params);
+  #($self->{warning}, $self->{critical}) =
+  #    $GLPlugin::plugin->get_thresholds(@params);
   return $GLPlugin::plugin->check_thresholds(@params);
 }
 
@@ -361,9 +361,9 @@ sub get_thresholds {
   my $self = shift;
   my @params = @_;
   my @thresholds = $GLPlugin::plugin->get_thresholds(@params);
-  my($warning, $critical) = $GLPlugin::plugin->get_thresholds(@params);
-  $self->{warning} = $thresholds[0];
-  $self->{critical} = $thresholds[1];
+  #my($warning, $critical) = $GLPlugin::plugin->get_thresholds(@params);
+  #$self->{warning} = $thresholds[0];
+  #$self->{critical} = $thresholds[1];
   return @thresholds;
 }
 
@@ -864,6 +864,18 @@ sub add_message {
 
 sub add_perfdata {
   my ($self, %args) = @_;
+printf "add_perfdata %s\n", Data::Dumper::Dumper(\%args);
+printf "add_perfdata %s\n", Data::Dumper::Dumper($self->{thresholds});
+#
+# wenn warning, critical, dann wird von oben ein expliziter wert mitgegeben
+# wenn thresholds
+#  wenn label in 
+#    warningx $self->{thresholds}->{$label}->{warning} existiert
+#  dann nimm $self->{thresholds}->{$label}->{warning}
+#  ansonsten thresholds->default->warning
+#
+
+  my $label = $args{label};
   $args{label} = '\''.$args{label}.'\'';
   if (! exists $args{places}) {
     $args{places} = 2;
@@ -876,7 +888,9 @@ sub add_perfdata {
   if ($args{uom}) {
     $str .= $args{uom};
   }
-  if ($args{warning}) {
+  if (exists $self->{thresholds}->{$label}->{warning}) {
+    $str .= ';'.$self->{thresholds}->{$label}->{warning}
+  } elsif ($args{warning}) {
     $str .= ';'.$args{warning};
   }
   if ($args{critical}) {
@@ -1042,6 +1056,7 @@ sub set_thresholds {
       }
     }
   } else {
+printf "%s get thres\n", ref($self);
     $self->{thresholds}->{default}->{warning} =
         $self->opts->warning || $params{warning} || 0;
     $self->{thresholds}->{default}->{critical} =
@@ -1052,13 +1067,22 @@ sub set_thresholds {
 sub force_thresholds {
   my $self = shift;
   my %params = @_;
-  $self->{mywarning} = $params{warning} || 0;
-  $self->{mycritical} = $params{critical} || 0;
+  $self->{thresholds}->{default}->{warning} = $params{warning} || 0;
+  $self->{thresholds}->{default}->{critical} = $params{critical} || 0;
 }
 
 sub get_thresholds {
   my $self = shift;
-  return ($self->{mywarning}, $self->{mycritical});
+  my @params = @_;
+  if (scalar(@params) > 1) {
+    my %params = @params;
+    my $metric = $params{metric};
+    return ($self->{thresholds}->{$metric}->{warning},
+        $self->{thresholds}->{$metric}->{critical});
+  } else {
+    return ($self->{thresholds}->{default}->{warning},
+        $self->{thresholds}->{default}->{critical});
+  }
 }
 
 sub check_thresholds {
