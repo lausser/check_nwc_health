@@ -1000,6 +1000,16 @@ sub nagios_exit {
   } else {
       chomp $message;
   }
+  if ($self->opts->negate) {
+    foreach my $from (keys %{$self->opts->negate}) {
+      if ((uc $from) =~ /^(OK|WARNING|CRITICAL|UNKNOWN)$/ &&
+          (uc $self->opts->negate->{$from}) =~ /^(OK|WARNING|CRITICAL|UNKNOWN)$/) {
+        if ($code == $ERRORS{uc $from}) {
+          $code = $ERRORS{uc $self->opts->negate->{$from}};
+        }
+      }
+    }
+  }
   my $output = "$STATUS_TEXT{$code}";
   $output .= " - $message" if defined $message && $message ne '';
   if (scalar (@{$self->{perfdata}})) {
