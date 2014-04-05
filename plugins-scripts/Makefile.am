@@ -43,6 +43,7 @@ EXTRA_MODULES=\
   Classes/Cisco/WLC/Component/WlanSubsystem.pm \
   Classes/Cisco/WLC.pm \
   Classes/Cisco/PrimeNCS.pm \
+  Classes/Cisco/UCOS.pm \
   Classes/Cisco/CCM/Component/PhoneSubsystem.pm \
   Classes/Cisco/CCM/Component/CmSubsystem.pm \
   Classes/Cisco/CCM.pm \
