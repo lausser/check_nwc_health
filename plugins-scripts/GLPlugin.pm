@@ -229,6 +229,18 @@ sub validate_args {
     }
   }
   $GLPlugin::plugin->{statefilesdir} = $self->opts->statefilesdir;
+  if ($self->opts->warningx) {
+    foreach my $key (keys %{$self->opts->warningx}) {
+      $self->set_thresholds(metric => $key, 
+          warning => $self->opts->warningx->{$key});
+    }
+  }
+  if ($self->opts->criticalx) {
+    foreach my $key (keys %{$self->opts->criticalx}) {
+      $self->set_thresholds(metric => $key, 
+          critical => $self->opts->criticalx->{$key});
+    }
+  }
   $SIG{'ALRM'} = sub {
     printf "UNKNOWN - %s timed out after %d seconds\n",
         $GLPlugin::plugin->{name}, $self->opts->timeout;
@@ -876,30 +888,47 @@ printf "add_perfdata %s\n", Data::Dumper::Dumper($self->{thresholds});
 #
 
   my $label = $args{label};
-  $args{label} = '\''.$args{label}.'\'';
-  if (! exists $args{places}) {
-    $args{places} = 2;
-  }
+  my $value = $args{value};
+  my $uom = $args{uom} || "";
   my $format = '%d';
-  if ($args{value} =~ /\./) {
-    $format = '%.'.$args{places}.'f';
+  if ($value =~ /\./) {
+    if ($args{places}) {
+      $value = sprintf '%.'.$args{places}.'f', $value;
+    } else {
+      $value = sprintf "%.2f", $value;
+    }
+  } else {
+    $value = sprintf "%d", $value;
   }
-  my $str = $args{label}.'='.sprintf $format, $args{value};
-  if ($args{uom}) {
-    $str .= $args{uom};
+  my $warn = "";
+  my $crit = "";
+  my $min = "";
+  my $max = "";
+  if ($args{thresholds}) {
+    if (exists $self->{thresholds}->{$label}->{warning}) {
+      $warn = $self->{thresholds}->{$label}->{warning};
+    } elsif (exists $self->{thresholds}->{default}->{warning}) {
+      $warn = $self->{thresholds}->{default}->{warning};
+    }
+    if (exists $self->{thresholds}->{$label}->{critical}) {
+      $crit = $self->{thresholds}->{$label}->{critical};
+    } elsif (exists $self->{thresholds}->{default}->{critical}) {
+      $crit = $self->{thresholds}->{default}->{critical};
+    }
+  } else {
+    if ($args{warning}) {
+      $warn = $args{warning};
+    }
+    if ($args{critical}) {
+      $crit = $args{critical};
+    }
   }
-  if (exists $self->{thresholds}->{$label}->{warning}) {
-    $str .= ';'.$self->{thresholds}->{$label}->{warning}
-  } elsif ($args{warning}) {
-    $str .= ';'.$args{warning};
+  if ($uom eq "%") {
+    $min = 0;
+    $max = 100;
   }
-  if ($args{critical}) {
-    $str .= ';'.$args{critical};
-  }
-  if (! $args{warning} && ! $args{critical} && $args{uom} && $args{uom} eq '%') {
-    $str .= ';0;100';
-  }
-  push @{$self->{perfdata}}, $str;
+  push @{$self->{perfdata}}, sprintf "'%s'=%s%s;%s;%s;%s;%s",
+      $label, $value, $uom, $warn, $crit, $min, $max;
 }
 
 sub add_html {
@@ -1039,24 +1068,20 @@ sub nagios_exit {
 sub set_thresholds {
   my $self = shift;
   my %params = @_;
+printf "set_thresholds %s\n", Data::Dumper::Dumper(\%params);
   if (exists $params{metric}) {
     my $metric = $params{metric};
-    $self->{thresholds}->{$metric}->{warning} = $params{warning};
-    $self->{thresholds}->{$metric}->{critical} = $params{critical};
-    if ($self->opts->warningx) {
-      foreach my $key (keys %{$self->opts->warningx}) {
-        next if $key ne $metric;
-        $self->{thresholds}->{$metric}->{warning} = $self->opts->warningx->{$key};
-      }
-    }
-    if ($self->opts->criticalx) {
-      foreach my $key (keys %{$self->opts->criticalx}) {
-        next if $key ne $metric;
-        $self->{thresholds}->{$metric}->{critical} = $self->opts->criticalx->{$key};
-      }
-    }
+    $self->{thresholds}->{$metric}->{warning} = 
+        $params{warning} if $params{warning};
+    $self->{thresholds}->{$metric}->{warning} = 
+        $self->{thresholds}->{$metric}->{warning} 
+        if $self->{thresholds}->{$metric}->{warning};
+    $self->{thresholds}->{$metric}->{critical} = 
+        $params{critical} if $params{critical};
+    $self->{thresholds}->{$metric}->{critical} = 
+        $self->{thresholds}->{$metric}->{critical}
+        if $self->{thresholds}->{$metric}->{critical};
   } else {
-printf "%s get thres\n", ref($self);
     $self->{thresholds}->{default}->{warning} =
         $self->opts->warning || $params{warning} || 0;
     $self->{thresholds}->{default}->{critical} =
