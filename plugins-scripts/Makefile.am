@@ -155,6 +155,8 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/TemperatureSubsystem.pm \
   Classes/Foundry.pm \
   Classes/Bluecoat.pm \
+  Classes/Lantronix.pm \
+  Classes/Lantronix/SLS.pm \
   Classes/MibsAndOids.pm \
   Classes/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
