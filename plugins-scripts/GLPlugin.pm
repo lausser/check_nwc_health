@@ -921,7 +921,7 @@ sub add_perfdata {
   my $crit = "";
   my $min = "";
   my $max = "";
-  if ($args{thresholds}) {
+  if ($args{thresholds} || (! exists $args{warning} && ! exists $args{critical})) {
     if (exists $self->{thresholds}->{$label}->{warning}) {
       $warn = $self->{thresholds}->{$label}->{warning};
     } elsif (exists $self->{thresholds}->{default}->{warning}) {
@@ -1109,8 +1109,14 @@ sub set_thresholds {
 sub force_thresholds {
   my $self = shift;
   my %params = @_;
-  $self->{thresholds}->{default}->{warning} = $params{warning} || 0;
-  $self->{thresholds}->{default}->{critical} = $params{critical} || 0;
+  if (exists $params{metric}) {
+    my $metric = $params{metric};
+    $self->{thresholds}->{$metric}->{warning} = $params{warning} || 0;
+    $self->{thresholds}->{$metric}->{critical} = $params{critical} || 0;
+  } else {
+    $self->{thresholds}->{default}->{warning} = $params{warning} || 0;
+    $self->{thresholds}->{default}->{critical} = $params{critical} || 0;
+  }
 }
 
 sub get_thresholds {

@@ -35,8 +35,6 @@ sub check {
   $self->add_perfdata(
       label => 'temperature',
       value => $self->{temp_value},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
   if ($self->{ps1_present} eq "true") {
     if ($self->{ps1_operational} ne "true") {

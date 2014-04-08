@@ -26,8 +26,6 @@ sub check {
       label => sprintf('%s_free_pct', $self->{hrStorageDescr}),
       value => $free,
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

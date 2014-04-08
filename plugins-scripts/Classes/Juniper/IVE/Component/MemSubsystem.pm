@@ -20,8 +20,6 @@ sub check {
       label => 'memory_usage',
       value => $self->{iveMemoryUtil},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
   );
   $self->set_thresholds(warning => 5, critical => 10);
   $self->add_message($self->check_thresholds($self->{iveSwapUtil}),
@@ -30,8 +28,6 @@ sub check {
       label => 'swap_usage',
       value => $self->{iveSwapUtil},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
   );
 }
 

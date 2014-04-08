@@ -47,8 +47,6 @@ sub check {
       label => 'memory_usage',
       value => $self->{deviceUsagePercent},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
   );
 }
 

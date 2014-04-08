@@ -64,8 +64,6 @@ sub check {
       $self->add_perfdata(
           label => 'num_aps',
           value => scalar (@{$self->{aps}}),
-          warning => $self->{warning},
-          critical => $self->{critical},
       );
     } elsif ($self->mode =~ /device::wlan::aps::status/) {
       if ($self->opts->report eq "short") {

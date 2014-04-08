@@ -29,8 +29,6 @@ sub check {
         label => 'disk_free',
         value => $free,
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   } else {
     foreach (@{$self->{storages}}) {

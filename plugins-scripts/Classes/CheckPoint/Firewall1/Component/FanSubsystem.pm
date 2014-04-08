@@ -37,8 +37,6 @@ sub check {
   $self->add_perfdata(
       label => 'fan'.$self->{sensorsFanName}.'_rpm',
       value => $self->{sensorsFanValue},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

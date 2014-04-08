@@ -32,8 +32,6 @@ sub check {
       label => 'cpu_'.$self->{sgProxyCpuCoreIndex}.'_usage',
       value => $self->{sgProxyCpuCoreBusyPerCent},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 
@@ -52,8 +50,6 @@ sub check {
       label => 'cpu_'.$self->{deviceUsageIndex}.'_usage',
       value => $self->{deviceUsagePercent},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

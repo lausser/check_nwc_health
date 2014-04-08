@@ -27,8 +27,6 @@ sub check {
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{temperatureIndex}),
       value => $self->{degreesCelsius},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

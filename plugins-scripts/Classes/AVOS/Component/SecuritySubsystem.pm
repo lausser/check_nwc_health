@@ -17,9 +17,6 @@ sub check {
   $self->add_perfdata(
       label => 'viruses',
       value => $self->{avVirusesDetected},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
-
 }
 

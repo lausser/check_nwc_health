@@ -32,8 +32,7 @@ sub check {
   $self->add_perfdata(
       label => sprintf('lifetime_%s', $self->{keyDaysUntilExpire}),
       value => $self->{keyDaysUntilExpire},
-      warning => $self->{warning},
-      critical => $self->{critical},
+      thresholds => $self->{keyIsPerpetual} eq 'true' ? 0 : 1,
   );
 }
 

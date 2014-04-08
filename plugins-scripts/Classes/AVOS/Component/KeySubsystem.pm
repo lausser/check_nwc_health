@@ -18,8 +18,6 @@ sub check {
   $self->add_perfdata(
       label => sprintf('lifetime_%s', $self->{avVendorName}),
       value => $self->{avLicenseDaysRemaining},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

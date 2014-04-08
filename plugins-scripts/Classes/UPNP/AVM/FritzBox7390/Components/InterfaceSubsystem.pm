@@ -112,25 +112,23 @@ sub check {
         label => $self->{ifDescr}.'_usage_in',
         value => $self->{inputUtilization},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_out',
         value => $self->{outputUtilization},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units,
+        thresholds => 0,
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units,
+        thresholds => 0,
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     $self->add_info(sprintf 'interface %s%s status is %s',

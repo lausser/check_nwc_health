@@ -22,8 +22,7 @@ sub check {
   $self->add_perfdata(
       label => sprintf('fan_c%s', $self->{fanIndex}),
       value => $self->{fanRPMs},
-      warning => undef,
-      critical => undef,
+      thresholds => 0,
   );
 }
 

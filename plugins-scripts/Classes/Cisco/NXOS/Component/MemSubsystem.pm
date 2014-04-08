@@ -20,7 +20,6 @@ sub check {
         label => 'memory_usage',
         value => $self->{cseSysMemoryUtilization},
         uom => '%',
-        thresholds => 1,
     );
   } else {
     $self->add_unknown('cannot aquire momory usage');

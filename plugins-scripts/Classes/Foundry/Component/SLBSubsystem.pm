@@ -164,8 +164,6 @@ sub check {
         label => 'session_usage',
         value => $self->{session_usage},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   } elsif ($self->mode =~ /device::lb::pool/) {
     if (scalar(@{$self->{virtualservers}}) == 0) {
@@ -263,12 +261,11 @@ sub check {
       label => sprintf('pool_%s:%d_completeness', $self->{snL4VirtualServerPortServerName}, $self->{snL4VirtualServerPortPort}),
       value => $self->{completeness},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
   $self->add_perfdata(
       label => sprintf('pool_%s:%d_servercurconns', $self->{snL4VirtualServerPortServerName}, $self->{snL4VirtualServerPortPort}),
       value => $self->{snL4VirtualServerPortStatisticCurrentConnection},
+      thresholds => 0,
   );
   if ($self->opts->report eq "html") {
     # tabelle mit snL4VirtualServerPortServerName:snL4VirtualServerPortPort

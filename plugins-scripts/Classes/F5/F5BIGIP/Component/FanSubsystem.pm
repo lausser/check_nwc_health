@@ -27,8 +27,6 @@ sub check {
     $self->add_perfdata(
         label => sprintf('fan_%s', $self->{sysChassisFanIndex}),
         value => $self->{sysChassisFanSpeed},
-        warning => undef,
-        critical => undef,
     );
   }
 }

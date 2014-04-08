@@ -28,8 +28,6 @@ sub check {
         value => $self->{sgProxyHttpResponseTimeAll},
         places => 5,
         uom => 's',
-        warning => $self->{warning},
-        critical => $self->{critical}
     );
   } elsif ($self->mode =~ /device::.*?::count/) {
     my $details = [
@@ -56,8 +54,6 @@ sub check {
       $self->add_perfdata(
           label => $_->[0].'_connections_'.$_->[1],
           value => $self->{$_->[2]},
-          warning => $self->{warning},
-          critical => $self->{critical}
       );
     }
   }

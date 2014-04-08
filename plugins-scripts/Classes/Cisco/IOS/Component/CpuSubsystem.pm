@@ -78,7 +78,6 @@ sub check {
       label => 'cpu_'.$self->{entPhysicalName}.'_usage',
       value => $self->{usage},
       uom => '%',
-      thresholds => 1,
   );
 }
 
