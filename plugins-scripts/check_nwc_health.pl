@@ -448,9 +448,10 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'perfdatafilter',
-    help => "--perfdatafilter
-   The parameter allows you to limit the list of performance data. It's a perl regexp.",
+    spec => 'selectedperfdata=s',
+    help => "--selectedperfdata
+   The parameter allows you to limit the list of performance data. It's a perl regexp.
+   Only matching perfdata show up in the output",
     required => 0,
 );
 $plugin->add_arg(

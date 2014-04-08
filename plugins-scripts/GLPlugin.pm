@@ -130,9 +130,9 @@ sub add_perfdata {
   $GLPlugin::plugin->add_perfdata(@_);
 }
 
-sub positive_filter_perfdata {
+sub selected_perfdata {
   my $self = shift;
-  $GLPlugin::plugin->positive_filter_perfdata(@_);
+  $GLPlugin::plugin->selected_perfdata(@_);
 }
 
 sub add_modes {
@@ -880,11 +880,11 @@ sub add_message {
   push @{$self->{messages}->{$code}}, @messages;
 }
 
-sub positive_filter_perfdata {
+sub selected_perfdata {
   my $self = shift;
   my $label = shift;
-  if ($self->opts->perfdatafilter) {
-    my $pattern = $self->opts->perfdatafilter;
+  if ($self->opts->selectedperfdata) {
+    my $pattern = $self->opts->selectedperfdata;
     return ($label =~ /$pattern/i) ? 1 : 0;
   } else {
     return 1;
@@ -946,7 +946,7 @@ sub add_perfdata {
   }
   push @{$self->{perfdata}}, sprintf("'%s'=%s%s;%s;%s;%s;%s",
       $label, $value, $uom, $warn, $crit, $min, $max)
-      if $self->positive_filter_perfdata($label);
+      if $self->selected_perfdata($label);
 }
 
 sub add_html {
