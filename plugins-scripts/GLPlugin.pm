@@ -129,6 +129,12 @@ sub add_perfdata {
   my $self = shift;
   $GLPlugin::plugin->add_perfdata(@_);
 }
+
+sub positive_filter_perfdata {
+  my $self = shift;
+  $GLPlugin::plugin->positive_filter_perfdata(@_);
+}
+
 sub add_modes {
   my $self = shift;
   my $modes = shift;
@@ -874,10 +880,21 @@ sub add_message {
   push @{$self->{messages}->{$code}}, @messages;
 }
 
+sub positive_filter_perfdata {
+  my $self = shift;
+  my $label = shift;
+  if ($self->opts->perfdatafilter) {
+    my $pattern = $self->opts->perfdatafilter;
+    return ($label =~ /$pattern/i) ? 1 : 0;
+  } else {
+    return 1;
+  }
+}
+
 sub add_perfdata {
   my ($self, %args) = @_;
-printf "add_perfdata %s\n", Data::Dumper::Dumper(\%args);
-printf "add_perfdata %s\n", Data::Dumper::Dumper($self->{thresholds});
+#printf "add_perfdata %s\n", Data::Dumper::Dumper(\%args);
+#printf "add_perfdata %s\n", Data::Dumper::Dumper($self->{thresholds});
 #
 # wenn warning, critical, dann wird von oben ein expliziter wert mitgegeben
 # wenn thresholds
@@ -927,8 +944,9 @@ printf "add_perfdata %s\n", Data::Dumper::Dumper($self->{thresholds});
     $min = 0;
     $max = 100;
   }
-  push @{$self->{perfdata}}, sprintf "'%s'=%s%s;%s;%s;%s;%s",
-      $label, $value, $uom, $warn, $crit, $min, $max;
+  push @{$self->{perfdata}}, sprintf("'%s'=%s%s;%s;%s;%s;%s",
+      $label, $value, $uom, $warn, $crit, $min, $max)
+      if $self->positive_filter_perfdata($label);
 }
 
 sub add_html {
@@ -1068,7 +1086,6 @@ sub nagios_exit {
 sub set_thresholds {
   my $self = shift;
   my %params = @_;
-printf "set_thresholds %s\n", Data::Dumper::Dumper(\%params);
   if (exists $params{metric}) {
     my $metric = $params{metric};
     $self->{thresholds}->{$metric}->{warning} = 
@@ -1122,8 +1139,12 @@ sub check_thresholds {
     $value = $params{value};
     my $metric = $params{metric};
     if ($metric ne 'default') {
-      $warningrange = $self->{thresholds}->{$metric}->{warning};
-      $criticalrange = $self->{thresholds}->{$metric}->{critical};
+      $warningrange = exists $self->{thresholds}->{$metric}->{warning} ?
+          $self->{thresholds}->{$metric}->{warning} :
+          $self->{thresholds}->{default}->{warning};
+      $criticalrange = exists $self->{thresholds}->{$metric}->{critical} ?
+          $self->{thresholds}->{$metric}->{critical} :
+          $self->{thresholds}->{default}->{critical};
     } else {
       $warningrange = (defined $params{warning}) ?
           $params{warning} : $self->{thresholds}->{default}->{warning};

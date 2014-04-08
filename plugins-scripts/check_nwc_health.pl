@@ -448,6 +448,12 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'perfdatafilter',
+    help => "--perfdatafilter
+   The parameter allows you to limit the list of performance data. It's a perl regexp.",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'negate=s%',
     help => "--negate
    The parameter allows you to map exit levels, such as warning=critical",

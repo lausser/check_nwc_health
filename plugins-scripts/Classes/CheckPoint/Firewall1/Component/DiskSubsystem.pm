@@ -5,7 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
-      ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { my $o = shift; return $o->{hrStorageType} eq 'hrStorageFixedDisk'}],
+      ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk'}],
   ]);
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
