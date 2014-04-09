@@ -4,20 +4,11 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->{name} = $self->get_snmp_object(
-     'MIB-II', 'sysName', 0);
-  foreach ($self->get_snmp_table_objects(
-     'AIRESPACE-WIRELESS-MIB', 'bsnAPTable')) {
-    if ($self->filter_name($_->{bsnAPName})) {
-      push(@{$self->{aps}},
-          Classes::Cisco::WLC::Component::WlanSubsystem::AP->new(%{$_}));
-    }
-  }
+  $self->{name} = $self->get_snmp_object('MIB-II', 'sysName', 0);
   $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-      ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IF'],
-  ]);
-  $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-      ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad'],
+      ['aps', 'bsnAPTable', 'NWC::CiscoWLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
+      ['ifs', 'bsnAPIfTable', 'NWC::CiscoWLC::Component::WlanSubsystem::AP' ],
+      ['ifloads', 'bsnAPIfLoadParametersTable', 'NWC::CiscoWLC::Component::WlanSubsystem::IFLoad' ],
   ]);
   $self->assign_loads_to_ifs();
   $self->assign_ifs_to_aps();
@@ -25,7 +16,6 @@ sub init {
 
 sub check {
   my $self = shift;
-  my $errorfound = 0;
   $self->add_info('checking access points');
   $self->{numOfAPs} = scalar (@{$self->{aps}});
   $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
@@ -121,7 +111,7 @@ use strict;
 
 sub check {
   my $self = shift;
-  if ($self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
+  if (self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   }
   $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
