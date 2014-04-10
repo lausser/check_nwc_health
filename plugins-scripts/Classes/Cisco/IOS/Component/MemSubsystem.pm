@@ -37,8 +37,6 @@ sub check {
       label => $self->{ciscoMemoryPoolName}.'_usage',
       value => $self->{usage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
   );
 }
 

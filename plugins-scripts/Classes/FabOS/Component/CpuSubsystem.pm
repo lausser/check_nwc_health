@@ -24,8 +24,6 @@ sub check {
         label => 'cpu_usage',
         value => $self->{swCpuUsage},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   } elsif ($self->{swFwFabricWatchLicense} eq 'swFwNotLicensed') {
     $self->add_unknown('please install a fabric watch license');

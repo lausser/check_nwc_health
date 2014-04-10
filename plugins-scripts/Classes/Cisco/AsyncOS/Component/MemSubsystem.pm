@@ -29,8 +29,6 @@ sub check {
       label => 'memory_usage',
       value => $self->{perCentMemoryUtilization},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

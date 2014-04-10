@@ -38,8 +38,6 @@ sub check {
   $self->add_perfdata(
       label => 'temperature_'.$self->{sensorsTemperatureName},
       value => $self->{sensorsTemperatureValue},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

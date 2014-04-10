@@ -28,8 +28,6 @@ sub check {
       label => sprintf('cpu_%s_usage', $self->{hrProcessorIndex}),
       value => $self->{hrProcessorLoad},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

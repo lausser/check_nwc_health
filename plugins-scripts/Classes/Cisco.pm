@@ -42,6 +42,9 @@ sub init {
   } elsif ($self->{productname} =~ /Cisco.*Prime Network Control System/i) {
     bless $self, 'Classes::Cisco::PrimeNCS';
     $self->debug('using Classes::Cisco::PrimeNCS');
+  } elsif ($self->{productname} =~ /UCOS /i) {
+    bless $self, 'Classes::Cisco::UCOS';
+    $self->debug('using Classes::Cisco::UCOS');
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'Classes::Cisco::IOS';
     $self->debug('using Classes::Cisco::IOS');

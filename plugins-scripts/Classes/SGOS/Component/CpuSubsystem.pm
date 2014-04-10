@@ -13,7 +13,7 @@ sub init {
   ]);
   if (scalar (@{$self->{cpus}}) == 0) {
     $self->get_snmp_tables('USAGE-MIB', [
-        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { my $cpu = shift; return $_->{deviceUsageName} =~ /CPU/ }],
+        ['cpus', 'deviceUsageTable', 'Classes::SGOS::Component::CpuSubsystem::DevCpu', sub { return shift->{deviceUsageName} =~ /CPU/ }],
     ]);
   }
 }
@@ -32,8 +32,6 @@ sub check {
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{sgProxyCpuCoreBusyPerCent},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 
@@ -52,8 +50,6 @@ sub check {
       label => 'cpu_'.$self->{flat_indices}.'_usage',
       value => $self->{deviceUsagePercent},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

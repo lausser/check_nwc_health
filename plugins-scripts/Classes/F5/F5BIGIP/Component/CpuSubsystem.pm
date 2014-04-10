@@ -44,8 +44,6 @@ sub check {
         label => 'cpu_tmm_usage',
         value => $self->{cpu_usage},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     return;
   }
@@ -68,14 +66,12 @@ sub check {
   $self->add_perfdata(
       label => sprintf('temp_c%s', $self->{sysCpuIndex}),
       value => $self->{sysCpuTemperature},
-      warning => undef,
-      critical => undef,
+      thresholds => 0,
   );
   $self->add_perfdata(
       label => sprintf('fan_c%s', $self->{sysCpuIndex}),
       value => $self->{sysCpuFanSpeed},
-      warning => undef,
-      critical => undef,
+      thresholds => 0,
   );
 }
 

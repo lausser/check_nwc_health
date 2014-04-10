@@ -18,8 +18,6 @@ sub check {
       label => 'cpu_usage',
       value => $self->{nsResCpuAvg},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 
@@ -37,8 +35,6 @@ sub check {
   $self->add_perfdata(
       label => lc $self->{laNames},
       value => $self->{laLoadFloat},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

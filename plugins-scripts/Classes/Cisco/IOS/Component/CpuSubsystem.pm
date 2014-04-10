@@ -2,11 +2,14 @@ package Classes::Cisco::IOS::Component::CpuSubsystem;
 our @ISA = qw(GLPlugin::Item);
 use strict;
 
+{
+  our $cpmCPUTotalIndex = 0;
+}
+
 sub init {
   my $self = shift;
-  my $idx = 0;
   $self->get_snmp_tables('CISCO-PROCESS-MIB', [
-      ['cpus', 'cpmCPUTotalTable', 'Classes::Cisco::IOS::Component::CpuSubsystem::Cpu', sub { my $o = shift; $o->{cpmCPUTotalIndex} ||= $idx++; return 1; }],
+      ['cpus', 'cpmCPUTotalTable', 'Classes::Cisco::IOS::Component::CpuSubsystem::Cpu' ],
   ]);
   if (scalar(@{$self->{cpus}}) == 0) {
     # maybe too old. i fake a cpu. be careful. this is a really bad hack
@@ -42,18 +45,23 @@ use strict;
 
 sub finish {
   my $self = shift;
+  $self->{cpmCPUTotalIndex} = exists $self->{cpmCPUTotalIndex} ? 
+      $self->{cpmCPUTotalIndex} :
+      $Classes::Cisco::IOS::Component::CpuSubsystem::cpmCPUTotalIndex++;
+  $self->{cpmCPUTotalPhysicalIndex} = exists $self->{cpmCPUTotalPhysicalIndex} ? 
+      $self->{cpmCPUTotalPhysicalIndex} : 0;
   if (exists $self->{cpmCPUTotal5minRev}) {
     $self->{usage} = $self->{cpmCPUTotal5minRev};
   } else {
     $self->{usage} = $self->{cpmCPUTotal5min};
   }
-  $self->protect_value(($self->{cpmCPUTotalIndex}||"").($self->{cpmCPUTotalPhysicalIndex}||""), 'usage', 'percent');
+  $self->protect_value($self->{cpmCPUTotalIndex}.$self->{cpmCPUTotalPhysicalIndex}, 'usage', 'percent');
   if ($self->{cpmCPUTotalPhysicalIndex}) {
     my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
     $self->{entPhysicalName} = $self->get_request(
         -varbindlist => [$entPhysicalName.'.'.$self->{cpmCPUTotalPhysicalIndex}]
     );
-    $self->{entPhysicalName} = $self->{entPhysicalName}->{$entPhysicalName.'.'.$self->{cpmCPUTotalPhysicalIndex}};
+    $self->{entPhysicalName} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalName', $self->{cpmCPUTotalPhysicalIndex});
   } else {
     $self->{entPhysicalName} = $self->{cpmCPUTotalIndex};
   }
@@ -64,13 +72,12 @@ sub check {
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
       $self->{entPhysicalName}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{usage}));
+  $self->add_message($self->check_thresholds(value => $self->{usage},
+      metric => 'cpu_'.$self->{entPhysicalName}.'_usage'));
   $self->add_perfdata(
       label => 'cpu_'.$self->{entPhysicalName}.'_usage',
       value => $self->{usage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

@@ -4,6 +4,7 @@
 
 2014-03-17 3.0
 - massive rewriting of the plugins structure and modules
+- repair malformed data returned by Net::SNMP
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model

@@ -27,8 +27,6 @@ sub check {
     $self->add_perfdata(
         label => 'connections',
         value => $self->{cfwConnectionStatValue},
-        warning => $self->{warning},
-        critical => $self->{critical}
     );
   }
 }

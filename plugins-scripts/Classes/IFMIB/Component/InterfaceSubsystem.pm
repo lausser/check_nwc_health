@@ -66,12 +66,11 @@ sub check {
     $self->add_perfdata(
         label => 'num_interfaces',
         value => $num_interfaces,
+        thresholds => 0,
     );
     $self->add_perfdata(
         label => 'available_interfaces',
         value => $available_interfaces,
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
 
     printf "%s\n", $self->{info};
@@ -453,25 +452,23 @@ sub check {
         label => $self->{ifDescr}.'_usage_in',
         value => $self->{inputUtilization},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_out',
         value => $self->{outputUtilization},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units,
+        thresholds => 0,
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units,
+        thresholds => 0,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
@@ -487,26 +484,18 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_out',
         value => $self->{outputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_in',
         value => $self->{inputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_out',
         value => $self->{outputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     #rfc2863

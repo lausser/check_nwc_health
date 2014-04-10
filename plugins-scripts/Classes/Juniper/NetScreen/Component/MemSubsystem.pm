@@ -22,8 +22,6 @@ sub check {
         label => 'memory_usage',
         value => $self->{mem_usage},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical}
     );
   } else {
     $self->add_unknown('cannot aquire momory usage');

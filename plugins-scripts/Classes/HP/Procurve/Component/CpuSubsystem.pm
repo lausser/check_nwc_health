@@ -22,8 +22,6 @@ sub check {
       label => 'cpu_usage',
       value => $self->{hpSwitchCpuStat},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

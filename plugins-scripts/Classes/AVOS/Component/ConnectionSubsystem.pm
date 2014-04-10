@@ -17,8 +17,6 @@ sub check {
   $self->add_perfdata(
       label => 'slow_connections',
       value => $self->{avSlowICAPConnections},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

@@ -20,8 +20,6 @@ sub check {
       label => 'memory_usage',
       value => $self->{memory_usage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

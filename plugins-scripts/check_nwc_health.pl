@@ -448,6 +448,19 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'selectedperfdata=s',
+    help => "--selectedperfdata
+   The parameter allows you to limit the list of performance data. It's a perl regexp.
+   Only matching perfdata show up in the output",
+    required => 0,
+);
+$plugin->add_arg(
+    spec => 'negate=s%',
+    help => "--negate
+   The parameter allows you to map exit levels, such as warning=critical",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'servertype=s',
     help => '--servertype
    The type of the network device: cisco (default). Use it if auto-detection

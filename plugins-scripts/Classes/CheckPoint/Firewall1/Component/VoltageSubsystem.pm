@@ -37,8 +37,6 @@ sub check {
   $self->add_perfdata(
       label => 'voltage'.$self->{sensorsVoltageName}.'_rpm',
       value => $self->{sensorsVoltageValue},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

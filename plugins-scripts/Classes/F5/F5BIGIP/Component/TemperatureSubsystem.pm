@@ -21,8 +21,6 @@ sub check {
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{sysChassisTempIndex}),
       value => $self->{sysChassisTempTemperature},
-      warning => undef,
-      critical => undef,
   );
 }
 

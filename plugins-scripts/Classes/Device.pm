@@ -53,6 +53,9 @@ sub classify {
       } elsif ($self->{productname} =~ /fujitsu intelligent blade panel 30\/12/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
+      } elsif ($self->{productname} =~ /UCOS /i) {
+        bless $self, 'Classes::Cisco';
+        $self->debug('using Classes::Cisco');
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'Classes::Nortel';
         $self->debug('using Classes::Nortel');

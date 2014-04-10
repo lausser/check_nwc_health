@@ -19,8 +19,6 @@ sub check {
       label => 'cpu_usage',
       value => $self->{agentCurrentCPUUtilization},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

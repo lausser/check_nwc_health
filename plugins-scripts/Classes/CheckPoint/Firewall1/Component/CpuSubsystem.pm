@@ -19,13 +19,12 @@ sub check {
       label => 'cpu_usage',
       value => $self->{procUsage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
   if (defined $self->{procQueue}) {
     $self->add_perfdata(
         label => 'cpu_queue_length',
         value => $self->{procQueue},
+        thresholds => 0,
     );
   }
 }

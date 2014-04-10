@@ -20,8 +20,6 @@ sub check {
         label => 'memory_usage',
         value => $self->{fgSysMemUsage},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical}
     );
   } else {
     $self->add_unknown('cannot aquire momory usage');

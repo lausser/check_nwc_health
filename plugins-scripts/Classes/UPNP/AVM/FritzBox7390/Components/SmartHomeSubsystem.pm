@@ -180,8 +180,6 @@ sub check {
     $self->add_perfdata(
         label => 'watt',
         value => $self->{last_watt},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   } elsif ($self->mode =~ /smarthome::device::consumption/) {
     $self->add_info(sprintf "device %s consumed %.4f kwh",
@@ -191,8 +189,6 @@ sub check {
     $self->add_perfdata(
         label => 'kwh',
         value => $self->{kwh},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   }
 }

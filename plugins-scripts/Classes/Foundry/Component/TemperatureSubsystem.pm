@@ -29,8 +29,6 @@ sub check {
   $self->add_perfdata(
       label => 'temperature_'.$self->{snAgentTempSlotNum},
       value => $self->{snAgentTempValue},
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

@@ -5,7 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
-      ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { my $storage = shift; return $storage->{hrStorageType} eq 'hrStorageFixedDisk' } ],
+      ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk' } ],
   ]);
 }
 
@@ -26,8 +26,6 @@ sub check {
       label => sprintf('%s_free_pct', $self->{hrStorageDescr}),
       value => $free,
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

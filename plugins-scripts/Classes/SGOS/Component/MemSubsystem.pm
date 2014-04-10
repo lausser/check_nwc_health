@@ -25,8 +25,6 @@ sub check {
       label => 'memory_usage',
       value => $self->{sgProxyMemPressure},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical}
   );
 }
 

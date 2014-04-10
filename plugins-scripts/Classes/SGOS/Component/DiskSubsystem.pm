@@ -8,7 +8,7 @@ sub init {
       ['disks', 'deviceDiskValueTable', 'Classes::SGOS::Component::DiskSubsystem::Disk'],
   ]);
   $self->get_snmp_tables('USAGE-MIB', [
-      ['filesystems', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { my $o = shift; return lc $o->{deviceUsageName} eq 'disk' }],
+      ['filesystems', 'deviceUsageTable', 'Classes::SGOS::Component::DiskSubsystem::FS', sub { return lc shift->{deviceUsageName} eq 'disk' }],
   ]);
   my $fs = 0;
   foreach (@{$self->{filesystems}}) {

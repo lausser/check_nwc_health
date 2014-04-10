@@ -21,8 +21,6 @@ sub check {
       label => 'cpu_usage',
       value => $self->{fgSysCpuUsage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

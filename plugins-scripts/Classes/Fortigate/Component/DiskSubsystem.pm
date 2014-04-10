@@ -25,8 +25,6 @@ sub check {
       label => 'disk_usage',
       value => $self->{usage},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
 }
 

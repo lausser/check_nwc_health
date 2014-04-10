@@ -43,6 +43,7 @@ EXTRA_MODULES=\
   Classes/Cisco/WLC/Component/WlanSubsystem.pm \
   Classes/Cisco/WLC.pm \
   Classes/Cisco/PrimeNCS.pm \
+  Classes/Cisco/UCOS.pm \
   Classes/Cisco/CCM/Component/PhoneSubsystem.pm \
   Classes/Cisco/CCM/Component/CmSubsystem.pm \
   Classes/Cisco/CCM.pm \
@@ -154,6 +155,8 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/TemperatureSubsystem.pm \
   Classes/Foundry.pm \
   Classes/Bluecoat.pm \
+  Classes/Lantronix.pm \
+  Classes/Lantronix/SLS.pm \
   Classes/MibsAndOids.pm \
   Classes/Device.pm
 EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
