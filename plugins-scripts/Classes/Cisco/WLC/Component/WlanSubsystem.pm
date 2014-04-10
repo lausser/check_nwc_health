@@ -111,7 +111,7 @@ use strict;
 
 sub check {
   my $self = shift;
-  if (self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
+  if ($self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   }
   $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
