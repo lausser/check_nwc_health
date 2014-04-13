@@ -163,9 +163,35 @@ sub update_interface_cache {
   my $self = shift;
   my $force = shift;
   my $statefile = $self->create_interface_cache_file();
-  my $update = time - 3600;
-  if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
-    $self->debug('force update of interface cache');
+  $self->get_snmp_objects('IFMIB', qw(ifTableLastChange));
+  # "The value of sysUpTime at the time of the last creation or
+  # deletion of an entry in the ifTable. If the number of
+  # entries has been unchanged since the last re-initialization
+  # of the local network management subsystem, then this object
+  # contains a zero value."
+  $self->{ifTableLastChange} ||= 0;
+  $self->{ifCacheLastChange} = -f $statefile ? (stat $statefile)[9] : 0;
+  $self->{bootTime} = time - $self->uptime();
+  $self->{ifTableLastChange} = $self->{bootTime} + $self->timeticks($self->{ifTableLastChange});
+  my $update_deadline = time - 3600;
+  my $must_update = 0;
+  if ($self->{ifCacheLastChange} < $update_deadline) {
+    # file older than 1h or file does not exist
+    $must_update = 1;
+    $self->debug(sprintf 'interface cache is older than 1h (%s < %s)',
+        scalar localtime $self->{ifCacheLastChange}, scalar localtime $update_deadline);
+  }
+  if ($self->{ifTableLastChange} >= $self->{ifCacheLastChange}) {
+    $must_update = 1;
+    $self->debug(sprintf 'interface table changes newer than cache file (%s >= %s)',
+        scalar localtime $self->{ifCacheLastChange}, scalar localtime $self->{ifCacheLastChange});
+  }
+  if ($force) {
+    $must_update = 1;
+    $self->debug(sprintf 'interface table update forced');
+  }
+  if ($must_update) {
+    $self->debug('update of interface cache');
     $self->{interface_cache} = {};
     foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable+ifXTable')) {
       # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
@@ -400,7 +426,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
-        $GLPlugin::SNMP::uptime - $self->timeticks($self->{ifLastChange});
+        $self->uptime() - $self->timeticks($self->{ifLastChange});
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     if ($self->{ifAdminStatus} eq "down") {
       $self->{ifAvailable} = "true";

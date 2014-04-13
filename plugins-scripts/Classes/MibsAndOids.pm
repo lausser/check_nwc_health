@@ -21,6 +21,8 @@ $GLPlugin::SNMP::mibs_and_oids = {
       sysName => '1.3.6.1.2.1.1.5',
   },
   'IFMIB' => {
+      ifNumber => '1.3.6.1.2.1.2.1',
+      ifTableLastChange => '1.3.6.1.2.1.31.1.5.0',
       ifTable => '1.3.6.1.2.1.2.2',
       ifEntry => '1.3.6.1.2.1.2.2.1',
       ifIndex => '1.3.6.1.2.1.2.2.1.1',
