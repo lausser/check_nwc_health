@@ -30,8 +30,8 @@ sub check {
     return;
   }
   if ($self->mode =~ /pool::list/) {
-    foreach (sort {$a->{name} cmp $b->{name}} @{$self->{pools}}) {
-      printf "%s\n", $_->{name};
+    foreach (sort {$a->{ltmPoolName} cmp $b->{ltmPoolName}} @{$self->{pools}}) {
+      printf "%s\n", $_->{ltmPoolName};
       #$_->list();
     }
   } else {
@@ -43,7 +43,7 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::TableItem);
 use strict;
 
 sub init {
@@ -147,10 +147,13 @@ our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub check {
+sub finish {
   my $self = shift;
   $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
-  $self->{name} = $self->{ltmPoolName};
+}
+
+sub check {
+  my $self = shift;
   $self->add_info(sprintf "pool %s is %s, avail state is %s, active members: %d of %d", 
       $self->{ltmPoolName},
       $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState},
@@ -236,7 +239,7 @@ our @ISA = qw(GLPlugin::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub check {
+sub finish {
   my $self = shift;
   $self->{ltmPoolMemberAddr} =~ s/ //g;
   if ($self->{ltmPoolMemberAddr} =~ /^0x([0-9a-zA-Z]{8})/) {
@@ -247,6 +250,10 @@ sub check {
       $self->{ltmNodeAddrStatusName}) {
     $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
   }
+}
+
+sub check {
+  my $self = shift;
   if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
       $self->add_critical(sprintf
@@ -261,12 +268,11 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::TableItem);
 use strict;
 
 sub init {
   my $self = shift;
-  my %params = @_;
   foreach ($self->get_snmp_table_objects(
       'LOAD-BAL-SYSTEM-MIB', 'poolTable')) {
     if ($self->filter_name($_->{poolName})) {
@@ -310,7 +316,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
   my $self = shift;
-  my %params = @_;
   $self->add_info(sprintf 'pool %s active members: %d of %d', $self->{poolName},
       $self->{poolActiveMemberCount},
       $self->{poolMemberQty});
