@@ -60,6 +60,18 @@ $plugin->add_mode(
     help => 'Check the status of interfaces (oper/admin)',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::nat::sessions::count',
+    spec => 'interface-nat-count-sessions',
+    alias => undef,
+    help => 'Count the number of nat sessions',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::nat::rejects',
+    spec => 'interface-nat-rejects',
+    alias => undef,
+    help => 'Count the number of nat sessions rejected due to lack of resources',
+);
+$plugin->add_mode(
     internal => 'device::interfaces::list',
     spec => 'list-interfaces',
     alias => undef,

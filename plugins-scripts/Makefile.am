@@ -32,6 +32,7 @@ EXTRA_MODULES=\
   Classes/Cisco/IOS/Component/MemSubsystem.pm \
   Classes/Cisco/IOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/IOS/Component/ConnectionSubsystem.pm \
+  Classes/Cisco/IOS/Component/NatSubsystem.pm \
   Classes/Cisco/IOS.pm \
   Classes/Cisco/NXOS/Component/CpuSubsystem.pm \
   Classes/Cisco/NXOS/Component/MemSubsystem.pm \

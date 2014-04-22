@@ -1535,11 +1535,10 @@ sub init {
     }
     exit 0;
   } elsif ($self->mode =~ /device::uptime/) {
-    my $info = sprintf 'device is up since %s',
-        $self->human_timeticks($self->{uptime});
-    $self->add_info($info);
+    $self->add_info(sprintf 'device is up since %s',
+        $self->human_timeticks($self->{uptime}));
     $self->set_thresholds(warning => '15:', critical => '5:');
-    $self->add_message($self->check_thresholds($self->{uptime}), $info);
+    $self->add_message($self->check_thresholds($self->{uptime}));
     $self->add_perfdata(
         label => 'uptime',
         value => $self->{uptime} / 60,

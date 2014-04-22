@@ -4,7 +4,6 @@ use strict;
 
 sub init {
   my $self = shift;
-  my $type = 0;
   $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
       ['mems', 'ciscoMemoryPoolTable', 'Classes::Cisco::IOS::Component::MemSubsystem::Mem'],
   ]);
