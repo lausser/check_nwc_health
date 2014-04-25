@@ -1186,6 +1186,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     cnatProtocolStatsTable => '1.3.6.1.4.1.9.10.77.1.3.1',
     cnatProtocolStatsEntry => '1.3.6.1.4.1.9.10.77.1.3.1.1',
     cnatProtocolStatsName => '1.3.6.1.4.1.9.10.77.1.3.1.1.1',
+    cnatProtocolStatsNameDefinition => 'CISCO-IETF-NAT-MIB::NATProtocolType',
     cnatProtocolStatsInTranslate => '1.3.6.1.4.1.9.10.77.1.3.1.1.2',
     cnatProtocolStatsOutTranslate => '1.3.6.1.4.1.9.10.77.1.3.1.1.3',
     cnatProtocolStatsRejectCount => '1.3.6.1.4.1.9.10.77.1.3.1.1.4',
@@ -6189,6 +6190,14 @@ $GLPlugin::SNMP::definitions = {
       10 => 'port',
       11 => 'stack',
       12 => 'cpu',
+    },
+  },
+  'CISCO-IETF-NAT-MIB' => {
+    'NATProtocolType' => {
+      1 => 'other',
+      2 => 'icmp',
+      3 => 'udp',
+      4 => 'tcp',
     },
   },
 };

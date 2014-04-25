@@ -18,6 +18,8 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::ConfigSubsystem");
   } elsif ($self->mode =~ /device::interfaces::nat::sessions::count/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
+  } elsif ($self->mode =~ /device::interfaces::nat::rejects/) {
+    $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
   } else {
     $self->no_such_mode();
   }

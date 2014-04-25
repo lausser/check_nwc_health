@@ -909,7 +909,7 @@ sub add_perfdata {
   my $uom = $args{uom} || "";
   my $format = '%d';
   if ($value =~ /\./) {
-    if ($args{places}) {
+    if (defined $args{places}) {
       $value = sprintf '%.'.$args{places}.'f', $value;
     } else {
       $value = sprintf "%.2f", $value;
@@ -1542,8 +1542,7 @@ sub init {
     $self->add_perfdata(
         label => 'uptime',
         value => $self->{uptime} / 60,
-        warning => $self->{warning},
-        critical => $self->{critical},
+        places => 0,
     );
     my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
     $GLPlugin::plugin->nagios_exit($code, $message);
@@ -2182,6 +2181,12 @@ sub make_symbolic {
   my $result = shift;
   my $indices = shift;
   my @entries = ();
+  if (! wantarray && ref(\$result) eq "SCALAR" && ref(\$indices) eq "SCALAR") {
+    # $self->make_symbolic('CISCO-IETF-NAT-MIB', 'cnatProtocolStatsName', $self->{cnatProtocolStatsName});
+    my $oid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$result};
+    $result = { $oid => $self->{$result} };
+    $indices = [[]];
+  }
   foreach my $index (@{$indices}) {
     # skip [], [[]], [[undef]]
     if (ref($index) eq "ARRAY") {
@@ -2267,7 +2272,15 @@ sub make_symbolic {
     }
     push(@entries, $mo) if keys %{$mo};
   }
-  return @entries;
+  if (wantarray) {
+    return @entries;
+  } else {
+    foreach my $entry (@entries) {
+      foreach my $key (keys %{$entry}) {
+        $self->{$key} = $entry->{$key};
+      }
+    }
+  }
 }
 
 # Level2

@@ -10,7 +10,7 @@ sub init {
     ));
   } elsif ($self->mode =~ /device::interfaces::nat::rejects/) { 
     $self->get_snmp_tables('CISCO-IETF-NAT-MIB', [
-        'protocolstats', 'cnatProtocolStatsTable', 'Classes::Cisco::IOS::Component::NatSubsystem::CnatProtocolStats',
+        ['protocolstats', 'cnatProtocolStatsTable', 'Classes::Cisco::IOS::Component::NatSubsystem::CnatProtocolStats'],
     ]);
   }
 }
@@ -49,15 +49,24 @@ use strict;
 
 sub finish {
   my $self = shift;
-  $self->{cnatProtocolStatsTranslate} = $self->{cnatProtocolStatsInTranslate} + $self->{cnatProtocolStatsOutTranslate};
-  $self->{rejects} = $self->{cnatProtocolStatsTranslate} ? 100 * $self->{cnatProtocolStatsTranslate} / $self->{cnatProtocolStatsRejectCount} : 0;
+  $self->{cnatProtocolStatsName} = $self->{flat_indices};
+  $self->make_symbolic('CISCO-IETF-NAT-MIB', 'cnatProtocolStatsName', $self->{cnatProtocolStatsName});
+  $self->valdiff({name => $self->{cnatProtocolStatsName}},
+      qw(cnatProtocolStatsInTranslate cnatProtocolStatsOutTranslate cnatProtocolStatsRejectCount));
+  $self->{delta_cnatProtocolStatsTranslate} = 
+      $self->{delta_cnatProtocolStatsInTranslate} +
+      $self->{delta_cnatProtocolStatsOutTranslate};
+  $self->{rejects} = $self->{delta_cnatProtocolStatsTranslate} ?
+      (100 * $self->{delta_cnatProtocolStatsRejectCount} / 
+      $self->{delta_cnatProtocolStatsTranslate}) : 0;
+  $self->protect_value($self->{rejects}, 'rejects', 'percent');
 }
 
 sub check {
   my $self = shift;
   $self->add_info(sprintf '%.2f%% of all %s packets have been dropped/rejected',
-      $self->{cnatProtocolStatsName}, $self->{rejects});
-  $self->set_thresholds(warning => 80, critical => 90);
+      $self->{rejects}, $self->{cnatProtocolStatsName});
+  $self->set_thresholds(warning => 30, critical => 50);
   $self->add_message($self->check_thresholds($self->{rejects}));
 }
 
