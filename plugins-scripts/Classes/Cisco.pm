@@ -45,6 +45,9 @@ sub init {
   } elsif ($self->{productname} =~ /UCOS /i) {
     bless $self, 'Classes::Cisco::UCOS';
     $self->debug('using Classes::Cisco::UCOS');
+  } elsif ($self->{productname} =~ /Cisco Adaptive Security Appliance/i) {
+    bless $self, 'Classes::Cisco::ASA';
+    $self->debug('using Classes::Cisco::ASA');
   } elsif ($self->{productname} =~ /Cisco/i) {
     bless $self, 'Classes::Cisco::IOS';
     $self->debug('using Classes::Cisco::IOS');

@@ -23,10 +23,12 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
+  Classes/Cisco/CISCOENTITYALARMMIB/Component/AlarmSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/TemperatureSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/ASA.pm \
   Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
   Classes/Cisco/IOS/Component/CpuSubsystem.pm \
   Classes/Cisco/IOS/Component/MemSubsystem.pm \

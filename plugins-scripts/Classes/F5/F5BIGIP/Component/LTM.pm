@@ -185,12 +185,11 @@ sub check {
       label => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
       value => $self->{completeness},
       uom => '%',
-      warning => $self->{warning},
-      critical => $self->{critical},
   );
   $self->add_perfdata(
       label => sprintf('pool_%s_servercurconns', $self->{ltmPoolName}),
       value => $self->{ltmPoolStatServerCurConns},
+      warning => undef, critical => undef,
   );
   if ($self->opts->report eq "html") {
     printf "%s - %s%s\n", $self->status_code($self->check_messages()), $message, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";

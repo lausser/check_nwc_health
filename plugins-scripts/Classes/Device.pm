@@ -23,6 +23,7 @@ sub classify {
       $self->check_snmp_and_model();
     }
     if ($self->opts->servertype) {
+      $self->{productname} = $self->opts->servertype;
       $self->{productname} = 'cisco' if $self->opts->servertype eq 'cisco';
       $self->{productname} = 'huawei' if $self->opts->servertype eq 'huawei';
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';

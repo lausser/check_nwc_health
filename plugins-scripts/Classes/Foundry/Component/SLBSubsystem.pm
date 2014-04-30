@@ -17,8 +17,8 @@ sub init {
   # opt->name can be servername:serverport
   my $original_name = $self->opts->name;
   if ($self->mode =~ /device::lb::session::usage/) {
-  $self->get_snmp_objects('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', (qw(
-      snL4MaxSessionLimit snL4FreeSessionCount)));
+    $self->get_snmp_objects('FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', (qw(
+        snL4MaxSessionLimit snL4FreeSessionCount)));
     $self->{session_usage} = 100 * ($self->{snL4MaxSessionLimit} - $self->{snL4FreeSessionCount}) / $self->{snL4MaxSessionLimit};
   } elsif ($self->mode =~ /device::lb::pool/) {
     if ($self->mode =~ /device::lb::pool::list/) {
@@ -189,17 +189,15 @@ sub check {
   }
 }
 
-sub add_port { 
-  my $self = shift;
-  my $port = shift;
-  $self->{ports} = [] if ! exists $self->{ports};
-  push(@{$self->{ports}}, $port);
-}
-
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
+
+sub finish {
+  my $self = shift;
+  $self->{ports} = [];
+}
 
 sub check {
   my $self = shift;
@@ -222,14 +220,23 @@ sub check {
   }
 }
 
+sub add_port {
+  my $self = shift;
+  push(@{$self->{ports}}, shift);
+}
+
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
 
+sub finish {
+  my $self = shift;
+  $self->{ports} = [];
+}
+
 sub check {
   my $self = shift;
-  my %params = @_;
   $self->add_info(sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort},
@@ -315,6 +322,11 @@ sub check {
     }
     $self->add_html("ASCII_NOTIFICATION_END\n-->\n");
   }
+}
+
+sub add_port {
+  my $self = shift;
+  push(@{$self->{ports}}, shift);
 }
 
 

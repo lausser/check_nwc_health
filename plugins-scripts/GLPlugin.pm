@@ -125,6 +125,16 @@ sub suppress_messages {
   return $GLPlugin::plugin->suppress_messages(@_);
 }
 
+sub add_html {
+  my $self = shift;
+  return $GLPlugin::plugin->add_html(@_);
+}
+
+sub html_string {
+  my $self = shift;
+  return $GLPlugin::plugin->html_string(@_);
+}
+
 sub add_perfdata {
   my $self = shift;
   $GLPlugin::plugin->add_perfdata(@_);
