@@ -6,6 +6,8 @@ sub init {
   my $self = shift;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::NXOS::Component::EnvironmentalSubsystem");
+  } elsif ($self->mode =~ /device::cisco::fex::watch/) {
+    $self->analyze_and_check_environmental_subsystem("Classes::Cisco::NXOS::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::Cisco::NXOS::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {

@@ -216,6 +216,12 @@ $plugin->add_mode(
     help => 'Check the number of connections (-client, -server is possible)',
 );
 $plugin->add_mode(
+    internal => 'device::cisco::fex::watch',
+    spec => 'watch-fexes',
+    alias => undef,
+    help => 'Check if FEXes appear and disappear (use --lookup)',
+);
+$plugin->add_mode(
     internal => 'device::wlan::aps::status',
     spec => 'accesspoint-status',
     alias => undef,

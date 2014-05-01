@@ -1736,11 +1736,15 @@ sub implements_mib {
     return 1;
   }
   # some mibs are only composed of tables
-  my $traces = $GLPlugin::SNMP::session->get_next_request(
-    -varbindlist => [
-        $GLPlugin::SNMP::mib_ids->{$mib}
-    ]
-  );
+  my $traces = $self->opts->snmpwalk ? 
+    {@{[map {$_, $self->rawdata->{$_} } grep { substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib} }
+    keys %{$self->rawdata}]}}
+    :
+    $GLPlugin::SNMP::session->get_next_request(
+        -varbindlist => [
+            $GLPlugin::SNMP::mib_ids->{$mib}
+        ]
+    );
   if ($traces && # must find oids following to the ident-oid
       ! exists $traces->{$GLPlugin::SNMP::mib_ids->{$mib}} && # must not be the ident-oid
       grep { # following oid is inside this tree
