@@ -12,7 +12,7 @@ sub init {
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
   ]);
-  @{$self->{entities}} = grep { $_->{entPhysicalClass} eq 'sensor' } @{$self->{entities}};
+  @{$self->{sensor_entities}} = grep { $_->{entPhysicalClass} eq 'sensor' } @{$self->{entities}};
   foreach my $sensor (@{$self->{sensors}}) {
     $sensors->{$sensor->{entPhysicalIndex}} = $sensor;
     foreach my $threshold (@{$self->{thresholds}}) {
@@ -20,7 +20,7 @@ sub init {
         push(@{$sensors->{thresholds}}, $threshold);
       }
     }
-    foreach my $entity (@{$self->{entities}}) {
+    foreach my $entity (@{$self->{sensor_entities}}) {
       if ($sensor->{entPhysicalIndex} eq $entity->{entPhysicalIndex}) {
         $sensor->{entity} = $entity;
       }
