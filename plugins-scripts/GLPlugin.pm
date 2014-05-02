@@ -1729,10 +1729,12 @@ sub implements_mib {
   my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
   $sysobj =~ s/^\.// if $sysobj;
   if ($sysobj && $sysobj eq $GLPlugin::SNMP::mib_ids->{$mib}) {
+    $self->debug(sprintf "implements %s (sysobj exact)", $mib);
     return 1;
   }
   if ($GLPlugin::SNMP::mib_ids->{$mib} eq
       substr $sysobj, 0, length $GLPlugin::SNMP::mib_ids->{$mib}) {
+    $self->debug(sprintf "implements %s (sysobj)", $mib);
     return 1;
   }
   # some mibs are only composed of tables
@@ -1750,6 +1752,7 @@ sub implements_mib {
       grep { # following oid is inside this tree
           substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib};
       } keys %{$traces}) {
+    $self->debug(sprintf "implements %s (found traces)", $mib);
     return 1;
   }
 }
