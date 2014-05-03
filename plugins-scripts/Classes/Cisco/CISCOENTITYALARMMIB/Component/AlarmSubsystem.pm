@@ -6,7 +6,7 @@ sub init {
   my $self = shift;
   my $alarms = {};
   $self->get_snmp_tables('CISCO-ENTITY-ALARM-MIB', [
-    ['alarms', 'ceAlarmTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm', sub { my $o = shift; $self->filter_name($o->{entPhysicalIndex})}],
+    ['alarms', 'ceAlarmTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm', sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
     ['alarmdescriptionmappings', 'ceAlarmDescrMapTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescriptionMapping' ],
     ['alarmdescriptions', 'ceAlarmDescrTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescription' ],
   ]);
@@ -30,12 +30,20 @@ sub init {
       }
     }
   }
+}
+
+sub check {
+  my $self = shift;
   if (scalar(@{$self->{alarms}}) == 0) {
     $self->add_info('no alarms');
     $self->add_ok();
   } else {
     foreach (@{$self->{alarms}}) {
       $_->check();
+    }
+    if (! $self->check_messages()) { # blacklisted des ganze glump
+      $self->add_info('no alarms');
+      $self->add_ok();
     }
   }
 }
@@ -70,21 +78,43 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf '%s alarm in %s%s',
-      $self->{ceAlarmSeverity},
-      $self->{entPhysicalIndex},
-      exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.')' : '');
-  if ($self->{ceAlarmSeverity} eq "none") {
-    # A value of '0' indicates that there the corresponding physical entity currently is not asserting any alarms.
-  } elsif ($self->{ceAlarmSeverity} eq "critical") {
-    $self->add_critical();
-  } elsif ($self->{ceAlarmSeverity} eq "major") {
-    $self->add_critical();
-  } elsif ($self->{ceAlarmSeverity} eq "minor") {
-    $self->add_warning();
-  } elsif ($self->{ceAlarmSeverity} eq "info") {
-    $self->add_ok();
+  my $location = exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.')' : '';
+  if (length($self->{ceAlarmTypes})) {
+    my @descriptorindexes = map {
+        $_->{ceAlarmDescrIndex}
+    } grep {
+        $self->{entity}->{entPhysicalVendorType} eq $_->{ceAlarmDescrVendorType}
+    } @{$self->{parent}->{alarmdescriptionmappings}};
+    if (@descriptorindexes) {
+      my $ceAlarmDescrIndex = $descriptorindexes[0];
+      my @descriptions = grep {
+        $_->{ceAlarmDescrIndex} == $ceAlarmDescrIndex;
+      } @{$self->{parent}->{alarmdescriptions}};
+      foreach my $ceAlarmType (split(",", $self->{ceAlarmTypes})) {
+        foreach my $alarmdesc (@descriptions) {
+          if ($alarmdesc->{ceAlarmDescrAlarmType} == $ceAlarmType) {
+            $self->add_info(sprintf '%s alarm "%s" in %s%s',
+                $alarmdesc->{ceAlarmDescrSeverity},
+                $alarmdesc->{ceAlarmDescrText},
+                $self->{entPhysicalIndex},
+                $location);
+            if ($alarmdesc->{ceAlarmDescrSeverity} eq "none") {
+              # A value of '0' indicates that there the corresponding physical entity currently is not asserting any alarms.
+            } elsif ($alarmdesc->{ceAlarmDescrSeverity} eq "critical") {
+              $self->add_critical();
+            } elsif ($alarmdesc->{ceAlarmDescrSeverity} eq "major") {
+              $self->add_critical();
+            } elsif ($alarmdesc->{ceAlarmDescrSeverity} eq "minor") {
+              $self->add_warning();
+            } elsif ($alarmdesc->{ceAlarmDescrSeverity} eq "info") {
+              $self->add_ok();
+            }
+          }
+        }
+      }
+    }
   }
+  delete $self->{parent}; # brauch ma nimmer, daad eh sched bon dump scheebern
 }
 
 
