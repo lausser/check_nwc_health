@@ -93,25 +93,26 @@ sub init {
       }
     }
 
-  # snL4VirtualServerTable:                snL4VirtualServerAdminStatus
-  # snL4VirtualServerStatisticTable:       allenfalls TxRx Bytes
-  # snL4VirtualServerPortTable:            snL4VirtualServerPortAdminStatus*
-  # snL4VirtualServerPortStatisticTable:   snL4VirtualServerPortStatisticCurrentConnection*
-  # snL4RealServerTable:                   snL4RealServerAdminStatus
-  # snL4RealServerPortStatusTable:         snL4RealServerPortStatusCurrentConnection snL4RealServerPortStatusState
-  # 
-  # summe snL4RealServerStatisticCurConnections = snL4VirtualServerPortStatisticCurrentConnection
-  # vip , jeder vport gibt ein performancedatum, jeder port hat n. realports, jeder realport hat status
-  #  aus realportstatus errechnet sich verfuegbarkeit des vport
-  #  aus vports ergeben sich die session-output.zahlen
-  # real ports eines vs, real servers
-  # globaler mode snL4MaxSessionLimit : snL4FreeSessionCount
+    # snL4VirtualServerTable:                snL4VirtualServerAdminStatus
+    # snL4VirtualServerStatisticTable:       allenfalls TxRx Bytes
+    # snL4VirtualServerPortTable:            snL4VirtualServerPortAdminStatus*
+    # snL4VirtualServerPortStatisticTable:   snL4VirtualServerPortStatisticCurrentConnection*
+    # snL4RealServerTable:                   snL4RealServerAdminStatus
+    # snL4RealServerPortStatusTable:         snL4RealServerPortStatusCurrentConnection snL4RealServerPortStatusState
+    # 
+    # summe snL4RealServerStatisticCurConnections = snL4VirtualServerPortStatisticCurrentConnection
+    # vip , jeder vport gibt ein performancedatum, jeder port hat n. realports, jeder realport hat status
+    #  aus realportstatus errechnet sich verfuegbarkeit des vport
+    #  aus vports ergeben sich die session-output.zahlen
+    # real ports eines vs, real servers
+    # globaler mode snL4MaxSessionLimit : snL4FreeSessionCount
 
 
     #
     # virtual server
     #
     $self->opts->override_opt('name', $original_name);
+    $self->{virtualservers} = [];
     foreach my $vs (grep { $self->filter_name($_) } keys %{$self->{vsdict}}) {
       $self->{vsdict}->{$vs} = Classes::Foundry::Component::SLBSubsystem::VirtualServer->new(%{$self->{vsdict}->{$vs}});
       next if ! exists $self->{vspdict}->{$vs};

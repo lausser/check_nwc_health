@@ -2854,7 +2854,8 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
   } else {
-    $self->debug("AUTOLOAD %s does not exist!!!\n", $AUTOLOAD);
+    $self->debug("AUTOLOAD: class %s has no method %s\n", 
+        ref($self), $AUTOLOAD);
   }
 }
 
