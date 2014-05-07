@@ -245,13 +245,13 @@ sub validate_args {
     }
   }
   $GLPlugin::plugin->{statefilesdir} = $self->opts->statefilesdir;
-  if ($self->opts->warningx) {
+  if ($self->opts->can("warningx") && $self->opts->warningx) {
     foreach my $key (keys %{$self->opts->warningx}) {
       $self->set_thresholds(metric => $key, 
           warning => $self->opts->warningx->{$key});
     }
   }
-  if ($self->opts->criticalx) {
+  if ($self->opts->can("criticalx") && $self->opts->criticalx) {
     foreach my $key (keys %{$self->opts->criticalx}) {
       $self->set_thresholds(metric => $key, 
           critical => $self->opts->criticalx->{$key});
@@ -268,8 +268,7 @@ sub validate_args {
 
 sub init {
   my $self = shift;
-  $self->{method} = 'snmp';
-  if ($self->opts->blacklist &&
+  if ($self->opts->can("blacklist") && $self->opts->blacklist &&
       -f $self->opts->blacklist) {
     $self->opts->blacklist = do {
         local (@ARGV, $/) = $self->opts->blacklist; <> };
@@ -298,17 +297,17 @@ sub debug {
   }
 }
 
-sub filter_name {
+sub filter_namex {
   my $self = shift;
+  my $opt = shift;
   my $name = shift;
-  if ($self->opts->name) {
+  if ($opt) {
     if ($self->opts->regexp) {
-      my $pattern = $self->opts->name;
-      if ($name =~ /$pattern/i) {
+      if ($name =~ /$opt/i) {
         return 1;
       }
     } else {
-      if (lc $self->opts->name eq lc $name) {
+      if (lc $opt eq lc $name) {
         return 1;
       }
     }
@@ -316,6 +315,24 @@ sub filter_name {
     return 1;
   }
   return 0;
+}
+
+sub filter_name {
+  my $self = shift;
+  my $name = shift;
+  return $self->filter_namex($self->opts->name, $name);
+}
+
+sub filter_name2 {
+  my $self = shift;
+  my $name = shift;
+  return $self->filter_namex($self->opts->name2, $name);
+}
+
+sub filter_name3 {
+  my $self = shift;
+  my $name = shift;
+  return $self->filter_namex($self->opts->name3, $name);
 }
 
 sub blacklist {
@@ -332,6 +349,9 @@ sub add_blacklist {
 
 sub is_blacklisted {
   my $self = shift;
+  if (! $self->opts->can("blacklist")) {
+    return 0;
+  }
   if (! exists $self->{blacklisted}) {
     $self->{blacklisted} = 0;
   }
@@ -817,6 +837,39 @@ sub dump {
   }
 }
 
+sub AUTOLOAD {
+  my $self = shift;
+  return if ($AUTOLOAD =~ /DESTROY/);
+  $self->debug("AUTOLOAD %s\n", $AUTOLOAD)
+        if $self->opts->verbose >= 2;
+  if ($AUTOLOAD =~ /^(.*)::analyze_and_check_(.*)_subsystem$/) {
+    my $class = $1;
+    my $subsystem = $2;
+    my $analyze = sprintf "analyze_%s_subsystem", $subsystem;
+    my $check = sprintf "check_%s_subsystem", $subsystem;
+    my @params = @_;
+    if (@params) {
+      # analyzer class
+      my $subsystem_class = shift @params;
+      $self->{components}->{$subsystem.'_subsystem'} = $subsystem_class->new();
+      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new()",
+          $subsystem, $subsystem_class);
+    } else {
+      $self->$analyze();
+      $self->debug("call %s()", $analyze);
+    }
+    $self->$check();
+  } elsif ($AUTOLOAD =~ /^(.*)::check_(.*)_subsystem$/) {
+    my $class = $1;
+    my $subsystem = sprintf "%s_subsystem", $2;
+    $self->{components}->{$subsystem}->check();
+    $self->{components}->{$subsystem}->dump()
+        if $self->opts->verbose >= 2;
+  } else {
+    $self->debug("AUTOLOAD: class %s has no method %s\n",
+        ref($self), $AUTOLOAD);
+  }
+}
 
 package GLPlugin::Commandline;
 use strict;
@@ -893,7 +946,7 @@ sub add_message {
 sub selected_perfdata {
   my $self = shift;
   my $label = shift;
-  if ($self->opts->selectedperfdata) {
+  if ($self->opts->can("selectedperfdata") && $self->opts->selectedperfdata) {
     my $pattern = $self->opts->selectedperfdata;
     return ($label =~ /$pattern/i) ? 1 : 0;
   } else {
@@ -1738,7 +1791,7 @@ sub implements_mib {
     return 1;
   }
   # some mibs are only composed of tables
-  my $traces = $self->opts->snmpwalk ? 
+  my $traces = $self->opts->snmpwalk ?
     {@{[map {$_, $self->rawdata->{$_} } grep { substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib} }
     keys %{$self->rawdata}]}}
     :
@@ -2822,40 +2875,6 @@ sub no_such_mode {
     printf "Mode %s is not implemented for this type of device\n",
         $self->opts->mode;
     exit 3;
-  }
-}
-
-sub AUTOLOAD {
-  my $self = shift;
-  return if ($AUTOLOAD =~ /DESTROY/);
-  $self->debug("AUTOLOAD %s\n", $AUTOLOAD)
-        if $self->opts->verbose >= 2;
-  if ($AUTOLOAD =~ /^(.*)::analyze_and_check_(.*)_subsystem$/) {
-    my $class = $1;
-    my $subsystem = $2;
-    my $analyze = sprintf "analyze_%s_subsystem", $subsystem;
-    my $check = sprintf "check_%s_subsystem", $subsystem;
-    my @params = @_;
-    if (@params) {
-      # analyzer class
-      my $subsystem_class = shift @params;
-      $self->{components}->{$subsystem.'_subsystem'} = $subsystem_class->new();
-      $self->debug(sprintf "\$self->{components}->{%s_subsystem} = %s->new()",
-          $subsystem, $subsystem_class);
-    } else {
-      $self->$analyze();
-      $self->debug("call %s()", $analyze);
-    }
-    $self->$check();
-  } elsif ($AUTOLOAD =~ /^(.*)::check_(.*)_subsystem$/) {
-    my $class = $1;
-    my $subsystem = sprintf "%s_subsystem", $2;
-    $self->{components}->{$subsystem}->check();
-    $self->{components}->{$subsystem}->dump()
-        if $self->opts->verbose >= 2;
-  } else {
-    $self->debug("AUTOLOAD: class %s has no method %s\n", 
-        ref($self), $AUTOLOAD);
   }
 }
 
