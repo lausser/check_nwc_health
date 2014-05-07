@@ -1500,12 +1500,6 @@ sub new {
   return $self;
 }
 
-sub ensure_index {
-  my $self = shift;
-  my $key = shift;
-  $self->{$key} ||= $self->{flat_indices};
-}
-
 sub check {
   my $self = shift;
   # some tableitems are not checkable, they are only used to enhance other

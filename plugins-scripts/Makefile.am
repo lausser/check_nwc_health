@@ -13,6 +13,8 @@ libexec_SCRIPTS=check_nwc_health
 MY_MODULES=
 EXTRA_MODULES=\
   GLPlugin.pm \
+  GLPluginSNMP.pm \
+  GLPluginUPNP.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390.pm \
