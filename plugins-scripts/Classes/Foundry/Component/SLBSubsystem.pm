@@ -1,5 +1,5 @@
 package Classes::Foundry::Component::SLBSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub update_caches {
@@ -193,7 +193,7 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -229,7 +229,7 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -333,7 +333,7 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::RealServer;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -352,7 +352,7 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::RealServerPort;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -371,6 +371,6 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::Binding;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 

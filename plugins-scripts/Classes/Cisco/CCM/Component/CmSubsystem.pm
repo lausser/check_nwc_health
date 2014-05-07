@@ -23,7 +23,7 @@ sub check {
 
 
 package Classes::Cisco::CCM::Component::CmSubsystem::Cm;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

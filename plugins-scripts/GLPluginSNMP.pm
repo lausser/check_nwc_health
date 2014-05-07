@@ -1273,6 +1273,16 @@ sub get_number {
   return ++$number;
 }
 
+sub create_entry_cache_file {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $key_attr = shift;
+  return lc sprintf "%s_%s_%s_%s_cache",
+      $self->create_interface_cache_file(),
+      $mib, $table, join('#', @{$key_attr});
+}
+
 sub update_entry_cache {
   my $self = shift;
   my $force = shift;
@@ -1284,9 +1294,7 @@ sub update_entry_cache {
   }
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
-  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $self->statefilesdir(), $self->opts->hostname,
-      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  my $statefile = $self->create_entry_cache_file($mib, $table, $key_attr);
   my $update = time - 3600;
   #my $update = time - 1;
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
@@ -1351,12 +1359,10 @@ sub save_cache {
   if (ref($key_attr) ne "ARRAY") {
     $key_attr = [$key_attr];
   }
-  $self->create_statefilesdir();
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
-  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $self->statefilesdir(), $self->opts->hostname,
-      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  $self->create_statefilesdir();
+  my $statefile = $self->create_entry_cache_file($mib, $table, $key_attr);
   open(STATE, ">".$statefile.".".$$);
   printf STATE Data::Dumper::Dumper($self->{$cache});
   close STATE;
@@ -1375,9 +1381,7 @@ sub load_cache {
   }
   my $cache = sprintf "%s_%s_%s_cache", 
       $mib, $table, join('#', @{$key_attr});
-  my $statefile = lc sprintf "%s/%s_%s_%s-%s_%s_cache",
-      $self->statefilesdir(), $self->opts->hostname,
-      $self->opts->mode, $mib, $table, join('#', @{$key_attr});
+  my $statefile = $self->create_entry_cache_file($mib, $table, $key_attr);
   $self->{$cache} = {};
   if ( -f $statefile) {
     our $VAR1;

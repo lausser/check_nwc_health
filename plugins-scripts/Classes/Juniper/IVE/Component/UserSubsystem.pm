@@ -1,5 +1,5 @@
 package Classes::Juniper::IVE::Component::UserSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

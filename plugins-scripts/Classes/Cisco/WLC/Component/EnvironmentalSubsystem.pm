@@ -1,5 +1,5 @@
 package Classes::Cisco::WLC::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
