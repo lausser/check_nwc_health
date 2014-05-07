@@ -9,12 +9,15 @@ sub init {
     ['alarms', 'ceAlarmTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm', sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
     ['alarmdescriptionmappings', 'ceAlarmDescrMapTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescriptionMapping' ],
     ['alarmdescriptions', 'ceAlarmDescrTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescription' ],
+    ['alarmfilterprofiles', 'ceAlarmFilterProfileTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmFilterProfile' ],
+    ['alarmhistory', 'ceAlarmHistTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHistory', sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::PhysicalEntity'],
   ]);
   $self->get_snmp_objects('CISCO-ENTITY-ALARM-MIB', qw(
       ceAlarmCriticalCount ceAlarmMajorCount ceAlarmMinorCount
+      ceAlarmFilterProfileIndexNext
   ));
   foreach (qw(ceAlarmCriticalCount ceAlarmMajorCount ceAlarmMinorCount)) {
     $self->{$_} ||= 0;
@@ -41,6 +44,9 @@ sub check {
     foreach (@{$self->{alarms}}) {
       $_->check();
     }
+    foreach (@{$self->{alarmhistory}}) {
+      $_->check();
+    }
     if (! $self->check_messages()) { # blacklisted des ganze glump
       $self->add_info('no alarms');
       $self->add_ok();
@@ -51,7 +57,6 @@ sub check {
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm;
 our @ISA = qw(GLPlugin::TableItem);
 use strict;
-use feature "state";
 
 sub finish {
   my $self = shift;
@@ -78,7 +83,8 @@ sub finish {
 
 sub check {
   my $self = shift;
-  my $location = exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.')' : '';
+  my $location = exists $self->{entity} ?
+      $self->{entity}->{entPhysicalDescr} : "unknown";
   if (length($self->{ceAlarmTypes})) {
     my @descriptorindexes = map {
         $_->{ceAlarmDescrIndex}
@@ -93,7 +99,7 @@ sub check {
       foreach my $ceAlarmType (split(",", $self->{ceAlarmTypes})) {
         foreach my $alarmdesc (@descriptions) {
           if ($alarmdesc->{ceAlarmDescrAlarmType} == $ceAlarmType) {
-            $self->add_info(sprintf '%s alarm "%s" in %s%s',
+            $self->add_info(sprintf "%s alarm '%s' in entity %d (%s)",
                 $alarmdesc->{ceAlarmDescrSeverity},
                 $alarmdesc->{ceAlarmDescrText},
                 $self->{entPhysicalIndex},
@@ -143,6 +149,47 @@ our @ISA = qw(GLPlugin::TableItem);
 sub finish {
   my $self = shift;
   $self->{ceAlarmDescrIndex} = $self->{indices}->[0];
+}
+
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmFilterProfile;
+our @ISA = qw(GLPlugin::TableItem);
+
+package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHistory;
+our @ISA = qw(GLPlugin::TableItem);
+
+sub finish {
+  my $self = shift;
+  $self->{ceAlarmHistTimeStamp} = time - $self->uptime() + $self->timeticks($self->{ceAlarmHistTimeStamp});
+  $self->{ceAlarmHistTimeStampLocal} = scalar localtime $self->{ceAlarmHistTimeStamp};
+}
+
+sub check {
+  my $self = shift;
+  my $vendortype = "unknown";
+  my @entities = grep {
+    $_->{entPhysicalIndex} == $self->{ceAlarmHistEntPhysicalIndex};
+  } @{$self->{parent}->{entities}};
+  if (@entities) {
+    $vendortype = $entities[0]->{entPhysicalVendorType};
+    $self->{ceAlarmHistEntPhysicalDescr} = $entities[0]->{entPhysicalDescr};
+  }
+  my @descriptorindexes = map {
+      $_->{ceAlarmDescrIndex}
+  } grep {
+      $vendortype eq $_->{ceAlarmDescrVendorType}
+  } @{$self->{parent}->{alarmdescriptionmappings}};
+  if (@descriptorindexes) {
+    my $ceAlarmDescrIndex = $descriptorindexes[0];
+    my @descriptions = grep {
+      $_->{ceAlarmDescrIndex} == $ceAlarmDescrIndex;
+    } @{$self->{parent}->{alarmdescriptions}};
+    foreach my $alarmdesc (@descriptions) {
+      if ($alarmdesc->{ceAlarmDescrAlarmType} == $self->{ceAlarmHistAlarmType}) {
+        $self->{ceAlarmHistAlarmDescrText} = $alarmdesc->{ceAlarmDescrText};
+      }
+    }
+  }
+  delete $self->{parent};
 }
 
 __END__

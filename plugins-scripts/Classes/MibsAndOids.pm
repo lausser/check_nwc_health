@@ -23,7 +23,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
   },
   'IFMIB' => {
       ifNumber => '1.3.6.1.2.1.2.1',
-      ifTableLastChange => '1.3.6.1.2.1.31.1.5.0',
+      ifTableLastChange => '1.3.6.1.2.1.31.1.5',
       ifTable => '1.3.6.1.2.1.2.2',
       ifEntry => '1.3.6.1.2.1.2.2.1',
       ifIndex => '1.3.6.1.2.1.2.2.1.1',
@@ -632,9 +632,14 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ceAlarmHistEntry => '1.3.6.1.4.1.9.9.138.1.3.3.1',
     ceAlarmHistIndex => '1.3.6.1.4.1.9.9.138.1.3.3.1.1',
     ceAlarmHistType => '1.3.6.1.4.1.9.9.138.1.3.3.1.2',
+    ceAlarmHistTypeDefinition => {
+        1 => 'asserted',
+        2 => 'cleared',
+    },
     ceAlarmHistEntPhysicalIndex => '1.3.6.1.4.1.9.9.138.1.3.3.1.3',
     ceAlarmHistAlarmType => '1.3.6.1.4.1.9.9.138.1.3.3.1.4',
     ceAlarmHistSeverity => '1.3.6.1.4.1.9.9.138.1.3.3.1.5',
+    ceAlarmHistSeverityDefinition => 'CISCO-ENTITY-ALARM-MIB::AlarmSeverityOrZero',
     ceAlarmHistTimeStamp => '1.3.6.1.4.1.9.9.138.1.3.3.1.6',
     ceAlarmFiltering => '1.3.6.1.4.1.9.9.138.1.4',
     ceAlarmNotifiesEnable => '1.3.6.1.4.1.9.9.138.1.4.1.0',
