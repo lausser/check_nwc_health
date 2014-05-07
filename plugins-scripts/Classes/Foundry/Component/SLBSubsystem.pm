@@ -204,14 +204,19 @@ sub finish {
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->add_info(sprintf "vip %s is %s", 
+  $self->add_info(sprintf "vis %s is %s", 
       $self->{snL4VirtualServerName},
       $self->{snL4VirtualServerAdminStatus});
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
     $self->add_warning();
   } else {
-    foreach (@{$self->{ports}}) {
-      $_->check();
+    if (scalar (@{$self->{ports}}) == 0) {
+      $self->add_warning();
+      $self->add_warning("but has no configured ports");
+    } else {
+      foreach (@{$self->{ports}}) {
+        $_->check();
+      }
     }
   }
   if ($self->opts->report eq "html") {
