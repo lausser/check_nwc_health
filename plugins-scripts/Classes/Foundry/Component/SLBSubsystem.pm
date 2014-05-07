@@ -55,6 +55,7 @@ sub init {
             #}
           }
           if (! exists $self->{rspstdict}->{$binding->{snL4BindRealServerName}}->{$binding->{snL4BindRealPortNumber}}) {
+            # todo: profiler, dauert 30s pro aufruf
             foreach my $rspst ($self->get_snmp_table_objects_with_cache(
                 'FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4RealServerPortStatusTable', 'snL4RealServerPortStatusServerName')) {
               $self->{rspstdict}->{$rspst->{snL4RealServerPortStatusServerName}}->{$rspst->{snL4RealServerPortStatusPort}} = $rspst;
