@@ -7,7 +7,7 @@ sub init {
   $self->get_snmp_objects('AIRESPACE-SWITCHING-MIB', (qw(
       agentTotalMemory agentFreeMemory)));
   $self->{memory_usage} = $self->{agentFreeMemory} ? 
-      ($self->{agentFreeMemory} / $self->{agentTotalMemory} * 100) : 100;
+      ( ($self->{agentTotalMemory} - $self->{agentFreeMemory}) / $self->{agentTotalMemory} * 100) : 100;
 }
 
 sub check {
