@@ -7,7 +7,7 @@ sub init {
   $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
       memTotalReal64 memFreeReal64)));
   $self->{memory_usage} = $self->{memFreeReal64} ? 
-      ($self->{memFreeReal64} / $self->{memTotalReal64} * 100) : 100;
+      ( ($self->{memTotalReal64} - $self->{memFreeReal64}) / $self->{memTotalReal64} * 100) : 100;
 }
 
 sub check {
