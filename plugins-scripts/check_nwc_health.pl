@@ -3,8 +3,6 @@
 use strict;
 use File::Basename;
 
-
-
 my $plugin = Classes::Device->new(
     shortname => '',
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
@@ -519,11 +517,9 @@ $plugin->add_arg(
     required => 0,
 );
 
-
 $plugin->getopts();
 $plugin->classify();
 $plugin->validate_args();
-
 
 if (! $plugin->check_messages()) {
   $plugin->init();

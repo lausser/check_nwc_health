@@ -12,6 +12,7 @@ $GLPlugin::SNMP::mib_ids = {
   'CISCO-ENTITY-SENSOR-MIB' => '1.3.6.1.4.1.9.9.91',
   'CISCO-ENTITY-FRU-CONTROL-MIB' => '1.3.6.1.4.1.9.9.117.1',
   'CISCO-ENTITY-ALARM-MIB' => '1.3.6.1.4.1.9.9.138.1',
+  'CISCO-ENVMON-MIB' => '1.3.6.1.4.1.9.9.13',
 };
 
 $GLPlugin::SNMP::mibs_and_oids = {

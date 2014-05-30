@@ -97,27 +97,35 @@ sub check_messages {
 
 sub clear_ok {
   my $self = shift;
-  return $self->clear_messages(OK);
+  $self->clear_messages(OK);
 }
 
 sub clear_warning {
   my $self = shift;
-  return $self->clear_messages(WARNING);
+  $self->clear_messages(WARNING);
 }
 
 sub clear_critical {
   my $self = shift;
-  return $self->clear_messages(CRITICAL);
+  $self->clear_messages(CRITICAL);
 }
 
 sub clear_unknown {
   my $self = shift;
-  return $self->clear_messages(UNKNOWN);
+  $self->clear_messages(UNKNOWN);
+}
+
+sub clear_all {
+  my $self = shift;
+  $self->clear_ok();
+  $self->clear_warning();
+  $self->clear_critical();
+  $self->clear_unknown();
 }
 
 sub clear_messages {
   my $self = shift;
-  return $GLPlugin::plugin->clear_messages(@_);
+  $GLPlugin::plugin->clear_messages(@_);
 }
 
 sub suppress_messages {
@@ -612,26 +620,13 @@ sub create_statefile {
   my %params = @_;
   my $extension = "";
   $extension .= $params{name} ? '_'.$params{name} : '';
-  if ($self->opts->community) {
-    $extension .= md5_hex($self->opts->community);
-  }
   $extension =~ s/\//_/g;
   $extension =~ s/\(/_/g;
   $extension =~ s/\)/_/g;
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
-  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
-  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
-  } else {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        $self->opts->hostname, $self->opts->mode, lc $extension;
-  }
+  return sprintf "%s/%s%s", $self->statefilesdir(),
+      $self->opts->mode, lc $extension;
 }
 
 sub schimpf {
@@ -1151,16 +1146,20 @@ sub set_thresholds {
   my %params = @_;
   if (exists $params{metric}) {
     my $metric = $params{metric};
-    $self->{thresholds}->{$metric}->{warning} = 
-        $params{warning} if $params{warning};
-    $self->{thresholds}->{$metric}->{warning} = 
-        $self->{thresholds}->{$metric}->{warning} 
-        if $self->{thresholds}->{$metric}->{warning};
-    $self->{thresholds}->{$metric}->{critical} = 
-        $params{critical} if $params{critical};
-    $self->{thresholds}->{$metric}->{critical} = 
-        $self->{thresholds}->{$metric}->{critical}
-        if $self->{thresholds}->{$metric}->{critical};
+    $self->{thresholds}->{$metric}->{warning} = $params{warning};
+    $self->{thresholds}->{$metric}->{critical} = $params{critical};
+    if ($self->opts->warningx) {
+      foreach my $key (keys %{$self->opts->warningx}) {
+        next if $key ne $metric;
+        $self->{thresholds}->{$metric}->{warning} = $self->opts->warningx->{$key};
+      }
+    }
+    if ($self->opts->criticalx) {
+      foreach my $key (keys %{$self->opts->criticalx}) {
+        next if $key ne $metric;
+        $self->{thresholds}->{$metric}->{critical} = $self->opts->criticalx->{$key};
+      }
+    }
   } else {
     $self->{thresholds}->{default}->{warning} =
         $self->opts->warning || $params{warning} || 0;
@@ -1168,6 +1167,7 @@ sub set_thresholds {
         $self->opts->critical || $params{critical} || 0;
   }
 }
+
 
 sub force_thresholds {
   my $self = shift;
@@ -1371,6 +1371,7 @@ sub getopts {
     exit 0;
   } else {
     no strict 'refs';
+    no warnings 'redefine';
     do { $self->print_help(); exit 0; } if $commandline{help};
     do { $self->print_version(); exit 0 } if $commandline{version};
     do { $self->print_usage(); exit 3 } if $commandline{usage};
@@ -1391,6 +1392,15 @@ sub getopts {
     }
     foreach (keys %commandline) {
       $self->{opts}->{$_} = $commandline{$_};
+    }
+    foreach (grep { exists $_->{aliasfor} } @{$self->{_args}}) {
+      my $field = $_->{aliasfor};
+      $_->{spec} =~ /^([\w\-]+)/;
+      my $aliasfield = $1;
+      next if $self->{opts}->{$field};
+      *{"$field"} = sub {
+        return $self->{opts}->{$aliasfield};
+      };
     }
   }
 }

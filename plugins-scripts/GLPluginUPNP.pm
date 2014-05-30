@@ -80,3 +80,20 @@ sub check_upnp_and_model {
   }
 }
 
+sub create_statefile {
+  my $self = shift;
+  my %params = @_;
+  my $extension = "";
+  $extension .= $params{name} ? '_'.$params{name} : '';
+  if ($self->opts->community) {
+    $extension .= md5_hex($self->opts->community);
+  }
+  $extension =~ s/\//_/g;
+  $extension =~ s/\(/_/g;
+  $extension =~ s/\)/_/g;
+  $extension =~ s/\*/_/g;
+  $extension =~ s/\s/_/g;
+  return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+      $self->opts->hostname, $self->opts->mode, lc $extension;
+}
+

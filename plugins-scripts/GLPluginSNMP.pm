@@ -314,6 +314,33 @@ sub check_snmp_and_model {
   }
 }
 
+sub create_statefile {
+  my $self = shift;
+  my %params = @_;
+  my $extension = "";
+  $extension .= $params{name} ? '_'.$params{name} : '';
+  if ($self->opts->community) {
+    $extension .= md5_hex($self->opts->community);
+  }
+  $extension =~ s/\//_/g;
+  $extension =~ s/\(/_/g;
+  $extension =~ s/\)/_/g;
+  $extension =~ s/\*/_/g;
+  $extension =~ s/\s/_/g;
+  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } else {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        $self->opts->hostname, $self->opts->mode, lc $extension;
+  }
+}
+
 sub discover_suitable_class {
   my $self = shift;
   my $sysobj = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
