@@ -158,6 +158,49 @@ sub init {
     );
     my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
     $GLPlugin::plugin->nagios_exit($code, $message);
+  } elsif ($self->mode =~ /^my::([^:.]+)/) {
+    my $class = $1;
+    my $loaderror = undef;
+    substr($class, 0, 1) = uc substr($class, 0, 1);
+    if (! $self->opts->get("with-mymodules-dyn-dir")) {
+      $self->override_opt("with-mymodules-dyn-dir", "");
+    }
+    my $plugin_name = basename($0);
+    $plugin_name =~ /check_(.*?)_health/;
+    $plugin_name = "Check".uc(substr($1, 0, 1)).substr($1, 1)."Health";
+printf "roch %s\n", $plugin_name;
+    foreach my $libpath (split(":", $self->opts->get("with-mymodules-dyn-dir"))) {
+printf "dong %s\n", $libpath;
+      foreach my $extmod (glob $libpath."/".$plugin_name."*.pm") {
+        eval {
+          $self->debug(sprintf "loading module %s", $extmod);
+          require $extmod;
+printf "bank\n";
+        };
+        if ($@) {
+          $loaderror = $extmod;
+          $self->debug(sprintf "failed loading module %s: %s", $extmod, $@);
+        }
+      }
+    }
+    my $obj = {};
+    bless $obj, "My$class";
+    $self->{my} = $obj;
+    if ($self->{my}->isa("GLPlugin::SNMP")) {
+      my $dos_init = $self->can("init");
+      my $my_init = $self->{my}->can("init");
+      if ($my_init == $dos_init) {
+          $self->add_unknown(
+              sprintf "Class %s needs an init() method", ref($self->{my}));
+      } else {
+        $self->{my}->init();
+      }
+    } else {
+      $self->add_unknown(
+          sprintf "Class %s is not a subclass of GLPlugin::SNMP%s",
+              ref($self->{my}),
+              $loaderror ? sprintf " (syntax error in %s?)", $loaderror : "" );
+    }
   }
 }
 

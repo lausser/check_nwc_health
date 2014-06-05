@@ -477,6 +477,12 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'with-mymodules-dyn-dir=s',
+    help => '--with-mymodules-dyn-dir
+   A directory where own extensions can be found',
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'servertype=s',
     help => '--servertype
    The type of the network device: cisco (default). Use it if auto-detection
