@@ -73,7 +73,7 @@ sub classify {
       } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
-      } elsif ($self->{productname} =~ /Brocade.*ICX/i) {
+      } elsif ($self->{productname} =~ /Brocade/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {

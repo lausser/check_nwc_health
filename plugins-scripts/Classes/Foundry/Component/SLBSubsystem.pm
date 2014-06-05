@@ -290,7 +290,6 @@ sub check {
     }
     $self->add_html("</tr>");
     foreach (sort {$a->{snL4RealServerPortStatusServerName} cmp $b->{snL4RealServerPortStatusServerName}} @{$self->{ports}}) {
-      $self->add_html("<tr>");
       $self->add_html("<tr style=\"border: 1px solid black;\">");
       foreach my $attr (qw(snL4VirtualServerPortServerName snL4VirtualServerPortPort snL4VirtualServerPortAdminStatus)) {
         my $bgcolor = "#33ff00"; #green
