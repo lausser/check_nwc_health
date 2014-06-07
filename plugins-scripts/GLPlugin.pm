@@ -832,6 +832,130 @@ sub dump {
   }
 }
 
+sub table_ascii {
+  my $self = shift;
+  my $table = shift;
+  my $titles = shift;
+  my $text = "";
+  my $column_length = {};
+  my $column = 0;
+  foreach (@{$titles}) {
+    $column_length->{$column++} = length($_);
+  }
+  foreach my $tr (@{$table}) {
+    @{$tr} = map { ref($_) eq "ARRAY" ? $_->[0] : $_; } @{$tr};
+    $column = 0;
+    foreach my $td (@{$tr}) {
+      if (length($td) > $column_length->{$column}) {
+        $column_length->{$column} = length($td);
+      }
+      $column++;
+    }
+  }
+  $column = 0;
+  foreach (@{$titles}) {
+    $column_length->{$column} = "%".($column_length->{$column} + 3)."s";
+    $column++;
+  }
+  $column = 0;
+  foreach (@{$titles}) {
+    $text .= sprintf $column_length->{$column++}, $_;
+  }
+  $text .= "\n";
+  foreach my $tr (@{$table}) {
+    $column = 0;
+    foreach my $td (@{$tr}) {
+      $text .= sprintf $column_length->{$column++}, $td;
+    }
+    $text .= "\n";
+  }
+  return $text;
+}
+
+sub table_html {
+  my $self = shift;
+  my $table = shift;
+  my $titles = shift;
+  my $text = "";
+  $text .= "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
+  $text .= "<tr>";
+  foreach (@{$titles}) {
+    $text .= sprintf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
+  }
+  $text .= "</tr>";
+  foreach my $tr (@{$table}) {
+    $text .= "<tr>";
+    foreach my $td (@{$tr}) {
+      my $class = "statusOK";
+      if (ref($td) eq "ARRAY") {
+        $class = {
+          0 => "statusOK",
+          1 => "statusWARNING",
+          2 => "statusCRITICAL",
+          3 => "statusUNKNOWN",
+        }->{$td->[1]};
+        $td = $td->[0];
+      }
+      $text .= sprintf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px;\" class=\"%s\">%s</td>", $class, $td;
+    }
+    $text .= "</tr>";
+  }
+  $text .= "</table>";
+  return $text;
+}
+
+sub load_my_extension {
+  my $self = shift;
+  if ($self->opts->mode =~ /^my-([^-.]+)/) {
+    my $class = $1;
+    my $loaderror = undef;
+    substr($class, 0, 1) = uc substr($class, 0, 1);
+    if (! $self->opts->get("with-mymodules-dyn-dir")) {
+      $self->override_opt("with-mymodules-dyn-dir", "");
+    }
+    my $plugin_name = basename($0);
+    $plugin_name =~ /check_(.*?)_health/;
+    $plugin_name = "Check".uc(substr($1, 0, 1)).substr($1, 1)."Health";
+    foreach my $libpath (split(":", $self->opts->get("with-mymodules-dyn-dir"))) {
+      foreach my $extmod (glob $libpath."/".$plugin_name."*.pm") {
+        my $stderrvar;
+        *SAVEERR = *STDERR;
+        open OUT ,'>',\$stderrvar;
+        *STDERR = *OUT;
+        eval {
+          $self->debug(sprintf "loading module %s", $extmod);
+          require $extmod;
+        };
+        *STDERR = *SAVEERR;
+        if ($@) {
+          $loaderror = $extmod;
+          $self->debug(sprintf "failed loading module %s: %s", $extmod, $@);
+        }
+      }
+    }
+    my $original_class = ref($self);
+    my $original_init = $self->can("init");
+    bless $self, "My$class";
+    if ($self->isa("GLPlugin")) {
+      my $new_init = $self->can("init");
+      if ($new_init == $original_init) {
+          $self->add_unknown(
+              sprintf "Class %s needs an init() method", ref($self));
+      } else {
+        # now go back to check_*_health.pl where init() will be called
+      }
+    } else {
+      bless $self, $original_class;
+      $self->add_unknown(
+          sprintf "Class %s is not a subclass of GLPlugin%s",
+              "My$class",
+              $loaderror ? sprintf " (syntax error in %s?)", $loaderror : "" );
+      my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+      $self->nagios_exit($code, $message);
+    }
+  }
+}
+
 sub AUTOLOAD {
   my $self = shift;
   return if ($AUTOLOAD =~ /DESTROY/);

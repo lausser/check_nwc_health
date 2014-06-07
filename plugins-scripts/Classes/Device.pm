@@ -31,7 +31,9 @@ sub classify {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};
       }
-      if ($self->{productname} =~ /upnp/i) {
+      if ($self->opts->mode =~ /^my-/) {
+        $self->load_my_extension();
+      } elsif ($self->{productname} =~ /upnp/i) {
         bless $self, 'Classes::UPNP';
         $self->debug('using Classes::UPNP');
       } elsif ($self->{productname} =~ /FRITZ/i) {
