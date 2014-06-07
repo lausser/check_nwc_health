@@ -55,7 +55,7 @@ sub unix_dump {
 
 
 package Classes::UCDMIB::Component::CpuSubsystem::Load;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

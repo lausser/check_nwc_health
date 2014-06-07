@@ -1,5 +1,5 @@
 package Classes::Fortigate::Component::MemSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

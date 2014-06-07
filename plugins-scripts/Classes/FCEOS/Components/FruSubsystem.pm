@@ -1,5 +1,5 @@
 package Classes::FCEOS::Component::FruSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -10,7 +10,7 @@ sub init {
 }
 
 package Classes::FCEOS::Component::FruSubsystem::Fcu;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

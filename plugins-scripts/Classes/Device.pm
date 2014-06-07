@@ -1,14 +1,6 @@
 package Classes::Device;
 our @ISA = qw(GLPlugin::SNMP GLPlugin::UPNP);
 use strict;
-use IO::File;
-use File::Basename;
-use Digest::MD5  qw(md5_hex);
-use Errno;
-use AutoLoader;
-our $AUTOLOAD;
-use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
-
 
 sub classify {
   my $self = shift;
@@ -39,7 +31,9 @@ sub classify {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};
       }
-      if ($self->{productname} =~ /upnp/i) {
+      if ($self->opts->mode =~ /^my-/) {
+        $self->load_my_extension();
+      } elsif ($self->{productname} =~ /upnp/i) {
         bless $self, 'Classes::UPNP';
         $self->debug('using Classes::UPNP');
       } elsif ($self->{productname} =~ /FRITZ/i) {
@@ -81,7 +75,7 @@ sub classify {
       } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
-      } elsif ($self->{productname} =~ /Brocade.*ICX/i) {
+      } elsif ($self->{productname} =~ /Brocade/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {

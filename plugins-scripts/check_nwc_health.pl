@@ -3,8 +3,6 @@
 use strict;
 use File::Basename;
 
-
-
 my $plugin = Classes::Device->new(
     shortname => '',
     usage => 'Usage: %s [ -v|--verbose ] [ -t <timeout> ] '.
@@ -479,6 +477,12 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'with-mymodules-dyn-dir=s',
+    help => '--with-mymodules-dyn-dir
+   A directory where own extensions can be found',
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'servertype=s',
     help => '--servertype
    The type of the network device: cisco (default). Use it if auto-detection
@@ -519,11 +523,9 @@ $plugin->add_arg(
     required => 0,
 );
 
-
 $plugin->getopts();
 $plugin->classify();
 $plugin->validate_args();
-
 
 if (! $plugin->check_messages()) {
   $plugin->init();

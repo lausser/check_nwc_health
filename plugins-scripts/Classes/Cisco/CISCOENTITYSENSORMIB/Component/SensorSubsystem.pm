@@ -1,5 +1,5 @@
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -29,7 +29,7 @@ sub init {
 }
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -101,7 +101,7 @@ sub check {
 
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -112,7 +112,7 @@ sub finish {
 
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {

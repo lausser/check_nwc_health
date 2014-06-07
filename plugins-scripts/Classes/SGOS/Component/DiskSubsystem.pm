@@ -1,5 +1,5 @@
 package Classes::SGOS::Component::DiskSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -18,7 +18,7 @@ sub init {
 
 
 package Classes::SGOS::Component::DiskSubsystem::Disk;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -35,7 +35,7 @@ sub check {
 
 
 package Classes::SGOS::Component::DiskSubsystem::FS;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

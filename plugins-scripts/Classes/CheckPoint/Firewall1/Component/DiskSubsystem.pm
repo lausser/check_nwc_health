@@ -1,5 +1,5 @@
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -45,7 +45,7 @@ sub check {
 
 
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -66,7 +66,7 @@ sub check {
 
 
 package Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

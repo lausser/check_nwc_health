@@ -32,7 +32,7 @@ sub init {
   } elsif ($self->{productname} =~ /FabOS/i) {
     bless $self, 'Classes::FabOS';
     $self->debug('using Classes::FabOS');
-  } elsif ($self->{productname} =~ /ICX6/i) {
+  } elsif ($self->{productname} =~ /ICX6|FastIron/i) {
     bless $self, 'Classes::Foundry';
     $self->debug('using Classes::Foundry');
   }

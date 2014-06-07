@@ -1,5 +1,5 @@
 package Classes::Cisco::IOS::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -9,6 +9,10 @@ sub init {
   # 
   $self->get_snmp_objects('CISCO-ENVMON-MIB', qw(
       ciscoEnvMonPresent));
+  if (! $self->{ciscoEnvMonPresent}) {
+    # gibt IOS-Kisten, die haben kein ciscoEnvMonPresent
+    $self->{ciscoEnvMonPresent} = $self->implements_mib('CISCO-ENVMON-MIB');
+  }
   if ($self->{ciscoEnvMonPresent} && 
       $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem} =

@@ -6,6 +6,7 @@
 - massive rewriting of the plugins structure and modules
 - repair malformed data returned by Net::SNMP
 - add interface-nat-rejects and interface-nat-session-count for IOS
+- add hardware-health for cisco asa
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model

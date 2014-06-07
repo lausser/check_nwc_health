@@ -1,5 +1,5 @@
 package Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem;
-our @ISA = qw(GLPlugin::Item Classes::UPNP::AVM::FritzBox7390);
+our @ISA = qw(GLPlugin::SNMP::Item Classes::UPNP::AVM::FritzBox7390);
 use strict;
 
 sub init {
@@ -137,7 +137,7 @@ sub get_device_indices {
 
 
 package Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem::Device;
-our @ISA = qw(GLPlugin::TableItem Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem);
+our @ISA = qw(GLPlugin::SNMP::TableItem Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem);
 use strict;
 
 sub finish {

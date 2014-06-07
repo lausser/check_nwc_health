@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -19,7 +19,7 @@ sub init {
 }
 
 package Classes::AVOS::Component::CpuSubsystem::Cpu;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -37,7 +37,7 @@ sub check {
 
 
 package Classes::AVOS::Component::CpuSubsystem::DevCpu;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

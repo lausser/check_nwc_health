@@ -1,5 +1,5 @@
 package Classes::Foundry::Component::SLBSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub update_caches {
@@ -55,6 +55,7 @@ sub init {
             #}
           }
           if (! exists $self->{rspstdict}->{$binding->{snL4BindRealServerName}}->{$binding->{snL4BindRealPortNumber}}) {
+            # todo: profiler, dauert 30s pro aufruf
             foreach my $rspst ($self->get_snmp_table_objects_with_cache(
                 'FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4RealServerPortStatusTable', 'snL4RealServerPortStatusServerName')) {
               $self->{rspstdict}->{$rspst->{snL4RealServerPortStatusServerName}}->{$rspst->{snL4RealServerPortStatusPort}} = $rspst;
@@ -192,7 +193,7 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServer;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -203,14 +204,19 @@ sub finish {
 sub check {
   my $self = shift;
   my %params = @_;
-  $self->add_info(sprintf "vip %s is %s", 
+  $self->add_info(sprintf "vis %s is %s", 
       $self->{snL4VirtualServerName},
       $self->{snL4VirtualServerAdminStatus});
   if ($self->{snL4VirtualServerAdminStatus} ne 'enabled') {
     $self->add_warning();
   } else {
-    foreach (@{$self->{ports}}) {
-      $_->check();
+    if (scalar (@{$self->{ports}}) == 0) {
+      $self->add_warning();
+      $self->add_warning("but has no configured ports");
+    } else {
+      foreach (@{$self->{ports}}) {
+        $_->check();
+      }
     }
   }
   if ($self->opts->report eq "html") {
@@ -228,7 +234,7 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::VirtualServerPort;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -284,7 +290,6 @@ sub check {
     }
     $self->add_html("</tr>");
     foreach (sort {$a->{snL4RealServerPortStatusServerName} cmp $b->{snL4RealServerPortStatusServerName}} @{$self->{ports}}) {
-      $self->add_html("<tr>");
       $self->add_html("<tr style=\"border: 1px solid black;\">");
       foreach my $attr (qw(snL4VirtualServerPortServerName snL4VirtualServerPortPort snL4VirtualServerPortAdminStatus)) {
         my $bgcolor = "#33ff00"; #green
@@ -332,7 +337,7 @@ sub add_port {
 
 
 package Classes::Foundry::Component::SLBSubsystem::RealServer;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -351,7 +356,7 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::RealServerPort;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -370,6 +375,6 @@ sub check {
 
 
 package Classes::Foundry::Component::SLBSubsystem::Binding;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 

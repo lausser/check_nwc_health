@@ -1,5 +1,5 @@
 package Classes::Cisco::IOS::Component::ConfigSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

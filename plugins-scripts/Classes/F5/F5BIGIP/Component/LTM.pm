@@ -1,5 +1,5 @@
 package Classes::F5::F5BIGIP::Component::LTMSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub new {
@@ -43,7 +43,7 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::TableItem);
+our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::SNMP::TableItem);
 use strict;
 
 sub init {
@@ -143,7 +143,7 @@ sub assign_members_to_pools {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPool;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -234,7 +234,7 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -267,7 +267,7 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4;
-our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::TableItem);
+our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem GLPlugin::SNMP::TableItem);
 use strict;
 
 sub init {
@@ -309,7 +309,7 @@ sub assign_members_to_pools {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPool;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -345,6 +345,6 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPoolMember;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
