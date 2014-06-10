@@ -116,6 +116,11 @@ sub classify {
       } elsif ($self->{productname} =~ /Foundry/i) {
         bless $self, 'Classes::Foundry';
         $self->debug('using Classes::Foundry');
+      } elsif ($self->{productname} =~ /IronWare/i) {
+        # although there can be a 
+        # Brocade Communications Systems, Inc. FWS648, IronWare Version 07.1....
+        bless $self, 'Classes::Foundry';
+        $self->debug('using Classes::Foundry');
       } elsif ($self->{productname} =~ /Linux Stingray/i) {
         bless $self, 'Classes::HOSTRESOURCESMIB';
         $self->debug('using Classes::HOSTRESOURCESMIB');

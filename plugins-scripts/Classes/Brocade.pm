@@ -39,6 +39,5 @@ sub init {
   if (ref($self) ne "Classes::Brocade") {
     $self->init();
   }
-
 }
 
