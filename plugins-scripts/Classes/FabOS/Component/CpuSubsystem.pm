@@ -28,7 +28,12 @@ sub check {
   } elsif ($self->{swFwFabricWatchLicense} eq 'swFwNotLicensed') {
     $self->add_unknown('please install a fabric watch license');
   } else {
-    $self->add_unknown('cannot aquire momory usage');
+    my $swFirmwareVersion = $self->get_snmp_object('SW-MIB', 'swFirmwareVersion');
+    if ($swFirmwareVersion && $swFirmwareVersion =~ /^v6/) {
+      $self->add_ok('cpu usage is not implemented');
+    } else {
+      $self->add_unknown('cannot aquire cpu usage');
+    }
   }
 }
 
