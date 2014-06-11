@@ -29,6 +29,7 @@ sub check {
   } elsif ($self->{swFwFabricWatchLicense} eq 'swFwNotLicensed') {
     $self->add_unknown('please install a fabric watch license');
   } else {
+    my $swFirmwareVersion = $self->get_snmp_object('SW-MIB', 'swFirmwareVersion');
     if ($swFirmwareVersion && $swFirmwareVersion =~ /^v6/) {
       $self->add_ok('memory usage is not implemented');
     } else {

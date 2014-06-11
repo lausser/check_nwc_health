@@ -1,5 +1,5 @@
 package Classes::Cisco::CCM::Component::CmSubsystem;
-our @ISA = qw(Classes::Cisco::CCM);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
