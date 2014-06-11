@@ -203,6 +203,11 @@ sub override_opt {
   $GLPlugin::plugin->override_opt(@_);
 }
 
+sub create_opt {
+  my $self = shift;
+  $GLPlugin::plugin->create_opt(@_);
+}
+
 sub validate_args {
   my $self = shift;
   if ($self->opts->mode =~ /^my-([^\-.]+)/) {

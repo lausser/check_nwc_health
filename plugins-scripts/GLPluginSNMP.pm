@@ -89,6 +89,8 @@ sub init {
 
     } elsif ($self->can("trees")) {
       @trees = $self->trees;
+    } else {
+      @trees = ("1.3.6.1.2.1", "1.3.6.1.4.1");
     }
     if ($self->opts->snmpdump) {
       $name = $self->opts->snmpdump;
@@ -137,7 +139,7 @@ sub init {
       }
     } else {
       printf "rm -f %s\n", $name;
-      foreach ($self->trees) {
+      foreach (@trees) {
         printf "snmpwalk -ObentU -v%s -c %s %s %s >> %s\n", 
             $self->opts->protocol,
             $self->opts->community,
