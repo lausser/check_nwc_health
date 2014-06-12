@@ -28,6 +28,13 @@ sub check {
       $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XE/i) {
     # https://supportforums.cisco.com/docs/DOC-16425
     $self->force_thresholds(warning => 100, critical => 100);
+  } elsif ($self->{ciscoMemoryPoolName} eq 'reserved' && 
+      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XR/i) {
+    # ASR9K "reserved" and "image" are always at 100%
+    $self->force_thresholds(warning => 100, critical => 100);
+  } elsif ($self->{ciscoMemoryPoolName} eq 'image' && 
+      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XR/i) {
+    $self->force_thresholds(warning => 100, critical => 100);
   } else {
     $self->set_thresholds(warning => 80, critical => 90);
   }

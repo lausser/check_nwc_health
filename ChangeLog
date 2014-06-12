@@ -9,6 +9,7 @@
 - add hardware-health for cisco asa
 - bugfix for old brocade devices and missing cpu/memory oids
 - bugfix in Cisco Call Manager
+- bugfix in IOS Memory for ASR 9000 image and reserved pool
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model
