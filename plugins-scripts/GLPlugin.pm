@@ -36,11 +36,6 @@ sub statefilesdir {
 #
 # Plugin-related methods
 #
-sub nagios_exit {
-  my $self = shift;
-  return $GLPlugin::plugin->nagios_exit(@_);
-}
-
 sub mode {
   my $self = shift;
   return $GLPlugin::mode;
@@ -85,16 +80,6 @@ sub add_message {
   }
 }
 
-sub status_code {
-  my $self = shift;
-  return $GLPlugin::plugin->status_code(@_);
-}
-
-sub check_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->check_messages(@_);
-}
-
 sub clear_ok {
   my $self = shift;
   $self->clear_messages(OK);
@@ -121,36 +106,6 @@ sub clear_all {
   $self->clear_warning();
   $self->clear_critical();
   $self->clear_unknown();
-}
-
-sub clear_messages {
-  my $self = shift;
-  $GLPlugin::plugin->clear_messages(@_);
-}
-
-sub suppress_messages {
-  my $self = shift;
-  return $GLPlugin::plugin->suppress_messages(@_);
-}
-
-sub add_html {
-  my $self = shift;
-  return $GLPlugin::plugin->add_html(@_);
-}
-
-sub html_string {
-  my $self = shift;
-  return $GLPlugin::plugin->html_string(@_);
-}
-
-sub add_perfdata {
-  my $self = shift;
-  $GLPlugin::plugin->add_perfdata(@_);
-}
-
-sub selected_perfdata {
-  my $self = shift;
-  $GLPlugin::plugin->selected_perfdata(@_);
 }
 
 sub add_modes {
@@ -201,11 +156,6 @@ sub getopts {
 sub override_opt {
   my $self = shift;
   $GLPlugin::plugin->override_opt(@_);
-}
-
-sub create_opt {
-  my $self = shift;
-  $GLPlugin::plugin->create_opt(@_);
 }
 
 sub validate_args {
@@ -989,11 +939,16 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->check();
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
+  } elsif ($AUTOLOAD =~ /^.*::(status_code|check_messages|nagios_exit|html_string|perfdata_string|selected_perfdata)$/) {
+    return $GLPlugin::plugin->$1(@_);
+  } elsif ($AUTOLOAD =~ /^.*::(clear_messages|suppress_messages|add_html|add_perfdata)$/) {
+    $GLPlugin::plugin->$1(@_);
   } else {
     $self->debug("AUTOLOAD: class %s has no method %s\n",
         ref($self), $AUTOLOAD);
   }
 }
+
 
 package GLPlugin::Commandline;
 use strict;

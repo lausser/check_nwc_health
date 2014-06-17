@@ -6,9 +6,9 @@ sub init {
   my $self = shift;
   $self->{name} = $self->get_snmp_object('MIB-II', 'sysName', 0);
   $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-      ['aps', 'bsnAPTable', 'NWC::CiscoWLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
-      ['ifs', 'bsnAPIfTable', 'NWC::CiscoWLC::Component::WlanSubsystem::AP' ],
-      ['ifloads', 'bsnAPIfLoadParametersTable', 'NWC::CiscoWLC::Component::WlanSubsystem::IFLoad' ],
+      ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
+      ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],
+      ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
   ]);
   $self->assign_loads_to_ifs();
   $self->assign_ifs_to_aps();
