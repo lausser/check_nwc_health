@@ -255,7 +255,8 @@ sub check {
   my $self = shift;
   if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
-      $self->add_critical(sprintf
+      # info only, because it would ruin thresholds in the pool
+      $self->add_ok(sprintf 
           "member %s is %s/%s (%s)",
           $self->{ltmPoolMemberNodeName},
           $self->{ltmPoolMemberMonitorState},
