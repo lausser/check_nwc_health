@@ -113,7 +113,13 @@ sub check {
   my $self = shift;
   if ($self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+  } elsif ($self->{bsnAPDot3MacAddress} && unpack("H12", $self->{bsnAPDot3MacAddress}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
+    $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   }
+}
+
+sub check {
+  my $self = shift;
   $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
       $self->{bsnAPName}, $self->{bsnAPOperationStatus},
       scalar(@{$self->{interfaces}}), $self->{NumOfClients});
