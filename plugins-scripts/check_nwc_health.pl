@@ -49,7 +49,13 @@ $plugin->add_mode(
     internal => 'device::interfaces::errors',
     spec => 'interface-errors',
     alias => undef,
-    help => 'Check the error-rate of interfaces (errors+discards per sec)',
+    help => 'Check the error-rate of interfaces (without discards)',
+);
+$plugin->add_mode(
+    internal => 'device::interfaces::discards',
+    spec => 'interface-discards',
+    alias => undef,
+    help => 'Check the discard-rate of interfaces',
 );
 $plugin->add_mode(
     internal => 'device::interfaces::operstatus',

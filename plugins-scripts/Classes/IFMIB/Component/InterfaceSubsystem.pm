@@ -410,18 +410,16 @@ sub init {
       $self->{outputRate} = 0;
     }
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors ifInDiscards ifOutDiscards));
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
         / $self->{delta_timestamp};
     $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
         / $self->{delta_timestamp};
+  } elsif ($self->mode =~ /device::interfaces::discards/) {
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
     $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
-        / $self->{delta_timestamp};
-    $self->{inputRate} = ($self->{delta_ifInErrors} + $self->{delta_ifInDiscards}) 
-        / $self->{delta_timestamp};
-    $self->{outputRate} = ($self->{delta_ifOutErrors} + $self->{delta_ifOutDiscards}) 
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
@@ -497,14 +495,12 @@ sub check {
         thresholds => 0,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
-        'discards in:%.2f/s out:%.2f/s',
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
         $self->{ifDescr},
-        $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+        $self->{inputErrorRate} , $self->{outputErrorRate});
     $self->set_thresholds(warning => 1, critical => 10);
-    my $in = $self->check_thresholds($self->{inputRate});
-    my $out = $self->check_thresholds($self->{outputRate});
+    my $in = $self->check_thresholds($self->{inputErrorRate});
+    my $out = $self->check_thresholds($self->{outputErrorRate});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
@@ -515,6 +511,15 @@ sub check {
         label => $self->{ifDescr}.'_errors_out',
         value => $self->{outputErrorRate},
     );
+  } elsif ($self->mode =~ /device::interfaces::discards/) {
+    $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
+        $self->{ifDescr},
+        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+    $self->set_thresholds(warning => 1, critical => 10);
+    my $in = $self->check_thresholds($self->{inputDiscardRate});
+    my $out = $self->check_thresholds($self->{outputDiscardRate});
+    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_in',
         value => $self->{inputDiscardRate},
