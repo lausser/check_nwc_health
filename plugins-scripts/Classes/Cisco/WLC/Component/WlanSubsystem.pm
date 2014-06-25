@@ -109,7 +109,7 @@ package Classes::Cisco::WLC::Component::WlanSubsystem::AP;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
-sub check {
+sub finish {
   my $self = shift;
   if ($self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
