@@ -220,6 +220,11 @@ sub validate_args {
           critical => $self->opts->criticalx->{$key});
     }
   }
+  $self->set_timeout_alarm() if ! $SIG{'ALRM'};
+}
+
+sub set_timeout_alarm {
+  my $self = shift;
   $SIG{'ALRM'} = sub {
     printf "UNKNOWN - %s timed out after %d seconds\n",
         $GLPlugin::plugin->{name}, $self->opts->timeout;

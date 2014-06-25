@@ -27,6 +27,9 @@ sub init {
     # (IOS can have ENVMON+ENTITY. Sensors are copies, so not needed)
     $self->{sensor_subsystem} =
         Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();
+  } elsif ($self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /C1700 Software/) {
+    $self->add_ok("environmental hardware working fine");
+    $self->add_ok('soho device, hopefully too small to fail');
   } else {
     $self->no_such_mode();
   }

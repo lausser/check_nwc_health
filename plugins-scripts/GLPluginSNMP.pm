@@ -246,6 +246,7 @@ sub check_snmp_and_model {
         keys %$response;
     $self->set_rawdata($response);
   } else {
+    $self->set_timeout_alarm();
     if (eval "require Net::SNMP") {
       my %params = ();
       my $net_snmp_version = Net::SNMP->VERSION(); # 5.002000 or 6.000000
