@@ -6283,3 +6283,7 @@ $GLPlugin::SNMP::definitions = {
   },
 };
 
+$GLPlugin::SNMP::mibdepot = [
+['1.3.6.1.3.90', 'cisco', 'v2', 'XGCP-MIB'],
+];
+

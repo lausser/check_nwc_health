@@ -31,7 +31,9 @@ sub init {
     $self->add_ok("environmental hardware working fine");
     $self->add_ok('soho device, hopefully too small to fail');
   } else {
-    $self->no_such_mode();
+    # last hope
+    $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOENTITYALARMMIB::Component::AlarmSubsystem");
+    #$self->no_such_mode();
   }
 }
 
