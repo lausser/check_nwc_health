@@ -90,16 +90,20 @@ sub init {
   my @auxmembers = ();
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName')) {
+    next if ! defined $_->{ltmPoolMbrStatusPoolName};
+    $_->{ltmPoolMbrStatusAddr} = $self->unhex($_->{ltmPoolMbrStatusAddr}, 8);
     push(@auxmembers, $_);
   }
   my @auxaddrs = ();
   foreach ($self->get_snmp_table_objects(
       'F5-BIGIP-LOCAL-MIB', 'ltmNodeAddrStatusTable')) {
+    $_->{ltmNodeAddrStatusAddr} = $self->unhex($_->{ltmNodeAddrStatusAddr}, 8);
     push(@auxaddrs, $_);
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
     if ($self->filter_name($_->{ltmPoolMemberPoolName})) {
+      $_->{ltmPoolMemberAddr} = $self->unhex($_->{ltmPoolMemberAddr}, 8);
       foreach my $auxmember (@auxmembers) {
         if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMbrStatusPoolName} &&
             $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMbrStatusAddrType} &&
@@ -240,10 +244,6 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
   my $self = shift;
-  $self->{ltmPoolMemberAddr} =~ s/ //g;
-  if ($self->{ltmPoolMemberAddr} =~ /^0x([0-9a-zA-Z]{8})/) {
-    $self->{ltmPoolMemberAddr} = join(".", unpack "C*", pack "H*", $1);
-  }
   $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   if ($self->{ltmPoolMemberNodeName} eq $self->{ltmPoolMemberAddr} &&
       $self->{ltmNodeAddrStatusName}) {

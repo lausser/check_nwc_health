@@ -1498,3 +1498,18 @@ sub ensure_index {
   $self->{$key} ||= $self->{flat_indices};
 }
 
+sub unhex {
+  my $self = shift;
+  my $value = shift;
+  my $len = shift;
+  if ($value && $value =~ /^0x(\w{8})/) {
+    $value = join(".", unpack "C*", pack "H*", $1);
+  } elsif ($value && $value =~ /^0x(\w{2} \w{2} \w{2} \w{2})/) {
+    $value = $1;
+    $value =~ s/ //g;
+    $value = join(".", unpack "C*", pack "H*", $value);
+  } elsif ($value && unpack("H8", $value) =~ /(\w{2})(\w{2})(\w{2})(\w{2})/) {
+    $value = join(".", map { hex($_) } ($1, $2, $3, $4));
+  }
+  return $value;
+}
