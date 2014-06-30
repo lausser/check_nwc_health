@@ -1498,10 +1498,9 @@ sub ensure_index {
   $self->{$key} ||= $self->{flat_indices};
 }
 
-sub unhex {
+sub unhex_ip {
   my $self = shift;
   my $value = shift;
-  my $len = shift;
   if ($value && $value =~ /^0x(\w{8})/) {
     $value = join(".", unpack "C*", pack "H*", $1);
   } elsif ($value && $value =~ /^0x(\w{2} \w{2} \w{2} \w{2})/) {

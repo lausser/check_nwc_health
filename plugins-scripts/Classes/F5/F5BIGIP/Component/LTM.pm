@@ -91,19 +91,19 @@ sub init {
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMbrStatusTable', 'ltmPoolMbrStatusPoolName')) {
     next if ! defined $_->{ltmPoolMbrStatusPoolName};
-    $_->{ltmPoolMbrStatusAddr} = $self->unhex($_->{ltmPoolMbrStatusAddr}, 8);
+    $_->{ltmPoolMbrStatusAddr} = $self->unhex_ip($_->{ltmPoolMbrStatusAddr});
     push(@auxmembers, $_);
   }
   my @auxaddrs = ();
   foreach ($self->get_snmp_table_objects(
       'F5-BIGIP-LOCAL-MIB', 'ltmNodeAddrStatusTable')) {
-    $_->{ltmNodeAddrStatusAddr} = $self->unhex($_->{ltmNodeAddrStatusAddr}, 8);
+    $_->{ltmNodeAddrStatusAddr} = $self->unhex_ip($_->{ltmNodeAddrStatusAddr});
     push(@auxaddrs, $_);
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
     if ($self->filter_name($_->{ltmPoolMemberPoolName})) {
-      $_->{ltmPoolMemberAddr} = $self->unhex($_->{ltmPoolMemberAddr}, 8);
+      $_->{ltmPoolMemberAddr} = $self->unhex_ip($_->{ltmPoolMemberAddr});
       foreach my $auxmember (@auxmembers) {
         if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMbrStatusPoolName} &&
             $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMbrStatusAddrType} &&
