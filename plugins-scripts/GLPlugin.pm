@@ -36,6 +36,16 @@ sub statefilesdir {
 #
 # Plugin-related methods
 #
+sub opts { # die beiden _nicht_ in AUTOLOAD schieben, das kracht!
+  my $self = shift;
+  return $GLPlugin::plugin->opts();
+}
+
+sub getopts {
+  my $self = shift;
+  return $GLPlugin::plugin->getopts();
+}
+
 sub mode {
   my $self = shift;
   return $GLPlugin::mode;
@@ -146,16 +156,6 @@ sub add_mode {
     $GLPlugin::plugin->{modestring} .= sprintf $format, $_->{spec}, $_->{help};
   }
   $GLPlugin::plugin->{modestring} .= "\n";
-}
-
-sub getopts {
-  my $self = shift;
-  $GLPlugin::plugin->getopts();
-}
-
-sub override_opt {
-  my $self = shift;
-  $GLPlugin::plugin->override_opt(@_);
 }
 
 sub validate_args {
@@ -354,35 +354,6 @@ sub is_blacklisted {
   return $self->{blacklisted};
 }
 
-
-sub set_thresholds {
-  my $self = shift;
-  $GLPlugin::plugin->set_thresholds(@_);
-}
-
-sub force_thresholds {
-  my $self = shift;
-  $GLPlugin::plugin->force_thresholds(@_);
-}
-
-sub check_thresholds {
-  my $self = shift;
-  my @params = @_;
-  #($self->{warning}, $self->{critical}) =
-  #    $GLPlugin::plugin->get_thresholds(@params);
-  return $GLPlugin::plugin->check_thresholds(@params);
-}
-
-sub get_thresholds {
-  my $self = shift;
-  my @params = @_;
-  my @thresholds = $GLPlugin::plugin->get_thresholds(@params);
-  #my($warning, $critical) = $GLPlugin::plugin->get_thresholds(@params);
-  #$self->{warning} = $thresholds[0];
-  #$self->{critical} = $thresholds[1];
-  return @thresholds;
-}
-
 sub set_level {
   my $self = shift;
   my $code = shift;
@@ -454,11 +425,6 @@ sub add_summary {
 sub get_summary {
   my $self = shift;
   return join(', ', @{$GLPlugin::summary});
-}
-
-sub opts {
-  my $self = shift;
-  return $GLPlugin::plugin->opts();
 }
 
 sub valdiff {
@@ -944,9 +910,9 @@ sub AUTOLOAD {
     $self->{components}->{$subsystem}->check();
     $self->{components}->{$subsystem}->dump()
         if $self->opts->verbose >= 2;
-  } elsif ($AUTOLOAD =~ /^.*::(status_code|check_messages|nagios_exit|html_string|perfdata_string|selected_perfdata)$/) {
+  } elsif ($AUTOLOAD =~ /^.*::(status_code|check_messages|nagios_exit|html_string|perfdata_string|selected_perfdata|check_thresholds|get_thresholds|opts)$/) {
     return $GLPlugin::plugin->$1(@_);
-  } elsif ($AUTOLOAD =~ /^.*::(clear_messages|suppress_messages|add_html|add_perfdata)$/) {
+  } elsif ($AUTOLOAD =~ /^.*::(clear_messages|suppress_messages|add_html|add_perfdata|override_opt|set_thresholds|force_thresholds)$/) {
     $GLPlugin::plugin->$1(@_);
   } else {
     $self->debug("AUTOLOAD: class %s has no method %s\n",
@@ -994,29 +960,46 @@ sub new {
   $GLPlugin::plugin = $self;
 }
 
-sub add_arg {
+sub AUTOLOAD {
   my $self = shift;
-  $self->{opts}->add_arg(@_);
+  return if ($AUTOLOAD =~ /DESTROY/);
+  $self->debug("AUTOLOAD %s\n", $AUTOLOAD)
+        if $self->{opts}->verbose >= 2;
+  if ($AUTOLOAD =~ /^.*::(add_arg|override_opt|create_opt)$/) {
+    $self->{opts}->$1(@_);
+  }
 }
 
-sub getopts {
+sub debug {
   my $self = shift;
-  $self->{opts}->getopts();
-}
-
-sub override_opt {
-  my $self = shift;
-  $self->{opts}->override_opt(@_);
-}
-
-sub create_opt {
-  my $self = shift;
-  $self->{opts}->create_opt(@_);
+  my $format = shift;
+  my $tracefile = "/tmp/".$0.".trace";
+  $self->{trace} = -f $tracefile ? 1 : 0;
+  if ($self->opts->verbose && $self->opts->verbose > 10) {
+    printf("%s: ", scalar localtime);
+    printf($format, @_);
+    printf "\n";
+  }
+  if ($self->{trace}) {
+    my $logfh = new IO::File;
+    $logfh->autoflush(1);
+    if ($logfh->open($tracefile, "a")) {
+      $logfh->printf("%s: ", scalar localtime);
+      $logfh->printf($format, @_);
+      $logfh->printf("\n");
+      $logfh->close();
+    }
+  }
 }
 
 sub opts {
   my $self = shift;
   return $self->{opts};
+}
+
+sub getopts {
+  my $self = shift;
+  $self->opts->getopts();
 }
 
 sub add_message {

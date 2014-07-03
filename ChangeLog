@@ -14,6 +14,7 @@
 - add hardware-health for cisco pix
 - add mode supportedmibs
 - last fallback alarm-mib for ios without envmon-mib
+- bugfix in timeticks for hp
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model

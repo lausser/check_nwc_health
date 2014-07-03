@@ -409,6 +409,9 @@ sub timeticks {
   } elsif ($timestr =~ /(\d+)\s*day[s]*.*?(\d+):(\d+):(\d+)\.(\d+)/) {
     # Timeticks: 2 days, 9:33:07.27
     $timestr = $1 * 24 * 3600 + $2 * 3600 + $3 * 60 + $4;
+  } elsif ($timestr =~ /(\d+):(\d+):(\d+):(\d+)\.(\d+)/) {
+    # Timeticks: 0001:03:18:42.77
+    $timestr = $1 * 3600 * 24 + $2 * 3600 + $3 * 60 + $4;
   } elsif ($timestr =~ /(\d+):(\d+):(\d+)\.(\d+)/) {
     # Timeticks: 9:33:07.27
     $timestr = $1 * 3600 + $2 * 60 + $3;
@@ -1512,3 +1515,20 @@ sub unhex_ip {
   }
   return $value;
 }
+
+sub unhex_mac {
+  my $self = shift;
+  my $value = shift;
+  if ($value && $value =~ /^0x(\w{12})/) {
+    $value = join(".", unpack "C*", pack "H*", $1);
+  } elsif ($value && $value =~ /^0x(\w{2}\s*\w{2}\s*\w{2}\s*\w{2}\s*\w{2}\s*\w{2})/) {
+    $value = $1;
+    $value =~ s/ //g;
+    $value = join(":", unpack "C*", pack "H*", $value);
+  } elsif ($value && unpack("H12", $value) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
+    $value = join(":", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+  }
+  return $value;
+}
+
+

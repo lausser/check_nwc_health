@@ -7,8 +7,8 @@ sub new {
   my %params = @_;
   my $self = {};
   # tables can be huge
-  if ($Classes::Device::session) {
-    $Classes::Device::session->max_msg_size(10 * $Classes::Device::session->max_msg_size());
+  if ($GLPlugin::SNMP::session) {
+    $GLPlugin::SNMP::session->max_msg_size(10 * $GLPlugin::SNMP::session->max_msg_size());
   }
   if ($params{productversion} =~ /^4/) {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem4";

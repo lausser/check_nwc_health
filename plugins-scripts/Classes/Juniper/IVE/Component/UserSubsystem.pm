@@ -8,6 +8,12 @@ sub init {
       iveSSLConnections iveVPNTunnels 
       signedInWebUsers signedInMailUsers meetingUserCount
       iveConcurrentUsers clusterConcurrentUsers)));
+  foreach (qw(
+      iveSSLConnections iveVPNTunnels 
+      signedInWebUsers signedInMailUsers meetingUserCount
+      iveConcurrentUsers clusterConcurrentUsers)) {
+    $self->{$_} = 0 if ! defined $self->{$_};
+  }
 }
 
 sub check {
@@ -46,4 +52,3 @@ sub check {
       value => $self->{clusterConcurrentUsers},
   );
 }
-
