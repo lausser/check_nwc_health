@@ -21,6 +21,8 @@ sub check {
       $self->{ciscoEnvMonSupplyStatusDescr},
       $self->{ciscoEnvMonSupplyState});
   if ($self->{ciscoEnvMonSupplyState} eq 'notPresent') {
+  } elsif ($self->{ciscoEnvMonSupplyState} eq 'warning') {
+    $self->add_warning();
   } elsif ($self->{ciscoEnvMonSupplyState} ne 'normal') {
     $self->add_critical();
   }
