@@ -17,7 +17,7 @@ sub init {
     $sensors->{$sensor->{entPhysicalIndex}} = $sensor;
     foreach my $threshold (@{$self->{thresholds}}) {
       if ($sensor->{entPhysicalIndex} eq $threshold->{entPhysicalIndex}) {
-        push(@{$sensors->{thresholds}}, $threshold);
+        push(@{$sensor->{thresholds}}, $threshold);
       }
     }
     foreach my $entity (@{$self->{sensor_entities}}) {
