@@ -58,7 +58,7 @@ sub check {
         $self->check_thresholds($unsynced_since);
     $self->add_info(sprintf "saved running config is ahead of startup config since %d minutes. device will boot with a config different from the one which was last saved",
         $unsynced_since / 60);
-    $self->add_message($self->check_thresholds($unsaved_since));
+    $self->add_message($self->check_thresholds($unsynced_since));
   }
 }
 
