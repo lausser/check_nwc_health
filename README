@@ -1,8 +1,6 @@
 check_nwc_health Nagios Plugin README
 ---------------------
 
-![Logo](http://labs.consol.de/download/speaker1.jpg)
-
 This plugin checks the hardware health and various interface metrics
 of network components like switches and routers.
 
