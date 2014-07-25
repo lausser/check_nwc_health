@@ -20,8 +20,16 @@ sub check {
       $self->{hrStorageIndex},
       $self->{hrStorageDescr},
       $free);
-  $self->set_thresholds(warning => '10:', critical => '5:');
-  $self->add_message($self->check_thresholds($free));
+  if ($self->{hrStorageDescr} eq "/dev" || $self->{hrStorageDescr} =~ /.*cdrom.*/) {
+    # /dev is usually full, so we ignore it.
+    $self->set_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
+        warning => '0:', critical => '0:');
+  } else {
+    $self->set_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
+        warning => '10:', critical => '5:');
+  }
+  $self->add_message($self->check_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
+      value => $free));
   $self->add_perfdata(
       label => sprintf('%s_free_pct', $self->{hrStorageDescr}),
       value => $free,

@@ -674,6 +674,7 @@ sub get_snmp_table_objects {
   if (scalar(@{$indices}) == 1) {
     if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib} &&
         exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table}) {
+      my $result = {};
       my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
       my $eoidlen = length($eoid);
       my @columns = map {
@@ -683,24 +684,32 @@ sub get_snmp_table_objects {
             $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
       } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
       my $index = join('.', @{$indices->[0]});
-      if ($augmenting_table && 
-          exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$augmenting_table}) {
-        my $augmenting_entry = $augmenting_table;
-        $augmenting_entry =~ s/Table/Entry/g;
-        my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$augmenting_entry}.'.';
-        my $eoidlen = length($eoid);
-        push(@columns, map {
-            $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
-        } grep {
-          substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
-              $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$augmenting_table}.'.'
-        } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}});
-      }
-      my  $result = $self->get_entries(
+      my $ifresult = $self->get_entries(
           -startindex => $index,
           -endindex => $index,
           -columns => \@columns,
       );
+      map { $result->{$_} = $ifresult->{$_} }
+          keys %{$ifresult};
+      if ($augmenting_table &&
+          exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$augmenting_table}) {
+        my $entry = $augmenting_table;
+        $entry =~ s/Table/Entry/g;
+        my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
+        my $eoidlen = length($eoid);
+        my @columns = map {
+            $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
+        } grep {
+          substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq $eoid
+        } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
+        my $ifresult = $self->get_entries(
+            -startindex => $index,
+            -endindex => $index,
+            -columns => \@columns,
+        );
+        map { $result->{$_} = $ifresult->{$_} }
+            keys %{$ifresult};
+      }
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
     }
@@ -715,8 +724,7 @@ sub get_snmp_table_objects {
       my @columns = map {
           $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
       } grep {
-        substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
-            $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
+        substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq $eoid
       } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
       my @sortedindices = map { $_->[0] }
           sort { $a->[1] cmp $b->[1] }
@@ -734,14 +742,6 @@ sub get_snmp_table_objects {
             -endindex => $endindex,
             -columns => \@columns,
         );
-        if (! $result) {
-          $result = $self->get_entries(
-              -startindex => $startindex,
-              -endindex => $endindex,
-              -columns => \@columns,
-              -maxrepetitions => 0,
-          );
-        }
       } else {
         foreach my $ifidx (@sortedindices) {
           my $ifresult = $self->get_entries(
@@ -762,8 +762,7 @@ sub get_snmp_table_objects {
         my @columns = map {
             $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
         } grep {
-          substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
-              $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
+          substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq $eoid
         } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
         foreach my $ifidx (@sortedindices) {
           my $ifresult = $self->get_entries(
@@ -876,7 +875,9 @@ sub make_symbolic {
               }
             } elsif ($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'} =~ /^OID::(.*)/) {
               my $othermib = $1;
-              my @result = grep { $GLPlugin::SNMP::mibs_and_oids->{$othermib}->{$_} eq $result->{$fulloid} } keys %{$GLPlugin::SNMP::mibs_and_oids->{$othermib}};
+              my $value_which_is_a_oid = $result->{$fulloid};
+              $value_which_is_a_oid =~ s/^\.//g;
+              my @result = grep { $GLPlugin::SNMP::mibs_and_oids->{$othermib}->{$_} eq $value_which_is_a_oid } keys %{$GLPlugin::SNMP::mibs_and_oids->{$othermib}};
               if (scalar(@result)) {
                 $mo->{$symoid} = $result[0];
               } else {
@@ -993,6 +994,88 @@ sub get_table {
       -columns => [$params{'-baseoid'}]);
 }
 
+sub get_entries_get_bulk {
+  my $self = shift;
+  my %params = @_;
+  my $result = {};
+  $self->debug(sprintf "get_entries_get_bulk %s", Data::Dumper::Dumper(\%params));
+  my %newparams = ();
+  $newparams{'-startindex'} = $params{'-startindex'}
+      if defined $params{'-startindex'};
+  $newparams{'-endindex'} = $params{'-endindex'}
+      if defined $params{'-endindex'};
+  $newparams{'-columns'} = $params{'-columns'};
+  $result = $GLPlugin::SNMP::session->get_entries(%newparams);
+  return $result;
+}
+
+sub get_entries_get_next {
+  my $self = shift;
+  my %params = @_;
+  my $result = {};
+  $self->debug(sprintf "get_entries_get_next %s", Data::Dumper::Dumper(\%params));
+  my %newparams = ();
+  $newparams{'-maxrepetitions'} = 0;
+  $newparams{'-startindex'} = $params{'-startindex'}
+      if defined $params{'-startindex'};
+  $newparams{'-endindex'} = $params{'-endindex'}
+      if defined $params{'-endindex'};
+  $newparams{'-columns'} = $params{'-columns'};
+  $result = $GLPlugin::SNMP::session->get_entries(%newparams);
+  return $result;
+}
+
+sub get_entries_get_next_1index {
+  my $self = shift;
+  my %params = @_;
+  my $result = {};
+  $self->debug(sprintf "get_entries_get_next_1index %s", Data::Dumper::Dumper(\%params));
+  my %newparams = ();
+  $newparams{'-startindex'} = $params{'-startindex'}
+      if defined $params{'-startindex'};
+  $newparams{'-endindex'} = $params{'-endindex'}
+      if defined $params{'-endindex'};
+  $newparams{'-columns'} = $params{'-columns'};
+  my %singleparams = ();
+  $singleparams{'-maxrepetitions'} = 0;
+  foreach my $index ($newparams{'-startindex'}..$newparams{'-endindex'}) {
+    foreach my $oid (@{$newparams{'-columns'}}) {
+      $singleparams{'-columns'} = [$oid];
+      $singleparams{'-startindex'} = $index;
+      $singleparams{'-endindex'} =$index;
+      my $singleresult = $GLPlugin::SNMP::session->get_entries(%singleparams);
+      foreach my $key (keys %{$singleresult}) {
+        $result->{$key} = $singleresult->{$key};
+      }
+    }
+  }
+  return $result;
+}
+
+sub get_entries_get_simple {
+  my $self = shift;
+  my %params = @_;
+  my $result = {};
+  $self->debug(sprintf "get_entries_get_simple %s", Data::Dumper::Dumper(\%params));
+  my %newparams = ();
+  $newparams{'-startindex'} = $params{'-startindex'}
+      if defined $params{'-startindex'};
+  $newparams{'-endindex'} = $params{'-endindex'}
+      if defined $params{'-endindex'};
+  $newparams{'-columns'} = $params{'-columns'};
+  my %singleparams = ();
+  foreach my $index ($newparams{'-startindex'}..$newparams{'-endindex'}) {
+    foreach my $oid (@{$newparams{'-columns'}}) {
+      $singleparams{'-varbindlist'} = [$oid.".".$index];
+      my $singleresult = $GLPlugin::SNMP::session->get_request(%singleparams);
+      foreach my $key (keys %{$singleresult}) {
+        $result->{$key} = $singleresult->{$key};
+      }
+    }
+  }
+  return $result;
+}
+
 sub get_entries {
   my $self = shift;
   my %params = @_;
@@ -1002,22 +1085,23 @@ sub get_entries {
   my $result = {};
   $self->debug(sprintf "get_entries %s", Data::Dumper::Dumper(\%params));
   if (! $self->opts->snmpwalk) {
-    my %newparams = ();
-    $newparams{'-startindex'} = $params{'-startindex'}
-        if defined $params{'-startindex'};
-    $newparams{'-endindex'} = $params{'-endindex'}     
-        if defined $params{'-endindex'};
-    $newparams{'-columns'} = $params{'-columns'};
-    $result = $GLPlugin::SNMP::session->get_entries(%newparams);
+    $result = $self->get_entries_get_bulk(%params);
     if (! $result) {
-      $newparams{'-maxrepetitions'} = 0;
-      $result = $GLPlugin::SNMP::session->get_entries(%newparams);
+      if (scalar (@{$params{'-columns'}}) < 50 && $params{'-startindex'} == $params{'-endindex'}) {
+        $result = $self->get_entries_get_simple(%params);
+      } else {
+        $result = $self->get_entries_get_next(%params);
+      }
       if (! $result) {
-        $self->debug(sprintf "get_entries tries last fallback");
-        delete $newparams{'-endindex'};
-        delete $newparams{'-startindex'};
-        delete $newparams{'-maxrepetitions'};
-        $result = $GLPlugin::SNMP::session->get_entries(%newparams);
+        if ($GLPlugin::SNMP::session->error() =~ /tooBig/i) {
+          $result = $self->get_entries_get_next_1index(%params);
+        }
+        if (! $result) {
+          $result = $self->get_entries_get_simple(%params);
+        }
+        if (! $result) {
+          $self->debug(sprintf "nutzt nix\n");
+        }
       }
     }
     foreach my $key (keys %{$result}) {
@@ -1036,7 +1120,7 @@ sub get_entries {
         #                  ...
         #                  '1.3.6.1.2.1.2.2.1.16'
         #                ],
-        #  '-startindex' => '2', 
+        #  '-startindex' => '2',
         #  '-endindex' => '2'
         #
         # und $result ist:
@@ -1095,7 +1179,7 @@ sub get_entries {
             }
           }
         }
-      } 
+      }
     }
     foreach (@to_del) {
       delete $result->{$_};

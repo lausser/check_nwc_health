@@ -1,5 +1,5 @@
 package Classes::UCDMIB::Component::MemSubsystem;
-our @ISA = qw(Classes::UCDMIB);
+our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

@@ -16,6 +16,8 @@
 - last fallback alarm-mib for ios without envmon-mib
 - bugfix in timeticks for hp
 - bugfix in Nexus sensor thresholds (Thanks Marcel Fischer)
+- bugfix in snmp-bulk-gets, more secure fallbacks to get-next
+- bugfix in 64bit-interfaces
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model
