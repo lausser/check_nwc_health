@@ -18,6 +18,7 @@
 - bugfix in Nexus sensor thresholds (Thanks Marcel Fischer)
 - bugfix in snmp-bulk-gets, more secure fallbacks to get-next
 - bugfix in 64bit-interfaces
+- get uptime from the FRAMEWORK-MIB to prevent rollovers
 
 2014-02-07 2.6.5.2
 - add another cisco unified communication model
