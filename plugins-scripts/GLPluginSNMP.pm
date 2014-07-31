@@ -262,6 +262,12 @@ sub check_snmp_and_model {
     sysUpTime => '1.3.6.1.2.1.1.3',
     sysName => '1.3.6.1.2.1.1.5',
   };
+  $GLPlugin::SNMP::mibs_and_oids->{'SNMP-FRAMEWORK-MIB'} = {
+    snmpEngineID => '1.3.6.1.6.3.10.2.1.1.0',
+    snmpEngineBoots => '1.3.6.1.6.3.10.2.1.2.0',
+    snmpEngineTime => '1.3.6.1.6.3.10.2.1.3.0',
+    snmpEngineMaxMessageSize => '1.3.6.1.6.3.10.2.1.4.0',
+  };
   if ($self->opts->snmpwalk) {
     my $response = {};
     if (! -f $self->opts->snmpwalk) {
@@ -400,9 +406,11 @@ sub check_snmp_and_model {
   }
   if (! $self->check_messages()) {
     my $sysUptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
+    my $snmpEngineTime = $self->get_snmp_object('SNMP-FRAMEWORK-MIB', 'snmpEngineTime');
     my $sysDescr = $self->get_snmp_object('MIB-II', 'sysDescr', 0);
     if (defined $sysUptime && defined $sysDescr) {
-      $self->{uptime} = $self->timeticks($sysUptime);
+      $self->{uptime} = defined $snmpEngineTime ?
+          $snmpEngineTime : $self->timeticks($sysUptime);
       $self->{productname} = $sysDescr;
       $self->{sysobjectid} = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
       $self->debug(sprintf 'uptime: %s', $self->{uptime});
