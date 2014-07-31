@@ -29,128 +29,34 @@ sub new {
   return $self;
 }
 
-sub statefilesdir {
+sub init {
   my $self = shift;
-  return $GLPlugin::plugin->{statefilesdir};
-}
-
-sub set_variable {
-  my $self = shift;
-  my $key = shift;
-  my $value = shift;
-  $GLPlugin::variables->{$key} = $value;
-}
-
-sub get_variable {
-  my $self = shift;
-  my $key = shift;
-  my $fallback = shift;
-  return exists $GLPlugin::variables->{$key} ?
-      $GLPlugin::variables->{$key} : $fallback;
-}
-
-#
-# Plugin-related methods
-#
-sub opts { # die beiden _nicht_ in AUTOLOAD schieben, das kracht!
-  my $self = shift;
-  return $GLPlugin::plugin->opts();
-}
-
-sub getopts {
-  my $self = shift;
-  $GLPlugin::plugin->getopts();
-  # es kann sein, dass beim aufraeumen zum schluss als erstes objekt
-  # das $GLPlugin::plugin geloescht wird. in anderen destruktoren
-  # (insb. fuer dbi disconnect) steht dann $self->opts->verbose
-  # nicht mehr zur verfuegung bzw. $GLPlugin::plugin->opts ist undef.
-  $self->set_variable("verbose", $self->opts->verbose);
-  #
-  # die gueltigkeit von modes wird bereits hier geprueft und nicht danach
-  # in validate_args. (zwischen getopts und validate_args wird
-  # normalerweise classify aufgerufen, welches bereits eine verbindung
-  # zum endgeraet herstellt. bei falschem mode waere das eine verschwendung
-  # bzw. durch den exit3 ein evt. unsauberes beenden der verbindung.
-  if ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$GLPlugin::plugin->{modes}}) &&
-      (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$GLPlugin::plugin->{modes}})) {
-    printf "UNKNOWN - mode %s\n", $self->opts->mode;
-    $self->opts->print_help();
-    exit 3;
+  if ($self->opts->can("blacklist") && $self->opts->blacklist &&
+      -f $self->opts->blacklist) {
+    $self->opts->blacklist = do {
+        local (@ARGV, $/) = $self->opts->blacklist; <> };
   }
 }
 
-sub mode {
+sub dumper {
   my $self = shift;
-  return $GLPlugin::mode;
+  my $object = shift;
+  my $run = $object->{runtime};
+  delete $object->{runtime};
+  printf STDERR "%s\n", Data::Dumper::Dumper($object);
+  $object->{runtime} = $run;
 }
 
-sub add_ok {
+sub no_such_mode {
   my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(OK, $message);
+  printf "Mode %s is not implemented for this type of device\n",
+      $self->opts->mode;
+  exit 3;
 }
 
-sub add_warning {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(WARNING, $message);
-}
-
-sub add_critical {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(CRITICAL, $message);
-}
-
-sub add_unknown {
-  my $self = shift;
-  my $message = shift || $self->{info};
-  $self->add_message(UNKNOWN, $message);
-}
-
-sub add_message {
-  my $self = shift;
-  my $level = shift;
-  my $message = shift || $self->{info};
-  $GLPlugin::plugin->add_message($level, $message)
-      unless $self->is_blacklisted();
-  if (exists $self->{failed}) {
-    if ($level == UNKNOWN && $self->{failed} == OK) {
-      $self->{failed} = $level;
-    } elsif ($level > $self->{failed}) {
-      $self->{failed} = $level;
-    }
-  }
-}
-
-sub clear_ok {
-  my $self = shift;
-  $self->clear_messages(OK);
-}
-
-sub clear_warning {
-  my $self = shift;
-  $self->clear_messages(WARNING);
-}
-
-sub clear_critical {
-  my $self = shift;
-  $self->clear_messages(CRITICAL);
-}
-
-sub clear_unknown {
-  my $self = shift;
-  $self->clear_messages(UNKNOWN);
-}
-
-sub clear_all {
-  my $self = shift;
-  $self->clear_ok();
-  $self->clear_warning();
-  $self->clear_critical();
-  $self->clear_unknown();
-}
-
+#########################################################
+# framework-related. setup, options
+#
 sub add_modes {
   my $self = shift;
   my $modes = shift;
@@ -266,14 +172,22 @@ sub set_timeout_alarm {
   alarm($self->opts->timeout);
 }
 
-
-sub init {
+#########################################################
+# global helpers
+#
+sub set_variable {
   my $self = shift;
-  if ($self->opts->can("blacklist") && $self->opts->blacklist &&
-      -f $self->opts->blacklist) {
-    $self->opts->blacklist = do {
-        local (@ARGV, $/) = $self->opts->blacklist; <> };
-  }
+  my $key = shift;
+  my $value = shift;
+  $GLPlugin::variables->{$key} = $value;
+}
+
+sub get_variable {
+  my $self = shift;
+  my $key = shift;
+  my $fallback = shift;
+  return exists $GLPlugin::variables->{$key} ?
+      $GLPlugin::variables->{$key} : $fallback;
 }
 
 sub debug {
@@ -337,6 +251,350 @@ sub filter_name3 {
   return $self->filter_namex($self->opts->name3, $name);
 }
 
+sub version_is_minimum {
+  my $self = shift;
+  my $version = shift;
+  my $installed_version;
+  my $newer = 1;
+  if ($self->get_variable("version")) {
+    $installed_version = $self->get_variable("version");
+  } elsif (exists $self->{version}) {
+    $installed_version = $self->{version};
+  } else {
+    return 0;
+  }
+  my @v1 = map { $_ eq "x" ? 0 : $_ } split(/\./, $version);
+  my @v2 = split(/\./, $installed_version);
+  if (scalar(@v1) > scalar(@v2)) {
+    push(@v2, (0) x (scalar(@v1) - scalar(@v2)));
+  } elsif (scalar(@v2) > scalar(@v1)) {
+    push(@v1, (0) x (scalar(@v2) - scalar(@v1)));
+  }
+  foreach my $pos (0..$#v1) {
+    if ($v2[$pos] > $v1[$pos]) {
+      $newer = 1;
+      last;
+    } elsif ($v2[$pos] < $v1[$pos]) {
+      $newer = 0;
+      last;
+    }
+  }
+  return $newer;
+}
+
+sub accentfree {
+  my $self = shift;
+  my $text = shift;
+  # thanks mycoyne who posted this accent-remove-algorithm
+  # http://www.experts-exchange.com/Programming/Languages/Scripting/Perl/Q_23275533.html#a21234612
+  my @transformed;
+  my %replace = (
+    '9a' => 's', '9c' => 'oe', '9e' => 'z', '9f' => 'Y', 'c0' => 'A', 'c1' => 'A',
+    'c2' => 'A', 'c3' => 'A', 'c4' => 'A', 'c5' => 'A', 'c6' => 'AE', 'c7' => 'C',
+    'c8' => 'E', 'c9' => 'E', 'ca' => 'E', 'cb' => 'E', 'cc' => 'I', 'cd' => 'I',
+    'ce' => 'I', 'cf' => 'I', 'd0' => 'D', 'd1' => 'N', 'd2' => 'O', 'd3' => 'O',
+    'd4' => 'O', 'd5' => 'O', 'd6' => 'O', 'd8' => 'O', 'd9' => 'U', 'da' => 'U',
+    'db' => 'U', 'dc' => 'U', 'dd' => 'Y', 'e0' => 'a', 'e1' => 'a', 'e2' => 'a',
+    'e3' => 'a', 'e4' => 'a', 'e5' => 'a', 'e6' => 'ae', 'e7' => 'c', 'e8' => 'e',
+    'e9' => 'e', 'ea' => 'e', 'eb' => 'e', 'ec' => 'i', 'ed' => 'i', 'ee' => 'i',
+    'ef' => 'i', 'f0' => 'o', 'f1' => 'n', 'f2' => 'o', 'f3' => 'o', 'f4' => 'o',
+    'f5' => 'o', 'f6' => 'o', 'f8' => 'o', 'f9' => 'u', 'fa' => 'u', 'fb' => 'u',
+    'fc' => 'u', 'fd' => 'y', 'ff' => 'y',
+  );
+  my @letters = split //, $text;;
+  for (my $i = 0; $i <= $#letters; $i++) {
+    my $hex = sprintf "%x", ord($letters[$i]);
+    $letters[$i] = $replace{$hex} if (exists $replace{$hex});
+  }
+  push @transformed, @letters;
+  return join '', @transformed;
+}
+
+sub dump {
+  my $self = shift;
+  my $class = ref($self);
+  $class =~ s/^.*:://;
+  if (exists $self->{flat_indices}) {
+    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
+  } else {
+    printf "[%s]\n", uc $class;
+  }
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
+    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
+  }
+  if ($self->{info}) {
+    printf "info: %s\n", $self->{info};
+  }
+  printf "\n";
+  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
+    if (defined $self->{$_} && ref($self->{$_}) eq "ARRAY") {
+      foreach my $obj (@{$self->{$_}}) {
+        $obj->dump();
+      }
+    }
+  }
+}
+
+sub table_ascii {
+  my $self = shift;
+  my $table = shift;
+  my $titles = shift;
+  my $text = "";
+  my $column_length = {};
+  my $column = 0;
+  foreach (@{$titles}) {
+    $column_length->{$column++} = length($_);
+  }
+  foreach my $tr (@{$table}) {
+    @{$tr} = map { ref($_) eq "ARRAY" ? $_->[0] : $_; } @{$tr};
+    $column = 0;
+    foreach my $td (@{$tr}) {
+      if (length($td) > $column_length->{$column}) {
+        $column_length->{$column} = length($td);
+      }
+      $column++;
+    }
+  }
+  $column = 0;
+  foreach (@{$titles}) {
+    $column_length->{$column} = "%".($column_length->{$column} + 3)."s";
+    $column++;
+  }
+  $column = 0;
+  foreach (@{$titles}) {
+    $text .= sprintf $column_length->{$column++}, $_;
+  }
+  $text .= "\n";
+  foreach my $tr (@{$table}) {
+    $column = 0;
+    foreach my $td (@{$tr}) {
+      $text .= sprintf $column_length->{$column++}, $td;
+    }
+    $text .= "\n";
+  }
+  return $text;
+}
+
+sub table_html {
+  my $self = shift;
+  my $table = shift;
+  my $titles = shift;
+  my $text = "";
+  $text .= "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
+  $text .= "<tr>";
+  foreach (@{$titles}) {
+    $text .= sprintf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
+  }
+  $text .= "</tr>";
+  foreach my $tr (@{$table}) {
+    $text .= "<tr>";
+    foreach my $td (@{$tr}) {
+      my $class = "statusOK";
+      if (ref($td) eq "ARRAY") {
+        $class = {
+          0 => "statusOK",
+          1 => "statusWARNING",
+          2 => "statusCRITICAL",
+          3 => "statusUNKNOWN",
+        }->{$td->[1]};
+        $td = $td->[0];
+      }
+      $text .= sprintf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px;\" class=\"%s\">%s</td>", $class, $td;
+    }
+    $text .= "</tr>";
+  }
+  $text .= "</table>";
+  return $text;
+}
+
+sub load_my_extension {
+  my $self = shift;
+  if ($self->opts->mode =~ /^my-([^-.]+)/) {
+    my $class = $1;
+    my $loaderror = undef;
+    substr($class, 0, 1) = uc substr($class, 0, 1);
+    if (! $self->opts->get("with-mymodules-dyn-dir")) {
+      $self->override_opt("with-mymodules-dyn-dir", "");
+    }
+    my $plugin_name = basename($0);
+    $plugin_name =~ /check_(.*?)_health/;
+    $plugin_name = "Check".uc(substr($1, 0, 1)).substr($1, 1)."Health";
+    foreach my $libpath (split(":", $self->opts->get("with-mymodules-dyn-dir"))) {
+      foreach my $extmod (glob $libpath."/".$plugin_name."*.pm") {
+        my $stderrvar;
+        *SAVEERR = *STDERR;
+        open OUT ,'>',\$stderrvar;
+        *STDERR = *OUT;
+        eval {
+          $self->debug(sprintf "loading module %s", $extmod);
+          require $extmod;
+        };
+        *STDERR = *SAVEERR;
+        if ($@) {
+          $loaderror = $extmod;
+          $self->debug(sprintf "failed loading module %s: %s", $extmod, $@);
+        }
+      }
+    }
+    my $original_class = ref($self);
+    my $original_init = $self->can("init");
+    bless $self, "My$class";
+    if ($self->isa("GLPlugin")) {
+      my $new_init = $self->can("init");
+      if ($new_init == $original_init) {
+          $self->add_unknown(
+              sprintf "Class %s needs an init() method", ref($self));
+      } else {
+        # now go back to check_*_health.pl where init() will be called
+      }
+    } else {
+      bless $self, $original_class;
+      $self->add_unknown(
+          sprintf "Class %s is not a subclass of GLPlugin%s",
+              "My$class",
+              $loaderror ? sprintf " (syntax error in %s?)", $loaderror : "" );
+      my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+      $self->nagios_exit($code, $message);
+    }
+  }
+}
+
+#########################################################
+# runtime methods
+#
+sub mode {
+  my $self = shift;
+  return $GLPlugin::mode;
+}
+
+sub statefilesdir {
+  my $self = shift;
+  return $GLPlugin::plugin->{statefilesdir};
+}
+
+sub opts { # die beiden _nicht_ in AUTOLOAD schieben, das kracht!
+  my $self = shift;
+  return $GLPlugin::plugin->opts();
+}
+
+sub getopts {
+  my $self = shift;
+  $GLPlugin::plugin->getopts();
+  # es kann sein, dass beim aufraeumen zum schluss als erstes objekt
+  # das $GLPlugin::plugin geloescht wird. in anderen destruktoren
+  # (insb. fuer dbi disconnect) steht dann $self->opts->verbose
+  # nicht mehr zur verfuegung bzw. $GLPlugin::plugin->opts ist undef.
+  $self->set_variable("verbose", $self->opts->verbose);
+  #
+  # die gueltigkeit von modes wird bereits hier geprueft und nicht danach
+  # in validate_args. (zwischen getopts und validate_args wird
+  # normalerweise classify aufgerufen, welches bereits eine verbindung
+  # zum endgeraet herstellt. bei falschem mode waere das eine verschwendung
+  # bzw. durch den exit3 ein evt. unsauberes beenden der verbindung.
+  if ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$GLPlugin::plugin->{modes}}) &&
+      (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$GLPlugin::plugin->{modes}})) {
+    printf "UNKNOWN - mode %s\n", $self->opts->mode;
+    $self->opts->print_help();
+    exit 3;
+  }
+}
+
+sub add_ok {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(OK, $message);
+}
+
+sub add_warning {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(WARNING, $message);
+}
+
+sub add_critical {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(CRITICAL, $message);
+}
+
+sub add_unknown {
+  my $self = shift;
+  my $message = shift || $self->{info};
+  $self->add_message(UNKNOWN, $message);
+}
+
+sub add_message {
+  my $self = shift;
+  my $level = shift;
+  my $message = shift || $self->{info};
+  $GLPlugin::plugin->add_message($level, $message)
+      unless $self->is_blacklisted();
+  if (exists $self->{failed}) {
+    if ($level == UNKNOWN && $self->{failed} == OK) {
+      $self->{failed} = $level;
+    } elsif ($level > $self->{failed}) {
+      $self->{failed} = $level;
+    }
+  }
+}
+
+sub clear_ok {
+  my $self = shift;
+  $self->clear_messages(OK);
+}
+
+sub clear_warning {
+  my $self = shift;
+  $self->clear_messages(WARNING);
+}
+
+sub clear_critical {
+  my $self = shift;
+  $self->clear_messages(CRITICAL);
+}
+
+sub clear_unknown {
+  my $self = shift;
+  $self->clear_messages(UNKNOWN);
+}
+
+sub clear_all { # deprecated, use clear_messages
+  my $self = shift;
+  $self->clear_ok();
+  $self->clear_warning();
+  $self->clear_critical();
+  $self->clear_unknown();
+}
+
+sub set_level {
+  my $self = shift;
+  my $code = shift;
+  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
+  $code = lc $code;
+  if (! exists $self->{tmp_level}) {
+    $self->{tmp_level} = {
+      ok => 0,
+      warning => 0,
+      critical => 0,
+      unknown => 0,
+    };
+  }
+  $self->{tmp_level}->{$code}++;
+}
+
+sub get_level {
+  my $self = shift;
+  return OK if ! exists $self->{tmp_level};
+  my $code = OK;
+  $code ||= CRITICAL if $self->{tmp_level}->{critical};
+  $code ||= WARNING  if $self->{tmp_level}->{warning};
+  $code ||= UNKNOWN  if $self->{tmp_level}->{unknown};
+  return $code;
+}
+
+#########################################################
+# blacklisting
+#
 sub blacklist {
   my $self = shift;
   $self->{blacklisted} = 1;
@@ -388,32 +646,9 @@ sub is_blacklisted {
   return $self->{blacklisted};
 }
 
-sub set_level {
-  my $self = shift;
-  my $code = shift;
-  $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
-  $code = lc $code;
-  if (! exists $self->{tmp_level}) {
-    $self->{tmp_level} = {
-      ok => 0,
-      warning => 0,
-      critical => 0,
-      unknown => 0,
-    };
-  }
-  $self->{tmp_level}->{$code}++;
-}
-
-sub get_level {
-  my $self = shift;
-  return OK if ! exists $self->{tmp_level};
-  my $code = OK;
-  $code ||= CRITICAL if $self->{tmp_level}->{critical};
-  $code ||= WARNING  if $self->{tmp_level}->{warning};
-  $code ||= UNKNOWN  if $self->{tmp_level}->{unknown};
-  return $code;
-}
-
+#########################################################
+# additional info
+#
 sub add_info {
   my $self = shift;
   my $info = shift;
@@ -422,7 +657,7 @@ sub add_info {
   push(@{$GLPlugin::info}, $info);
 }
 
-sub annotate_info {
+sub annotate_info { # deprecated
   my $self = shift;
   my $annotation = shift;
   my $lastinfo = pop(@{$GLPlugin::info});
@@ -430,7 +665,7 @@ sub annotate_info {
   push(@{$GLPlugin::info}, $lastinfo);
 }
 
-sub add_extendedinfo {
+sub add_extendedinfo {  # deprecated
   my $self = shift;
   my $info = shift;
   $self->{extendedinfo} = $info;
@@ -450,7 +685,7 @@ sub get_extendedinfo {
   return join($separator, @{$GLPlugin::extendedinfo});
 }
 
-sub add_summary {
+sub add_summary {  # deprecated
   my $self = shift;
   my $summary = shift;
   push(@{$GLPlugin::summary}, $summary);
@@ -461,6 +696,9 @@ sub get_summary {
   return join(', ', @{$GLPlugin::summary});
 }
 
+#########################################################
+# persistency
+#
 sub valdiff {
   my $self = shift;
   my $pparams = shift;
@@ -677,53 +915,9 @@ sub load_state {
   }
 }
 
-sub dumper {
-  my $self = shift;
-  my $object = shift;
-  my $run = $object->{runtime};
-  delete $object->{runtime};
-  printf STDERR "%s\n", Data::Dumper::Dumper($object);
-  $object->{runtime} = $run;
-}
-
-sub no_such_mode {
-  my $self = shift;
-  printf "Mode %s is not implemented for this type of device\n",
-      $self->opts->mode;
-  exit 3;
-}
-
-sub version_is_minimum {
-  my $self = shift;
-  my $version = shift;
-  my $installed_version;
-  my $newer = 1;
-  if ($self->get_variable("version")) {
-    $installed_version = $self->get_variable("version");
-  } elsif (exists $self->{version}) {
-    $installed_version = $self->{version};
-  } else {
-    return 0;
-  }
-  my @v1 = map { $_ eq "x" ? 0 : $_ } split(/\./, $version);
-  my @v2 = split(/\./, $installed_version);
-  if (scalar(@v1) > scalar(@v2)) {
-    push(@v2, (0) x (scalar(@v1) - scalar(@v2)));
-  } elsif (scalar(@v2) > scalar(@v1)) {
-    push(@v1, (0) x (scalar(@v2) - scalar(@v1)));
-  }
-  foreach my $pos (0..$#v1) {
-    if ($v2[$pos] > $v1[$pos]) {
-      $newer = 1;
-      last;
-    } elsif ($v2[$pos] < $v1[$pos]) {
-      $newer = 0;
-      last;
-    }
-  }
-  return $newer;
-}
-
+#########################################################
+# daemon mode
+#
 sub check_pidfile {
   my $self = shift;
   my $fh = new IO::File;
@@ -777,183 +971,6 @@ sub write_pidfile {
   } else {
     $self->debug("Could not write pidfile %s", $self->{pidfile});
     die "pid file could not be written";
-  }
-}
-
-sub accentfree {
-  my $self = shift;
-  my $text = shift;
-  # thanks mycoyne who posted this accent-remove-algorithm
-  # http://www.experts-exchange.com/Programming/Languages/Scripting/Perl/Q_23275533.html#a21234612
-  my @transformed;
-  my %replace = (
-    '9a' => 's', '9c' => 'oe', '9e' => 'z', '9f' => 'Y', 'c0' => 'A', 'c1' => 'A',
-    'c2' => 'A', 'c3' => 'A', 'c4' => 'A', 'c5' => 'A', 'c6' => 'AE', 'c7' => 'C',
-    'c8' => 'E', 'c9' => 'E', 'ca' => 'E', 'cb' => 'E', 'cc' => 'I', 'cd' => 'I',
-    'ce' => 'I', 'cf' => 'I', 'd0' => 'D', 'd1' => 'N', 'd2' => 'O', 'd3' => 'O',
-    'd4' => 'O', 'd5' => 'O', 'd6' => 'O', 'd8' => 'O', 'd9' => 'U', 'da' => 'U',
-    'db' => 'U', 'dc' => 'U', 'dd' => 'Y', 'e0' => 'a', 'e1' => 'a', 'e2' => 'a',
-    'e3' => 'a', 'e4' => 'a', 'e5' => 'a', 'e6' => 'ae', 'e7' => 'c', 'e8' => 'e',
-    'e9' => 'e', 'ea' => 'e', 'eb' => 'e', 'ec' => 'i', 'ed' => 'i', 'ee' => 'i',
-    'ef' => 'i', 'f0' => 'o', 'f1' => 'n', 'f2' => 'o', 'f3' => 'o', 'f4' => 'o',
-    'f5' => 'o', 'f6' => 'o', 'f8' => 'o', 'f9' => 'u', 'fa' => 'u', 'fb' => 'u',
-    'fc' => 'u', 'fd' => 'y', 'ff' => 'y',
-  );
-  my @letters = split //, $text;;
-  for (my $i = 0; $i <= $#letters; $i++) {
-    my $hex = sprintf "%x", ord($letters[$i]);
-    $letters[$i] = $replace{$hex} if (exists $replace{$hex});
-  }
-  push @transformed, @letters;
-  return join '', @transformed;
-}
-
-sub dump {
-  my $self = shift;
-  my $class = ref($self);
-  $class =~ s/^.*:://;
-  if (exists $self->{flat_indices}) {
-    printf "[%s_%s]\n", uc $class, $self->{flat_indices};
-  } else {
-    printf "[%s]\n", uc $class;
-  }
-  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
-    printf "%s: %s\n", $_, $self->{$_} if defined $self->{$_} && ref($self->{$_}) ne "ARRAY";
-  }
-  if ($self->{info}) {
-    printf "info: %s\n", $self->{info};
-  }
-  printf "\n";
-  foreach (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$self}) {
-    if (defined $self->{$_} && ref($self->{$_}) eq "ARRAY") {
-      foreach my $obj (@{$self->{$_}}) {
-        $obj->dump();
-      }
-    }
-  }
-}
-
-sub table_ascii {
-  my $self = shift;
-  my $table = shift;
-  my $titles = shift;
-  my $text = "";
-  my $column_length = {};
-  my $column = 0;
-  foreach (@{$titles}) {
-    $column_length->{$column++} = length($_);
-  }
-  foreach my $tr (@{$table}) {
-    @{$tr} = map { ref($_) eq "ARRAY" ? $_->[0] : $_; } @{$tr};
-    $column = 0;
-    foreach my $td (@{$tr}) {
-      if (length($td) > $column_length->{$column}) {
-        $column_length->{$column} = length($td);
-      }
-      $column++;
-    }
-  }
-  $column = 0;
-  foreach (@{$titles}) {
-    $column_length->{$column} = "%".($column_length->{$column} + 3)."s";
-    $column++;
-  }
-  $column = 0;
-  foreach (@{$titles}) {
-    $text .= sprintf $column_length->{$column++}, $_;
-  }
-  $text .= "\n";
-  foreach my $tr (@{$table}) {
-    $column = 0;
-    foreach my $td (@{$tr}) {
-      $text .= sprintf $column_length->{$column++}, $td;
-    }
-    $text .= "\n";
-  }
-  return $text;
-}
-
-sub table_html {
-  my $self = shift;
-  my $table = shift;
-  my $titles = shift;
-  my $text = "";
-  $text .= "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
-  $text .= "<tr>";
-  foreach (@{$titles}) {
-    $text .= sprintf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
-  }
-  $text .= "</tr>";
-  foreach my $tr (@{$table}) {
-    $text .= "<tr>";
-    foreach my $td (@{$tr}) {
-      my $class = "statusOK";
-      if (ref($td) eq "ARRAY") {
-        $class = {
-          0 => "statusOK",
-          1 => "statusWARNING",
-          2 => "statusCRITICAL",
-          3 => "statusUNKNOWN",
-        }->{$td->[1]};
-        $td = $td->[0];
-      }
-      $text .= sprintf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px;\" class=\"%s\">%s</td>", $class, $td;
-    }
-    $text .= "</tr>";
-  }
-  $text .= "</table>";
-  return $text;
-}
-
-sub load_my_extension {
-  my $self = shift;
-  if ($self->opts->mode =~ /^my-([^-.]+)/) {
-    my $class = $1;
-    my $loaderror = undef;
-    substr($class, 0, 1) = uc substr($class, 0, 1);
-    if (! $self->opts->get("with-mymodules-dyn-dir")) {
-      $self->override_opt("with-mymodules-dyn-dir", "");
-    }
-    my $plugin_name = basename($0);
-    $plugin_name =~ /check_(.*?)_health/;
-    $plugin_name = "Check".uc(substr($1, 0, 1)).substr($1, 1)."Health";
-    foreach my $libpath (split(":", $self->opts->get("with-mymodules-dyn-dir"))) {
-      foreach my $extmod (glob $libpath."/".$plugin_name."*.pm") {
-        my $stderrvar;
-        *SAVEERR = *STDERR;
-        open OUT ,'>',\$stderrvar;
-        *STDERR = *OUT;
-        eval {
-          $self->debug(sprintf "loading module %s", $extmod);
-          require $extmod;
-        };
-        *STDERR = *SAVEERR;
-        if ($@) {
-          $loaderror = $extmod;
-          $self->debug(sprintf "failed loading module %s: %s", $extmod, $@);
-        }
-      }
-    }
-    my $original_class = ref($self);
-    my $original_init = $self->can("init");
-    bless $self, "My$class";
-    if ($self->isa("GLPlugin")) {
-      my $new_init = $self->can("init");
-      if ($new_init == $original_init) {
-          $self->add_unknown(
-              sprintf "Class %s needs an init() method", ref($self));
-      } else {
-        # now go back to check_*_health.pl where init() will be called
-      }
-    } else {
-      bless $self, $original_class;
-      $self->add_unknown(
-          sprintf "Class %s is not a subclass of GLPlugin%s",
-              "My$class",
-              $loaderror ? sprintf " (syntax error in %s?)", $loaderror : "" );
-      my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
-      $self->nagios_exit($code, $message);
-    }
   }
 }
 
