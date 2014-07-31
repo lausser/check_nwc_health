@@ -17,6 +17,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $info = [];
   our $extendedinfo = [];
   our $summary = [];
+  our $variables = {};
 }
 
 sub new {
@@ -33,6 +34,21 @@ sub statefilesdir {
   return $GLPlugin::plugin->{statefilesdir};
 }
 
+sub set_variable {
+  my $self = shift;
+  my $key = shift;
+  my $value = shift;
+  $GLPlugin::variables->{$key} = $value;
+}
+
+sub get_variable {
+  my $self = shift;
+  my $key = shift;
+  my $fallback = shift;
+  return exists $GLPlugin::variables->{$key} ?
+      $GLPlugin::variables->{$key} : $fallback;
+}
+
 #
 # Plugin-related methods
 #
@@ -43,7 +59,24 @@ sub opts { # die beiden _nicht_ in AUTOLOAD schieben, das kracht!
 
 sub getopts {
   my $self = shift;
-  return $GLPlugin::plugin->getopts();
+  $GLPlugin::plugin->getopts();
+  # es kann sein, dass beim aufraeumen zum schluss als erstes objekt
+  # das $GLPlugin::plugin geloescht wird. in anderen destruktoren
+  # (insb. fuer dbi disconnect) steht dann $self->opts->verbose
+  # nicht mehr zur verfuegung bzw. $GLPlugin::plugin->opts ist undef.
+  $self->set_variable("verbose", $self->opts->verbose);
+  #
+  # die gueltigkeit von modes wird bereits hier geprueft und nicht danach
+  # in validate_args. (zwischen getopts und validate_args wird
+  # normalerweise classify aufgerufen, welches bereits eine verbindung
+  # zum endgeraet herstellt. bei falschem mode waere das eine verschwendung
+  # bzw. durch den exit3 ein evt. unsauberes beenden der verbindung.
+  if ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$GLPlugin::plugin->{modes}}) &&
+      (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$GLPlugin::plugin->{modes}})) {
+    printf "UNKNOWN - mode %s\n", $self->opts->mode;
+    $self->opts->print_help();
+    exit 3;
+  }
 }
 
 sub mode {
@@ -248,7 +281,8 @@ sub debug {
   my $format = shift;
   my $tracefile = "/tmp/".$0.".trace";
   $self->{trace} = -f $tracefile ? 1 : 0;
-  if ($self->opts->verbose && $self->opts->verbose > 10) {
+  if ($self->get_variable("verbose") &&
+      $self->get_variable("verbose") > $self->get_variable("verbosity", 10)) {
     printf("%s: ", scalar localtime);
     printf($format, @_);
     printf "\n";
@@ -449,6 +483,7 @@ sub valdiff {
     }
     $empty_events;
   };
+  $self->{'delta_timestamp'} = $now - $last_values->{timestamp};
   foreach (@keys) {
     if ($self->opts->lookback) {
       # find a last_value in the history which fits lookback best
@@ -478,6 +513,8 @@ sub valdiff {
         $self->{'delta_'.$_} = $self->{$_};
       }
       $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
+      $self->{$_.'_per_sec'} = $self->{'delta_timestamp'} ?
+          $self->{'delta_'.$_} / $self->{'delta_timestamp'} : 0;
     } elsif (ref($self->{$_}) eq "ARRAY") {
       if ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && exists $params{lastarray}) {
         # innerhalb der lookback-zeit wurde nichts in der lookback_history
@@ -506,7 +543,6 @@ sub valdiff {
       $self->{'delta_lost_'.$_} = \@lost;
     }
   }
-  $self->{'delta_timestamp'} = $now - $last_values->{timestamp};
   $params{save} = eval {
     my $empty_events = {};
     foreach (@keys) {
@@ -571,6 +607,11 @@ sub protect_value {
       my $value = shift;
       return ($value < 0 || $value > 100) ? 0 : 1;
     };
+  } elsif (ref($validfunc) ne "CODE" && $validfunc eq "positive") {
+    $validfunc = sub {
+      my $value = shift;
+      return ($value < 0) ? 0 : 1;
+    };
   }
   if (&$validfunc($self->{$key})) {
     $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
@@ -599,16 +640,19 @@ sub save_state {
   my %params = @_;
   $self->create_statefilesdir();
   my $statefile = $self->create_statefile(%params);
+  my $tmpfile = $self->statefilesdir().'/check__health_tmp_'.$$;
   if ((ref($params{save}) eq "HASH") && exists $params{save}->{timestamp}) {
     $params{save}->{localtime} = scalar localtime $params{save}->{timestamp};
   }
   my $seekfh = new IO::File;
-  if ($seekfh->open($statefile, "w")) {
+  if ($seekfh->open($tmpfile, "w")) {
     $seekfh->printf("%s", Data::Dumper::Dumper($params{save}));
+    $seekfh->flush();
     $seekfh->close();
     $self->debug(sprintf "saved %s to %s",
         Data::Dumper::Dumper($params{save}), $statefile);
-  } else {
+  }
+  if (! rename $tmpfile, $statefile) {
     $self->add_message(UNKNOWN,
         sprintf "cannot write status file %s! check your filesystem (permissions/usage/integrity) and disk devices", $statefile);
   }
@@ -647,6 +691,37 @@ sub no_such_mode {
   printf "Mode %s is not implemented for this type of device\n",
       $self->opts->mode;
   exit 3;
+}
+
+sub version_is_minimum {
+  my $self = shift;
+  my $version = shift;
+  my $installed_version;
+  my $newer = 1;
+  if ($self->get_variable("version")) {
+    $installed_version = $self->get_variable("version");
+  } elsif (exists $self->{version}) {
+    $installed_version = $self->{version};
+  } else {
+    return 0;
+  }
+  my @v1 = map { $_ eq "x" ? 0 : $_ } split(/\./, $version);
+  my @v2 = split(/\./, $installed_version);
+  if (scalar(@v1) > scalar(@v2)) {
+    push(@v2, (0) x (scalar(@v1) - scalar(@v2)));
+  } elsif (scalar(@v2) > scalar(@v1)) {
+    push(@v1, (0) x (scalar(@v2) - scalar(@v1)));
+  }
+  foreach my $pos (0..$#v1) {
+    if ($v2[$pos] > $v1[$pos]) {
+      $newer = 1;
+      last;
+    } elsif ($v2[$pos] < $v1[$pos]) {
+      $newer = 0;
+      last;
+    }
+  }
+  return $newer;
 }
 
 sub check_pidfile {
@@ -1049,8 +1124,8 @@ sub add_perfdata {
   }
   my $warn = "";
   my $crit = "";
-  my $min = "";
-  my $max = "";
+  my $min = defined $args{min} ? $args{min} : "";
+  my $max = defined $args{max} ? $args{max} : "";
   if ($args{thresholds} || (! exists $args{warning} && ! exists $args{critical})) {
     if (exists $self->{thresholds}->{$label}->{warning}) {
       $warn = $self->{thresholds}->{$label}->{warning};
@@ -1073,6 +1148,28 @@ sub add_perfdata {
   if ($uom eq "%") {
     $min = 0;
     $max = 100;
+  }
+  if (defined $args{places}) {
+    # cut off excessive decimals which may be the result of a division
+    # length = places*2, no trailing zeroes
+    if ($warn ne "") {
+      $warn = join("", map {
+          s/\.0+$//; $_
+      } map {
+          s/(\.[1-9]+)0+$/$1/; $_
+      } map {
+          /[\+\-\d\.]+/ ? sprintf '%.'.2*$args{places}.'f', $_ : $_;
+      } split(/([\+\-\d\.]+)/, $warn));
+    }
+    if ($crit ne "") {
+      $crit = join("", map {
+          s/\.0+$//; $_
+      } map {
+          s/(\.[1-9]+)0+$/$1/; $_
+      } map {
+          /[\+\-\d\.]+/ ? sprintf '%.'.2*$args{places}.'f', $_ : $_;
+      } split(/([\+\-\d\.]+)/, $crit));
+    }
   }
   push @{$self->{perfdata}}, sprintf("'%s'=%s%s;%s;%s;%s;%s",
       $label, $value, $uom, $warn, $crit, $min, $max)
@@ -1218,9 +1315,18 @@ sub set_thresholds {
   my %params = @_;
   if (exists $params{metric}) {
     my $metric = $params{metric};
+    # erst die hartcodierten defaultschwellwerte
     $self->{thresholds}->{$metric}->{warning} = $params{warning};
     $self->{thresholds}->{$metric}->{critical} = $params{critical};
-    if ($self->opts->warningx) {
+    # dann die defaultschwellwerte von der kommandozeile
+    if (defined $self->opts->warning) {
+      $self->{thresholds}->{$metric}->{warning} = $self->opts->warning;
+    }
+    if (defined $self->opts->critical) {
+      $self->{thresholds}->{$metric}->{critical} = $self->opts->critical;
+    }
+    # dann die ganz spezifischen schwellwerte von der kommandozeile
+    if ($self->opts->warningx) { # muss nicht auf defined geprueft werden, weils ein hash ist
       foreach my $key (keys %{$self->opts->warningx}) {
         next if $key ne $metric;
         $self->{thresholds}->{$metric}->{warning} = $self->opts->warningx->{$key};
@@ -1234,12 +1340,11 @@ sub set_thresholds {
     }
   } else {
     $self->{thresholds}->{default}->{warning} =
-        $self->opts->warning || $params{warning} || 0;
+        defined $self->opts->warning ? $self->opts->warning : defined $params{warning} ? $params{warning} : 0;
     $self->{thresholds}->{default}->{critical} =
-        $self->opts->critical || $params{critical} || 0;
+        defined $self->opts->critical ? $self->opts->critical : defined $params{critical} ? $params{critical} : 0;
   }
 }
-
 
 sub force_thresholds {
   my $self = shift;

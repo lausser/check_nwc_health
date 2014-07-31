@@ -310,64 +310,7 @@ $plugin->add_arg(
    Hostname or IP-address of the switch or router',
     required => 0,
 );
-$plugin->add_arg(
-    spec => 'port=i',
-    help => '--port
-   The SNMP port to use (default: 161)',
-    required => 0,
-    default => 161,
-);
-$plugin->add_arg(
-    spec => 'domain=s',
-    help => '--domain
-   The transport domain to use (default: udp/ipv4, other possible values: udp6, udp/ipv6, tcp, tcp4, tcp/ipv4, tcp6, tcp/ipv6)',
-    required => 0,
-    default => 'udp',
-);
-$plugin->add_arg(
-    spec => 'protocol|P=s',
-    help => '--protocol
-   The SNMP protocol to use (default: 2c, other possibilities: 1,3)',
-    required => 0,
-    default => '2c',
-);
-$plugin->add_arg(
-    spec => 'community|C=s',
-    help => '--community
-   SNMP community of the server (SNMP v1/2 only)',
-    required => 0,
-    default => 'public',
-);
-$plugin->add_arg(
-    spec => 'username:s',
-    help => '--username
-   The securityName for the USM security model (SNMPv3 only)',
-    required => 0,
-);
-$plugin->add_arg(
-    spec => 'authpassword:s',
-    help => '--authpassword
-   The authentication password for SNMPv3',
-    required => 0,
-);
-$plugin->add_arg(
-    spec => 'authprotocol:s',
-    help => '--authprotocol
-   The authentication protocol for SNMPv3 (md5|sha)',
-    required => 0,
-);
-$plugin->add_arg(
-    spec => 'privpassword:s',
-    help => '--privpassword
-   The password for authPriv security level',
-    required => 0,
-);
-$plugin->add_arg(
-    spec => 'privprotocol=s',
-    help => '--privprotocol
-   The private protocol for SNMPv3 (des|aes|aes128|3des|3desde)',
-    required => 0,
-);
+$plugin->add_snmp_args();
 $plugin->add_arg(
     spec => 'mode=s',
     help => "--mode
