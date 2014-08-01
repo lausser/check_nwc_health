@@ -46,6 +46,11 @@ sub v2tov3 {
         if defined($contextname) && $contextname;
     $self->override_opt('protocol', '3') ;
   }
+  if (($self->opts->authpassword || $self->opts->authprotocol ||
+      $self->opts->privpassword || $self->opts->privprotocol) && 
+      ! $self->opts->protocol eq '3') {
+    $self->override_opt('protocol', '3') ;
+  }
 }
 
 sub add_snmp_args {
