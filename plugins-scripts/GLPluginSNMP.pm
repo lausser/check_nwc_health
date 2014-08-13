@@ -1555,9 +1555,19 @@ package GLPlugin::SNMP::Item;
 our @ISA = qw(GLPlugin::Item GLPlugin::SNMP);
 use strict;
 
+sub create_statefile {
+  my $self = shift;
+  return GLPlugin::SNMP::create_statefile($self, @_);
+}
+
 
 package GLPlugin::SNMP::TableItem;
 our @ISA = qw(GLPlugin::TableItem GLPlugin::SNMP);
+
+sub create_statefile {
+  my $self = shift;
+  return GLPlugin::SNMP::create_statefile($self, @_);
+}
 
 sub ensure_index {
   my $self = shift;
