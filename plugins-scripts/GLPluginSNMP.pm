@@ -589,33 +589,6 @@ sub internal_name {
 ################################################################
 # file-related functions
 #
-sub create_statefile {
-  my $self = shift;
-  my %params = @_;
-  my $extension = "";
-  $extension .= $params{name} ? '_'.$params{name} : '';
-  if ($self->opts->community) {
-    $extension .= md5_hex($self->opts->community);
-  }
-  $extension =~ s/\//_/g;
-  $extension =~ s/\(/_/g;
-  $extension =~ s/\)/_/g;
-  $extension =~ s/\*/_/g;
-  $extension =~ s/\s/_/g;
-  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
-  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
-  } else {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        $self->opts->hostname, $self->opts->mode, lc $extension;
-  }
-}
-
 sub create_interface_cache_file {
   my $self = shift;
   my $extension = "";
@@ -1551,23 +1524,46 @@ sub get_cache_indices {
 }
 
 
-package GLPlugin::SNMP::Item;
-our @ISA = qw(GLPlugin::Item GLPlugin::SNMP);
+package GLPlugin::SNMP::CSF;
+#our @ISA = qw(GLPlugin::SNMP);
+use Digest::MD5 qw(md5_hex);
 use strict;
 
 sub create_statefile {
   my $self = shift;
-  return GLPlugin::SNMP::create_statefile($self, @_);
+  my %params = @_;
+  my $extension = "";
+  $extension .= $params{name} ? '_'.$params{name} : '';
+  if ($self->opts->community) {
+    $extension .= md5_hex($self->opts->community);
+  }
+  $extension =~ s/\//_/g;
+  $extension =~ s/\(/_/g;
+  $extension =~ s/\)/_/g;
+  $extension =~ s/\*/_/g;
+  $extension =~ s/\s/_/g;
+  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
+        $self->opts->mode, lc $extension;
+  } else {
+    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
+        $self->opts->hostname, $self->opts->mode, lc $extension;
+  }
 }
+
+package GLPlugin::SNMP::Item;
+our @ISA = qw(GLPlugin::SNMP::CSF GLPlugin::Item GLPlugin::SNMP);
+use strict;
 
 
 package GLPlugin::SNMP::TableItem;
-our @ISA = qw(GLPlugin::TableItem GLPlugin::SNMP);
-
-sub create_statefile {
-  my $self = shift;
-  return GLPlugin::SNMP::create_statefile($self, @_);
-}
+our @ISA = qw(GLPlugin::SNMP::CSF GLPlugin::TableItem GLPlugin::SNMP);
+use strict;
 
 sub ensure_index {
   my $self = shift;
