@@ -324,6 +324,13 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'drecksptkdb=s',
+    help => "--drecksptkdb
+   This parameter must be used instead of --name, because Devel::ptkdb is stealing the latter from the command line",
+    aliasfor => "name",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'alias=s',
     help => "--alias
    The alias name of a 64bit-interface (ifAlias)",

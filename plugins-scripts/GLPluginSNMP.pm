@@ -246,16 +246,22 @@ sub init {
     my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
     $GLPlugin::plugin->nagios_exit($code, $message);
   } elsif ($self->mode =~ /device::supportedmibs/) {
-    if (grep /mibdepot/, keys %GLPlugin::SNMP::) {
-      foreach my $mibinfo (@{$GLPlugin::SNMP::mibdepot}) {
+    our $mibdepot = [];
+    if ($self->opts->name && -f $self->opts->name) {
+      eval { require $self->opts->name };
+      $self->add_critical($@) if $@;
+      foreach my $mibinfo (@{$mibdepot}) {
         if (! exists $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]}) {
           $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]} = $mibinfo->[0];
         }
         if ($self->implements_mib($mibinfo->[3])) {
-          printf "%s\n", $mibinfo->[3];
+          printf "%s %s\n", $mibinfo->[2], $mibinfo->[3];
         }
       }
+    } else {
+      $GLPlugin::plugin->add_unknown("where is --name mibdepotfile?");
     }
+    $GLPlugin::plugin->nagios_exit(OK, "have fun");
   }
 }
 
