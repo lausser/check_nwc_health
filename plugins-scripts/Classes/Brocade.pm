@@ -2,15 +2,6 @@ package Classes::Brocade;
 our @ISA = qw(Classes::Device);
 use strict;
 
-use constant trees => (
-  '1.3.6.1.2.1',        # mib-2
-  '1.3.6.1.4.1.289',    # mcData
-  '1.3.6.1.4.1.333',    # cnt
-  '1.3.6.1.4.1.1588',   # bcsi
-  '1.3.6.1.4.1.1991',   # foundry
-  '1.3.6.1.4.1.4369',   # nishan
-);
-
 sub init {
   my $self = shift;
   foreach ($self->get_snmp_table_objects(
@@ -35,9 +26,14 @@ sub init {
   } elsif ($self->{productname} =~ /ICX6|FastIron/i) {
     bless $self, 'Classes::Foundry';
     $self->debug('using Classes::Foundry');
+  } elsif ($self->implements_mib('SW-MIB')) {
+    bless $self, 'Classes::FabOS';
+    $self->debug('using Classes::FabOS');
   }
   if (ref($self) ne "Classes::Brocade") {
     $self->init();
+  } else {
+    $self->no_such_mode();
   }
 }
 

@@ -1187,6 +1187,24 @@ sub add_perfdata {
           /[\+\-\d\.]+/ ? sprintf '%.'.2*$args{places}.'f', $_ : $_;
       } split(/([\+\-\d\.]+)/, $crit));
     }
+    if ($min ne "") {
+      $min = join("", map {
+          s/\.0+$//; $_
+      } map {
+          s/(\.[1-9]+)0+$/$1/; $_
+      } map {
+          /[\+\-\d\.]+/ ? sprintf '%.'.2*$args{places}.'f', $_ : $_;
+      } split(/([\+\-\d\.]+)/, $min));
+    }
+    if ($max ne "") {
+      $max = join("", map {
+          s/\.0+$//; $_
+      } map {
+          s/(\.[1-9]+)0+$/$1/; $_
+      } map {
+          /[\+\-\d\.]+/ ? sprintf '%.'.2*$args{places}.'f', $_ : $_;
+      } split(/([\+\-\d\.]+)/, $max));
+    }
   }
   push @{$self->{perfdata}}, sprintf("'%s'=%s%s;%s;%s;%s;%s",
       $label, $value, $uom, $warn, $crit, $min, $max)
