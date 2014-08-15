@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-08-15 3.0.2.2
+- bugfix in ios memory criticalx/warningx thresholds
+
 2014-08-14 3.0.2.1
 - update GLPluginSNMP
 
