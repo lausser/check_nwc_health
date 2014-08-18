@@ -132,6 +132,15 @@ sub validate_args {
   $self->SUPER::validate_args();
   if ($self->opts->mode eq 'walk') {
     if ($self->opts->snmpwalk && $self->opts->hostname) {
+      if ($self->check_messages == CRITICAL) {
+        # gemecker vom super-validierer, der sicherstellt, dass die datei
+        # snmpwalk existiert. in diesem fall wird sie aber erst neu angelegt,
+        # also schnauze.
+        my ($code, $message) = $self->check_messages;
+        if ($message eq sprintf("file %s not found", $self->opts->snmpwalk)) {
+          $self->clear_critical;
+        }
+      }
       # snmp agent wird abgefragt, die ergebnisse landen in einem file
       # opts->snmpwalk ist der filename. da sich die ganzen get_snmp_table/object-aufrufe
       # an das walkfile statt an den agenten halten wuerden, muss opts->snmpwalk geloescht
@@ -174,6 +183,7 @@ sub init {
 
     } elsif ($self->can("trees")) {
       @trees = $self->trees;
+      push(@trees, "1.3.6.1.2.1.1");
     } else {
       @trees = ("1.3.6.1.2.1", "1.3.6.1.4.1");
     }
@@ -183,7 +193,7 @@ sub init {
     if (defined $self->opts->offline) {
       $self->{pidfile} = $name.".pid";
       if (! $self->check_pidfile()) {
-        $self->trace("Exiting because another walk is already running");
+        $self->debug("Exiting because another walk is already running");
         printf STDERR "Exiting because another walk is already running\n";
         exit 3;
       }
@@ -206,7 +216,7 @@ sub init {
             $self->opts->community,
             $self->opts->hostname,
             $tree, $name.".partial";
-        $self->trace($cmd);
+        $self->debug($cmd);
         $snmpwalkpid = fork;
         if (not $snmpwalkpid) {
           exec($cmd);
@@ -302,14 +312,16 @@ sub check_snmp_and_model {
       }
       close WALK;
     } else {
-      if (defined $self->opts->offline) {
+      if (defined $self->opts->offline && $self->opts->mode ne 'walk') {
         if ((time - (stat($self->opts->snmpwalk))[9]) > $self->opts->offline) {
+printf "it is too old\n";
           $self->add_message(UNKNOWN,
               sprintf 'snmpwalk file %s is too old', $self->opts->snmpwalk);
         }
       }
-      $self->opts->override_opt('hostname', 'walkhost');
+      $self->opts->override_opt('hostname', 'walkhost') if $self->opts->mode ne 'walk';
       open(MESS, $self->opts->snmpwalk);
+printf "i reaad MESS\n";
       while(<MESS>) {
         # SNMPv2-SMI::enterprises.232.6.2.6.7.1.3.1.4 = INTEGER: 6
         if (/^([\d\.]+) = .*?INTEGER: .*\((\-*\d+)\)/) {
@@ -352,6 +364,7 @@ sub check_snmp_and_model {
     }
     map { $response->{$_} =~ s/^\s+//; $response->{$_} =~ s/\s+$//; }
         keys %$response;
+printf "i fillfill MESS\n";
     $self->set_rawdata($response);
   } else {
     $self->set_timeout_alarm();
