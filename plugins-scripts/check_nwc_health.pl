@@ -309,6 +309,7 @@ $plugin->add_arg(
     help => '--hostname
    Hostname or IP-address of the switch or router',
     required => 0,
+    env => 'HOSTNAME',
 );
 $plugin->add_snmp_args();
 $plugin->add_arg(
@@ -456,6 +457,7 @@ $plugin->add_arg(
     help => '--statefilesdir
    An alternate directory where the plugin can save files',
     required => 0,
+    env => 'STATEFILESDIR',
 );
 $plugin->add_arg(
     spec => 'snmpwalk=s',
@@ -463,6 +465,7 @@ $plugin->add_arg(
    A file with the output of a snmpwalk (used for simulation)
    Use it instead of --hostname',
     required => 0,
+    env => 'SNMPWALK',
 );
 $plugin->add_arg(
     spec => 'oids=s',
@@ -477,6 +480,7 @@ $plugin->add_arg(
    The maximum number of seconds since the last update of cache file before
    it is considered too old',
     required => 0,
+    env => 'OFFLINE',
 );
 $plugin->add_arg(
     spec => 'multiline',

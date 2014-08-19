@@ -138,9 +138,7 @@ sub validate_args {
     $ENV{NRPE_MULTILINESUPPORT} = 0;
   }
   if (! $self->opts->statefilesdir) {
-    if (exists $ENV{NAGIOS__SERVICESTATEFILESDIR}) {
-      $self->override_opt('statefilesdir', $ENV{NAGIOS__SERVICESTATEFILESDIR});
-    } elsif (exists $ENV{OMD_ROOT}) {
+    if (exists $ENV{OMD_ROOT}) {
       $self->override_opt('statefilesdir', $ENV{OMD_ROOT}."/var/tmp/".$GLPlugin::plugin->{name});
     } else {
       $self->override_opt('statefilesdir', "/var/tmp/".$GLPlugin::plugin->{name});
@@ -479,6 +477,7 @@ sub opts { # die beiden _nicht_ in AUTOLOAD schieben, das kracht!
 
 sub getopts {
   my $self = shift;
+  my $envparams = shift || [];
   $GLPlugin::plugin->getopts();
   # es kann sein, dass beim aufraeumen zum schluss als erstes objekt
   # das $GLPlugin::plugin geloescht wird. in anderen destruktoren
@@ -1604,6 +1603,16 @@ sub getopts {
     }
     foreach (keys %commandline) {
       $self->{opts}->{$_} = $commandline{$_};
+    }
+    foreach (grep { exists $_->{env} } @{$self->{_args}}) {
+      $_->{spec} =~ /^([\w\-]+)/;
+      my $spec = $1;
+      if (exists $ENV{'NAGIOS__HOST'.$_->{env}}) {
+        $self->{opts}->{$spec} = $ENV{'NAGIOS__HOST'.$_->{env}};
+      }
+      if (exists $ENV{'NAGIOS__SERVICE'.$_->{env}}) {
+        $self->{opts}->{$spec} = $ENV{'NAGIOS__SERVICE'.$_->{env}};
+      }
     }
     foreach (grep { exists $_->{aliasfor} } @{$self->{_args}}) {
       my $field = $_->{aliasfor};

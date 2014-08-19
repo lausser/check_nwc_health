@@ -155,10 +155,6 @@ sub validate_args {
       $self->create_opt('snmpdump');
     }
   } else {    
-    if (exists $ENV{NAGIOS__HOSTSNMPWALK} || exists $ENV{NAGIOS__SERVICESNMPWALK}) {
-      $self->override_opt('snmpwalk', $ENV{NAGIOS__SERVICESNMPWALK} || $ENV{NAGIOS__HOSTSNMPWALK}); 
-      $self->override_opt('offline', $ENV{NAGIOS__SERVICEOFFLINE} || $ENV{NAGIOS__HOSTOFFLIN});
-    }
     if ($self->opts->snmpwalk && ! $self->opts->hostname) {
       # normaler aufruf, mode != walk, oid-quelle ist eine datei
       $self->override_opt('hostname', 'snmpwalk.file'.md5_hex($self->opts->snmpwalk))
@@ -314,14 +310,12 @@ sub check_snmp_and_model {
     } else {
       if (defined $self->opts->offline && $self->opts->mode ne 'walk') {
         if ((time - (stat($self->opts->snmpwalk))[9]) > $self->opts->offline) {
-printf "it is too old\n";
           $self->add_message(UNKNOWN,
               sprintf 'snmpwalk file %s is too old', $self->opts->snmpwalk);
         }
       }
       $self->opts->override_opt('hostname', 'walkhost') if $self->opts->mode ne 'walk';
       open(MESS, $self->opts->snmpwalk);
-printf "i reaad MESS\n";
       while(<MESS>) {
         # SNMPv2-SMI::enterprises.232.6.2.6.7.1.3.1.4 = INTEGER: 6
         if (/^([\d\.]+) = .*?INTEGER: .*\((\-*\d+)\)/) {
@@ -364,7 +358,6 @@ printf "i reaad MESS\n";
     }
     map { $response->{$_} =~ s/^\s+//; $response->{$_} =~ s/\s+$//; }
         keys %$response;
-printf "i fillfill MESS\n";
     $self->set_rawdata($response);
   } else {
     $self->set_timeout_alarm();
