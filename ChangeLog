@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-08-20 3.0.3.2
+- update GLPluginSNMP (timeout handling)
+
 2014-08-20 3.0.3.1
 - fix interfaces which seem to be 64bit but have no counters
 

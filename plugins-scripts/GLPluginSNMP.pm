@@ -253,21 +253,434 @@ sub init {
     $GLPlugin::plugin->nagios_exit($code, $message);
   } elsif ($self->mode =~ /device::supportedmibs/) {
     our $mibdepot = [];
+    my $unknowns = {};
+    my @outputlist = ();
+    %{$unknowns} = %{$self->rawdata};
     if ($self->opts->name && -f $self->opts->name) {
       eval { require $self->opts->name };
       $self->add_critical($@) if $@;
-      foreach my $mibinfo (@{$mibdepot}) {
-        if (! exists $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]}) {
-          $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]} = $mibinfo->[0];
-        }
-        if ($self->implements_mib($mibinfo->[3])) {
-          printf "%s %s\n", $mibinfo->[2], $mibinfo->[3];
-        }
-      }
-    } else {
-      $GLPlugin::plugin->add_unknown("where is --name mibdepotfile?");
+    } elsif ($self->opts->name && ! -f $self->opts->name) {
+      $self->add_unknown("where is --name mibdepotfile?");
     }
-    $GLPlugin::plugin->nagios_exit(OK, "have fun");
+    push(@{$mibdepot}, ['1.3.6.1.2.1.60', 'ietf', 'v2', 'ACCOUNTING-CONTROL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.238', 'ietf', 'v2', 'ADSL2-LINE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.238.2', 'ietf', 'v2', 'ADSL2-LINE-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.94.3', 'ietf', 'v2', 'ADSL-LINE-EXT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.94', 'ietf', 'v2', 'ADSL-LINE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.94.2', 'ietf', 'v2', 'ADSL-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.74', 'ietf', 'v2', 'AGENTX-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.123', 'ietf', 'v2', 'AGGREGATE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.118', 'ietf', 'v2', 'ALARM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.23', 'ietf', 'v2', 'APM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.3', 'ietf', 'v2', 'APPC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.13.1', 'ietf', 'v1', 'APPLETALK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.27', 'ietf', 'v2', 'APPLICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.62', 'ietf', 'v2', 'APPLICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.5', 'ietf', 'v2', 'APPN-DLUR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.4', 'ietf', 'v2', 'APPN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.4', 'ietf', 'v2', 'APPN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.4.0', 'ietf', 'v2', 'APPN-TRAP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.49', 'ietf', 'v2', 'APS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.117', 'ietf', 'v2', 'ARC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.37.1.14', 'ietf', 'v2', 'ATM2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.59', 'ietf', 'v2', 'ATM-ACCOUNTING-INFORMATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.37', 'ietf', 'v2', 'ATM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.37', 'ietf', 'v2', 'ATM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.37.3', 'ietf', 'v2', 'ATM-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.15', 'ietf', 'v2', 'BGP4-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.15', 'ietf', 'v2', 'BGP4-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.122', 'ietf', 'v2', 'BLDG-HVAC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17.1', 'ietf', 'v1', 'BRIDGE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17', 'ietf', 'v2', 'BRIDGE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.19', 'ietf', 'v2', 'CHARACTER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.94', 'ietf', 'v2', 'CIRCUIT-IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.1.1', 'ietf', 'v1', 'CLNS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.1.1', 'ietf', 'v1', 'CLNS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.132', 'ietf', 'v2', 'COFFEE-POT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.89', 'ietf', 'v2', 'COPS-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.18.1', 'ietf', 'v1', 'DECNET-PHIV-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.21', 'ietf', 'v2', 'DIAL-CONTROL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.108', 'ietf', 'v2', 'DIFFSERV-CONFIG-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.97', 'ietf', 'v2', 'DIFFSERV-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.66', 'ietf', 'v2', 'DIRECTORY-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.88', 'ietf', 'v2', 'DISMAN-EVENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.90', 'ietf', 'v2', 'DISMAN-EXPRESSION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.82', 'ietf', 'v2', 'DISMAN-NSLOOKUP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.82', 'ietf', 'v2', 'DISMAN-NSLOOKUP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.80', 'ietf', 'v2', 'DISMAN-PING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.80', 'ietf', 'v2', 'DISMAN-PING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.63', 'ietf', 'v2', 'DISMAN-SCHEDULE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.63', 'ietf', 'v2', 'DISMAN-SCHEDULE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.64', 'ietf', 'v2', 'DISMAN-SCRIPT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.64', 'ietf', 'v2', 'DISMAN-SCRIPT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.81', 'ietf', 'v2', 'DISMAN-TRACEROUTE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.81', 'ietf', 'v2', 'DISMAN-TRACEROUTE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.46', 'ietf', 'v2', 'DLSW-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.32.2', 'ietf', 'v2', 'DNS-RESOLVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.32.1', 'ietf', 'v2', 'DNS-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.127.5', 'ietf', 'v2', 'DOCS-BPI-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.69', 'ietf', 'v2', 'DOCS-CABLE-DEVICE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.69', 'ietf', 'v2', 'DOCS-CABLE-DEVICE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.126', 'ietf', 'v2', 'DOCS-IETF-BPI2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.132', 'ietf', 'v2', 'DOCS-IETF-CABLE-DEVICE-NOTIFICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.127', 'ietf', 'v2', 'DOCS-IETF-QOS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.125', 'ietf', 'v2', 'DOCS-IETF-SUBMGT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.127', 'ietf', 'v2', 'DOCS-IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.127', 'ietf', 'v2', 'DOCS-IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.45', 'ietf', 'v2', 'DOT12-IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.53', 'ietf', 'v2', 'DOT12-RPTR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.155', 'ietf', 'v2', 'DOT3-EPON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.158', 'ietf', 'v2', 'DOT3-OAM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.2.2.1.1', 'ietf', 'v1', 'DPI20-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.82', 'ietf', 'v2', 'DS0BUNDLE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.81', 'ietf', 'v2', 'DS0-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.18', 'ietf', 'v2', 'DS1-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.18', 'ietf', 'v2', 'DS1-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.18', 'ietf', 'v2', 'DS1-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.30', 'ietf', 'v2', 'DS3-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.30', 'ietf', 'v2', 'DS3-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.29', 'ietf', 'v2', 'DSA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.26', 'ietf', 'v2', 'DSMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.7', 'ietf', 'v2', 'EBN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.167', 'ietf', 'v2', 'EFM-CU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.47', 'ietf', 'v2', 'ENTITY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.47', 'ietf', 'v2', 'ENTITY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.47', 'ietf', 'v2', 'ENTITY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.99', 'ietf', 'v2', 'ENTITY-SENSOR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.131', 'ietf', 'v2', 'ENTITY-STATE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.130', 'ietf', 'v2', 'ENTITY-STATE-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.70', 'ietf', 'v2', 'ETHER-CHIPSET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.7', 'ietf', 'v1', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.7', 'ietf', 'v1', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.35', 'ietf', 'v2', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.35', 'ietf', 'v2', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.35', 'ietf', 'v2', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.35', 'ietf', 'v2', 'EtherLike-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.224', 'ietf', 'v2', 'FCIP-MGMT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.56', 'ietf', 'v2', 'FC-MGMT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.15.73.1', 'ietf', 'v1', 'FDDI-SMT73-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.75', 'ietf', 'v2', 'FIBRE-CHANNEL-FE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.111', 'ietf', 'v2', 'Finisher-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.40', 'ietf', 'v2', 'FLOW-METER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.40', 'ietf', 'v2', 'FLOW-METER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.32', 'ietf', 'v2', 'FRAME-RELAY-DTE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.86', 'ietf', 'v2', 'FR-ATM-PVC-SERVICE-IWF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.47', 'ietf', 'v2', 'FR-MFR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.44', 'ietf', 'v2', 'FRNETSERV-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.44', 'ietf', 'v2', 'FRNETSERV-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.44', 'ietf', 'v2', 'FRNETSERV-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.95', 'ietf', 'v2', 'FRSLD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.16', 'ietf', 'v2', 'GMPLS-LABEL-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.15', 'ietf', 'v2', 'GMPLS-LSR-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.12', 'ietf', 'v2', 'GMPLS-TC-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.13', 'ietf', 'v2', 'GMPLS-TE-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.98', 'ietf', 'v2', 'GSMP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.29', 'ietf', 'v2', 'HC-ALARM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.107', 'ietf', 'v2', 'HC-PerfHist-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.20.5', 'ietf', 'v2', 'HC-RMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.25.1', 'ietf', 'v1', 'HOST-RESOURCES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.25.7.1', 'ietf', 'v2', 'HOST-RESOURCES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.6.1.5', 'ietf', 'v2', 'HPR-IP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.6', 'ietf', 'v2', 'HPR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.106', 'ietf', 'v2', 'IANA-CHARSET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.110', 'ietf', 'v2', 'IANA-FINISHER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.152', 'ietf', 'v2', 'IANA-GMPLS-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.30', 'ietf', 'v2', 'IANAifType-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.128', 'ietf', 'v2', 'IANA-IPPM-METRICS-REGISTRY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.119', 'ietf', 'v2', 'IANA-ITU-ALARM-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.154', 'ietf', 'v2', 'IANA-MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.109', 'ietf', 'v2', 'IANA-PRINTER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.2.6.2.13.1.1', 'ietf', 'v1', 'IBM-6611-APPN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.166', 'ietf', 'v2', 'IF-CAP-STACK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.230', 'ietf', 'v2', 'IFCP-MGMT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.77', 'ietf', 'v2', 'IF-INVERTED-STACK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.31', 'ietf', 'v2', 'IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.31', 'ietf', 'v2', 'IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.31', 'ietf', 'v2', 'IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.85', 'ietf', 'v2', 'IGMP-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.76', 'ietf', 'v2', 'INET-ADDRESS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.76', 'ietf', 'v2', 'INET-ADDRESS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.76', 'ietf', 'v2', 'INET-ADDRESS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.52.5', 'ietf', 'v2', 'INTEGRATED-SERVICES-GUARANTEED-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.52', 'ietf', 'v2', 'INTEGRATED-SERVICES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.27', 'ietf', 'v2', 'INTERFACETOPN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.17', 'ietf', 'v2', 'IPATM-IPMC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.57', 'ietf', 'v2', 'IPATM-IPMC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.4.24', 'ietf', 'v2', 'IP-FORWARD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.4.24', 'ietf', 'v2', 'IP-FORWARD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.168', 'ietf', 'v2', 'IPMCAST-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.48', 'ietf', 'v2', 'IP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.48', 'ietf', 'v2', 'IP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.83', 'ietf', 'v2', 'IPMROUTE-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.46', 'ietf', 'v2', 'IPOA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.141', 'ietf', 'v2', 'IPS-AUTH-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.153', 'ietf', 'v2', 'IPSEC-SPD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.103', 'ietf', 'v2', 'IPV6-FLOW-LABEL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.56', 'ietf', 'v2', 'IPV6-ICMP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.55', 'ietf', 'v2', 'IPV6-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.91', 'ietf', 'v2', 'IPV6-MLD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.86', 'ietf', 'v2', 'IPV6-TCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.87', 'ietf', 'v2', 'IPV6-UDP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.142', 'ietf', 'v2', 'ISCSI-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.20', 'ietf', 'v2', 'ISDN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.138', 'ietf', 'v2', 'ISIS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.163', 'ietf', 'v2', 'ISNS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.121', 'ietf', 'v2', 'ITU-ALARM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.120', 'ietf', 'v2', 'ITU-ALARM-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.2699.1.1', 'ietf', 'v2', 'Job-Monitoring-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.95', 'ietf', 'v2', 'L2TP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.165', 'ietf', 'v2', 'LANGTAG-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.227', 'ietf', 'v2', 'LMP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.227', 'ietf', 'v2', 'LMP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.101', 'ietf', 'v2', 'MALLOC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.26.1', 'ietf', 'v1', 'MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.26.6', 'ietf', 'v2', 'MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.26.6', 'ietf', 'v2', 'MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.26.6', 'ietf', 'v2', 'MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.26.6', 'ietf', 'v2', 'MAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.171', 'ietf', 'v2', 'MIDCOM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.38.1', 'ietf', 'v1', 'MIOX25-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.44', 'ietf', 'v2', 'MIP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.133', 'ietf', 'v2', 'MOBILEIPV6-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.38', 'ietf', 'v2', 'Modem-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.8', 'ietf', 'v2', 'MPLS-FTN-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.11', 'ietf', 'v2', 'MPLS-L3VPN-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.9', 'ietf', 'v2', 'MPLS-LC-ATM-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.10', 'ietf', 'v2', 'MPLS-LC-FR-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.5', 'ietf', 'v2', 'MPLS-LDP-ATM-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.6', 'ietf', 'v2', 'MPLS-LDP-FRAME-RELAY-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.7', 'ietf', 'v2', 'MPLS-LDP-GENERIC-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.9.10.65', 'ietf', 'v2', 'MPLS-LDP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.4', 'ietf', 'v2', 'MPLS-LDP-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.2', 'ietf', 'v2', 'MPLS-LSR-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.1', 'ietf', 'v2', 'MPLS-TC-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.166.3', 'ietf', 'v2', 'MPLS-TE-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.92', 'ietf', 'v2', 'MSDP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.28', 'ietf', 'v2', 'MTA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.28', 'ietf', 'v2', 'MTA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.28', 'ietf', 'v2', 'MTA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.123', 'ietf', 'v2', 'NAT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.27', 'ietf', 'v2', 'NETWORK-SERVICES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.27', 'ietf', 'v2', 'NETWORK-SERVICES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.71', 'ietf', 'v2', 'NHRP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.92', 'ietf', 'v2', 'NOTIFICATION-LOG-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.133', 'ietf', 'v2', 'OPT-IF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.14', 'ietf', 'v2', 'OSPF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.14', 'ietf', 'v2', 'OSPF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.14.16', 'ietf', 'v2', 'OSPF-TRAP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.14.16', 'ietf', 'v2', 'OSPF-TRAP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.34', 'ietf', 'v2', 'PARALLEL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17.6', 'ietf', 'v2', 'P-BRIDGE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.58', 'ietf', 'v2', 'PerfHist-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.58', 'ietf', 'v2', 'PerfHist-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.172', 'ietf', 'v2', 'PIM-BSR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.61', 'ietf', 'v2', 'PIM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.157', 'ietf', 'v2', 'PIM-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.93', 'ietf', 'v2', 'PINT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.140', 'ietf', 'v2', 'PKTC-IETF-MTA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.169', 'ietf', 'v2', 'PKTC-IETF-SIG-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.124', 'ietf', 'v2', 'POLICY-BASED-MANAGEMENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.105', 'ietf', 'v2', 'POWER-ETHERNET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.23.4', 'ietf', 'v1', 'PPP-BRIDGE-NCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.23.3', 'ietf', 'v1', 'PPP-IP-NCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.23.1.1', 'ietf', 'v1', 'PPP-LCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.23.2', 'ietf', 'v1', 'PPP-SEC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.43', 'ietf', 'v2', 'Printer-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.43', 'ietf', 'v2', 'Printer-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.79', 'ietf', 'v2', 'PTOPO-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17.7', 'ietf', 'v2', 'Q-BRIDGE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.2.2', 'ietf', 'v2', 'RADIUS-ACC-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.2.2', 'ietf', 'v2', 'RADIUS-ACC-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.2.1', 'ietf', 'v2', 'RADIUS-ACC-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.2.1', 'ietf', 'v2', 'RADIUS-ACC-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.1.2', 'ietf', 'v2', 'RADIUS-AUTH-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.1.2', 'ietf', 'v2', 'RADIUS-AUTH-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.1.1', 'ietf', 'v2', 'RADIUS-AUTH-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.67.1.1', 'ietf', 'v2', 'RADIUS-AUTH-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.145', 'ietf', 'v2', 'RADIUS-DYNAUTH-CLIENT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.146', 'ietf', 'v2', 'RADIUS-DYNAUTH-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.31', 'ietf', 'v2', 'RAQMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.32', 'ietf', 'v2', 'RAQMON-RDS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.39', 'ietf', 'v2', 'RDBMS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.1', 'ietf', 'v1', 'RFC1066-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.1', 'ietf', 'v1', 'RFC1156-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.1', 'ietf', 'v1', 'RFC1158-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.1', 'ietf', 'v1', 'RFC1213-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.12', 'ietf', 'v1', 'RFC1229-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.7', 'ietf', 'v1', 'RFC1230-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.9', 'ietf', 'v1', 'RFC1231-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.2', 'ietf', 'v1', 'RFC1232-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.15', 'ietf', 'v1', 'RFC1233-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.13.1', 'ietf', 'v1', 'RFC1243-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.13.1', 'ietf', 'v1', 'RFC1248-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.13.1', 'ietf', 'v1', 'RFC1252-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.14.1', 'ietf', 'v1', 'RFC1253-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.15', 'ietf', 'v1', 'RFC1269-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.1', 'ietf', 'v1', 'RFC1271-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.7', 'ietf', 'v1', 'RFC1284-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.15.1', 'ietf', 'v1', 'RFC1285-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17.1', 'ietf', 'v1', 'RFC1286-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.18.1', 'ietf', 'v1', 'RFC1289-phivMIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.31', 'ietf', 'v1', 'RFC1304-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.32', 'ietf', 'v1', 'RFC1315-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.19', 'ietf', 'v1', 'RFC1316-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.33', 'ietf', 'v1', 'RFC1317-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.34', 'ietf', 'v1', 'RFC1318-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.20.2', 'ietf', 'v1', 'RFC1353-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.4.24', 'ietf', 'v1', 'RFC1354-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.16', 'ietf', 'v1', 'RFC1381-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.5', 'ietf', 'v1', 'RFC1382-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.23.1', 'ietf', 'v1', 'RFC1389-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.7', 'ietf', 'v1', 'RFC1398-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.18', 'ietf', 'v1', 'RFC1406-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.30', 'ietf', 'v1', 'RFC1407-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.24.1', 'ietf', 'v1', 'RFC1414-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.23', 'ietf', 'v2', 'RIPv2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16', 'ietf', 'v2', 'RMON2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16', 'ietf', 'v2', 'RMON2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.1', 'ietf', 'v1', 'RMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.20.8', 'ietf', 'v2', 'RMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.112', 'ietf', 'v2', 'ROHC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.114', 'ietf', 'v2', 'ROHC-RTP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.113', 'ietf', 'v2', 'ROHC-UNCOMPRESSED-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.33', 'ietf', 'v2', 'RS-232-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.134', 'ietf', 'v2', 'RSTP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.51', 'ietf', 'v2', 'RSVP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.87', 'ietf', 'v2', 'RTP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.139', 'ietf', 'v2', 'SCSI-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.104', 'ietf', 'v2', 'SCTP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.4300.1', 'ietf', 'v2', 'SFLOW-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.149', 'ietf', 'v2', 'SIP-COMMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.36', 'ietf', 'v2', 'SIP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.151', 'ietf', 'v2', 'SIP-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.148', 'ietf', 'v2', 'SIP-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.150', 'ietf', 'v2', 'SIP-UA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.88', 'ietf', 'v2', 'SLAPM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.22', 'ietf', 'v2', 'SMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.4.4', 'ietf', 'v1', 'SMUX-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34', 'ietf', 'v2', 'SNA-NAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34', 'ietf', 'v2', 'SNA-NAU-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.41', 'ietf', 'v2', 'SNA-SDLC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.18', 'ietf', 'v2', 'SNMP-COMMUNITY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.18', 'ietf', 'v2', 'SNMP-COMMUNITY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.10', 'ietf', 'v2', 'SNMP-FRAMEWORK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.10', 'ietf', 'v2', 'SNMP-FRAMEWORK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.10', 'ietf', 'v2', 'SNMP-FRAMEWORK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.21', 'ietf', 'v2', 'SNMP-IEEE802-TM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.11', 'ietf', 'v2', 'SNMP-MPD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.11', 'ietf', 'v2', 'SNMP-MPD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.11', 'ietf', 'v2', 'SNMP-MPD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.13', 'ietf', 'v2', 'SNMP-NOTIFICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.13', 'ietf', 'v2', 'SNMP-NOTIFICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.13', 'ietf', 'v2', 'SNMP-NOTIFICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.14', 'ietf', 'v2', 'SNMP-PROXY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.14', 'ietf', 'v2', 'SNMP-PROXY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.14', 'ietf', 'v2', 'SNMP-PROXY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.22.1.1', 'ietf', 'v1', 'SNMP-REPEATER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.22.1.1', 'ietf', 'v1', 'SNMP-REPEATER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.22.5', 'ietf', 'v2', 'SNMP-REPEATER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.12', 'ietf', 'v2', 'SNMP-TARGET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.12', 'ietf', 'v2', 'SNMP-TARGET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.12', 'ietf', 'v2', 'SNMP-TARGET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.15', 'ietf', 'v2', 'SNMP-USER-BASED-SM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.15', 'ietf', 'v2', 'SNMP-USER-BASED-SM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.15', 'ietf', 'v2', 'SNMP-USER-BASED-SM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.20', 'ietf', 'v2', 'SNMP-USM-AES-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.101', 'ietf', 'v2', 'SNMP-USM-DH-OBJECTS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.2', 'ietf', 'v2', 'SNMPv2-M2M-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.1', 'ietf', 'v2', 'SNMPv2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.1', 'ietf', 'v2', 'SNMPv2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.1', 'ietf', 'v2', 'SNMPv2-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.3', 'ietf', 'v2', 'SNMPv2-PARTY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.6', 'ietf', 'v2', 'SNMPv2-USEC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.16', 'ietf', 'v2', 'SNMP-VIEW-BASED-ACM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.16', 'ietf', 'v2', 'SNMP-VIEW-BASED-ACM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.6.3.16', 'ietf', 'v2', 'SNMP-VIEW-BASED-ACM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.39', 'ietf', 'v2', 'SONET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.39', 'ietf', 'v2', 'SONET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.39', 'ietf', 'v2', 'SONET-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.17.3', 'ietf', 'v1', 'SOURCE-ROUTING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.28', 'ietf', 'v2', 'SSPM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.54', 'ietf', 'v2', 'SYSAPPL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.137', 'ietf', 'v2', 'T11-FC-FABRIC-ADDR-MGR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.162', 'ietf', 'v2', 'T11-FC-FABRIC-CONFIG-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.159', 'ietf', 'v2', 'T11-FC-FABRIC-LOCK-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.143', 'ietf', 'v2', 'T11-FC-FSPF-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.135', 'ietf', 'v2', 'T11-FC-NAME-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.144', 'ietf', 'v2', 'T11-FC-ROUTE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.161', 'ietf', 'v2', 'T11-FC-RSCN-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.176', 'ietf', 'v2', 'T11-FC-SP-AUTHENTICATION-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.178', 'ietf', 'v2', 'T11-FC-SP-POLICY-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.179', 'ietf', 'v2', 'T11-FC-SP-SA-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.175', 'ietf', 'v2', 'T11-FC-SP-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.177', 'ietf', 'v2', 'T11-FC-SP-ZONING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.147', 'ietf', 'v2', 'T11-FC-VIRTUAL-FABRIC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.160', 'ietf', 'v2', 'T11-FC-ZONE-SERVER-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.136', 'ietf', 'v2', 'T11-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.156', 'ietf', 'v2', 'TCP-ESTATS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.4.1.23.2.29.1', 'ietf', 'v1', 'TCPIPX-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.49', 'ietf', 'v2', 'TCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.49', 'ietf', 'v2', 'TCP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.200', 'ietf', 'v2', 'TE-LINK-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.122', 'ietf', 'v2', 'TE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.3.124', 'ietf', 'v2', 'TIME-AGGREGATE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.8', 'ietf', 'v2', 'TN3270E-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.34.9', 'ietf', 'v2', 'TN3270E-RT-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.9', 'ietf', 'v2', 'TOKENRING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.9', 'ietf', 'v2', 'TOKENRING-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.1', 'ietf', 'v1', 'TOKEN-RING-RMON-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.42', 'ietf', 'v2', 'TOKENRING-STATION-SR-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.16.30', 'ietf', 'v2', 'TPM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.100', 'ietf', 'v2', 'TRANSPORT-ADDRESS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.116', 'ietf', 'v2', 'TRIP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.115', 'ietf', 'v2', 'TRIP-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.131', 'ietf', 'v2', 'TUNNEL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.131', 'ietf', 'v2', 'TUNNEL-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.170', 'ietf', 'v2', 'UDPLITE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.50', 'ietf', 'v2', 'UDP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.50', 'ietf', 'v2', 'UDP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.33', 'ietf', 'v2', 'UPS-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.164', 'ietf', 'v2', 'URI-TC-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.229', 'ietf', 'v2', 'VDSL-LINE-EXT-MCM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.228', 'ietf', 'v2', 'VDSL-LINE-EXT-SCM-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.10.97', 'ietf', 'v2', 'VDSL-LINE-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.129', 'ietf', 'v2', 'VPN-TC-STD-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.68', 'ietf', 'v2', 'VRRP-MIB']);
+    push(@{$mibdepot}, ['1.3.6.1.2.1.65', 'ietf', 'v2', 'WWW-MIB']);
+    my $oids = $self->get_entries_by_walk(-varbindlist => [
+        '1.3.6.1.2.1', '1.3.6.1.4.1',
+    ]);
+    foreach my $mibinfo (@{$mibdepot}) {
+      $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]} = $mibinfo->[0];
+    }
+    $GLPlugin::SNMP::mib_ids->{'SNMP-MIB2'} = "1.3.6.1.2.1";
+    foreach my $mib (keys %{$GLPlugin::SNMP::mib_ids}) {
+      if ($self->implements_mib($mib)) {
+        push(@outputlist, [$mib, $GLPlugin::SNMP::mib_ids->{$mib}]);
+        $unknowns = {@{[map {
+            $_, $self->rawdata->{$_}
+        } grep {
+            substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) ne
+                $GLPlugin::SNMP::mib_ids->{$mib} || (
+            substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq
+                $GLPlugin::SNMP::mib_ids->{$mib} &&
+            substr($_, length($GLPlugin::SNMP::mib_ids->{$mib}), 1) ne ".")
+        } keys %{$unknowns}]}};
+      }
+    }
+    my $toplevels = {};
+    map {
+        /^(1\.3\.6\.1\.(2|4)\.1\.\d+\.\d+)\./; $toplevels->{$1} = 1; 
+    } keys %{$unknowns};
+    foreach (sort {$a cmp $b} keys $toplevels) {
+      push(@outputlist, ["<unknown>", $_]);
+    }
+    foreach (sort {$a->[0] cmp $b->[0]} @outputlist) {
+      printf "implements %s %s\n", $_->[0], $_->[1];
+    }
+    $self->add_ok("have fun");
+    my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
+    $GLPlugin::plugin->nagios_exit($code, $message);
   }
 }
 
@@ -422,9 +835,11 @@ sub check_snmp_and_model {
     }
   }
   if (! $self->check_messages()) {
+    my $tic = time;
     my $sysUptime = $self->get_snmp_object('MIB-II', 'sysUpTime', 0);
     my $snmpEngineTime = $self->get_snmp_object('SNMP-FRAMEWORK-MIB', 'snmpEngineTime');
     my $sysDescr = $self->get_snmp_object('MIB-II', 'sysDescr', 0);
+    my $tac = time;
     if (defined $sysUptime && defined $sysDescr) {
       $self->{uptime} = defined $snmpEngineTime ?
           $snmpEngineTime : $self->timeticks($sysUptime);
@@ -436,8 +851,13 @@ sub check_snmp_and_model {
       $GLPlugin::SNMP::uptime = $self->{uptime};
       $self->debug('whoami: '.$self->{productname});
     } else {
-      $self->add_message(CRITICAL,
-          'could not contact snmp agent, got neither sysUptime nor sysDescr');
+      if ($tac - $tic >= $GLPlugin::SNMP::session->timeout) {
+        $self->add_message(UNKNOWN,
+            'could not contact snmp agent, timeout during snmp-get sysUptime');
+      } else {
+        $self->add_message(CRITICAL,
+            'got neither sysUptime nor sysDescr, is this snmp agent working correctly?');
+      }
       $GLPlugin::SNMP::session->close if $GLPlugin::SNMP::session;
     }
   }
@@ -515,7 +935,7 @@ sub implements_mib {
         $_, $self->rawdata->{$_} 
     } grep {
         substr($_, 0, length($GLPlugin::SNMP::mib_ids->{$mib})) eq $GLPlugin::SNMP::mib_ids->{$mib} 
-    } keys %{$self->rawdata}]}}
+    } keys %{$self->rawdata}]}};
   } else {
     my %params = (
         -varbindlist => [
@@ -1189,6 +1609,44 @@ sub get_entries {
   return $result;
 }
 
+sub get_entries_by_walk {
+  my $self = shift;
+  my %params = @_;
+  if (! $self->opts->snmpwalk) {
+    $self->add_ok("if you get this crap working correctly, let me know");
+    if ($GLPlugin::SNMP::session->version() == 3) {
+      $params{-contextengineid} = $self->opts->contextengineid if $self->opts->contextengineid;
+      $params{-contextname} = $self->opts->contextname if $self->opts->contextname;
+    }
+    $self->debug(sprintf "get_tree %s", Data::Dumper::Dumper(\%params));
+    my @baseoids = @{$params{-varbindlist}};
+    delete $params{-varbindlist};
+    if ($GLPlugin::SNMP::session->version() == 0) {
+      foreach my $baseoid (@baseoids) {
+        $params{-varbindlist} = [$baseoid];
+        while (my $result = $GLPlugin::SNMP::session->get_next_request(%params)) {
+          $params{-varbindlist} = [($GLPlugin::SNMP::session->var_bind_names)[0]];
+        }
+      }
+    } else {
+      $params{-maxrepetitions} = 200;
+          printf "bratta %s\n", Data::Dumper::Dumper(\@baseoids);
+      foreach my $baseoid (@baseoids) {
+        $params{-varbindlist} = [$baseoid];
+        while (my $result = $GLPlugin::SNMP::session->get_bulk_request(%params)) {
+          printf "hoi %s\n", Data::Dumper::Dumper($result);
+          my @names = $GLPlugin::SNMP::session->var_bind_names();
+          my @oids = $self->sort_oids(\@names);
+          $params{-varbindlist} = [pop @oids];
+        }
+      }
+    }
+  } else {
+    return $self->get_matching_oids(
+        -columns => $params{-varbindlist});
+  }
+}
+
 sub get_table {
   my $self = shift;
   my %params = @_;
@@ -1382,6 +1840,17 @@ sub make_symbolic {
       }
     }
   }
+}
+
+sub sort_oids {
+  my $self = shift;
+  my $oids = shift || [];
+  my @sortedkeys = map { $_->[0] }
+      sort { $a->[1] cmp $b->[1] }
+          map { [$_,
+                  join '', map { sprintf("%30d",$_) } split( /\./, $_)
+                ] } @{$oids};
+  return @sortedkeys;
 }
 
 sub get_matching_oids {
