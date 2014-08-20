@@ -319,8 +319,9 @@ sub new {
     $self->{$key} = 0 if ! defined $params{$key};
   }
   bless $self, $class;
-  #if (0) {
-  if ($params{ifName}) {
+  # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
+  # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
+  if ($params{ifName} && defined $params{ifHCInOctets} && defined $params{ifHCOutOctets}) {
     my $self64 = {
       ifName => $params{ifName},
       ifInMulticastPkts => $params{ifInMulticastPkts},
