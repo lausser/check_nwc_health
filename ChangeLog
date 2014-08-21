@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-08-21 3.0.3.4
+- bugfix in glplugin/uptime thresholds
+
 2014-08-21 3.0.3.3
 - add a hack with --name2 which allows shortening of stupid interface names (make dmz1 from Adaptive Security Appliance 'dmz1' interface)
 

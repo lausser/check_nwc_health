@@ -243,7 +243,7 @@ sub init {
     $self->add_info(sprintf 'device is up since %s',
         $self->human_timeticks($self->{uptime}));
     $self->set_thresholds(warning => '15:', critical => '5:');
-    $self->add_message($self->check_thresholds($self->{uptime}));
+    $self->add_message($self->check_thresholds($self->{uptime} / 60));
     $self->add_perfdata(
         label => 'uptime',
         value => $self->{uptime} / 60,
