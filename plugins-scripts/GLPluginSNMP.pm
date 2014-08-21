@@ -672,7 +672,7 @@ sub init {
     map {
         /^(1\.3\.6\.1\.(2|4)\.1\.\d+\.\d+)\./; $toplevels->{$1} = 1; 
     } keys %{$unknowns};
-    foreach (sort {$a cmp $b} keys $toplevels) {
+    foreach (sort {$a cmp $b} keys %{$toplevels}) {
       push(@outputlist, ["<unknown>", $_]);
     }
     foreach (sort {$a->[0] cmp $b->[0]} @outputlist) {
