@@ -196,6 +196,16 @@ sub update_interface_cache {
     foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable+ifXTable')) {
       # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
       # alle gleich heissen
+      # und noch so ein hirnbrand: --mode list-interfaces
+      # 000003 Adaptive Security Appliance 'GigabitEthernet0/0' interface
+      # ....
+      # der ASA-schlonz ist ueberfluessig, also brauchen wir eine hintertuer
+      # um die namen auszuputzen
+      if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
+        if ($_->{ifDescr} =~ $self->opts->name2) {
+          $_->{ifDescr} = $1;
+        }
+      }
       $self->{interface_cache}->{$_->{ifIndex}}->{ifDescr} = $_->{ifDescr};
       $self->{interface_cache}->{$_->{ifIndex}}->{ifAlias} = $_->{ifAlias} if exists $_->{ifAlias};;
     }
@@ -319,6 +329,11 @@ sub new {
     $self->{$key} = 0 if ! defined $params{$key};
   }
   bless $self, $class;
+  if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
+    if ($self->{ifDescr} =~ $self->opts->name2) {
+      $self->{ifDescr} = $1;
+    }
+  }
   # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
   # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
   if ($params{ifName} && defined $params{ifHCInOctets} && defined $params{ifHCOutOctets}) {
