@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-08-22 3.0.3.5
+- bugfix in glplugin/uptime because of buggy snmpengineuptime
+
 2014-08-21 3.0.3.4
 - bugfix in glplugin/uptime thresholds
 

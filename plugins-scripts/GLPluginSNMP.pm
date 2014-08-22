@@ -841,8 +841,12 @@ sub check_snmp_and_model {
     my $sysDescr = $self->get_snmp_object('MIB-II', 'sysDescr', 0);
     my $tac = time;
     if (defined $sysUptime && defined $sysDescr) {
-      $self->{uptime} = defined $snmpEngineTime ?
-          $snmpEngineTime : $self->timeticks($sysUptime);
+      # drecksschrott asa liefert negative werte
+      if (defined $snmpEngineTime && $snmpEngineTime > 0) {
+        $self->{uptime} = $snmpEngineTime;
+      } else {
+        $self->{uptime} = $self->timeticks($sysUptime);
+      }
       $self->{productname} = $sysDescr;
       $self->{sysobjectid} = $self->get_snmp_object('MIB-II', 'sysObjectID', 0);
       $self->debug(sprintf 'uptime: %s', $self->{uptime});
