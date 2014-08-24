@@ -1061,6 +1061,13 @@ sub AUTOLOAD {
   }
 }
 
+sub DESTROY {
+  my $self = shift;
+  # ohne dieses DESTROY rennt nagios_exit in obiges AUTOLOAD rein
+  # und fliegt aufs Maul, weil {opts} bereits nicht mehr existiert.
+  # Unerklaerliches Verhalten.
+}
+
 sub debug {
   my $self = shift;
   my $format = shift;

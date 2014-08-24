@@ -512,5 +512,6 @@ my ($code, $message) = $plugin->opts->multiline ?
 $message .= sprintf "\n%s\n", $plugin->get_info("\n")
     if $plugin->opts->verbose >= 1;
 #printf "%s\n", Data::Dumper::Dumper($plugin);
-$plugin->nagios_exit($code, $message);
 
+$plugin->nagios_exit($code, $message);
+printf "schluss\n";
