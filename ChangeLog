@@ -2,6 +2,12 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-08-28 3.0.3.8
+- bugfix in interface-usage/ifspeed (Thanks Matthias Gallinger)
+
+2014-08-26 3.0.3.7
+- bugfix in glpluginsnmp (undef errors with loadbalacer index)
+
 2014-08-25 3.0.3.6
 - bugfix in glpluginsnmp / (fritzbox cpu undef-error)
 

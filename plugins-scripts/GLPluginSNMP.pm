@@ -1512,12 +1512,13 @@ sub get_entries {
   if (! $self->opts->snmpwalk) {
     $result = $self->get_entries_get_bulk(%params);
     if (! $result) {
-      if (scalar (@{$params{'-columns'}}) < 50 && $params{'-startindex'} == $params{'-endindex'}) {
+      if (scalar (@{$params{'-columns'}}) < 50 && $params{'-startindex'} eq $params{'-endindex'}) {
         $result = $self->get_entries_get_simple(%params);
       } else {
         $result = $self->get_entries_get_next(%params);
       }
-      if (! $result) {
+      if (! $result && $params{'-startindex'} !~ /\./) {
+        # compound indexes cannot continue, as these two methods iterate numerically
         if ($GLPlugin::SNMP::session->error() =~ /tooBig/i) {
           $result = $self->get_entries_get_next_1index(%params);
         }

@@ -398,8 +398,8 @@ sub init {
           ($self->{delta_timestamp} * $self->opts->ifspeed);
       $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
           ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{maxInputRate} = $self->opts->ifspeedin;
-      $self->{maxOutputRate} = $self->opts->ifspeedout;
+      $self->{maxInputRate} = $self->opts->ifspeed;
+      $self->{maxOutputRate} = $self->opts->ifspeed;
     }
     $self->{inputRate} = $self->{delta_ifInOctets} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutOctets} / $self->{delta_timestamp};
@@ -688,8 +688,8 @@ sub init {
           ($self->{delta_timestamp} * $self->opts->ifspeed);
       $self->{outputUtilization} = $self->{delta_ifHCOutOctets} * 8 * 100 /
           ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{maxInputRate} = $self->opts->ifspeedin;
-      $self->{maxOutputRate} = $self->opts->ifspeedout;
+      $self->{maxInputRate} = $self->opts->ifspeed;
+      $self->{maxOutputRate} = $self->opts->ifspeed;
     }
     $self->{inputRate} = $self->{delta_ifHCInOctets} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifHCOutOctets} / $self->{delta_timestamp};
