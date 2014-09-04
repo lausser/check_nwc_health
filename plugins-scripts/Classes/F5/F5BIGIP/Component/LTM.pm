@@ -204,7 +204,7 @@ sub check {
       printf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
     }
     printf "</tr>";
-    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} ($self->{members} ? @{$self->{members}} : () )) {
       printf "<tr>";
       printf "<tr style=\"border: 1px solid black;\">";
       foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
