@@ -154,6 +154,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 sub finish {
   my $self = shift;
   $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
+  $self->{members} = [];
 }
 
 sub check {
@@ -313,6 +314,11 @@ package Classes::F5::F5BIGIP::Component::LTMSubsystem4::LTMPool;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
+
+sub finish {
+  my $self = shift;
+  $self->{members} = [];
+}
 
 sub check {
   my $self = shift;
