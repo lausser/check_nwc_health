@@ -179,7 +179,7 @@ sub check {
   } else {
     $self->{bgpPeerRemoteAsImportant} = 1;
   }
-  if ($self->{bgpPeerState} eq "established" || $self->{bgpPeerState} eq "idle") {
+  if ($self->{bgpPeerState} eq "established") {
     $self->add_ok(sprintf "peer %s (AS%s) state is %s since %s",
         $self->{bgpPeerRemoteAddr},
         $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
