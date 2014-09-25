@@ -12,7 +12,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 {
   our $mode = undef;
   our $plugin = undef;
-  our $pluginname = basename($0);
+  our $pluginname = basename($ENV{'NAGIOS_PLUGIN'} || $0);
   our $blacklist = undef;
   our $info = [];
   our $extendedinfo = [];
