@@ -169,7 +169,7 @@ sub init {
   my $self = shift;
   if ($self->mode =~ /device::walk/) {
     my @trees = ();
-    my $name = $0;
+    my $name = $GLPlugin::pluginname;
     $name =~ s/.*\///g;
     $name = sprintf "/tmp/snmpwalk_%s_%s", $name, $self->opts->hostname;
     if ($self->opts->oids) {

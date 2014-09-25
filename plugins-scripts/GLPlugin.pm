@@ -191,7 +191,7 @@ sub get_variable {
 sub debug {
   my $self = shift;
   my $format = shift;
-  my $tracefile = "/tmp/".$0.".trace";
+  my $tracefile = "/tmp/".$GLPlugin::pluginname.".trace";
   $self->{trace} = -f $tracefile ? 1 : 0;
   if ($self->get_variable("verbose") &&
       $self->get_variable("verbose") > $self->get_variable("verbosity", 10)) {
@@ -414,7 +414,7 @@ sub load_my_extension {
     if (! $self->opts->get("with-mymodules-dyn-dir")) {
       $self->override_opt("with-mymodules-dyn-dir", "");
     }
-    my $plugin_name = basename($0);
+    my $plugin_name = $GLPlugin::pluginname;
     $plugin_name =~ /check_(.*?)_health/;
     $plugin_name = "Check".uc(substr($1, 0, 1)).substr($1, 1)."Health";
     foreach my $libpath (split(":", $self->opts->get("with-mymodules-dyn-dir"))) {
@@ -1071,7 +1071,7 @@ sub DESTROY {
 sub debug {
   my $self = shift;
   my $format = shift;
-  my $tracefile = "/tmp/".$0.".trace";
+  my $tracefile = "/tmp/".$GLPlugin::pluginname.".trace";
   $self->{trace} = -f $tracefile ? 1 : 0;
   if ($self->opts->verbose && $self->opts->verbose > 10) {
     printf("%s: ", scalar localtime);
@@ -1533,13 +1533,11 @@ sub _init {
   my $self = shift;
   my %params = @_;
   # Check params
-  my $plugin = basename($0);
-  #my %attr = validate( @_, {
   my %attr = (
     usage => 1,
     version => 0,
     url => 0,
-    plugin => { default => $plugin },
+    plugin => { default => $GLPlugin::pluginname },
     blurb => 0,
     extra => 0,
     'extra-opts' => 0,

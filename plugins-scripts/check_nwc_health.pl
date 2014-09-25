@@ -13,7 +13,7 @@ my $plugin = Classes::Device->new(
     blurb => 'This plugin checks various parameters of network components ',
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
-    plugin => basename($0),
+    plugin => $GLPlugin::pluginname,
 );
 $plugin->add_mode(
     internal => 'device::uptime',
