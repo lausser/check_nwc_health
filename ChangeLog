@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-09-55 3.0.4
+- bugfix in glplugin (tmp-file-paths wrong under epn) (Thanks Sven Nierlein)
+
 2014-09-15 3.0.3.9
 - bugfix in bgp error states (Thanks Matthias Gallinger)
 - bugfix in f5 pools (Thanks Sven Nierlein)
