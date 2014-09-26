@@ -137,6 +137,11 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1/Component/MemSubsystem.pm \
   Classes/CheckPoint/Firewall1.pm \
   Classes/CheckPoint.pm \
+  Classes/Clavister/Firewall1/Component/EnvironmentalSubsystem.pm \
+  Classes/Clavister/Firewall1/Component/CpuSubsystem.pm \
+  Classes/Clavister/Firewall1/Component/MemSubsystem.pm \
+  Classes/Clavister/Firewall1.pm \
+  Classes/Clavister.pm \
   Classes/SGOS/Component/MemSubsystem.pm \
   Classes/SGOS/Component/CpuSubsystem.pm \
   Classes/SGOS/Component/EnvironmentalSubsystem.pm \

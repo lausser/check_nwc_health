@@ -4362,6 +4362,17 @@ $GLPlugin::SNMP::mibs_and_oids = {
           2 => 'unknown',
       },
   },
+  'CLAVISTER-MIB' => {
+      'clvSystem' => '1.3.6.1.4.1.5089.1.2.1',
+      'clvSysCpuLoad' => '1.3.6.1.4.1.5089.1.2.1.1.0',
+      'clvHWSensorTable' => '1.3.6.1.4.1.5089.1.2.1.11',
+      'clvHWSensorEntry' => '1.3.6.1.4.1.5089.1.2.1.11.1',
+      'clvHWSensorIndex' => '1.3.6.1.4.1.5089.1.2.1.11.1.1',
+      'clvHWSensorName' => '1.3.6.1.4.1.5089.1.2.1.11.1.2',
+      'clvHWSensorValue' => '1.3.6.1.4.1.5089.1.2.1.11.1.3',
+      'clvHWSensorUnit' => '1.3.6.1.4.1.5089.1.2.1.11.1.4',
+      'clvSysMemUsage' => '1.3.6.1.4.1.5089.1.2.1.12.0',
+  },
   'NETSCREEN-RESOURCE-MIB' => {
       nsResCpuAvg => '1.3.6.1.4.1.3224.16.1.1.0',
       nsResCpuLast15Min => '1.3.6.1.4.1.3224.16.1.4.0',

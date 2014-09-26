@@ -25,6 +25,7 @@ sub classify {
       $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
       $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
       $self->{productname} = 'checkpoint' if $self->opts->servertype eq 'checkpoint';
+      $self->{productname} = 'clavister' if $self->opts->servertype eq 'clavister';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
     if (! $self->check_messages()) {
@@ -110,6 +111,9 @@ sub classify {
       } elsif ($self->{productname} =~ /(cpx86_64)|(Check\s*Point)|(Linux.*\dcp )/i) {
         bless $self, 'Classes::CheckPoint';
         $self->debug('using Classes::CheckPoint');
+      } elsif ($self->{productname} =~ /Clavister/i) {
+        bless $self, 'Classes::Clavister';
+        $self->debug('using Classes::Clavister');
       } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
         bless $self, 'Classes::Bluecoat';
         $self->debug('using Classes::Bluecoat');
