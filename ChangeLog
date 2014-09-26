@@ -4,6 +4,7 @@
 
 2014-09-26 3.1
 - add Clavister Firewall (Thanks Dirk Goetz)
+- fix GLPluginSNMP, all timeout-like errors are UNKNOWN
 
 2014-09-55 3.0.4
 - bugfix in glplugin (tmp-file-paths wrong under epn) (Thanks Sven Nierlein)

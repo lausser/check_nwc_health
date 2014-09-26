@@ -859,7 +859,7 @@ sub check_snmp_and_model {
         $self->add_message(UNKNOWN,
             'could not contact snmp agent, timeout during snmp-get sysUptime');
       } else {
-        $self->add_message(CRITICAL,
+        $self->add_message(UNKNOWN,
             'got neither sysUptime nor sysDescr, is this snmp agent working correctly?');
       }
       $GLPlugin::SNMP::session->close if $GLPlugin::SNMP::session;
