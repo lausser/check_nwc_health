@@ -227,7 +227,7 @@ sub check {
       printf "%20s", $_;
     }
     printf "\n";
-    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} ($self->{members} ? @{$self->{members}} : () )) {
       foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
         printf "%20s", $_->{$attr};
       }
