@@ -31,6 +31,7 @@ sub init {
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
+use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
   my $self = shift;
@@ -58,13 +59,10 @@ sub check {
     return;
   } elsif ($self->{entSensorStatus} eq "unavailable") {
     return;
-  } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
-        @{$self->{thresholds}})) {
-    $self->add_critical(sprintf "%s sensor %s threshold evaluation is true", 
-        $self->{entSensorType},
-        $self->{entPhysicalIndex});
-  } else {
   }
+  my $label = sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex});
+  my $warningx = ($self->get_thresholds(metric => $label))[0];
+  my $criticalx = ($self->get_thresholds(metric => $label))[1];
   if (scalar(@{$self->{thresholds}} == 2)) {
     # reparaturlauf
     foreach my $idx (0..1) {
@@ -83,19 +81,91 @@ sub check {
     my $critical = (map { $_->{entSensorThresholdValue} } 
         grep { $_->{entSensorThresholdSeverity} eq "major" }
         @{$self->{thresholds}})[0];
+    $self->set_thresholds(
+        metric => $label,
+        warning => $warning, critical => $critical
+    );
+    if ((defined($criticalx) && 
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) ||
+        (! defined($criticalx) && 
+            grep { $_->{entSensorThresholdEvaluation} eq "true" } 
+            grep { $_->{entSensorThresholdSeverity} eq "major" } @{$self->{thresholds}})) {
+      # eigener schwellwert hat vorrang
+      $self->add_critical(sprintf "%s sensor %s threshold evaluation is true (value: %s, major threshold: %s)", 
+          $self->{entSensorType},
+          $self->{entPhysicalIndex},
+          $self->{entSensorValue},
+          defined($criticalx) ? $criticalx : $critical
+      );
+    } elsif ((defined($warningx) && 
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == WARNING) ||
+        (! defined($warningx) && 
+            grep { $_->{entSensorThresholdEvaluation} eq "true" } 
+            grep { $_->{entSensorThresholdSeverity} eq "minor" } @{$self->{thresholds}})) {
+      $self->add_warning(sprintf "%s sensor %s threshold evaluation is true (value: %s, minor threshold: %s)", 
+          $self->{entSensorType},
+          $self->{entPhysicalIndex},
+          $self->{entSensorValue},
+          defined($warningx) ? $warningx : $warning
+      );
+    }
     $self->add_perfdata(
-        label => sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex}),
+        label => $label,
         value => $self->{entSensorValue},
-        warning => $warning,
-        critical => $critical,
+        warning => defined($warningx) ? $warningx : $warning,
+        critical => defined($criticalx) ? $criticalx : $critical,
     );
   } elsif ($self->{entSensorValue}) {
-    $self->add_perfdata(
-        label => sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex}),
-        value => $self->{entSensorValue},
-        warning => $self->{ciscoEnvMonSensorThreshold},
-        critical => undef,
-    );
+printf "dadong\n";
+    if ((defined($criticalx) && 
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) ||
+       (defined($warningx) && 
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == WARNING) ||
+       $self->{entSensorThresholdEvaluation} eq "true") {
+    }
+    if (defined($criticalx) &&
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) {
+      $self->add_critical(sprintf "%s sensor %s threshold evaluation is true (value: %s)",
+          $self->{entSensorType},
+          $self->{entPhysicalIndex},
+          $self->{entSensorValue}
+      );
+      $self->add_perfdata(
+          label => $label,
+          value => $self->{entSensorValue},
+          critical => $criticalx,
+          warning => $warningx,
+      );
+    } elsif (defined($warningx) &&
+        $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == WARNING) {
+      $self->add_warning(sprintf "%s sensor %s threshold evaluation is true (value: %s)",
+          $self->{entSensorType},
+          $self->{entPhysicalIndex},
+          $self->{entSensorValue}
+      );
+      $self->add_perfdata(
+          label => $label,
+          value => $self->{entSensorValue},
+          critical => $criticalx,
+          warning => $warningx,
+      );
+    } elsif ($self->{entSensorThresholdEvaluation} eq "true") {
+      $self->add_warning(sprintf "%s sensor %s threshold evaluation is true (value: %s)",
+          $self->{entSensorType},
+          $self->{entPhysicalIndex},
+          $self->{entSensorValue}
+      );
+      $self->add_perfdata(
+          label => $label,
+          value => $self->{entSensorValue},
+          warning => $self->{ciscoEnvMonSensorThreshold},
+      );
+    }
+  } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
+      @{$self->{thresholds}})) {
+    $self->add_ok(sprintf "%s sensor %s threshold evaluation is true", 
+        $self->{entSensorType},
+        $self->{entPhysicalIndex});
   }
 }
 

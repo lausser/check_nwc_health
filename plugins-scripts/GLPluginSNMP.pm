@@ -1635,11 +1635,9 @@ sub get_entries_by_walk {
       }
     } else {
       $params{-maxrepetitions} = 200;
-          printf "bratta %s\n", Data::Dumper::Dumper(\@baseoids);
       foreach my $baseoid (@baseoids) {
         $params{-varbindlist} = [$baseoid];
         while (my $result = $GLPlugin::SNMP::session->get_bulk_request(%params)) {
-          printf "hoi %s\n", Data::Dumper::Dumper($result);
           my @names = $GLPlugin::SNMP::session->var_bind_names();
           my @oids = $self->sort_oids(\@names);
           $params{-varbindlist} = [pop @oids];
