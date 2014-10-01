@@ -116,7 +116,6 @@ sub check {
         critical => defined($criticalx) ? $criticalx : $critical,
     );
   } elsif ($self->{entSensorValue}) {
-printf "dadong\n";
     if ((defined($criticalx) && 
         $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) ||
        (defined($warningx) && 
@@ -163,7 +162,7 @@ printf "dadong\n";
     }
   } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
       @{$self->{thresholds}})) {
-    $self->add_ok(sprintf "%s sensor %s threshold evaluation is true", 
+    $self->add_warning(sprintf "%s sensor %s threshold evaluation is true", 
         $self->{entSensorType},
         $self->{entPhysicalIndex});
   }
