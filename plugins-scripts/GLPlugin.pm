@@ -1443,7 +1443,9 @@ sub check_thresholds {
     $warningrange = $self->{thresholds}->{default}->{warning};
     $criticalrange = $self->{thresholds}->{default}->{critical};
   }
-  if ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
+  if (! defined $warningrange) {
+    # there was no set_thresholds for defaults, no --warning, no --warningx
+  } elsif ($warningrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
     # warning = 10, warn if > 10 or < 0
     $level = $ERRORS{WARNING}
         if ($value > $1 || $value < 0);
@@ -1464,7 +1466,9 @@ sub check_thresholds {
     $level = $ERRORS{WARNING}
         if ($value >= $1 && $value <= $2);
   }
-  if ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
+  if (! defined $criticalrange) {
+    # there was no set_thresholds for defaults, no --critical, no --criticalx
+  } elsif ($criticalrange =~ /^([-+]?[0-9]*\.?[0-9]+)$/) {
     # critical = 10, crit if > 10 or < 0
     $level = $ERRORS{CRITICAL}
         if ($value > $1 || $value < 0);
@@ -1741,5 +1745,18 @@ sub check {
   # some tableitems are not checkable, they are only used to enhance other
   # items (e.g. sensorthresholds enhance sensors)
   # normal tableitems should have their own check-method
+}
+
+package Classes::Generic;
+our @ISA = qw(Classes::Device);
+use strict;
+
+sub init {
+  my $self = shift;
+  if ($self->mode =~ /something generic/) {
+  } else {
+    bless $self, 'GLPlugin::SNMP';
+    $self->no_such_mode();
+  }
 }
 
