@@ -492,9 +492,11 @@ sub getopts {
   # bzw. durch den exit3 ein evt. unsauberes beenden der verbindung.
   if ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$GLPlugin::plugin->{modes}}) &&
       (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$GLPlugin::plugin->{modes}})) {
-    printf "UNKNOWN - mode %s\n", $self->opts->mode;
-    $self->opts->print_help();
-    exit 3;
+    if ($self->opts->mode !~ /^my-/) {
+      printf "UNKNOWN - mode %s\n", $self->opts->mode;
+      $self->opts->print_help();
+      exit 3;
+    }
   }
 }
 
