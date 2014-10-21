@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-10-20 3.2
+- make nexus cpu names unique
+
 2014-09-26 3.1
 - add Clavister Firewall (Thanks Dirk Goetz)
 - fix GLPluginSNMP, all timeout-like errors are UNKNOWN
