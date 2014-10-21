@@ -45,10 +45,10 @@ use strict;
 
 sub finish {
   my $self = shift;
-  $self->{cpmCPUTotalIndex} = exists $self->{cpmCPUTotalIndex} ? 
+  $self->{cpmCPUTotalIndex} = exists $self->{cpmCPUTotalIndex} ?
       $self->{cpmCPUTotalIndex} :
       $Classes::Cisco::IOS::Component::CpuSubsystem::cpmCPUTotalIndex++;
-  $self->{cpmCPUTotalPhysicalIndex} = exists $self->{cpmCPUTotalPhysicalIndex} ? 
+  $self->{cpmCPUTotalPhysicalIndex} = exists $self->{cpmCPUTotalPhysicalIndex} ?
       $self->{cpmCPUTotalPhysicalIndex} : 0;
   if (exists $self->{cpmCPUTotal5minRev}) {
     $self->{usage} = $self->{cpmCPUTotal5minRev};
@@ -57,25 +57,39 @@ sub finish {
   }
   $self->protect_value($self->{cpmCPUTotalIndex}.$self->{cpmCPUTotalPhysicalIndex}, 'usage', 'percent');
   if ($self->{cpmCPUTotalPhysicalIndex}) {
-    my $entPhysicalName = '1.3.6.1.2.1.47.1.1.1.1.7';
-    $self->{entPhysicalName} = $self->get_request(
-        -varbindlist => [$entPhysicalName.'.'.$self->{cpmCPUTotalPhysicalIndex}]
-    );
     $self->{entPhysicalName} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalName', $self->{cpmCPUTotalPhysicalIndex});
+    # wichtig fuer gestacktes zeugs, bei dem entPhysicalName doppelt und mehr vorkommen kann
+    # This object is a user-assigned asset tracking identifier for the physical entity
+    # as specified by a network manager, and provides non-volatile storage of this
+    # information. On the first instantiation of an physical entity, the value of
+    # entPhysicalAssetID associated with that entity is set to the zero-length string.
+    # ...
+    # If write access is implemented for an instance of entPhysicalAssetID, and a value
+    # is written into the instance, the agent must retain the supplied value in the
+    # entPhysicalAssetID instance associated with the same physical entity for as long
+    # as that entity remains instantiated. This includes instantiations across all
+    # re-initializations/reboots of the network management system, including those
+    # which result in a change of the physical entity's entPhysicalIndex value.
+    $self->{entPhysicalAssetID} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalAssetID', $self->{cpmCPUTotalPhysicalIndex});
+    $self->{name} = $self->{entPhysicalName};
+    $self->{name} .= ' '.$self->{entPhysicalAssetID} if $self->{entPhysicalAssetID};
+    $self->{label} = $self->{entPhysicalName};
+    $self->{label} .= ' '.$self->{entPhysicalAssetID} if $self->{entPhysicalAssetID};
   } else {
-    $self->{entPhysicalName} = $self->{cpmCPUTotalIndex};
+    $self->{name} = $self->{cpmCPUTotalIndex};
+    $self->{label} = $self->{cpmCPUTotalIndex};
   }
+  return $self;
 }
 
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
-      $self->{entPhysicalName}, $self->{usage});
+      $self->{name}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds(value => $self->{usage},
-      metric => 'cpu_'.$self->{entPhysicalName}.'_usage'));
+  $self->add_message($self->check_thresholds($self->{usage}));
   $self->add_perfdata(
-      label => 'cpu_'.$self->{entPhysicalName}.'_usage',
+      label => 'cpu_'.$self->{label}.'_usage',
       value => $self->{usage},
       uom => '%',
   );
