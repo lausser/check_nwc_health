@@ -145,8 +145,8 @@ sub classify {
           bless $self, $class;
           $self->debug('using '.$class);
         } else {
-          bless $self, 'Classes::NWCGeneric';
-          $self->debug('using Classes::NWCGeneric');
+          bless $self, 'Classes::Generic';
+          $self->debug('using Classes::Generic');
         }
       }
     }
@@ -155,8 +155,8 @@ sub classify {
 }
 
 
-package Classes::NWCGeneric;
-our @ISA = qw(Classes::Generic);
+package Classes::Generic;
+our @ISA = qw(Classes::Device);
 use strict;
 
 
