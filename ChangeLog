@@ -2,6 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-11-02 3.1.1
+- bugfix my-modes
+- add paloaltomib
+
 2014-09-26 3.1
 - add Clavister Firewall (Thanks Dirk Goetz)
 - fix GLPluginSNMP, all timeout-like errors are UNKNOWN

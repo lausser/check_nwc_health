@@ -13,6 +13,7 @@ $GLPlugin::SNMP::mib_ids = {
   'CISCO-ENTITY-FRU-CONTROL-MIB' => '1.3.6.1.4.1.9.9.117.1',
   'CISCO-ENTITY-ALARM-MIB' => '1.3.6.1.4.1.9.9.138.1',
   'CISCO-ENVMON-MIB' => '1.3.6.1.4.1.9.9.13',
+  'PAN-PRODUCTS-MIB' => '1.3.6.1.4.1.25461.2.3',
 };
 
 $GLPlugin::SNMP::mibs_and_oids = {
@@ -5676,6 +5677,9 @@ $GLPlugin::SNMP::mibs_and_oids = {
     Loginsuccess => '1.3.6.1.4.1.244.1.11.4.3',
     SecurityViolation => '1.3.6.1.4.1.244.1.11.4.4',
     Generic => '1.3.6.1.4.1.244.1.11.4.5',
+  },
+  'xPAN-PRODUCTS-MIB' => {
+    "x"=>1.3.6.1.4.1.25461.2.3.9
   },
   'PAN-COMMON-MIB' => {
     panCommonConfMib => '1.3.6.1.4.1.25461.2.1.1',

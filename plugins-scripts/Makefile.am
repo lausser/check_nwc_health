@@ -164,6 +164,10 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/FanSubsystem.pm \
   Classes/Foundry/Component/TemperatureSubsystem.pm \
   Classes/Foundry.pm \
+  Classes/PaloAlto/Component/MemSubsystem.pm \
+  Classes/PaloAlto/Component/CpuSubsystem.pm \
+  Classes/PaloAlto/Component/EnvironmentalSubsystem.pm \
+  Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
