@@ -104,6 +104,8 @@ EXTRA_MODULES=\
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/MemSubsystem.pm \
   Classes/HOSTRESOURCESMIB.pm \
+  Classes/ENTITYSENSORMIB.pm \
+  Classes/ENTITYSENSORMIB/Component/EnvironmentalSubsystem.pm \
   Classes/BGP/Component/PeerSubsystem.pm \
   Classes/BGP.pm \
   Classes/FCMGMT/Component/EnvironmentalSubsystem.pm \
