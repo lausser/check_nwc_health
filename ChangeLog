@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-11-10 3.2
+- add palo alto hardware, sensors, ha
+
 2014-11-02 3.1.1
 - bugfix my-modes
 - add paloaltomib

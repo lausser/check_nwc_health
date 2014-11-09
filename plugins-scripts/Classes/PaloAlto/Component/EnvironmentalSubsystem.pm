@@ -1,4 +1,4 @@
-package Classes::PaloALto::Component::EnvironmentalSubsystem;
+package Classes::PaloAlto::Component::EnvironmentalSubsystem;
 our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
@@ -11,10 +11,10 @@ die;
   $self->get_snmp_objects("NETSCREEN-CHASSIS-MIB", (qw(
       sysBatteryStatus)));
   $self->get_snmp_tables("NETSCREEN-CHASSIS-MIB", [
-      ['fans', 'nsFanTable', 'Classes::PaloALto::Component::EnvironmentalSubsystem::Fan'],
-      ['power', 'nsPowerTable', 'Classes::PaloALto::Component::EnvironmentalSubsystem::Power'],
-      ['slots', 'nsSlotTable', 'Classes::PaloALto::Component::EnvironmentalSubsystem::Slot'],
-      ['temperatures', 'nsTemperatureTable', 'Classes::PaloALto::Component::EnvironmentalSubsystem::Temperature'],
+      ['fans', 'nsFanTable', 'Classes::PaloAlto::Component::EnvironmentalSubsystem::Fan'],
+      ['power', 'nsPowerTable', 'Classes::PaloAlto::Component::EnvironmentalSubsystem::Power'],
+      ['slots', 'nsSlotTable', 'Classes::PaloAlto::Component::EnvironmentalSubsystem::Slot'],
+      ['temperatures', 'nsTemperatureTable', 'Classes::PaloAlto::Component::EnvironmentalSubsystem::Temperature'],
   ]);
 }
 
@@ -26,7 +26,7 @@ sub check {
 }
 
 
-package Classes::PaloALto::Component::EnvironmentalSubsystem::Fan;
+package Classes::PaloAlto::Component::EnvironmentalSubsystem::Fan;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -43,7 +43,7 @@ sub check {
 }
 
 
-package Classes::PaloALto::Component::EnvironmentalSubsystem::Power;
+package Classes::PaloAlto::Component::EnvironmentalSubsystem::Power;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -59,7 +59,7 @@ sub check {
 }
 
 
-package Classes::PaloALto::Component::EnvironmentalSubsystem::Slot;
+package Classes::PaloAlto::Component::EnvironmentalSubsystem::Slot;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -75,7 +75,7 @@ sub check {
 }
 
 
-package Classes::PaloALto::Component::EnvironmentalSubsystem::Temperature;
+package Classes::PaloAlto::Component::EnvironmentalSubsystem::Temperature;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 
