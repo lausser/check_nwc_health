@@ -40,6 +40,12 @@ sub check_fex_subsystem {
   if (scalar (@{$self->{fexes}}) == 0) {
     $self->add_unknown('no FEXes found');
   } else {
+    # lookback, denn sonst muesste der check is_volatile sein und koennte bei
+    # einem kurzen netzausfall fehler schmeissen.
+    # empfehlung: check_interval 5 (muss jedesmal die entity-mib durchwalken)
+    #             retry_interval 2
+    #             max_check_attempts 2
+    # --lookback 360
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     $self->valdiff({name => $self->{name}, lastarray => 1},
         qw(fexNameList numOfFexes));
