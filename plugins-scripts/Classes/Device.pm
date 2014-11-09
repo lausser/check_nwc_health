@@ -99,6 +99,9 @@ sub classify {
       } elsif ($self->implements_mib('NETSCREEN-PRODUCTS-MIB')) {
         $self->debug('using Classes::Juniper::NetScreen');
         bless $self, 'Classes::Juniper::NetScreen';
+      } elsif ($self->implements_mib('PAN-PRODUCTS-MIB')) {
+        $self->debug('using Classes::PaloAlto');
+        bless $self, 'Classes::PaloAlto';
       } elsif ($self->{productname} =~ /SecureOS/i) {
         bless $self, 'Classes::SecureOS';
         $self->debug('using Classes::SecureOS');

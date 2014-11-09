@@ -104,6 +104,8 @@ EXTRA_MODULES=\
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/MemSubsystem.pm \
   Classes/HOSTRESOURCESMIB.pm \
+  Classes/ENTITYSENSORMIB.pm \
+  Classes/ENTITYSENSORMIB/Component/EnvironmentalSubsystem.pm \
   Classes/BGP/Component/PeerSubsystem.pm \
   Classes/BGP.pm \
   Classes/FCMGMT/Component/EnvironmentalSubsystem.pm \
@@ -164,6 +166,10 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/FanSubsystem.pm \
   Classes/Foundry/Component/TemperatureSubsystem.pm \
   Classes/Foundry.pm \
+  Classes/PaloAlto/Component/MemSubsystem.pm \
+  Classes/PaloAlto/Component/CpuSubsystem.pm \
+  Classes/PaloAlto/Component/EnvironmentalSubsystem.pm \
+  Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \

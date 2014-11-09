@@ -1,9 +1,13 @@
 package Classes::Cisco::IOS::Component::CpuSubsystem;
 our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
+use constant PHYS_NAME => 1;
+use constant PHYS_ASSET => 2;
+use constant PHYS_DESCR => 4;
 
 {
   our $cpmCPUTotalIndex = 0;
+  our $uniquify = PHYS_NAME;
 }
 
 sub init {
@@ -37,6 +41,18 @@ sub init {
       ));
     }
   }
+  foreach my $cpu (@{$self->{cpus}}) {
+printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+  }
+$Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_ASSET;
+  foreach my $cpu (@{$self->{cpus}}) {
+printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+  }
+$Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_DESCR;
+  foreach my $cpu (@{$self->{cpus}}) {
+printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+  }
+die;
 }
 
 package Classes::Cisco::IOS::Component::CpuSubsystem::Cpu;
@@ -71,15 +87,36 @@ sub finish {
     # re-initializations/reboots of the network management system, including those
     # which result in a change of the physical entity's entPhysicalIndex value.
     $self->{entPhysicalAssetID} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalAssetID', $self->{cpmCPUTotalPhysicalIndex});
-    $self->{name} = $self->{entPhysicalName};
-    $self->{name} .= ' '.$self->{entPhysicalAssetID} if $self->{entPhysicalAssetID};
-    $self->{label} = $self->{entPhysicalName};
-    $self->{label} .= ' '.$self->{entPhysicalAssetID} if $self->{entPhysicalAssetID};
+    $self->{entPhysicalDescr} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalDescr', $self->{cpmCPUTotalPhysicalIndex});
+    $self->unique_name();
   } else {
     $self->{name} = $self->{cpmCPUTotalIndex};
     $self->{label} = $self->{cpmCPUTotalIndex};
   }
   return $self;
+}
+
+sub unique_name {
+  my $self = shift;
+    $self->{name} = ();
+    $self->{label} = ();
+    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
+        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_NAME) {
+printf "PHYS_NAME\n";
+      push(@{$self->{name}}, $self->{entPhysicalName});
+    }
+    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
+        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_ASSET) {
+printf "PHYS_ASSET\n";
+      push(@{$self->{name}}, $self->{entPhysicalAssetID});
+    }
+    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
+        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_DESCR) {
+printf "PHYS_DESCR\n";
+      push(@{$self->{name}}, $self->{entPhysicalDescr});
+    }
+    $self->{name} = join(' ', @{$self->{name}});
+    $self->{label} = $self->{name};
 }
 
 sub check {
