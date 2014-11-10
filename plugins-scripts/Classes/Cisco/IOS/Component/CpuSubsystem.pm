@@ -42,17 +42,17 @@ sub init {
     }
   }
   foreach my $cpu (@{$self->{cpus}}) {
-printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
   }
 $Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_ASSET;
   foreach my $cpu (@{$self->{cpus}}) {
-printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
   }
 $Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_DESCR;
   foreach my $cpu (@{$self->{cpus}}) {
-printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
   }
-die;
+#die;
 }
 
 package Classes::Cisco::IOS::Component::CpuSubsystem::Cpu;
