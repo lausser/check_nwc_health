@@ -102,17 +102,17 @@ sub unique_name {
     $self->{label} = ();
     if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
         Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_NAME) {
-printf "PHYS_NAME\n";
+#printf "PHYS_NAME\n";
       push(@{$self->{name}}, $self->{entPhysicalName});
     }
     if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
         Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_ASSET) {
-printf "PHYS_ASSET\n";
+#printf "PHYS_ASSET\n";
       push(@{$self->{name}}, $self->{entPhysicalAssetID});
     }
     if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
         Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_DESCR) {
-printf "PHYS_DESCR\n";
+#printf "PHYS_DESCR\n";
       push(@{$self->{name}}, $self->{entPhysicalDescr});
     }
     $self->{name} = join(' ', @{$self->{name}});
