@@ -193,7 +193,7 @@ sub update_interface_cache {
   if ($must_update) {
     $self->debug('update of interface cache');
     $self->{interface_cache} = {};
-    foreach ($self->get_snmp_table_objects( 'IFMIB', 'ifTable+ifXTable')) {
+    foreach ($self->get_snmp_table_objects('MINI-IFMIB', 'ifTable+ifXTable', [-1])) {
       # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
       # alle gleich heissen
       # und noch so ein hirnbrand: --mode list-interfaces

@@ -2,7 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-11-29 3.2.1
 - remove unnecessary use statement
+- finalize paloalto ha
 
 2014-11-18 3.2.0.1
 - hide some debug printfs

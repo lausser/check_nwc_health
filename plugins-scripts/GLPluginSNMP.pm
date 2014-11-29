@@ -1232,9 +1232,47 @@ sub get_snmp_table_objects {
   }
   my $entry = $table;
   $entry =~ s/Table/Entry/g;
-  if (scalar(@{$indices}) == 1) {
-    if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib} &&
-        exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table}) {
+  if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib} &&
+      exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table}) {
+    if (scalar(@{$indices}) == 1 && $indices->[0] == -1) {
+      # get mini-version of a table
+      my $result = {};
+      my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
+      my $eoidlen = length($eoid);
+      my @columns = map {
+          $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
+      } grep {
+        substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
+            $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
+      } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
+      my $index = join('.', @{$indices->[0]});
+      my $ifresult = $self->get_entries(
+          -startindex => 0,
+          -columns => \@columns,
+      );
+      map { $result->{$_} = $ifresult->{$_} }
+          keys %{$ifresult};
+      if ($augmenting_table &&
+          exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$augmenting_table}) {
+        my $entry = $augmenting_table;
+        $entry =~ s/Table/Entry/g;
+        my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
+        my $eoidlen = length($eoid);
+        my @columns = map {
+            $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
+        } grep {
+          substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq $eoid
+        } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
+        my $ifresult = $self->get_entries(
+            -startindex => 0,
+            -columns => \@columns,
+        );
+        map { $result->{$_} = $ifresult->{$_} }
+            keys %{$ifresult};
+      }
+      @entries = $self->make_symbolic($mib, $result, $indices);
+      @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
+    } elsif (scalar(@{$indices}) == 1) {
       my $result = {};
       my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
       my $eoidlen = length($eoid);
@@ -1273,12 +1311,9 @@ sub get_snmp_table_objects {
       }
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
-    }
-  } elsif (scalar(@{$indices}) > 1) {
+    } elsif (scalar(@{$indices}) > 1) {
     # man koennte hier pruefen, ob die indices aufeinanderfolgen
     # und dann get_entries statt get_table aufrufen
-    if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib} &&
-        exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table}) {
       my $result = {};
       my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
       my $eoidlen = length($eoid);
@@ -1341,10 +1376,7 @@ sub get_snmp_table_objects {
       # $self->get_indices($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry});
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
-    }
-  } else {
-    if (exists $GLPlugin::SNMP::mibs_and_oids->{$mib} &&
-        exists $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table}) {
+    } else {
       $self->debug(sprintf "get_snmp_table_objects calls get_table %s",
           $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table});
       my $result = $self->get_table(
@@ -1512,7 +1544,7 @@ sub get_entries {
   if (! $self->opts->snmpwalk) {
     $result = $self->get_entries_get_bulk(%params);
     if (! $result) {
-      if (scalar (@{$params{'-columns'}}) < 50 && $params{'-startindex'} eq $params{'-endindex'}) {
+      if (scalar (@{$params{'-columns'}}) < 50 && $params{'-endindex'} && $params{'-startindex'} eq $params{'-endindex'}) {
         $result = $self->get_entries_get_simple(%params);
       } else {
         $result = $self->get_entries_get_next(%params);
