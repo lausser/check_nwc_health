@@ -744,7 +744,7 @@ sub check_snmp_and_model {
         } elsif (/^([\d\.]+) = Hex-STRING: (.*)/) {
           $response->{$1} = "0x".$2;
           $response->{$1} =~ s/\s+$//;
-        } elsif (/^([\d\.]+) = \w+: (\-*\d+)/) {
+        } elsif (/^([\d\.]+) = \w+: (\-*\d+)\s*$/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {
           $response->{$1} = $2;
@@ -1267,9 +1267,14 @@ sub get_snmp_table_objects {
         map { $result->{$_} = $ifresult->{$_} }
             keys %{$ifresult};
       }
-      $indices = [];
-      @entries = $self->make_symbolic($mib, $result, $indices);
-      @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
+      my @indices = 
+          $self->get_indices(
+              -baseoid => $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry},
+              -oids => [keys %{$result}]);
+      $self->debug(sprintf "get_snmp_table_objects get_table returns %d indices",
+          scalar(@indices));
+      @entries = $self->make_symbolic($mib, $result, \@indices);
+      @entries = map { $_->{indices} = shift @indices; $_ } @entries;
     } elsif (scalar(@{$indices}) == 1) {
       my $result = {};
       my $eoid = $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
