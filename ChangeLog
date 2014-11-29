@@ -2,6 +2,8 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+- remove unnecessary use statement
+
 2014-11-18 3.2.0.1
 - hide some debug printfs
 

@@ -1,7 +1,6 @@
 # /usr/bin/perl -w
 
 use strict;
-use File::Basename;
 
 my $plugin = Classes::Device->new(
     shortname => '',
