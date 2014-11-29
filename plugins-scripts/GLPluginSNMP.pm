@@ -1245,9 +1245,7 @@ sub get_snmp_table_objects {
         substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
             $GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
       } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
-      my $index = join('.', @{$indices->[0]});
       my $ifresult = $self->get_entries(
-          -startindex => 0,
           -columns => \@columns,
       );
       map { $result->{$_} = $ifresult->{$_} }
@@ -1264,12 +1262,12 @@ sub get_snmp_table_objects {
           substr($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq $eoid
         } keys %{$GLPlugin::SNMP::mibs_and_oids->{$mib}};
         my $ifresult = $self->get_entries(
-            -startindex => 0,
             -columns => \@columns,
         );
         map { $result->{$_} = $ifresult->{$_} }
             keys %{$ifresult};
       }
+      $indices = [];
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
     } elsif (scalar(@{$indices}) == 1) {
