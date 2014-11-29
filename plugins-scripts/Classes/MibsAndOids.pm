@@ -23,6 +23,18 @@ $GLPlugin::SNMP::mibs_and_oids = {
       sysUpTime => '1.3.6.1.2.1.1.3',
       sysName => '1.3.6.1.2.1.1.5',
   },
+  'MINI-IFMIB' => {
+      ifNumber => '1.3.6.1.2.1.2.1',
+      ifTableLastChange => '1.3.6.1.2.1.31.1.5',
+      ifTable => '1.3.6.1.2.1.2.2',
+      ifEntry => '1.3.6.1.2.1.2.2.1',
+      ifIndex => '1.3.6.1.2.1.2.2.1.1',
+      ifDescr => '1.3.6.1.2.1.2.2.1.2',
+      ifXTable => '1.3.6.1.2.1.31.1.1',
+      ifXEntry => '1.3.6.1.2.1.31.1.1.1',
+      ifName => '1.3.6.1.2.1.31.1.1.1.1',
+      ifAlias => '1.3.6.1.2.1.31.1.1.1.18',
+  },
   'IFMIB' => {
       ifNumber => '1.3.6.1.2.1.2.1',
       ifTableLastChange => '1.3.6.1.2.1.31.1.5',
