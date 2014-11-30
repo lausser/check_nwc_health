@@ -1819,8 +1819,14 @@ sub make_symbolic {
             } elsif ($GLPlugin::SNMP::mibs_and_oids->{$mib}->{$symoid.'Definition'} =~ /^(.*?)::(.*)/) {
               my $mib = $1;
               my $definition = $2;
-              if  (exists $GLPlugin::SNMP::definitions->{$mib} && exists $GLPlugin::SNMP::definitions->{$mib}->{$definition}
-                  && exists $GLPlugin::SNMP::definitions->{$mib}->{$definition}->{$result->{$fulloid}}) {
+              if  (exists $GLPlugin::SNMP::definitions->{$mib} &&
+                  exists $GLPlugin::SNMP::definitions->{$mib}->{$definition} &&
+                  ref($GLPlugin::SNMP::definitions->{$mib}->{$definition}) eq 'CODE') {
+                $mo->{$symoid} = $GLPlugin::SNMP::definitions->{$mib}->{$definition}->($result->{$fulloid});
+              } elsif  (exists $GLPlugin::SNMP::definitions->{$mib} &&
+                  exists $GLPlugin::SNMP::definitions->{$mib}->{$definition} &&
+                  ref($GLPlugin::SNMP::definitions->{$mib}->{$definition}) eq 'HASH' &&
+                  exists $GLPlugin::SNMP::definitions->{$mib}->{$definition}->{$result->{$fulloid}}) {
                 $mo->{$symoid} = $GLPlugin::SNMP::definitions->{$mib}->{$definition}->{$result->{$fulloid}};
               } else {
                 $mo->{$symoid} = 'unknown_'.$result->{$fulloid};
