@@ -10,7 +10,7 @@ sub init {
     $self->analyze_fex_subsystem();
     $self->check_fex_subsystem();
   } elsif ($self->mode =~ /device::hardware::load/) {
-    $self->analyze_and_check_cpu_subsystem("Classes::Cisco::NXOS::Component::CpuSubsystem");
+    $self->analyze_and_check_cpu_subsystem("Classes::Cisco::IOS::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::NXOS::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::hsrp/) {

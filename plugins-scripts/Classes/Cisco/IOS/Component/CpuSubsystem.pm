@@ -41,18 +41,19 @@ sub init {
       ));
     }
   }
-  foreach my $cpu (@{$self->{cpus}}) {
-#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
+  # same cpmCPUTotalPhysicalIndex found in multiple table rows
+  if (scalar(@{$self->{cpus}}) > 1) {
+    my %names = ();
+    foreach my $cpu (@{$self->{cpus}}) {
+      $names{$cpu->{name}}++;
+    }
+    foreach my $cpu (@{$self->{cpus}}) {
+      if ($names{$cpu->{name}} > 1) {
+        # more than one cpu points to the same physical entity
+        $cpu->{name} .= '.'.$cpu->{flat_indices};
+      }
+    }
   }
-$Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_ASSET;
-  foreach my $cpu (@{$self->{cpus}}) {
-#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
-  }
-$Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |= PHYS_DESCR;
-  foreach my $cpu (@{$self->{cpus}}) {
-#printf "%-20s%s\n", $cpu->{name}, $cpu->{label};
-  }
-#die;
 }
 
 package Classes::Cisco::IOS::Component::CpuSubsystem::Cpu;
@@ -61,9 +62,7 @@ use strict;
 
 sub finish {
   my $self = shift;
-  $self->{cpmCPUTotalIndex} = exists $self->{cpmCPUTotalIndex} ?
-      $self->{cpmCPUTotalIndex} :
-      $Classes::Cisco::IOS::Component::CpuSubsystem::cpmCPUTotalIndex++;
+  $self->{cpmCPUTotalIndex} = $self->{flat_indices};
   $self->{cpmCPUTotalPhysicalIndex} = exists $self->{cpmCPUTotalPhysicalIndex} ?
       $self->{cpmCPUTotalPhysicalIndex} : 0;
   if (exists $self->{cpmCPUTotal5minRev}) {
@@ -88,39 +87,18 @@ sub finish {
     # which result in a change of the physical entity's entPhysicalIndex value.
     $self->{entPhysicalAssetID} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalAssetID', $self->{cpmCPUTotalPhysicalIndex});
     $self->{entPhysicalDescr} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalDescr', $self->{cpmCPUTotalPhysicalIndex});
-    $self->unique_name();
+    $self->{name} = $self->{entPhysicalName} || $self->{entPhysicalDescr};
   } else {
     $self->{name} = $self->{cpmCPUTotalIndex};
-    $self->{label} = $self->{cpmCPUTotalIndex};
+    # waere besser, aber dann zerlegts wohl zu viele rrdfiles
+    #$self->{name} = 'central processor';
   }
   return $self;
 }
 
-sub unique_name {
-  my $self = shift;
-    $self->{name} = ();
-    $self->{label} = ();
-    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
-        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_NAME) {
-#printf "PHYS_NAME\n";
-      push(@{$self->{name}}, $self->{entPhysicalName});
-    }
-    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
-        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_ASSET) {
-#printf "PHYS_ASSET\n";
-      push(@{$self->{name}}, $self->{entPhysicalAssetID});
-    }
-    if ($Classes::Cisco::IOS::Component::CpuSubsystem::uniquify |
-        Classes::Cisco::IOS::Component::CpuSubsystem::PHYS_DESCR) {
-#printf "PHYS_DESCR\n";
-      push(@{$self->{name}}, $self->{entPhysicalDescr});
-    }
-    $self->{name} = join(' ', @{$self->{name}});
-    $self->{label} = $self->{name};
-}
-
 sub check {
   my $self = shift;
+  $self->{label} = $self->{name};
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
       $self->{name}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);
