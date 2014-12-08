@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-12-08 3.3
+- add windowslocal
+
 2014-12-06 3.2.2
 - unique names for cisco cpus pointing to the same physical entity
 

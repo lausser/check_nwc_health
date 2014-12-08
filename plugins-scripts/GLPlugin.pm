@@ -138,7 +138,17 @@ sub validate_args {
     $ENV{NRPE_MULTILINESUPPORT} = 0;
   }
   if (! $self->opts->statefilesdir) {
-    if (exists $ENV{OMD_ROOT}) {
+    if ($^O =~ /MSWin/) {
+      if (defined $ENV{TEMP}) {
+        $self->override_opt('statefilesdir', $ENV{TEMP}."/".$GLPlugin::plugin->{name});
+      } elsif (defined $ENV{TMP}) {
+        $self->override_opt('statefilesdir', $ENV{TMP}."/".$GLPlugin::plugin->{name});
+      } elsif (defined $ENV{windir}) {
+        $self->override_opt('statefilesdir', File::Spec->catfile($ENV{windir}, 'Temp')."/".$GLPlugin::plugin->{name});
+      } else {
+        $self->override_opt('statefilesdir', "C:/".$GLPlugin::plugin->{name});
+      }
+    } elsif (exists $ENV{OMD_ROOT}) {
       $self->override_opt('statefilesdir', $ENV{OMD_ROOT}."/var/tmp/".$GLPlugin::plugin->{name});
     } else {
       $self->override_opt('statefilesdir', "/var/tmp/".$GLPlugin::plugin->{name});

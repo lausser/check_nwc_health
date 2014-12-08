@@ -8,6 +8,11 @@ sub classify {
     $self->add_unknown('either specify a hostname or a snmpwalk file');
   } else {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
+    } elsif ($self->opts->servertype && $self->opts->servertype eq 'windowslocal') {
+      eval "use DBD::WMI";
+      if ($@) {
+        $self->add_unknown("module DBD::WMI is not installed");
+      }
     } elsif ($self->opts->port && $self->opts->port == 49000) {
       $self->{productname} = 'upnp';
       $self->check_upnp_and_model();
@@ -43,6 +48,9 @@ sub classify {
       } elsif ($self->{productname} =~ /linuxlocal/i) {
         bless $self, 'Server::Linux';
         $self->debug('using Server::Linux');
+      } elsif ($self->{productname} =~ /windowslocal/i) {
+        bless $self, 'Server::Windows';
+        $self->debug('using Server::Windows');
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
