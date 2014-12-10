@@ -5,8 +5,20 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-IPSEC-FLOW-MONITOR-MIB', [
-      ['ciketunnels', 'cikeTunnelTable', 'Classes::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::CikeTunnel'],
+      ['ciketunnels', 'cikeTunnelTable', 'Classes::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::CikeTunnel',  sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{cikeTunRemoteValue})}],
   ]);
+}
+
+sub check {
+  my $self = shift;
+  if (! @{$self->{ciketunnels}}) {
+    $self->add_critical(sprintf 'tunnel to %s does not exist',
+        $self->opts->name);
+  } else {
+    foreach (@{$self->{ciketunnels}}) {
+      $_->check();
+    }
+  }
 }
 
 
@@ -18,16 +30,12 @@ sub check {
   my $self = shift;
 # cikeTunRemoteValue per --name angegeben, muss active sein
 # ansonsten watch-vpns, delta tunnels ueberwachen
-printf "%s\n", Data::Dumper::Dumper($self);
-  return;
-  $self->ensure_index('ciscoEnvMonFanStatusIndex');
-  $self->add_info(sprintf 'fan %d (%s) is %s',
-      $self->{ciscoEnvMonFanStatusIndex},
-      $self->{ciscoEnvMonFanStatusDescr},
-      $self->{ciscoEnvMonFanState});
-  if ($self->{ciscoEnvMonFanState} eq 'notPresent') {
-  } elsif ($self->{ciscoEnvMonFanState} ne 'normal') {
+  $self->add_info(sprintf 'tunnel to %s is %s',
+      $self->{cikeTunRemoteValue}, $self->{cikeTunStatus});
+  if ($self->{cikeTunStatus} ne 'active') {
     $self->add_critical();
+  } else {
+    $self->add_ok();
   }
 }
 
