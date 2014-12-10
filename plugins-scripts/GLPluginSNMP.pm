@@ -842,7 +842,8 @@ sub check_snmp_and_model {
     my $tac = time;
     if (defined $sysUptime && defined $sysDescr) {
       # drecksschrott asa liefert negative werte
-      if (defined $snmpEngineTime && $snmpEngineTime > 0) {
+      # und drecksschrott socomec liefert: wrong type (should be INTEGER): NULL
+      if (defined $snmpEngineTime && $snmpEngineTime =~ /^\d+$/ && $snmpEngineTime > 0) {
         $self->{uptime} = $snmpEngineTime;
       } else {
         $self->{uptime} = $self->timeticks($sysUptime);

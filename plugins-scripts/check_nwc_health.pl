@@ -99,6 +99,12 @@ $plugin->add_mode(
     help => 'Check the percentage of up interfaces in a link aggregation',
 );
 $plugin->add_mode(
+    internal => 'device::vpn::status',
+    spec => 'vpn-status',
+    alias => undef,
+    help => 'Check the status of vpns (up/down)',
+);
+$plugin->add_mode(
     internal => 'device::shinken::interface',
     spec => 'create-shinken-service',
     alias => undef,
