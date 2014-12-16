@@ -868,6 +868,14 @@ sub check_snmp_and_model {
   }
 }
 
+sub mult_snmp_max_msg_size {
+  my $self = shift;
+  my $factor = shift || 10;
+  $self->debug(sprintf "raise maxmsgsize %d * %d", 
+      $factor, $GLPlugin::SNMP::session->max_msg_size());
+  $GLPlugin::SNMP::session->max_msg_size($factor * $GLPlugin::SNMP::session->max_msg_size()) if $GLPlugin::SNMP::session;
+}
+
 sub no_such_model {
   my $self = shift;
   printf "Model %s is not implemented\n", $self->{productname};
