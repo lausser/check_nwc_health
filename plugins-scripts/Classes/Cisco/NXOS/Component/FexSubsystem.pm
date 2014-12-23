@@ -7,6 +7,27 @@ sub init {
   $self->get_snmp_tables('CISCO-ETHERNET-FABRIC-EXTENDER-MIB', [
     ['fexes', 'cefexConfigTable', 'Classes::Cisco::NXOS::Component::FexSubsystem::Fex'],
   ]);
+  if (scalar (@{$self->{fexes}}) == 0) {
+   # fallback
+    $self->get_snmp_tables('ENTITY-MIB', [
+      ['fexes', 'entPhysicalTable', 'Classes::Cisco::NXOS::Component::FexSubsystem::Fex'],
+    ]);
+    @{$self->{fexes}} = grep {
+        $_->{entPhysicalClass} eq 'chassis' && $_->{entPhysicalDescr} =~ /fex/i; 
+    } @{$self->{fexes}};
+    if (scalar (@{$self->{fexes}}) == 0) {
+      $self->get_snmp_tables('ENTITY-MIB', [
+        ['fexes', 'entPhysicalTable', 'Classes::Cisco::NXOS::Component::FexSubsystem::Fex'],
+      ]);
+      # fallback
+      my $known_fexes = {};
+      @{$self->{fexes}} = grep {
+        ! $known_fexes->{$_->{cefexConfigExtenderName}}++;
+      } grep {
+          $_->{entPhysicalClass} eq 'other' && $_->{entPhysicalDescr} =~ /fex.*cable/i; 
+      } @{$self->{fexes}};
+    }
+  }
 }
 
 sub dump {
@@ -51,7 +72,44 @@ sub check {
   }
 }
 
+
 package Classes::Cisco::NXOS::Component::FexSubsystem::Fex;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
+
+sub finish {
+  my $self = shift;
+  $self->{original_cefexConfigExtenderName} = $self->{cefexConfigExtenderName};
+  if (exists $self->{entPhysicalClass}) {
+    # stammt aus ENTITY-MIB
+    if ($self->{entPhysicalDescr} =~ /^FEX[^\d]*(\d+)/i) {
+      $self->{cefexConfigExtenderName} = "FEX".$1;
+    } else {
+      $self->{cefexConfigExtenderName} = $self->{entPhysicalDescr};
+    }
+  } else {
+    # stammt aus CISCO-ETHERNET-FABRIC-EXTENDER-MIB, kann FEX101-J8-VT04.01 heissen
+    if ($self->{cefexConfigExtenderName} =~ /^FEX[^\d]*(\d+)/i) {
+      $self->{cefexConfigExtenderName} = "FEX".$1;
+    }
+  }
+}
+
+__END__
+entweder die cefexConfigTable ist bestueckt oder man liest als Fallback die Entities aus
+entPhysicalAlias:
+entPhysicalAssetID:
+entPhysicalClass: chassis
+entPhysicalContainedIn: 10
+entPhysicalDescr: Fex-107 Nexus2248 Chassis
+entPhysicalFirmwareRev:
+entPhysicalHardwareRev: V03
+entPhysicalIsFRU: 2
+entPhysicalMfgName: Cisco Systems, Inc.
+entPhysicalModelName: Fabric Extender Module: 48x1GE, 4x10GE
+entPhysicalName: Fex-107 Nexus2248 Chassis
+entPhysicalParentRelPos: 107
+entPhysicalSerialNum: SSI162802BH
+entPhysicalSoftwareRev:
+entPhysicalVendorType: 1.3.6.1.4.1.9.12.3.1.3.914
 
