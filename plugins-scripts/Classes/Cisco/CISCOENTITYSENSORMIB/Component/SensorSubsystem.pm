@@ -120,7 +120,7 @@ sub check {
         $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) ||
        (defined($warningx) && 
         $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == WARNING) ||
-       $self->{entSensorThresholdEvaluation} eq "true") {
+       ($self->{entSensorThresholdEvaluation} && $self->{entSensorThresholdEvaluation} eq "true")) {
     }
     if (defined($criticalx) &&
         $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) {
@@ -148,7 +148,7 @@ sub check {
           critical => $criticalx,
           warning => $warningx,
       );
-    } elsif ($self->{entSensorThresholdEvaluation} eq "true") {
+    } elsif ($self->{entSensorThresholdEvaluation} && $self->{entSensorThresholdEvaluation} eq "true") {
       $self->add_warning(sprintf "%s sensor %s threshold evaluation is true (value: %s)",
           $self->{entSensorType},
           $self->{entPhysicalIndex},
