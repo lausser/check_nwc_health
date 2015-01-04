@@ -4,6 +4,7 @@
 
 2014-01-02 3.4.2.2
 - fix lsmpi_io for cisco asr1000 (Thanks Andreas Schulz)
+- fix Fritz!Box upnp control url (Thanks Bernd)
 
 2014-12-23 3.4.2.1
 - use fallbacks to find fexes (cefexConfigTable may not be populated)

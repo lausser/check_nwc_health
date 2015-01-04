@@ -49,6 +49,7 @@ sub check_upnp_and_model {
   } else {
     $self->add_critical('could not find SOAP::Lite module');
   }
+  $self->{services} = {};
   if (! $self->check_messages()) {
     eval {
       my $igddesc = sprintf "http://%s:%s/igddesc.xml",
@@ -59,6 +60,27 @@ sub check_upnp_and_model {
       my $xpc = XML::LibXML::XPathContext->new( $root );
       $xpc->registerNs('n', 'urn:schemas-upnp-org:device-1-0');
       $self->{productname} = $xpc->findvalue('(//n:device)[position()=1]/n:modelName' );
+      my @services = ();
+      my @servicedescs = $xpc->find('(//n:service)')->get_nodelist;
+      foreach my $service (@servicedescs) {
+        my $servicetype = undef;
+        my $serviceid = undef;
+        my $controlurl = undef;
+        foreach my $node ($service->nonBlankChildNodes("./*")) {
+          $serviceid = $node->textContent if ($node->nodeName eq "serviceId");
+          $servicetype = $node->textContent if ($node->nodeName eq "serviceType");
+          $controlurl = $node->textContent if ($node->nodeName eq "controlURL");
+        }
+        if ($serviceid && $controlurl) {
+          push(@services, {
+              serviceType => $servicetype,
+              serviceId => $serviceid,
+              controlURL => sprintf('http://%s:%s%s',
+                  $self->opts->hostname, $self->opts->port, $controlurl),
+          });
+        }
+      }
+      $self->set_variable('services', \@services);
     };
     if ($@) {
       $self->add_critical($@);
@@ -66,10 +88,10 @@ sub check_upnp_and_model {
   }
   if (! $self->check_messages()) {
     eval {
+      my $service = (grep { $_->{serviceId} =~ /WANIPConn1/ } @{$self->get_variable('services')})[0];
       my $som = SOAP::Lite
-          -> proxy(sprintf 'http://%s:%s/upnp/control/WANIPConn1',
-              $self->opts->hostname, $self->opts->port)
-          -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
+          -> proxy($service->{controlURL})
+          -> uri($service->{serviceType})
           -> GetStatusInfo();
       $self->{uptime} = $som->valueof("//GetStatusInfoResponse/NewUptime");
       $self->{uptime} /= 1.0;

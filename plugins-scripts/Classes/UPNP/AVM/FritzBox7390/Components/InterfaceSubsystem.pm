@@ -2,53 +2,48 @@ package Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem);
 use strict;
 
+
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces/) {
     $self->{ifDescr} = "WAN";
+    my $service = (grep { $_->{serviceId} =~ /WANIPConn1/ } @{$self->get_variable('services')})[0];
     $self->{ExternalIPAddress} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANIPConn1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetExternalIPAddress()
       -> result;
     $self->{ConnectionStatus} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANIPConn1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANIPConnection:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetStatusInfo()
       -> valueof("//GetStatusInfoResponse/NewConnectionStatus");;
+    $service = (grep { $_->{serviceId} =~ /WANCommonIFC1/ } @{$self->get_variable('services')})[0];
     $self->{PhysicalLinkStatus} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewPhysicalLinkStatus");
     $self->{Layer1UpstreamMaxBitRate} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1UpstreamMaxBitRate");
     $self->{Layer1DownstreamMaxBitRate} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetCommonLinkProperties()
       -> valueof("//GetCommonLinkPropertiesResponse/NewLayer1DownstreamMaxBitRate");
     $self->{TotalBytesSent} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetTotalBytesSent()
       -> result;
     $self->{TotalBytesReceived} = SOAP::Lite
-      -> proxy(sprintf 'http://%s:%s/upnp/control/WANCommonIFC1',
-        $self->opts->hostname, $self->opts->port)
-      -> uri('urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1')
+      -> proxy($service->{controlURL})
+      -> uri($service->{serviceType})
       -> GetTotalBytesReceived()
       -> result;
-  
     if ($self->mode =~ /device::interfaces::usage/) {
       $self->valdiff({name => $self->{ifDescr}}, qw(TotalBytesSent TotalBytesReceived));
       $self->{inputUtilization} = $self->{delta_TotalBytesReceived} * 8 * 100 /
