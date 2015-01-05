@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2014-01-05 3.4.2.3
+- fix a perl-bug in F5 (was introduced in 3.4.2)
+
 2014-01-02 3.4.2.2
 - fix lsmpi_io for cisco asr1000 (Thanks Andreas Schulz)
 - fix Fritz!Box upnp control url (Thanks Bernd)
