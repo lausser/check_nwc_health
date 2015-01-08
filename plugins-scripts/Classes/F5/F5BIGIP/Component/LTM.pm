@@ -6,8 +6,6 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {};
-  # tables can be huge
-  $self->mult_snmp_max_msg_size(10);
   if ($params{productversion} =~ /^4/) {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem4";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem4");
@@ -16,6 +14,8 @@ sub new {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem9";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem9");
   }
+  # tables can be huge
+  $self->mult_snmp_max_msg_size(10);
   $self->init();
   return $self;
 }

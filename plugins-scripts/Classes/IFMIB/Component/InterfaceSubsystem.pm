@@ -155,6 +155,10 @@ sub check {
         }
         $_->check();
       }
+      if ($self->opts->report eq "short") {
+        $self->clear_ok();
+        $self->add_ok('no problems') if ! $self->check_messages();
+      }
     }
   }
 }
