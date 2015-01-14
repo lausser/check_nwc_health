@@ -1561,7 +1561,7 @@ sub get_entries {
       } else {
         $result = $self->get_entries_get_next(%params);
       }
-      if (! $result && $params{'-startindex'} !~ /\./) {
+      if (! $result && defined $params{'-startindex'} && $params{'-startindex'} !~ /\./) {
         # compound indexes cannot continue, as these two methods iterate numerically
         if ($GLPlugin::SNMP::session->error() =~ /tooBig/i) {
           $result = $self->get_entries_get_next_1index(%params);
