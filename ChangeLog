@@ -2,13 +2,22 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
-2014-01-08 3.4.2.4
+2015-01-28 3.4.2.7
+- more trailing null cleanup. (Thanks Jörg Linge)
+
+2015-01-27 3.4.2.6
+- bugfix in interface-usage windows+snmp+trailing null in ifDescr. (Thanks Jörg Linge)
+
+2015-01-14 3.4.2.5
+- bugfix in interface-status and snmp-table-get (no more false 64bit interfaces)
+
+2015-01-08 3.4.2.4
 - shorten interface-output with report=short
 
-2014-01-05 3.4.2.3
+2015-01-05 3.4.2.3
 - fix a perl-bug in F5 (was introduced in 3.4.2)
 
-2014-01-02 3.4.2.2
+2015-01-02 3.4.2.2
 - fix lsmpi_io for cisco asr1000 (Thanks Andreas Schulz)
 - fix Fritz!Box upnp control url (Thanks Bernd)
 

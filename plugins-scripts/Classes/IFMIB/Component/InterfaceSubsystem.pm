@@ -210,8 +210,9 @@ sub update_interface_cache {
           $_->{ifDescr} = $1;
         }
       }
-      $self->{interface_cache}->{$_->{ifIndex}}->{ifDescr} = $_->{ifDescr};
-      $self->{interface_cache}->{$_->{ifIndex}}->{ifAlias} = $_->{ifAlias} if exists $_->{ifAlias};;
+      $self->{interface_cache}->{$_->{ifIndex}}->{ifDescr} = unpack("Z*", $_->{ifDescr});
+      $self->{interface_cache}->{$_->{ifIndex}}->{ifName} = unpack("Z*", $_->{ifName}) if exists $_->{ifName};
+      $self->{interface_cache}->{$_->{ifIndex}}->{ifAlias} = unpack("Z*", $_->{ifAlias}) if exists $_->{ifAlias};
     }
     $self->save_interface_cache();
   }
@@ -332,6 +333,7 @@ sub new {
     next if $key !~ /^if/;
     $self->{$key} = 0 if ! defined $params{$key};
   }
+  $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
   bless $self, $class;
   if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
     if ($self->{ifDescr} =~ $self->opts->name2) {
@@ -364,6 +366,8 @@ sub new {
       ifCounterDiscontinuityTime => $params{ifCounterDiscontinuityTime},
     };
     map { $self->{$_} = $self64->{$_} } keys %{$self64};
+    $self->{ifName} = unpack("Z*", $self->{ifName});
+    $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
   $self->init();
