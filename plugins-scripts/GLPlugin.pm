@@ -1342,10 +1342,11 @@ sub nagios_exit {
       chomp $message;
   }
   if ($self->opts->negate) {
+    my $original_code = $code;
     foreach my $from (keys %{$self->opts->negate}) {
       if ((uc $from) =~ /^(OK|WARNING|CRITICAL|UNKNOWN)$/ &&
           (uc $self->opts->negate->{$from}) =~ /^(OK|WARNING|CRITICAL|UNKNOWN)$/) {
-        if ($code == $ERRORS{uc $from}) {
+        if ($original_code == $ERRORS{uc $from}) {
           $code = $ERRORS{uc $self->opts->negate->{$from}};
         }
       }
