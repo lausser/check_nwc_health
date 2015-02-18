@@ -439,6 +439,12 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'morphperfdata=%s',
+    help => "--morphperfdata
+   The parameter allows you to change performance data labels. It's a perl regexp.",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'negate=s%',
     help => "--negate
    The parameter allows you to map exit levels, such as warning=critical",

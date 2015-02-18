@@ -1148,6 +1148,16 @@ sub add_perfdata {
   my $value = $args{value};
   my $uom = $args{uom} || "";
   my $format = '%d';
+
+  if ($self->opts->can("morphperfdata") && $self->opts->morphperfdata) {
+    # 'Intel [R] Interface (\d+) usage'='nic$1'
+    foreach my $key (keys %{$self->opts->morphperfdata}) {
+      if ($label =~ /$key/) {
+        my $replacement = $self->opts->morphperfdata->{$key};
+        $label =~ s/$key/$replacement/;
+      }
+    }
+  }
   if ($value =~ /\./) {
     if (defined $args{places}) {
       $value = sprintf '%.'.$args{places}.'f', $value;
