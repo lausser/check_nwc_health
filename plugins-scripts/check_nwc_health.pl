@@ -439,9 +439,9 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'morphperfdata=%s',
+    spec => 'morphperfdata=s%',
     help => "--morphperfdata
-   The parameter allows you to change performance data labels. It's a perl regexp.",
+   The parameter allows you to change performance data labels. It's a perl regexp and a substitution. --morphperfdata '(.*)ISATAP(.*)'='\$1patasi\$2'",
     required => 0,
 );
 $plugin->add_arg(

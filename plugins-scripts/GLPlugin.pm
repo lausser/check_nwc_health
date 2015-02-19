@@ -1153,8 +1153,8 @@ sub add_perfdata {
     # 'Intel [R] Interface (\d+) usage'='nic$1'
     foreach my $key (keys %{$self->opts->morphperfdata}) {
       if ($label =~ /$key/) {
-        my $replacement = $self->opts->morphperfdata->{$key};
-        $label =~ s/$key/$replacement/;
+        my $replacement = '"'.$self->opts->morphperfdata->{$key}.'"';
+        $label =~ s/$key/$replacement/ee;
       }
     }
   }

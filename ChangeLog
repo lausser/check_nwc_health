@@ -4,6 +4,7 @@
 
 2015-02-19 3.4.3
 - allow mitigation of admin down bgp peer
+- add morphperfdata
 
 2015-01-30 3.4.2.8
 - bugfix in GLPlugin (multiple --negate)
