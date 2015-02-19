@@ -112,12 +112,14 @@ sub check {
         if (exists $as_numbers->{$as}) {
           my $num_peers = scalar(@{$as_numbers->{$as}->{peers}});
           my $num_ok_peers = scalar(grep { $_->{bgpPeerFaulty} == 0 } @{$as_numbers->{$as}->{peers}});
+          my $num_admdown_peers = scalar(grep { $_->{bgpPeerAdminStatus} eq "stop" } @{$as_numbers->{$as}->{peers}});
           $as_numbers->{$as}->{availability} = 100 * $num_ok_peers / $num_peers;
           $self->set_thresholds(warning => "100:", critical => "50:");
           $self->add_message($self->check_thresholds($as_numbers->{$as}->{availability}),
-              sprintf "%d from %d connections to %s are up (%.2f%%)",
+              sprintf "%d from %d connections to %s are up (%.2f%%%s)",
               $num_ok_peers, $num_peers, $asname ? $asname : "AS".$as, 
-              $as_numbers->{$as}->{availability});
+              $as_numbers->{$as}->{availability},
+              $num_admdown_peers ? sprintf(", but %d are admin down and counted as up!", $num_admdown_peers) : "");
         } else {
           $self->add_critical(sprintf 'found no peer for %s', $asname ? $asname : "AS".$as);
         }
@@ -187,20 +189,28 @@ sub check {
         $self->{bgpPeerFsmEstablishedTime}
     );
   } elsif ($self->{bgpPeerAdminStatus} eq "stop") {
-    $self->add_message($self->{bgpPeerRemoteAsImportant} ? WARNING : OK, 
+    # admin down is by default critical, but can be mitigated
+    $self->add_message(
+        defined $self->opts->mitigation() ? $self->opts->mitigation() :
+            $self->{bgpPeerRemoteAsImportant} ? WARNING : OK,
         sprintf "peer %s (AS%s) state is %s (is admin down)",
         $self->{bgpPeerRemoteAddr},
         $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
         $self->{bgpPeerState}
     );
-    $self->{bgpPeerFaulty} = $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
+    $self->{bgpPeerFaulty} =
+        defined $self->opts->mitigation() && $self->opts->mitigation() eq "ok" ? 0 :
+        $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
   } else {
+    # bgpPeerLastError may be undef, at least under the following circumstances
+    # bgpPeerRemoteAsName is "", bgpPeerAdminStatus is "start",
+    # bgpPeerState is "active"
     $self->add_message($self->{bgpPeerRemoteAsImportant} ? CRITICAL : OK,
         sprintf "peer %s (AS%s) state is %s (last error: %s)",
         $self->{bgpPeerRemoteAddr},
         $self->{bgpPeerRemoteAs}.$self->{bgpPeerRemoteAsName},
         $self->{bgpPeerState},
-        $self->{bgpPeerLastError}
+        $self->{bgpPeerLastError}||"no error"
     );
     $self->{bgpPeerFaulty} = $self->{bgpPeerRemoteAsImportant} ? 1 : 0;
   }

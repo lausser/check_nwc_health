@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2015-02-19 3.4.3
+- allow mitigation of admin down bgp peer
+
 2015-01-30 3.4.2.8
 - bugfix in GLPlugin (multiple --negate)
 
