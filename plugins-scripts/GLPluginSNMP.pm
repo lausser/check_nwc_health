@@ -872,7 +872,7 @@ sub mult_snmp_max_msg_size {
   my $self = shift;
   my $factor = shift || 10;
   $self->debug(sprintf "raise maxmsgsize %d * %d", 
-      $factor, $GLPlugin::SNMP::session->max_msg_size());
+      $factor, $GLPlugin::SNMP::session->max_msg_size()) if $GLPlugin::SNMP::session;
   $GLPlugin::SNMP::session->max_msg_size($factor * $GLPlugin::SNMP::session->max_msg_size()) if $GLPlugin::SNMP::session;
 }
 
@@ -2105,6 +2105,10 @@ sub unhex_ip {
   if ($value && $value =~ /^0x(\w{8})/) {
     $value = join(".", unpack "C*", pack "H*", $1);
   } elsif ($value && $value =~ /^0x(\w{2} \w{2} \w{2} \w{2})/) {
+    $value = $1;
+    $value =~ s/ //g;
+    $value = join(".", unpack "C*", pack "H*", $value);
+  } elsif ($value && $value =~ /^([A-Z0-9]{2} [A-Z0-9]{2} [A-Z0-9]{2} [A-Z0-9]{2})/i) {
     $value = $1;
     $value =~ s/ //g;
     $value = join(".", unpack "C*", pack "H*", $value);
