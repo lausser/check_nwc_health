@@ -189,6 +189,12 @@ $plugin->add_mode(
     help => 'Check the members of a load balancer pool',
 );
 $plugin->add_mode(
+    internal => 'device::lb::pool::connections',
+    spec => 'pool-connections',
+    alias => undef,
+    help => 'Check the number of connections to a load balancer pool',
+);
+$plugin->add_mode(
     internal => 'device::lb::pool::list',
     spec => 'list-pools',
     alias => undef,
