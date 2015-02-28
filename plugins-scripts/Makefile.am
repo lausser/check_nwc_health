@@ -175,6 +175,7 @@ EXTRA_MODULES=\
   Classes/PaloAlto/Component/HaSubsystem.pm \
   Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
+  Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
   Classes/MibsAndOids.pm \

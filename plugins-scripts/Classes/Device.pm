@@ -101,6 +101,9 @@ sub classify {
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
+      } elsif ($self->implements_mib('NETGEAR-MIB')) {
+        $self->debug('using Classes::Netgear');
+        bless $self, 'Classes::Netgear';
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');

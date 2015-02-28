@@ -14,6 +14,7 @@ $GLPlugin::SNMP::mib_ids = {
   'CISCO-ENTITY-ALARM-MIB' => '1.3.6.1.4.1.9.9.138.1',
   'CISCO-ENVMON-MIB' => '1.3.6.1.4.1.9.9.13',
   'PAN-PRODUCTS-MIB' => '1.3.6.1.4.1.25461.2.3',
+  'NETGEAR-MIB' => '1.3.6.1.4.1.4526',
 };
 
 $GLPlugin::SNMP::mibs_and_oids = {
