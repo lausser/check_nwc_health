@@ -284,6 +284,7 @@ sub check {
       printf "ASCII_NOTIFICATION_END\n-->\n";
     }
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
+    
     foreach my $member (@{$self->{members}}) {
       $member->check();
     }
@@ -301,7 +302,8 @@ sub finish {
   if ($self->mode =~ /device::lb::pool::completeness/) {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
-    $self->{ltmPoolMemberStatServerPctConns} = ($self->{ltmPoolMemberStatServerMaxConns} == 0) ? 0 :
+    # ltmPoolMemberConnLimit, ist aber in allen Beispielen 0
+    $self->{ltmPoolMemberStatServerPctConns} = ($self->{ltmPoolMemberConnLimit} == 0) ? 0 :
         100 * $self->{ltmPoolMemberStatServerCurConns} / $self->{ltmPoolMemberStatServerMaxConns};
   }
 }
@@ -333,18 +335,28 @@ sub check {
     }
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
     my $label = $self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
-    $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
-    $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
-        $self->{ltmPoolMemberNodeName},
-        $self->{ltmPoolMemberPort},
-        $self->{ltmPoolMemberStatServerCurConns},
-        $self->{ltmPoolMemberStatServerMaxConns});
-    $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
-    $self->add_perfdata(
-        label => $label.'_connections_pct',
-        value => $self->{ltmPoolMemberStatServerPctConns},
-        uom => '%',
-    );
+    if ($self->{ltmPoolMemberConnLimit}) {
+      $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
+      $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
+          $self->{ltmPoolMemberNodeName},
+          $self->{ltmPoolMemberPort},
+          $self->{ltmPoolMemberStatServerCurConns},
+          $self->{ltmPoolMemberConnLimit});
+      $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
+      $self->add_perfdata(
+          label => $label.'_connections_pct',
+          value => $self->{ltmPoolMemberStatServerPctConns},
+          uom => '%',
+      );
+    } else {
+      $self->set_thresholds(metric => $label.'_connections', warning => "85", critical => "95");
+      $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
+          $self->{ltmPoolMemberNodeName},
+          $self->{ltmPoolMemberPort},
+          $self->{ltmPoolMemberStatServerCurConns},
+          $self->{ltmPoolMemberConnLimit});
+      $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
+    }
     $self->add_perfdata(
         label => $label.'_connections',
         value => $self->{ltmPoolMemberStatServerCurConns},
