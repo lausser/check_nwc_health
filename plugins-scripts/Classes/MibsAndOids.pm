@@ -6521,6 +6521,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfHostTOS => '1.3.6.1.2.1.14.6.1.2',
     ospfHostMetric => '1.3.6.1.2.1.14.6.1.3',
     ospfHostStatus => '1.3.6.1.2.1.14.6.1.4',
+    ospfHostStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
     ospfHostAreaID => '1.3.6.1.2.1.14.6.1.5',
     ospfHostCfgAreaID => '1.3.6.1.2.1.14.6.1.6',
     ospfIfTable => '1.3.6.1.2.1.14.7',
@@ -6531,6 +6532,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfIfType => '1.3.6.1.2.1.14.7.1.4',
     ospfIfTypeDefinition => 'OSPF-MIB::ospfIfType',
     ospfIfAdminStat => '1.3.6.1.2.1.14.7.1.5',
+    ospfIfAdminStatDefinition => 'OSPF-MIB::Status',
     ospfIfRtrPriority => '1.3.6.1.2.1.14.7.1.6',
     ospfIfTransitDelay => '1.3.6.1.2.1.14.7.1.7',
     ospfIfRetransInterval => '1.3.6.1.2.1.14.7.1.8',
@@ -6544,10 +6546,13 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfIfEvents => '1.3.6.1.2.1.14.7.1.15',
     ospfIfAuthKey => '1.3.6.1.2.1.14.7.1.16',
     ospfIfStatus => '1.3.6.1.2.1.14.7.1.17',
+    ospfIfStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
     ospfIfMulticastForwarding => '1.3.6.1.2.1.14.7.1.18',
     ospfIfMulticastForwardingDefinition => 'OSPF-MIB::ospfIfMulticastForwarding',
     ospfIfDemand => '1.3.6.1.2.1.14.7.1.19',
+    ospfIfDemandDefinition => 'SNMPv2-TC-v1::TruthValue',
     ospfIfAuthType => '1.3.6.1.2.1.14.7.1.20',
+    ospfIfAuthTypeDefinition => 'OSPF-MIB::AuType',
     ospfIfLsaCount => '1.3.6.1.2.1.14.7.1.21',
     ospfIfLsaCksumSum => '1.3.6.1.2.1.14.7.1.22',
     ospfIfDesignatedRouterId => '1.3.6.1.2.1.14.7.1.23',
@@ -6559,6 +6564,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfIfMetricTOS => '1.3.6.1.2.1.14.8.1.3',
     ospfIfMetricValue => '1.3.6.1.2.1.14.8.1.4',
     ospfIfMetricStatus => '1.3.6.1.2.1.14.8.1.5',
+    ospfIfMetricStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
     ospfVirtIfTable => '1.3.6.1.2.1.14.9',
     ospfVirtIfEntry => '1.3.6.1.2.1.14.9.1',
     ospfVirtIfAreaId => '1.3.6.1.2.1.14.9.1.1',
@@ -6587,9 +6593,11 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfNbrEvents => '1.3.6.1.2.1.14.10.1.7',
     ospfNbrLsRetransQLen => '1.3.6.1.2.1.14.10.1.8',
     ospfNbmaNbrStatus => '1.3.6.1.2.1.14.10.1.9',
+    ospfNbmaNbrStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
     ospfNbmaNbrPermanence => '1.3.6.1.2.1.14.10.1.10',
     ospfNbmaNbrPermanenceDefinition => 'OSPF-MIB::ospfNbmaNbrPermanence',
     ospfNbrHelloSuppressed => '1.3.6.1.2.1.14.10.1.11',
+    ospfNbrHelloSuppressedDefinition => 'SNMPv2-TC-v1::TruthValue',
     ospfNbrRestartHelperStatus => '1.3.6.1.2.1.14.10.1.12',
     ospfNbrRestartHelperStatusDefinition => 'OSPF-MIB::ospfNbrRestartHelperStatus',
     ospfNbrRestartHelperAge => '1.3.6.1.2.1.14.10.1.13',
@@ -6601,6 +6609,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ospfVirtNbrRtrId => '1.3.6.1.2.1.14.11.1.2',
     ospfVirtNbrIpAddr => '1.3.6.1.2.1.14.11.1.3',
     ospfVirtNbrOptions => '1.3.6.1.2.1.14.11.1.4',
+    ospfVirtNbrOptionsDefinition => 'OSPF-MIB::ospfVirtNbrOptions',
     ospfVirtNbrState => '1.3.6.1.2.1.14.11.1.5',
     ospfVirtNbrStateDefinition => 'OSPF-MIB::ospfVirtNbrState',
     ospfVirtNbrEvents => '1.3.6.1.2.1.14.11.1.6',
@@ -7487,6 +7496,10 @@ $GLPlugin::SNMP::definitions = {
     },
   },
   'OSPF-MIB' => {
+    'Status' => {
+      1 => 'enabled',
+      2 => 'disabled',
+    },
     ospfAreaAggregateEffect => {
       '1' => 'advertiseMatching',
       '2' => 'doNotAdvertiseMatching',
@@ -7647,6 +7660,19 @@ $GLPlugin::SNMP::definitions = {
     ospfAreaNssaTranslatorRole => {
       '1' => 'always',
       '2' => 'candidate',
+    },
+    'AuType' => { # rfc2328 appendix e.
+      '0' => 'Null authentication',
+      '1' => 'Simple password',
+      # others assigned by iana
+    },
+    'ospfVirtNbrOptions' => sub {
+      my $value = shift;
+      my @capabilities = ();
+      push (@capabilities, 'only TOS 0') if $value & (1<<0) == 0;
+      push (@capabilities, 'all except TOS 0') if $value & (1<<0) == 1;
+      push (@capabilities, 'multicast') if $value & (1<<1) == 1;
+      return join(',', @capabilities);
     },
   },
 };
