@@ -668,7 +668,7 @@ sub add_info {
   push(@{$GLPlugin::info}, $info);
 }
 
-sub annotate_info { # deprecated
+sub annotate_info {
   my $self = shift;
   my $annotation = shift;
   my $lastinfo = pop(@{$GLPlugin::info});
@@ -688,6 +688,11 @@ sub get_info {
   my $self = shift;
   my $separator = shift || ' ';
   return join($separator , @{$GLPlugin::info});
+}
+
+sub get_last_info {
+  my $self = shift;
+  return pop(@{$GLPlugin::info});
 }
 
 sub get_extendedinfo {

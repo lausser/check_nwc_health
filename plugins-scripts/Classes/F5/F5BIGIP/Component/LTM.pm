@@ -6,20 +6,28 @@ use strict;
   our $max_l4_connections = 10000000;
 }
 
+sub max_l4_connections : lvalue {
+  my $self = shift;
+  $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
+}
+
 sub new {
   my $class = shift;
   my %params = @_;
-  my $self = {};
-  if ($params{sysProductVersion} =~ /^4/) {
+  my $self = {
+    sysProductVersion => $params{sysProductVersion},
+    sysPlatformInfoMarketingName => $params{sysPlatformInfoMarketingName},
+  };
+  if ($self->{sysProductVersion} =~ /^4/) {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem4";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem4");
-  #} elsif ($params{sysProductVersion} =~ /^9/) {
   } else {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem9";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem9");
   }
   # tables can be huge
   $self->mult_snmp_max_msg_size(10);
+  $self->set_max_l4_connections();
   $self->init();
   return $self;
 }
@@ -29,40 +37,41 @@ sub set_max_l4_connections {
   if ($self->{sysPlatformInfoMarketingName} && 
       $self->{sysPlatformInfoMarketingName} =~ /BIG-IP\s*(\d+)/i) {
     if ($1 =~ /^(1500)$/) {
-      $max_l4_connections = 1500000;
+      $self->max_l4_connections() = 1500000;
     } elsif ($1 =~ /^(1600)$/) {
-      $max_l4_connections = 3000000;
+      $self->max_l4_connections() = 3000000;
     } elsif ($1 =~ /^(2000|2200)$/) {
-      $max_l4_connections = 5000000;
+      $self->max_l4_connections() = 5000000;
     } elsif ($1 =~ /^(3400)$/) {
-      $max_l4_connections = 4000000;
+      $self->max_l4_connections() = 4000000;
     } elsif ($1 =~ /^(3600|8800|8400)$/) {
-      $max_l4_connections = 8000000;
+      $self->max_l4_connections() = 8000000;
     } elsif ($1 =~ /^(4000|4200)$/) {
-      $max_l4_connections = 10000000;
+      $self->max_l4_connections() = 10000000;
     } elsif ($1 =~ /^(8900|8950)$/) {
-      $max_l4_connections = 12000000;
+      $self->max_l4_connections() = 12000000;
     } elsif ($1 =~ /^(5000|5050|5200|5250|7000|7050|7200|7250|11050)$/) {
-      $max_l4_connections = 24000000;
+      $self->max_l4_connections() = 24000000;
     } elsif ($1 =~ /^(10000|10050|10200|10250)$/) {
-      $max_l4_connections = 36000000;
+      $self->max_l4_connections() = 36000000;
     } elsif ($1 =~ /^(10350|12250)$/) {
-      $max_l4_connections = 80000000;
+      $self->max_l4_connections() = 80000000;
     } elsif ($1 =~ /^(11000)$/) {
-      $max_l4_connections = 30000000;
+      $self->max_l4_connections() = 30000000;
     }
   } elsif ($self->{sysPlatformInfoMarketingName} && 
       $self->{sysPlatformInfoMarketingName} =~ /Viprion\s*(\d+)/i) {
     if ($1 =~ /^(2100)$/) {
-      $max_l4_connections = 12000000;
+      $self->max_l4_connections() = 12000000;
     } elsif ($1 =~ /^(2150)$/) {
-      $max_l4_connections = 24000000;
+      $self->max_l4_connections() = 24000000;
     } elsif ($1 =~ /^(2200|2250|2400)$/) {
-      $max_l4_connections = 48000000;
+      $self->max_l4_connections() = 48000000;
     } elsif ($1 =~ /^(4300)$/) {
-      $max_l4_connections = 36000000;
+      $self->max_l4_connections() = 36000000;
     } elsif ($1 =~ /^(4340|4800)$/) {
-      $max_l4_connections = 72000000;
+      $self->max_l4_connections() = 72000000;
+    }
   }
 }
 
@@ -252,30 +261,33 @@ sub finish {
 
 sub check {
   my $self = shift;
-  if ($self->mode =~ /device::lb::pool::completeness/) {
-    $self->add_info(sprintf "pool %s is %s, avail state is %s, active members: %d of %d", 
+  if ($self->mode =~ /device::lb::pool::comple/) {
+    my $pool_info = sprintf "pool %s is %s, avail state is %s, active members: %d of %d, connections: %d",
         $self->{ltmPoolName},
         $self->{ltmPoolStatusEnabledState}, $self->{ltmPoolStatusAvailState},
-        $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt});
+        $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt}, $self->{ltmPoolStatServerCurConns};
+    $self->add_info($pool_info);
     if ($self->{ltmPoolActiveMemberCnt} == 1) {
       # only one member left = no more redundancy!!
-      $self->set_thresholds(warning => "100:", critical => "51:");
+      $self->set_thresholds(
+          metric => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
+          warning => "100:", critical => "51:");
     } else {
-      $self->set_thresholds(warning => "51:", critical => "26:");
+      $self->set_thresholds(
+          metric => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
+          warning => "51:", critical => "26:");
     }
-    my $message = sprintf ("pool %s has %d active members (of %d) and %d sessions",
-            $self->{ltmPoolName},
-            $self->{ltmPoolActiveMemberCnt}, $self->{ltmPoolMemberCnt},
-            $self->{ltmPoolStatServerCurConns});
-    $self->add_message($self->check_thresholds($self->{completeness}), $message);
+    $self->add_message($self->check_thresholds(
+        metric => sprintf('pool_%s_completeness', $self->{ltmPoolName}),
+        value => $self->{completeness}));
     if ($self->{ltmPoolMinActiveMembers} > 0 &&
         $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
-      $message = sprintf("pool %s has not enough active members (%d, min is %d)",
+      $self->annotate_info(sprintf("not enough active members (%d, min is %d)",
               $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt},
-              $self->{ltmPoolMinActiveMembers});
-      $self->add_message(defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL, $message);
+              $self->{ltmPoolMinActiveMembers}));
+      $self->add_message(defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL);
     }
-    if ($self->check_messages()) {
+    if ($self->check_messages() || $self->mode  =~ /device::lb::pool::co.*tions/) {
       foreach my $member (@{$self->{members}}) {
         $member->check();
       }
@@ -291,86 +303,106 @@ sub check {
         warning => undef, critical => undef,
     );
     if ($self->opts->report eq "html") {
-      printf "%s - %s%s\n", $self->status_code($self->check_messages()), $message, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
+      printf "%s - %s%s\n", $self->status_code($self->check_messages()), $pool_info, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
       $self->suppress_messages();
-      printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
-      printf "<tr>";
-      foreach (qw(Node Port Enabled Avail Reason)) {
-        printf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
-      }
-      printf "</tr>";
-      foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
-        printf "<tr>";
-        printf "<tr style=\"border: 1px solid black;\">";
-        foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
-          if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
-            if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
-              printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
-            } else {
-              printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
-            }
-          } else {
-            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
-          }
-        }
-        printf "</tr>";
-      }
-      printf "</table>\n";
-      printf "<!--\nASCII_NOTIFICATION_START\n";
-      foreach (qw(Node Port Enabled Avail Reason)) {
-        printf "%20s", $_;
-      }
-      printf "\n";
-      foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
-        foreach my $attr (qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason)) {
-          printf "%20s", $_->{$attr};
-        }
-        printf "\n";
-      }
-      printf "ASCII_NOTIFICATION_END\n-->\n";
+      $self->draw_html_table();
     }
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
-    
     foreach my $member (@{$self->{members}}) {
       $member->check();
     }
   }
 }
 
+sub draw_html_table {
+  my $self = shift;
+  if ($self->mode =~ /device::lb::pool::comple/) {
+    my @headers = qw(Node Port Enabled Avail Reason);
+    my @columns = qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason);
+    if ($self->mode =~ /device::lb::pool::complections/) {
+      push(@headers, "Connections");
+      push(@headers, "ConnPct");
+      push(@columns, "ltmPoolMemberStatServerCurConns");
+      push(@columns, "ltmPoolMemberStatServerPctConns");
+      foreach my $member (@{$self->{members}}) {
+        $member->{ltmPoolMemberStatServerPctConns} = sprintf "%.5f", $member->{ltmPoolMemberStatServerPctConns};
+      }
+    }
+    printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
+    printf "<tr>";
+    foreach (@headers) {
+      printf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
+    }
+    printf "</tr>";
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+      printf "<tr>";
+      printf "<tr style=\"border: 1px solid black;\">";
+      foreach my $attr (@columns) {
+        if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
+          if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
+            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
+          } else {
+            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
+          }
+        } else {
+          printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
+        }
+      }
+      printf "</tr>";
+    }
+    printf "</table>\n";
+    printf "<!--\nASCII_NOTIFICATION_START\n";
+    foreach (@headers) {
+      printf "%20s", $_;
+    }
+    printf "\n";
+    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+      foreach my $attr (@columns) {
+        printf "%20s", $_->{$attr};
+      }
+      printf "\n";
+    }
+    printf "ASCII_NOTIFICATION_END\n-->\n";
+  } elsif ($self->mode =~ /device::lb::pool::complections/) {
+  }
+}
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember;
 our @ISA = qw(GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
+sub max_l4_connections {
+  my $self = shift;
+  $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
+}
+
 sub finish {
   my $self = shift;
-  if ($self->mode =~ /device::lb::pool::completeness/) {
+  if ($self->mode =~ /device::lb::pool::comple/) {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
-  } elsif ($self->mode =~ /device::lb::pool::connections/) {
+  }
+  if ($self->mode =~ /device::lb::pool::co.*ctions/) {
     if (! $self->{ltmPoolMemberConnLimit}) {
-      $self->{ltmPoolMemberConnLimit} =
-          $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
+      $self->{ltmPoolMemberConnLimit} = $self->max_l4_connections();
     }
     $self->{ltmPoolMemberStatServerPctConns} = 
         100 * $self->{ltmPoolMemberStatServerCurConns} /
-        $self->{ltmPoolMemberStatServerMaxConns};
+        $self->{ltmPoolMemberConnLimit};
   }
 }
 
 sub rename {
   my $self = shift;
-  if ($self->mode =~ /device::lb::pool::completeness/) {
-    if ($self->{ltmPoolMemberNodeName} eq $self->{ltmPoolMemberAddr} &&
-        $self->{ltmNodeAddrStatusName}) {
-      $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
-    }
+  if ($self->{ltmPoolMemberNodeName} eq $self->{ltmPoolMemberAddr} &&
+      $self->{ltmNodeAddrStatusName}) {
+    $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
   }
 }
 
 sub check {
   my $self = shift;
-  if ($self->mode =~ /device::lb::pool::completeness/) {
+  if ($self->mode =~ /device::lb::pool::comple.*/) {
     if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
       if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
         # info only, because it would ruin thresholds in the pool
@@ -383,14 +415,15 @@ sub check {
             $self->{ltmPoolMbrStatusDetailReason});
       }
     }
-  } elsif ($self->mode =~ /device::lb::pool::connections/) {
+  }
+  if ($self->mode =~ /device::lb::pool::co.*ctions/) {
     my $label = $self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
     $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
-    $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
+    $self->add_info(sprintf "member %s:%s has %d connections (from max %dM)",
         $self->{ltmPoolMemberNodeName},
         $self->{ltmPoolMemberPort},
         $self->{ltmPoolMemberStatServerCurConns},
-        $self->{ltmPoolMemberConnLimit});
+        $self->{ltmPoolMemberConnLimit} / 1000000);
     $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
     $self->add_perfdata(
         label => $label.'_connections_pct',
