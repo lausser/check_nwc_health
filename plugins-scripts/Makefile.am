@@ -121,6 +121,7 @@ EXTRA_MODULES=\
   Classes/UCDMIB/Components/CpuSubsystem.pm \
   Classes/UCDMIB.pm \
   Classes/F5/F5BIGIP/Component/LTM.pm \
+  Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
   Classes/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   Classes/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
@@ -175,6 +176,7 @@ EXTRA_MODULES=\
   Classes/PaloAlto/Component/HaSubsystem.pm \
   Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
+  Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
   Classes/MibsAndOids.pm \

@@ -5,10 +5,11 @@ use strict;
 sub init {
   my $self = shift;
   # gets 11.* and 9.*
-  $self->{productversion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
-  if (! defined $self->{productversion} ||
-      $self->{productversion} !~ /^((9)|(10)|(11))/) {
-    $self->{productversion} = "4";
+  $self->{sysProductVersion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
+  $self->{sysPlatformInfoMarketingName} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysPlatformInfoMarketingName');
+  if (! defined $self->{sysProductVersion} ||
+      $self->{sysProductVersion} !~ /^((9)|(10)|(11))/) {
+    $self->{sysProductVersion} = "4";
   }
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem");
@@ -26,6 +27,6 @@ sub init {
 sub analyze_ltm_subsystem {
   my $self = shift;
   $self->{components}->{ltm_subsystem} =
-      Classes::F5::F5BIGIP::Component::LTMSubsystem->new('productversion' => $self->{productversion});
+      Classes::F5::F5BIGIP::Component::LTMSubsystem->new('sysProductVersion' => $self->{sysProductVersion}, sysPlatformInfoMarketingName => $self->{sysPlatformInfoMarketingName});
 }
 
