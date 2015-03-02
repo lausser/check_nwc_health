@@ -2,14 +2,18 @@ package Classes::F5::F5BIGIP::Component::LTMSubsystem;
 our @ISA = qw(GLPlugin::SNMP::Item);
 use strict;
 
+{
+  our $max_l4_connections = 10000000;
+}
+
 sub new {
   my $class = shift;
   my %params = @_;
   my $self = {};
-  if ($params{productversion} =~ /^4/) {
+  if ($params{sysProductVersion} =~ /^4/) {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem4";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem4");
-  #} elsif ($params{productversion} =~ /^9/) {
+  #} elsif ($params{sysProductVersion} =~ /^9/) {
   } else {
     bless $self, "Classes::F5::F5BIGIP::Component::LTMSubsystem9";
     $self->debug("use Classes::F5::F5BIGIP::Component::LTMSubsystem9");
@@ -18,6 +22,48 @@ sub new {
   $self->mult_snmp_max_msg_size(10);
   $self->init();
   return $self;
+}
+
+sub set_max_l4_connections {
+  my $self = shift;
+  if ($self->{sysPlatformInfoMarketingName} && 
+      $self->{sysPlatformInfoMarketingName} =~ /BIG-IP\s*(\d+)/i) {
+    if ($1 =~ /^(1500)$/) {
+      $max_l4_connections = 1500000;
+    } elsif ($1 =~ /^(1600)$/) {
+      $max_l4_connections = 3000000;
+    } elsif ($1 =~ /^(2000|2200)$/) {
+      $max_l4_connections = 5000000;
+    } elsif ($1 =~ /^(3400)$/) {
+      $max_l4_connections = 4000000;
+    } elsif ($1 =~ /^(3600|8800|8400)$/) {
+      $max_l4_connections = 8000000;
+    } elsif ($1 =~ /^(4000|4200)$/) {
+      $max_l4_connections = 10000000;
+    } elsif ($1 =~ /^(8900|8950)$/) {
+      $max_l4_connections = 12000000;
+    } elsif ($1 =~ /^(5000|5050|5200|5250|7000|7050|7200|7250|11050)$/) {
+      $max_l4_connections = 24000000;
+    } elsif ($1 =~ /^(10000|10050|10200|10250)$/) {
+      $max_l4_connections = 36000000;
+    } elsif ($1 =~ /^(10350|12250)$/) {
+      $max_l4_connections = 80000000;
+    } elsif ($1 =~ /^(11000)$/) {
+      $max_l4_connections = 30000000;
+    }
+  } elsif ($self->{sysPlatformInfoMarketingName} && 
+      $self->{sysPlatformInfoMarketingName} =~ /Viprion\s*(\d+)/i) {
+    if ($1 =~ /^(2100)$/) {
+      $max_l4_connections = 12000000;
+    } elsif ($1 =~ /^(2150)$/) {
+      $max_l4_connections = 24000000;
+    } elsif ($1 =~ /^(2200|2250|2400)$/) {
+      $max_l4_connections = 48000000;
+    } elsif ($1 =~ /^(4300)$/) {
+      $max_l4_connections = 36000000;
+    } elsif ($1 =~ /^(4340|4800)$/) {
+      $max_l4_connections = 72000000;
+  }
 }
 
 sub check {
@@ -302,9 +348,13 @@ sub finish {
   if ($self->mode =~ /device::lb::pool::completeness/) {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
-    # ltmPoolMemberConnLimit, ist aber in allen Beispielen 0
-    $self->{ltmPoolMemberStatServerPctConns} = ($self->{ltmPoolMemberConnLimit} == 0) ? 0 :
-        100 * $self->{ltmPoolMemberStatServerCurConns} / $self->{ltmPoolMemberStatServerMaxConns};
+    if (! $self->{ltmPoolMemberConnLimit}) {
+      $self->{ltmPoolMemberConnLimit} =
+          $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
+    }
+    $self->{ltmPoolMemberStatServerPctConns} = 
+        100 * $self->{ltmPoolMemberStatServerCurConns} /
+        $self->{ltmPoolMemberStatServerMaxConns};
   }
 }
 
@@ -335,28 +385,18 @@ sub check {
     }
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
     my $label = $self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
-    if ($self->{ltmPoolMemberConnLimit}) {
-      $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
-      $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
-          $self->{ltmPoolMemberNodeName},
-          $self->{ltmPoolMemberPort},
-          $self->{ltmPoolMemberStatServerCurConns},
-          $self->{ltmPoolMemberConnLimit});
-      $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
-      $self->add_perfdata(
-          label => $label.'_connections_pct',
-          value => $self->{ltmPoolMemberStatServerPctConns},
-          uom => '%',
-      );
-    } else {
-      $self->set_thresholds(metric => $label.'_connections', warning => "85", critical => "95");
-      $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
-          $self->{ltmPoolMemberNodeName},
-          $self->{ltmPoolMemberPort},
-          $self->{ltmPoolMemberStatServerCurConns},
-          $self->{ltmPoolMemberConnLimit});
-      $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
-    }
+    $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
+    $self->add_info(sprintf "member %s:%s has %d connections (from max %d)",
+        $self->{ltmPoolMemberNodeName},
+        $self->{ltmPoolMemberPort},
+        $self->{ltmPoolMemberStatServerCurConns},
+        $self->{ltmPoolMemberConnLimit});
+    $self->add_message($self->check_thresholds(metric => $label.'_connections_pct', value => $self->{ltmPoolMemberStatServerPctConns}));
+    $self->add_perfdata(
+        label => $label.'_connections_pct',
+        value => $self->{ltmPoolMemberStatServerPctConns},
+        uom => '%',
+    );
     $self->add_perfdata(
         label => $label.'_connections',
         value => $self->{ltmPoolMemberStatServerCurConns},

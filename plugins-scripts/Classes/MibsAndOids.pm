@@ -3994,6 +3994,28 @@ $GLPlugin::SNMP::mibs_and_oids = {
       sysStatTmIdleCycles => '1.3.6.1.4.1.3375.2.1.1.2.1.42.0',
       sysStatTmSleepCycles => '1.3.6.1.4.1.3375.2.1.1.2.1.43.0',
 
+      sysPlatformInfoName => '1.3.6.1.4.1.3375.2.1.3.5.1.0',
+      sysPlatformInfoMarketingName => '1.3.6.1.4.1.3375.2.1.3.5.2.0',
+
+      sysPhysicalDiskTable => '1.3.6.1.4.1.3375.2.1.7.7.2',
+      sysPhysicalDiskEntry => '1.3.6.1.4.1.3375.2.1.7.7.2.1',
+      sysPhysicalDiskSerialNumber => '1.3.6.1.4.1.3375.2.1.7.7.2.1.1',
+      sysPhysicalDiskSlotId => '1.3.6.1.4.1.3375.2.1.7.7.2.1.2',
+      sysPhysicalDiskName => '1.3.6.1.4.1.3375.2.1.7.7.2.1.3',
+      sysPhysicalDiskIsArrayMember => '1.3.6.1.4.1.3375.2.1.7.7.2.1.4',
+      sysPhysicalDiskIsArrayMemberDefinition => {
+          0 => 'false',
+          1 => 'true',
+      },
+      sysPhysicalDiskArrayStatus => '1.3.6.1.4.1.3375.2.1.7.7.2.1.5',
+      sysPhysicalDiskArrayStatusDefinition => {
+          0 => 'undefined',
+          1 => 'ok',
+          2 => 'replicating',
+          3 => 'missing',
+          4 => 'failed',
+      },
+
       sysCpuNumber => '1.3.6.1.4.1.3375.2.1.3.1.1.0',
       sysCpuTable => '1.3.6.1.4.1.3375.2.1.3.1.2',
       sysCpuEntry => '1.3.6.1.4.1.3375.2.1.3.1.2.1',
