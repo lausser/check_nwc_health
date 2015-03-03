@@ -72,6 +72,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'Classes::AlliedTelesyn';
         $self->debug('using Classes::AlliedTelesyn');
+      } elsif ($self->{productname} =~ /Linux cumulus/i) {
+        bless $self, 'Classes::Cumulus';
+        $self->debug('using Classes::Cumulus');
       } elsif ($self->{productname} =~ /DS_4100/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');

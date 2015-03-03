@@ -362,7 +362,7 @@ sub new {
       ifHighSpeed => $params{ifHighSpeed},
       ifPromiscuousMode => $params{ifPromiscuousMode},
       ifConnectorPresent => $params{ifConnectorPresent},
-      ifAlias => $params{ifAlias},
+      ifAlias => $params{ifAlias} || $params{ifName}, # kommt vor bei linux lo
       ifCounterDiscontinuityTime => $params{ifCounterDiscontinuityTime},
     };
     map { $self->{$_} = $self64->{$_} } keys %{$self64};
