@@ -651,6 +651,8 @@ sub init {
         '1.3.6.1.2.1', '1.3.6.1.4.1',
     ]);
     foreach my $mibinfo (@{$mibdepot}) {
+      next if $self->opts->protocol eq "1" && $mibinfo->[2] ne "v1";
+      next if $self->opts->protocol ne "1" && $mibinfo->[2] eq "v1";
       $GLPlugin::SNMP::mib_ids->{$mibinfo->[3]} = $mibinfo->[0];
     }
     $GLPlugin::SNMP::mib_ids->{'SNMP-MIB2'} = "1.3.6.1.2.1";
