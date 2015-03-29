@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2015-03-29 3.4.4.3
+- separate discards from errors in linuxlocal
+
 2015-03-03 3.4.4.2
 - combine pool-connections and pool-completion for f5
 - finish pool-complections
