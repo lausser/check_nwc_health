@@ -200,39 +200,38 @@ sub check {
         uom => $self->opts->units,
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s '.
-        'discards in:%.2f/s out:%.2f/s',
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
         $self->{ifDescr},
-        $self->{inputErrorRate} , $self->{outputErrorRate},
-        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+        $self->{inputErrorRate} , $self->{outputErrorRate});
     $self->set_thresholds(warning => 1, critical => 10);
-    my $in = $self->check_thresholds($self->{inputRate});
-    my $out = $self->check_thresholds($self->{outputRate});
+    my $in = $self->check_thresholds($self->{inputErrorRate});
+    my $out = $self->check_thresholds($self->{outputErrorRate});
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
         value => $self->{inputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_out',
         value => $self->{outputErrorRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
+  } elsif ($self->mode =~ /device::interfaces::discards/) {
+    $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
+        $self->{ifDescr},
+        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+    $self->set_thresholds(warning => 1, critical => 10);
+    my $in = $self->check_thresholds($self->{inputDiscardRate});
+    my $out = $self->check_thresholds($self->{outputDiscardRate});
+    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
+    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_in',
         value => $self->{inputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_out',
         value => $self->{outputDiscardRate},
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   }
 }

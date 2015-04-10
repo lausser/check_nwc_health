@@ -5,6 +5,9 @@
 2015-04-09 3.5
 - implement ospf and modes ospf-neighbor-status and list-ospf-neighbors
 
+2015-03-29 3.4.4.3
+- separate discards from errors in linuxlocal
+
 2015-03-03 3.4.4.2
 - combine pool-connections and pool-completion for f5
 - finish pool-complections
