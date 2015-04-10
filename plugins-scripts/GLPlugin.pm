@@ -483,9 +483,9 @@ sub load_my_extension {
 #########################################################
 # runtime methods
 #
-sub mode {
+sub mode : lvalue {
   my $self = shift;
-  return $GLPlugin::mode;
+  $GLPlugin::mode;
 }
 
 sub statefilesdir {

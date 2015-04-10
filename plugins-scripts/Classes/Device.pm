@@ -185,6 +185,10 @@ sub init {
     $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::bgp/) {
     $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
+  } elsif ($self->mode =~ /device::ospf/) {
+    bless $self, "Classes::OSPF";
+    #$self->analyze_and_check_ospf_subsystem("Classes::OSPF");
+    $self->init();
   } else {
     bless $self, 'GLPlugin::SNMP';
     $self->no_such_mode();

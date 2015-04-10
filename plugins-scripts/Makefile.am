@@ -113,6 +113,8 @@ EXTRA_MODULES=\
   Classes/LMSENSORSMIB.pm \
   Classes/ENTITYSENSORMIB.pm \
   Classes/ENTITYSENSORMIB/Component/EnvironmentalSubsystem.pm \
+  Classes/OSPF/Component/NeighborSubsystem.pm \
+  Classes/OSPF.pm \
   Classes/BGP/Component/PeerSubsystem.pm \
   Classes/BGP.pm \
   Classes/FCMGMT/Component/EnvironmentalSubsystem.pm \

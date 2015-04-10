@@ -141,6 +141,18 @@ $plugin->add_mode(
     help => 'Show BGP peers known to this device',
 );
 $plugin->add_mode(
+    internal => 'device::ospf::neighbor::status',
+    spec => 'ospf-neighbor-status',
+    alias => undef,
+    help => 'Check status of OSPF neighbors',
+);
+$plugin->add_mode(
+    internal => 'device::ospf::neighbor::list',
+    spec => 'list-ospf-neighbors',
+    alias => undef,
+    help => 'Show OSPF neighbors',
+);
+$plugin->add_mode(
     internal => 'device::ha::role',
     spec => 'ha-role',
     alias => undef,
