@@ -1173,7 +1173,11 @@ sub add_perfdata {
     foreach my $key (keys %{$self->opts->morphperfdata}) {
       if ($label =~ /$key/) {
         my $replacement = '"'.$self->opts->morphperfdata->{$key}.'"';
+        my $oldlabel = $label;
         $label =~ s/$key/$replacement/ee;
+        if (exists $self->{thresholds}->{$oldlabel}) {
+          %{$self->{thresholds}->{$label}} = %{$self->{thresholds}->{$oldlabel}};
+        }
       }
     }
   }
