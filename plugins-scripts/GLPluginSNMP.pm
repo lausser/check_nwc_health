@@ -186,6 +186,7 @@ sub init {
     if ($self->opts->snmpdump) {
       $name = $self->opts->snmpdump;
     }
+    $self->opts->override_opt("protocol", $1) if $self->opts->protocol =~ /^v(.*)/;
     if (defined $self->opts->offline) {
       $self->{pidfile} = $name.".pid";
       if (! $self->check_pidfile()) {

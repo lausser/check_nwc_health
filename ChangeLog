@@ -2,6 +2,9 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2015-04-19 3.5.1
+- add LM-SENSOR-MIB
+
 2015-04-09 3.5
 - implement ospf and modes ospf-neighbor-status and list-ospf-neighbors
 
