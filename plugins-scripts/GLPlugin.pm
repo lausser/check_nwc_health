@@ -480,6 +480,16 @@ sub load_my_extension {
   }
 }
 
+sub decode_password {
+  my $self = shift;
+  my $password = shift;
+  if ($password && $password =~ /^rfc3986:\/\/(.*)/) {
+    $password =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
+  }
+  return $password;
+}
+
+
 #########################################################
 # runtime methods
 #

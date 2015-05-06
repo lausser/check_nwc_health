@@ -2,6 +2,10 @@
 # Changelog of the check_nwc_health plugin #
 ############################################
 
+2015-05-06 3.5.2
+- add --community2 (necessary if there are different ospf contexts)
+- raise max-repetitions for table-bulk-requests (large number of interfaces)
+
 2015-04-19 3.5.1
 - add LM-SENSOR-MIB
 - bugfix in thresholds of morphed performancedata
