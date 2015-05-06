@@ -126,7 +126,7 @@ sub add_snmp_args {
       required => 0,
   );
   $self->add_arg(
-      spec => 'community2|C=s',
+      spec => 'community2=s',
       help => '--community2
      SNMP community which can be used to switch the context during runtime',
       required => 0,
