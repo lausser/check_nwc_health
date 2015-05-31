@@ -183,6 +183,12 @@ sub init {
     $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
+  } elsif ($self->mode =~ /device::routes/) {
+    if ($self->implements_mib('IP-FORWARD-MIB')) {
+      $self->analyze_and_check_interface_subsystem("Classes::IPFORWARDMIB::Component::RoutingSubsystem");
+    } else {
+      $self->analyze_and_check_interface_subsystem("Classes::IPMIB::Component::RoutingSubsystem");
+    }
   } elsif ($self->mode =~ /device::bgp/) {
     $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
   } elsif ($self->mode =~ /device::ospf/) {

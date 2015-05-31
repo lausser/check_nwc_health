@@ -99,6 +99,19 @@ $plugin->add_mode(
     help => 'Check the percentage of up interfaces in a link aggregation',
 );
 $plugin->add_mode(
+    internal => 'device::routes::list',
+    spec => 'list-routes',
+    alias => undef,
+    help => 'Show the configured routes',
+    help => 'Check the percentage of up interfaces in a link aggregation',
+);
+$plugin->add_mode(
+    internal => 'device::routes::exists',
+    spec => 'route-exists',
+    alias => undef,
+    help => 'Check if a route exists. (--name2 check also the next hop)',
+);
+$plugin->add_mode(
     internal => 'device::vpn::status',
     spec => 'vpn-status',
     alias => undef,

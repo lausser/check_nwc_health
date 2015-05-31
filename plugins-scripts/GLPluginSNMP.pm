@@ -1216,6 +1216,23 @@ sub get_snmp_tables {
   }
 }
 
+sub mibs_and_oids_definition {
+  my $self = shift;
+  my $mib = shift;
+  my $definition = shift;
+  my @values = @_;
+  if (exists $GLPlugin::SNMP::definitions->{$mib} &&
+      exists $GLPlugin::SNMP::definitions->{$mib}->{$definition}) {
+    if (ref($GLPlugin::SNMP::definitions->{$mib}->{$definition}) eq "CODE") {
+      return $GLPlugin::SNMP::definitions->{$mib}->{$definition}->(@values);
+    } elsif (ref($GLPlugin::SNMP::definitions->{$mib}->{$definition}) eq "HASH") {
+      return $GLPlugin::SNMP::definitions->{$mib}->{$definition}->{$values[0]};
+    }
+  } else {
+    return "unknown_".$definition;
+  }
+}
+
 ################################################################
 # 2nd level 
 #

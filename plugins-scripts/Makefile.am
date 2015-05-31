@@ -102,6 +102,10 @@ EXTRA_MODULES=\
   Classes/IFMIB/Component/LinkAggregation.pm \
   Classes/IFMIB/Component/InterfaceSubsystem.pm \
   Classes/IFMIB.pm \
+  Classes/IPFORWARDMIB/Component/RoutingSubsystem.pm \
+  Classes/IPFORWARDMIB.pm \
+  Classes/IPMIB/Component/RoutingSubsystem.pm \
+  Classes/IPMIB.pm \
   Classes/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
