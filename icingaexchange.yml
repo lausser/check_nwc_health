@@ -1,0 +1,9 @@
+name: check_nwc_health
+description: "file:///README.md"
+url: "https://github.com/lausser/check_nwc_health"
+tags: network,cisco,asa,juniper,hp,ios,nexus,bluecoat,f5,brocade,foundry,fortigate,clavister,checkpoint
+vendor: Cisco,Juniper,Checkpoint,HP,Brocade
+target: Network
+type: Plugin
+license: gplv2
+
