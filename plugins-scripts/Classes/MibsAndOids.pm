@@ -227,7 +227,31 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ipCidrRouteNextHop => '1.3.6.1.2.1.4.24.4.1.4',
     ipCidrRouteIfIndex => '1.3.6.1.2.1.4.24.4.1.5',
     ipCidrRouteType => '1.3.6.1.2.1.4.24.4.1.6',
+    ipCidrRouteTypeDefinition => {
+      1 => 'other',
+      2 => 'reject',
+      3 => 'local',
+      4 => 'remote',
+    },
     ipCidrRouteProto => '1.3.6.1.2.1.4.24.4.1.7',
+    ipCidrRouteProtoDefinition => {
+      1 => 'other',
+      2 => 'local',
+      3 => 'netmgmt',
+      4 => 'icmp',
+      5 => 'egp',
+      6 => 'ggp',
+      7 => 'hello',
+      8 => 'rip',
+      9 => 'isIs',
+      10 => 'esIs',
+      11 => 'ciscoIgrp',
+      12 => 'bbnSpfIgp',
+      13 => 'ospf',
+      14 => 'bgp',
+      15 => 'idpr',
+      16 => 'ciscoEigrp',
+    },
     ipCidrRouteAge => '1.3.6.1.2.1.4.24.4.1.8',
     ipCidrRouteInfo => '1.3.6.1.2.1.4.24.4.1.9',
     ipCidrRouteNextHopAS => '1.3.6.1.2.1.4.24.4.1.10',
@@ -7887,8 +7911,20 @@ $GLPlugin::SNMP::definitions = {
       16 => 'dns',
     },
     # https://www.ietf.org/rfc/rfc4001.txt
-    'inetAddressType' => {
-    }
+    'inetAddress' => sub {
+      my $type = shift;
+      my @params = @_;
+      if ($type eq "ipv4") {
+        return 0;
+      }
+    },
+    'InetAddressPrefixLength ' => sub {
+      my $type = shift;
+      my @params = @_;
+      if ($type eq "ipv4") {
+        return 0;
+      }
+    },
   }
 };
 

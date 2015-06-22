@@ -109,7 +109,13 @@ $plugin->add_mode(
     internal => 'device::routes::exists',
     spec => 'route-exists',
     alias => undef,
-    help => 'Check if a route exists. (--name2 check also the next hop)',
+    help => 'Check if a route exists. (--name is the dest, --name2 check also the next hop)',
+);
+$plugin->add_mode(
+    internal => 'device::routes::count',
+    spec => 'count-routes',
+    alias => undef,
+    help => 'Count the routes. (--name is the dest, --name2 is the hop)',
 );
 $plugin->add_mode(
     internal => 'device::vpn::status',
