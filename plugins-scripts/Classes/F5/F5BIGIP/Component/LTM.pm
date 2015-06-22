@@ -383,6 +383,9 @@ sub finish {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   }
   if ($self->mode =~ /device::lb::pool::co.*ctions/) {
+    # in rare cases we suddenly get noSuchInstance for ltmPoolMemberConnLimit
+    $self->protect_value($self->{ltmPoolMemberNodeName},
+        'ltmPoolMemberConnLimit', 'positive');
     if (! $self->{ltmPoolMemberConnLimit}) {
       $self->{ltmPoolMemberConnLimit} = $self->max_l4_connections();
     }
