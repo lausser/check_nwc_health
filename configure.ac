@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_REVISION ($Revision: 1.150 $)
 AC_PREREQ(2.58)
-AC_INIT(check_nwc_health,3.5.2)
+AC_INIT(check_nwc_health,3.5.3)
 AM_INIT_AUTOMAKE([1.9 tar-pax])
 AM_MAINTAINER_MODE([enable])
 AC_CANONICAL_HOST
@@ -104,6 +104,15 @@ AC_ARG_WITH(perl,
   with_perl=$withval,with_perl=$PERL)
 AC_SUBST(PERL, $with_perl)
 
+AC_ARG_ENABLE([standalone],
+    AS_HELP_STRING([--disable-standalone], [Disable feature standalone]))
+echo variable disable-standalone $disable_standalone
+echo variable enable-standalone $enable_standalone
+AS_IF([test "x$enable_standalone" != "xno"], [
+  dnl Do the stuff needed for enabling the feature
+])
+AM_CONDITIONAL([DISABLE_STANDALONE], [test "$enable_standalone" = "no"])
+
 AC_OUTPUT(Makefile plugins-scripts/Makefile plugins-scripts/subst)
 
 ACX_FEATURE([with],[perl])
@@ -114,3 +123,4 @@ ACX_FEATURE([with],[degrees])
 ACX_FEATURE([enable],[perfdata])
 ACX_FEATURE([enable],[extendedinfo])
 ACX_FEATURE([enable],[hwinfo])
+ACX_FEATURE([disable],[standalone], $disable_standalone)

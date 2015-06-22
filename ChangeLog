@@ -1,407 +1,291 @@
-############################################
-# Changelog of the check_nwc_health plugin #
-############################################
-
-2015-05-06 3.5.2
-- add --community2 (necessary if there are different ospf contexts)
-- raise max-repetitions for table-bulk-requests (large number of interfaces)
-
-2015-04-19 3.5.1
-- add LM-SENSOR-MIB
-- bugfix in thresholds of morphed performancedata
-
-2015-04-09 3.5
-- implement ospf and modes ospf-neighbor-status and list-ospf-neighbors
-
-2015-03-29 3.4.4.3
-- separate discards from errors in linuxlocal
-
-2015-03-03 3.4.4.2
-- combine pool-connections and pool-completion for f5
-- finish pool-complections
-
-2015-02-28 3.4.4.1
-- detect (not implement!) netgear
-
-2015-02-26 3.4.4
-- add mode pool-connections for f5
-
-2015-02-19 3.4.3
-- allow mitigation of admin down bgp peer
-- add morphperfdata
-
-2015-01-30 3.4.2.8
-- bugfix in GLPlugin (multiple --negate)
-
-2015-01-28 3.4.2.7
-- more trailing null cleanup. (Thanks Jörg Linge)
-
-2015-01-27 3.4.2.6
-- bugfix in interface-usage windows+snmp+trailing null in ifDescr. (Thanks Jörg Linge)
-
-2015-01-14 3.4.2.5
-- bugfix in interface-status and snmp-table-get (no more false 64bit interfaces)
-
-2015-01-08 3.4.2.4
-- shorten interface-output with report=short
-
-2015-01-05 3.4.2.3
-- fix a perl-bug in F5 (was introduced in 3.4.2)
-
-2015-01-02 3.4.2.2
-- fix lsmpi_io for cisco asr1000 (Thanks Andreas Schulz)
-- fix Fritz!Box upnp control url (Thanks Bernd)
-
-2014-12-23 3.4.2.1
-- use fallbacks to find fexes (cefexConfigTable may not be populated)
-
-2014-12-16 3.4.2
-- use cefexConfigTable for mode watch-fexes
-- bugfix in cisco nexus sensors (had undef perl warnings)
-
-2014-12-12 3.4.1
-- bugfix in bluecoat hardware (skip perfdata of missing psus)
-
-2014-12-11 3.4
-- add vpn-status for cisco asa
-
-2014-12-08 3.3
-- add windowslocal
-
-2014-12-06 3.2.2
-- unique names for cisco cpus pointing to the same physical entity
-
-2014-11-29 3.2.1
-- remove unnecessary use statement
-- finalize paloalto ha
-- make list-interfaces and update-cache faster
-
-2014-11-18 3.2.0.1
-- hide some debug printfs
-
-2014-11-10 3.2
-- add palo alto hardware, sensors, ha
-- make nexus cpu names unique
-
-2014-11-02 3.1.1
-- bugfix my-modes
-- add paloaltomib
-
-2014-09-26 3.1
-- add Clavister Firewall (Thanks Dirk Goetz)
-- fix GLPluginSNMP, all timeout-like errors are UNKNOWN
-- allow warningx/criticalx to override cisco sensor thresholds
-
-2014-09-55 3.0.4
-- bugfix in glplugin (tmp-file-paths wrong under epn) (Thanks Sven Nierlein)
-
-2014-09-15 3.0.3.9
-- bugfix in bgp error states (Thanks Matthias Gallinger)
-- bugfix in f5 pools (Thanks Sven Nierlein)
-
-2014-08-28 3.0.3.8
-- bugfix in interface-usage/ifspeed (Thanks Matthias Gallinger)
-
-2014-08-26 3.0.3.7
-- bugfix in glpluginsnmp (undef errors with loadbalacer index)
-
-2014-08-25 3.0.3.6
-- bugfix in glpluginsnmp / (fritzbox cpu undef-error)
-
-2014-08-22 3.0.3.5
-- bugfix in glplugin/uptime because of buggy snmpengineuptime
-
-2014-08-21 3.0.3.4
-- bugfix in glplugin/uptime thresholds
-
-2014-08-21 3.0.3.3
-- add a hack with --name2 which allows shortening of stupid interface names (make dmz1 from Adaptive Security Appliance 'dmz1' interface)
-
-2014-08-20 3.0.3.2
-- update GLPluginSNMP (timeout handling)
-
-2014-08-20 3.0.3.1
-- fix interfaces which seem to be 64bit but have no counters
-
-2014-08-19 3.0.3
-- bugfix in offline mode
-- update GLPlugin
-- update GLPluginSNMP
-
-2014-08-15 3.0.2.2
-- bugfix in ios memory criticalx/warningx thresholds
-
-2014-08-14 3.0.2.1
-- update GLPluginSNMP
-
-2014-08-14 3.0.2
-- improve interface-usage performance data
-- detect more brocade models
-
-2014-08-13 3.0.1
-- bugfix in interface-usage temp-files
-
-2014-08.01 3.0
-- jetzt langts mit der ridiseignerei
-
-2014-03-17 3.0x
-- massive rewriting of the plugins structure and modules
-- repair malformed data returned by Net::SNMP
-- add interface-nat-rejects and interface-nat-session-count for IOS
-- add hardware-health for cisco asa
-- bugfix for old brocade devices and missing cpu/memory oids
-- bugfix in Cisco Call Manager
-- bugfix in IOS Memory for ASR 9000 image and reserved pool
-- bugfix in cisco wlc status
-- add hardware-health for cisco pix
-- add mode supportedmibs
-- last fallback alarm-mib for ios without envmon-mib
-- bugfix in timeticks for hp
-- bugfix in Nexus sensor thresholds (Thanks Marcel Fischer)
-- bugfix in snmp-bulk-gets, more secure fallbacks to get-next
-- bugfix in 64bit-interfaces
-- GLPlugin update & cleanup
-- get uptime from the FRAMEWORK-MIB to prevent rollovers
-
-2014-02-07 2.6.5.2
-- add another cisco unified communication model
-
-2014-01-31 2.6.5.1
-- handle a missing brocade fabric watch license in cpu-load & memory-usage
-- add CISCO-ENHANCED-MEMPOOL-MIB
-
-2014-01-24 2.6.5
-- add mode --check-config, which finds unsaved (cisco only) configs (Thanks Simon Meggle)
-
-2014-01-18 2.6.4.3
-- bugfix in uptime (Thanks Finn Christiansen)
-
-2014-01-15 2.6.4.2
-- add http connection checks for bluecoat sg
-
-2014-01-14 2.6.4
-- add cisco ccm
-
-2014-01-11 2.6.3.1
-- support more SecureOS devices (i bought Juniper SSG5)
-- bugfix in upnp-detection 
-
-2013-12-21 2.6.3
-- output number of sessions for f5 bigip load balancer pools
-- deal with obviously wrong values from devices (20000% cpu usage)
-- foundry server load balancing
-- bugfix in interface-* for Juniper IVE
-- filter hsrp groups by name
-
-2013-11-08
-- added support for role based login for Fritz Boxes (available since 
+*2015-06-22 3.5.3
+  fix a bug in f5 member connection limit noSuchInstance
+  add mode --count-routes
+* 2015-05-06 3.5.2
+  add --community2 (necessary if there are different ospf contexts)
+  raise max-repetitions for table-bulk-requests (large number of interfaces)
+* 2015-04-19 3.5.1
+  add LM-SENSOR-MIB
+  bugfix in thresholds of morphed performancedata
+* 2015-04-09 3.5
+  implement ospf and modes ospf-neighbor-status and list-ospf-neighbors
+* 2015-03-29 3.4.4.3
+  separate discards from errors in linuxlocal
+* 2015-03-03 3.4.4.2
+  combine pool-connections and pool-completion for f5
+  finish pool-complections
+* 2015-02-28 3.4.4.1
+  detect (not implement!) netgear
+* 2015-02-26 3.4.4
+  add mode pool-connections for f5
+* 2015-02-19 3.4.3
+  allow mitigation of admin down bgp peer
+  add morphperfdata
+* 2015-01-30 3.4.2.8
+  bugfix in GLPlugin (multiple --negate)
+* 2015-01-28 3.4.2.7
+  more trailing null cleanup. (Thanks Jörg Linge)
+* 2015-01-27 3.4.2.6
+  bugfix in interface-usage windows+snmp+trailing null in ifDescr. (Thanks Jörg Linge)
+* 2015-01-14 3.4.2.5
+  bugfix in interface-status and snmp-table-get (no more false 64bit interfaces)
+* 2015-01-08 3.4.2.4
+  shorten interface-output with report=short
+* 2015-01-05 3.4.2.3
+  fix a perl-bug in F5 (was introduced in 3.4.2)
+* 2015-01-02 3.4.2.2
+  fix lsmpi_io for cisco asr1000 (Thanks Andreas Schulz)
+  fix Fritz!Box upnp control url (Thanks Bernd)
+* 2014-12-23 3.4.2.1
+  use fallbacks to find fexes (cefexConfigTable may not be populated)
+* 2014-12-16 3.4.2
+  use cefexConfigTable for mode watch-fexes
+  bugfix in cisco nexus sensors (had undef perl warnings)
+* 2014-12-12 3.4.1
+  bugfix in bluecoat hardware (skip perfdata of missing psus)
+* 2014-12-11 3.4
+  add vpn-status for cisco asa
+* 2014-12-08 3.3
+  add windowslocal
+* 2014-12-06 3.2.2
+  unique names for cisco cpus pointing to the same physical entity
+* 2014-11-29 3.2.1
+  remove unnecessary use statement
+  finalize paloalto ha
+  make list-interfaces and update-cache faster
+* 2014-11-18 3.2.0.1
+  hide some debug printfs
+* 2014-11-10 3.2
+  add palo alto hardware, sensors, ha
+  make nexus cpu names unique
+* 2014-11-02 3.1.1
+  bugfix my-modes
+  add paloaltomib
+* 2014-09-26 3.1
+  add Clavister Firewall (Thanks Dirk Goetz)
+  fix GLPluginSNMP, all timeout-like errors are UNKNOWN
+  allow warningx/criticalx to override cisco sensor thresholds
+* 2014-09-55 3.0.4
+  bugfix in glplugin (tmp-file-paths wrong under epn) (Thanks Sven Nierlein)
+* 2014-09-15 3.0.3.9
+  bugfix in bgp error states (Thanks Matthias Gallinger)
+  bugfix in f5 pools (Thanks Sven Nierlein)
+* 2014-08-28 3.0.3.8
+  bugfix in interface-usage/ifspeed (Thanks Matthias Gallinger)
+* 2014-08-26 3.0.3.7
+  bugfix in glpluginsnmp (undef errors with loadbalacer index)
+* 2014-08-25 3.0.3.6
+  bugfix in glpluginsnmp / (fritzbox cpu undef-error)
+* 2014-08-22 3.0.3.5
+  bugfix in glplugin/uptime because of buggy snmpengineuptime
+* 2014-08-21 3.0.3.4
+  bugfix in glplugin/uptime thresholds
+* 2014-08-21 3.0.3.3
+  add a hack with --name2 which allows shortening of stupid interface names (make dmz1 from Adaptive Security Appliance 'dmz1' interface)
+* 2014-08-20 3.0.3.2
+  update GLPluginSNMP (timeout handling)
+* 2014-08-20 3.0.3.1
+  fix interfaces which seem to be 64bit but have no counters
+* 2014-08-19 3.0.3
+  bugfix in offline mode
+  update GLPlugin
+  update GLPluginSNMP
+* 2014-08-15 3.0.2.2
+  bugfix in ios memory criticalx/warningx thresholds
+* 2014-08-14 3.0.2.1
+  update GLPluginSNMP
+* 2014-08-14 3.0.2
+  improve interface-usage performance data
+  detect more brocade models
+* 2014-08-13 3.0.1
+  bugfix in interface-usage temp-files
+* 2014-08.01 3.0
+  jetzt langts mit der ridiseignerei
+* 2014-03-17 3.0x
+  massive rewriting of the plugins structure and modules
+  repair malformed data returned by Net::SNMP
+  add interface-nat-rejects and interface-nat-session-count for IOS
+  add hardware-health for cisco asa
+  bugfix for old brocade devices and missing cpu/memory oids
+  bugfix in Cisco Call Manager
+  bugfix in IOS Memory for ASR 9000 image and reserved pool
+  bugfix in cisco wlc status
+  add hardware-health for cisco pix
+  add mode supportedmibs
+  last fallback alarm-mib for ios without envmon-mib
+  bugfix in timeticks for hp
+  bugfix in Nexus sensor thresholds (Thanks Marcel Fischer)
+  bugfix in snmp-bulk-gets, more secure fallbacks to get-next
+  bugfix in 64bit-interfaces
+  GLPlugin update & cleanup
+  get uptime from the FRAMEWORK-MIB to prevent rollovers
+* 2014-02-07 2.6.5.2
+  add another cisco unified communication model
+* 2014-01-31 2.6.5.1
+  handle a missing brocade fabric watch license in cpu-load & memory-usage
+  add CISCO-ENHANCED-MEMPOOL-MIB
+* 2014-01-24 2.6.5
+  add mode --check-config, which finds unsaved (cisco only) configs (Thanks Simon Meggle)
+* 2014-01-18 2.6.4.3
+  bugfix in uptime (Thanks Finn Christiansen)
+* 2014-01-15 2.6.4.2
+  add http connection checks for bluecoat sg
+* 2014-01-14 2.6.4
+  add cisco ccm
+* 2014-01-11 2.6.3.1
+  support more SecureOS devices (i bought Juniper SSG5)
+  bugfix in upnp-detection 
+* 2013-12-21 2.6.3
+  output number of sessions for f5 bigip load balancer pools
+  deal with obviously wrong values from devices (20000% cpu usage)
+  foundry server load balancing
+  bugfix in interface-* for Juniper IVE
+  filter hsrp groups by name
+* 2013-11-08
+  added support for role based login for Fritz Boxes (available since 
   FRITZ!OS 5.50). Use --community for password, --username for username if
   role based security is switched on.
-
-2013-11-09
-- bugfix for fritzbox
-
-2013-11-08 2.6.1
-- hardware-health for Checkpoint Firewall-1
-
-2013-11-07 2.6
-- finished bgp-peer-status (focus on as numbers with --name2)
-- admin down with --interface-status can have any level with --mitigation
-
-2013-10-31 2.5.4.1
-- add Fujitsu Intelligent Blade Panel 30/12
-
-2013-10-30 2.5.4
-- add bgp
-
-2013-10-01 2.5.3
-- detect more brocade devices 
-
-2013-09-26 2.5.2.1
-- supress double output for html f5 pool members
-
-2013-09-25 2.5.2
-- add html output for f5 pool members
-
-2013-09-18 2.5.1.2
-- removed a leftover Data::Dumper (Thanks Frank Belau)
-
-2013-09-17 2.5.1.1
-- bugfix in lsmpi_io memory pools of Cisco ASR (100% even with --warning/--critical)
-
-2013-09-11 2.5.1
-- set a 100% threshold for lsmpi_io memory pools of Cisco ASR (Thanks James Clark & Perun)
-
-2013-09-10 2.5
-- implemented offline mode with --snmpwalk & --offline
-
-2013-09-03 2.4
-- add Cisco IronPort AsyncOS
-
-2013-08-27 2.3
-- add Juniper IVE (ex. Pulse-Gateway MAG4610)
-- add count-connections for cisco asa
-
-2013-07-11 2.2
-- add memory-usage for checkpoint
-- add detection for cpx
-
-2013-07-09 2.1.1
-- skip non-interface files in /sys/class/net for servertype linuxlocal (Thanks Sven Nierlein)
-- better error handling on unwritable statefiles/dirs
-
-2013-06-12 2.1
-- added "--servertype ifmib" so you can use "--mode interface*" with every kind of ifmib-capable device
-
-2013-06-01 2.0
-- added support for AVM FRITZ!DECT 200 smart plug
-
-2013-05-27 1.9.8.1
-- bugfix for the bugfix in commandline options (Thanks webspace Mario)
-
-2013-05-23 1.9.8
-- add Brocade Communications Systems, Inc. ICX6610-24-HPOE, IronWare 
-- bugfix in commandline options (Thanks TheCry)
-
-2013-05-17 1.9.7.4
-- added another fallback for snmp-get_entries
-- fixed a bug in uptime (only first minute after reboot)
-
-2013-04-20 1.9.7.3
-- fixed a bug in snmpwalk simulation and savestate
-
-2013-04-08 1.9.7.2
-- bugfix, interfaces were shown twice in list-interfaces
-
-2013-03-26 1.9.7.1
-- set automatic thresholds for link-aggregation-availability
-
-2013-03-25 1.9.7
-- added link-aggregation-availability
-
-2013-03-19 1.9.6
-- fixed a bug in interface-*
-- speedup in interface-* (with --name and 64bit)
-- added a hostname/community hash to statefiles
-
-2013-02-13 1.9.5.1
-- fixed a bug deep inside snmp bulkwalks and lots of interfaces (Thanks Uestuen Oender)
-
-2013-02-24 1.9.5
-- add interface-availability
-
-2013-02-11 1.9.4
-- add Cisco Wireless LAN Controller 5500 
-
-2013-02-11 1.9.3.1
-- fixed a bug in statefiles with uppercase directory names. (Thanks Matthias Gallinger)
-
-2013-02-10 1.9.3
-- add blue coat sg600
-
-2013-02-02 1.9.2
-- removed my static ip from FRITZ!BOX interface-usage (Thanks Stef)
-
-2013-01- 1.9.1
-- fixed a bug in FFritz!BOX uptime (Thanks Lars Urban)
-
+* 2013-11-09
+  bugfix for fritzbox
+* 2013-11-08 2.6.1
+  hardware-health for Checkpoint Firewall-1
+* 2013-11-07 2.6
+  finished bgp-peer-status (focus on as numbers with --name2)
+  admin down with --interface-status can have any level with --mitigation
+* 2013-10-31 2.5.4.1
+  add Fujitsu Intelligent Blade Panel 30/12
+* 2013-10-30 2.5.4
+  add bgp
+* 2013-10-01 2.5.3
+  detect more brocade devices 
+* 2013-09-26 2.5.2.1
+  supress double output for html f5 pool members
+* 2013-09-25 2.5.2
+  add html output for f5 pool members
+* 2013-09-18 2.5.1.2
+  removed a leftover Data::Dumper (Thanks Frank Belau)
+* 2013-09-17 2.5.1.1
+  bugfix in lsmpi_io memory pools of Cisco ASR (100% even with --warning/--critical)
+* 2013-09-11 2.5.1
+  set a 100% threshold for lsmpi_io memory pools of Cisco ASR (Thanks James Clark & Perun)
+* 2013-09-10 2.5
+  implemented offline mode with --snmpwalk & --offline
+* 2013-09-03 2.4
+  add Cisco IronPort AsyncOS
+* 2013-08-27 2.3
+  add Juniper IVE (ex. Pulse-Gateway MAG4610)
+  add count-connections for cisco asa
+* 2013-07-11 2.2
+  add memory-usage for checkpoint
+  add detection for cpx
+* 2013-07-09 2.1.1
+  skip non-interface files in /sys/class/net for servertype linuxlocal (Thanks Sven Nierlein)
+  better error handling on unwritable statefiles/dirs
+* 2013-06-12 2.1
+  added "--servertype ifmib" so you can use "--mode interface*" with every kind of ifmib-capable device
+* 2013-06-01 2.0
+  added support for AVM FRITZ!DECT 200 smart plug
+* 2013-05-27 1.9.8.1
+  bugfix for the bugfix in commandline options (Thanks webspace Mario)
+* 2013-05-23 1.9.8
+  add Brocade Communications Systems, Inc. ICX6610-24-HPOE, IronWare 
+  bugfix in commandline options (Thanks TheCry)
+* 2013-05-17 1.9.7.4
+  added another fallback for snmp-get_entries
+  fixed a bug in uptime (only first minute after reboot)
+* 2013-04-20 1.9.7.3
+  fixed a bug in snmpwalk simulation and savestate
+* 2013-04-08 1.9.7.2
+  bugfix, interfaces were shown twice in list-interfaces
+* 2013-03-26 1.9.7.1
+  set automatic thresholds for link-aggregation-availability
+* 2013-03-25 1.9.7
+  added link-aggregation-availability
+* 2013-03-19 1.9.6
+  fixed a bug in interface-*
+  speedup in interface-* (with --name and 64bit)
+  added a hostname/community hash to statefiles
+* 2013-02-13 1.9.5.1
+  fixed a bug deep inside snmp bulkwalks and lots of interfaces (Thanks Uestuen Oender)
+* 2013-02-24 1.9.5
+  add interface-availability
+* 2013-02-11 1.9.4
+  add Cisco Wireless LAN Controller 5500 
+* 2013-02-11 1.9.3.1
+  fixed a bug in statefiles with uppercase directory names. (Thanks Matthias Gallinger)
+* 2013-02-10 1.9.3
+  add blue coat sg600
+* 2013-02-02 1.9.2
+  removed my static ip from FRITZ!BOX interface-usage (Thanks Stef)
+* 2013-01- 1.9.1
+  fixed a bug in FFritz!BOX uptime (Thanks Lars Urban)
 3013-01 1.9
-- add uptime and interface-usage for AVM FRITZ!Box 7390
-- add cpu-load and memory-usage for AVM FRITZ!Box 7390
-
-2013-01-13 1.8
+  add uptime and interface-usage for AVM FRITZ!Box 7390
+  add cpu-load and memory-usage for AVM FRITZ!Box 7390
+* 2013-01-13 1.8
 -add cpu&memory check for juniper netscreen
-
-2013-01-12 1.7.1
-- add a name caching mechanism for f5 bigip pools
-
-2013-01-08 1.7
-- add f5 bigip pool completeness
-- add member info for failed f5 pools
-
-2012-12-10 1.6
-- add checkpoint firewall-1
-
-2012-11-23 1.5
-- add 64bit interfaces
-
-2012-09-26 1.4.9.1
-- fix a bug in uptime calculation
-
-2012-09-24 1.4.9
-- add hp procurve cpu-load and memory-usage
-- fix a bug in cisco memory perfdata
-
-2012-08-28 1.4.8
-- add hp procurve hardware
-
-2012-08-21 1.4.7.1
-- fix a bug in servertype locallinux, interfaces and --name (Thanks Simon Meggle)
-
-2012-08-21 1.4.7
-- add f5 bigip
-- bugfix in mode uptime
-
-2012-08-10 1.4.6
-- add mode uptime
-
-2012-08-10 1.4.5.2
-- fix a bug in statefilesdir creation under omd
-
-2012-08-02 1.4.5.1
-- add more hardware info for EMC-DS24M2 (McData Sphereon 4500)
-
-2012-07-31 1.4.5
-- add UCD-MIB for SecureOS (McAfee Sidewinder)
-
-2012-07-31 1.4.4
-- add fibre alliance mib sensor table for MeOS/DS-4700M
-
-2012-07-20 1.4.3.1
-- add the index to interface names, if interfaces all have the same name
-- first experiments with MeOS
-
-2012-07-12 1.4.3
-- fix a bug in the role parameter for hsrp
-- fix a temperature index where ios doesn't set the counter itself
-- add mib2-interface-modes to brocade fabos
-
-2012-07-05 1.4.2
-- add mode encode for interface names with ' or "
-
-2012-07-05 1.4.1
-- add --ifspeedin, --ifspeedout, --ifspeed (used for asymmetric mpls)
-
-2012-06-22 1.4
-- add linux local interfaces (interface-usage/errors only) with --servertype linuxlocal
-- add mode walk
-- rename brocade300 -> fabos
-
-2012-04-23 1.3
-- add mode list-interfaces-detail (Cisco only)
-- add brocade300 (hardware-health,memory-usage,cpu-load only)
-
-2012-03-29 1.2
-- add support for Cisco Nexus (cpu, mem, )
-- add Nexus sensors
-- add Allied Telesyn (only interfaces so far)
-
-2012-03-19 1.1.1.1
-- bugfix in list-hsrp-groups
-- --units KBi/MBi/GBi for interface-usage
-
-2012-02-22 1.1.1
-- add mode hsrp-failover (Thanks Munich)
-
-2012-02-22 1.1
-- add mode hsrp-state (Thanks Munich)
-
-2012-01-05
-- some more debug messages
-
-2012-01-04 1.0
-- Nortel devices are recognized. (only interfaces can be queried by now)
-
-
-
-- no official changes yet
+* 2013-01-12 1.7.1
+  add a name caching mechanism for f5 bigip pools
+* 2013-01-08 1.7
+  add f5 bigip pool completeness
+  add member info for failed f5 pools
+* 2012-12-10 1.6
+  add checkpoint firewall-1
+* 2012-11-23 1.5
+  add 64bit interfaces
+* 2012-09-26 1.4.9.1
+  fix a bug in uptime calculation
+* 2012-09-24 1.4.9
+  add hp procurve cpu-load and memory-usage
+  fix a bug in cisco memory perfdata
+* 2012-08-28 1.4.8
+  add hp procurve hardware
+* 2012-08-21 1.4.7.1
+  fix a bug in servertype locallinux, interfaces and --name (Thanks Simon Meggle)
+* 2012-08-21 1.4.7
+  add f5 bigip
+  bugfix in mode uptime
+* 2012-08-10 1.4.6
+  add mode uptime
+* 2012-08-10 1.4.5.2
+  fix a bug in statefilesdir creation under omd
+* 2012-08-02 1.4.5.1
+  add more hardware info for EMC-DS24M2 (McData Sphereon 4500)
+* 2012-07-31 1.4.5
+  add UCD-MIB for SecureOS (McAfee Sidewinder)
+* 2012-07-31 1.4.4
+  add fibre alliance mib sensor table for MeOS/DS-4700M
+* 2012-07-20 1.4.3.1
+  add the index to interface names, if interfaces all have the same name
+  first experiments with MeOS
+* 2012-07-12 1.4.3
+  fix a bug in the role parameter for hsrp
+  fix a temperature index where ios doesn't set the counter itself
+  add mib2-interface-modes to brocade fabos
+* 2012-07-05 1.4.2
+  add mode encode for interface names with ' or "
+* 2012-07-05 1.4.1
+  add --ifspeedin, --ifspeedout, --ifspeed (used for asymmetric mpls)
+* 2012-06-22 1.4
+  add linux local interfaces (interface-usage/errors only) with --servertype linuxlocal
+  add mode walk
+  rename brocade300 -> fabos
+* 2012-04-23 1.3
+  add mode list-interfaces-detail (Cisco only)
+  add brocade300 (hardware-health,memory-usage,cpu-load only)
+* 2012-03-29 1.2
+  add support for Cisco Nexus (cpu, mem, )
+  add Nexus sensors
+  add Allied Telesyn (only interfaces so far)
+* 2012-03-19 1.1.1.1
+  bugfix in list-hsrp-groups
+  --units KBi/MBi/GBi for interface-usage
+* 2012-02-22 1.1.1
+  add mode hsrp-failover (Thanks Munich)
+* 2012-02-22 1.1
+  add mode hsrp-state (Thanks Munich)
+* 2012-01-05
+  some more debug messages
+* 2012-01-04 1.0
+  Nortel devices are recognized. (only interfaces can be queried by now)
+  no official changes yet

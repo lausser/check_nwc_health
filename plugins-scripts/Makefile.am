@@ -4,17 +4,22 @@ SED=/bin/sed
 GREP=/bin/grep
 CAT=/bin/cat
 ECHO=/bin/echo
+if DISABLE_STANDALONE
+STANDALONE = no
+else
+STANDALONE = yes
+endif
 
 SUFFIXES = .pl .pm .sh
 
 VPATH=$(top_srcdir) $(top_srcdir)/plugins-scripts $(top_srcdir)/plugins-scripts/t
 
 libexec_SCRIPTS=check_nwc_health
-MY_MODULES=
-EXTRA_MODULES=\
+GL_MODULES=\
   GLPlugin.pm \
   GLPluginSNMP.pm \
-  GLPluginUPNP.pm \
+  GLPluginUPNP.pm
+EXTRA_MODULES=\
   Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390.pm \
@@ -192,7 +197,7 @@ EXTRA_MODULES=\
   Classes/Lantronix/SLS.pm \
   Classes/MibsAndOids.pm \
   Classes/Device.pm
-EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES)
+EXTRA_DIST=check_nwc_health.pl $(EXTRA_MODULES) $(GL_MODULES)
 
 CLEANFILES=$(libexec_SCRIPTS)
 
@@ -214,6 +219,12 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "#! #PERL# -w" | $(AWK) -f ./subst > $@
 	$(ECHO) "# nagios: -epn" >> $@
 	$(ECHO) >> $@
+	if [ "${STANDALONE}" == "yes" ]; then \
+		$(ECHO) i am standalone; \
+		for m in ${GL_MODULES}; do \
+			$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst >> $@; \
+		done \
+	fi
 	for m in ${EXTRA_MODULES}; do \
 		$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
 	done
