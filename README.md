@@ -19,59 +19,60 @@ Command line parameters
 Modi
 ----
 
-| hardware-health               | Check the status of environmental equipment | fans, temperatures, power))|
+|-------------------------------|------------------------------------------------------------------------|
+| hardware-health               | Check the status of environmental equipment (fans, temperatures, power)|
 | cpu-load                      | Check the CPU load of the device)|
 | memory-usage                  | Check the memory usage of the device)|
 | interface-usage               | Check the utilization of interfaces)|
-| interface-errors              | Check the error-rate of interfaces | without discards))|
+| interface-errors              | Check the error-rate of interfaces |
 | interface-discards            | Check the discard-rate of interfaces)|
-| interface-status              | Check the status of interfaces | oper/admin))|
+| interface-status              | Check the status of interfaces (oper/admin)|
 | interface-nat-count-sessions  | Count the number of nat sessions)|
 | interface-nat-rejects         | Count the number of nat sessions rejected due to lack of resources)|
 | list-interfaces               | Show the interfaces of the device and update the name cache)|
 | list-interfaces-detail        | Show the interfaces of the device and some details)|
-| interface-availability        | Show the availability | oper != up) of interfaces)|
+| interface-availability        | Show the availability (oper != up of interfaces)|
 | link-aggregation-availability | Check the percentage of up interfaces in a link aggregation)|
 | list-routes                   | Check the percentage of up interfaces in a link aggregation)|
-| route-exists                  | Check if a route exists. | --name is the dest, --name2 check also the next hop))|
-| count-routes                  | Count the routes. | --name is the dest, --name2 is the hop))|
-| vpn-status                    | Check the status of vpns | up/down))|
+| route-exists                  | Check if a route exists. --name is the dest, --name2 check also the next hop))|
+| count-routes                  | Count the routes. --name is the dest, --name2 is the hop))|
+| vpn-status                    | Check the status of vpns (up/down))|
 | create-shinken-service        | Create a Shinken service definition)|
 | hsrp-state                    | Check the state in a HSRP group)|
-| hsrp-failover                 | Check if a HSRP group's nodes have changed their roles)|
-| list-hsrp-groups              | Show the HSRP groups configured on this device)|
-| bgp-peer-status               | Check status of BGP peers)|
-| list-bgp-peers                | Show BGP peers known to this device)|
-| ospf-neighbor-status          | Check status of OSPF neighbors)|
-| list-ospf-neighbors           | Show OSPF neighbors)|
-| ha-role                       | Check the role in a ha group)|
-| svn-status                    | Check the status of the svn subsystem)|
-| mngmt-status                  | Check the status of the management subsystem)|
-| fw-policy                     | Check the installed firewall policy)|
-| fw-connections                | Check the number of firewall policy connections)|
-| session-usage                 | Check the session limits of a load balancer)|
-| security-status               | Check if there are security-relevant incidents)|
-| pool-completeness             | Check the members of a load balancer pool)|
-| pool-connections              | Check the number of connections of a load balancer pool)|
-| pool-complections             | Check the members and connections of a load balancer pool)|
-| list-pools                    | List load balancer pools)|
-| check-licenses                | Check the installed licences/keys)|
-| count-users                   | Count the | connected) users/sessions)|
-| check-config                  | Check the status of configs | cisco, unsaved config changes))|
-| check-connections             | Check the quality of connections)|
-| count-connections             | Check the number of connections | -client, -server is possible))|
-| watch-fexes                   | Check if FEXes appear and disappear | use --lookup))|
-| accesspoint-status            | Check the status of access points)|
-| count-accesspoints            | Check if the number of access points is within a certain range)|
-| watch-accesspoints            | Check if access points appear and disappear | use --lookup))|
-| list-accesspoints             | List access points managed by this device)|
-| phone-cm-status               | Check if the callmanager is up)|
-| phone-status                  | Check the number of registered/unregistered/rejected phones)|
-| list-smart-home-devices       | List Fritz!DECT 200 plugs managed by this device)|
-| smart-home-device-status      | Check if a Fritz!DECT 200 plug is on)|
-| smart-home-device-energy      | Show the current power consumption of a Fritz!DECT 200 plug)|
-| walk                          | Show snmpwalk command with the oids necessary for a simulation)|
-| supportedmibs                 | Shows the names of the mibs which this devices has implemented | only lausser may run this command))|
+| hsrp-failover                 | Check if a HSRP group's nodes have changed their roles|
+| list-hsrp-groups              | Show the HSRP groups configured on this device|
+| bgp-peer-status               | Check status of BGP peers|
+| list-bgp-peers                | Show BGP peers known to this device|
+| ospf-neighbor-status          | Check status of OSPF neighbors|
+| list-ospf-neighbors           | Show OSPF neighbors|
+| ha-role                       | Check the role in a ha group|
+| svn-status                    | Check the status of the svn subsystem|
+| mngmt-status                  | Check the status of the management subsystem|
+| fw-policy                     | Check the installed firewall policy|
+| fw-connections                | Check the number of firewall policy connections|
+| session-usage                 | Check the session limits of a load balancer|
+| security-status               | Check if there are security-relevant incidents|
+| pool-completeness             | Check the members of a load balancer pool|
+| pool-connections              | Check the number of connections of a load balancer pool|
+| pool-complections             | Check the members and connections of a load balancer pool|
+| list-pools                    | List load balancer pools|
+| check-licenses                | Check the installed licences/keys|
+| count-users                   | Count the | connected) users/sessions|
+| check-config                  | Check the status of configs (cisco, unsaved config changes)|
+| check-connections             | Check the quality of connections|
+| count-connections             | Check the number of connections (-client, -server is possible)|
+| watch-fexes                   | Check if FEXes appear and disappear (use --lookup)|
+| accesspoint-status            | Check the status of access points|
+| count-accesspoints            | Check if the number of access points is within a certain range|
+| watch-accesspoints            | Check if access points appear and disappear (use --lookup)|
+| list-accesspoints             | List access points managed by this device|
+| phone-cm-status               | Check if the callmanager is up|
+| phone-status                  | Check the number of registered/unregistered/rejected phones|
+| list-smart-home-devices       | List Fritz!DECT 200 plugs managed by this device|
+| smart-home-device-status      | Check if a Fritz!DECT 200 plug is on|
+| smart-home-device-energy      | Show the current power consumption of a Fritz!DECT 200 plug|
+| walk                          | Show snmpwalk command with the oids necessary for a simulation|
+| supportedmibs                 | Shows the names of the mibs which this devices has implemented (only lausser may run this command)|
 
 The list is not complete. Some devices that are not listed here can possibly be monitored because they implement the same MIBs as supported models. Just try it ....
 (If a device is not recognized, i can extend the plugin. But not for free)
