@@ -60,6 +60,19 @@ sub no_such_mode {
 sub add_default_args {
   my $self = shift;
   $self->add_arg(
+      spec => 'mode=s',
+      help => "--mode
+     A keyword which tells the plugin what to do",
+      required => 1,
+  );
+  $self->add_arg(
+      spec => 'blacklist|b=s',
+      help => '--blacklist
+     Blacklist some (missing/failed) components',
+      required => 0,
+      default => '',
+  );
+  $self->add_arg(
       spec => 'regexp',
       help => "--regexp
      if this parameter is used, name will be interpreted as a
@@ -90,6 +103,28 @@ sub add_default_args {
       required => 0,
   );
   $self->add_arg(
+      spec => 'mitigation=s',
+      help => "--mitigation
+     The parameter allows you to change a critical error to a warning.",
+      required => 0,
+  );
+  $self->add_arg(
+      spec => 'units=s',
+      help => "--units
+     One of %, B, KB, MB, GB, Bit, KBi, MBi, GBi. (used for e.g. mode interface-usage)",
+      required => 0,
+  );
+  $self->add_arg(
+      spec => 'lookback=s',
+      help => "--lookback
+     The amount of time you want to look back when calculating average rates.
+     Use it for mode interface-errors or interface-usage. Without --lookback
+     the time between two runs of check_nwc_health is the base for calculations.
+     If you want your checkresult to be based for example on the past hour,
+     use --lookback 3600. ",
+      required => 0,
+  );
+  $self->add_arg(
       spec => 'environment|e=s%',
       help => "--environment
      Add a variable to the plugin's environment",
@@ -99,12 +134,6 @@ sub add_default_args {
       spec => 'negate=s%',
       help => "--negate
      Emulate the negate plugin. --negate warning=critical --negate unknown=critical",
-      required => 0,
-  );
-  $self->add_arg(
-      spec => 'with-mymodules-dyn-dir=s',
-      help => "--with-mymodules-dyn-dir
-     Add-on modules for the my-modes will be searched in this directory",
       required => 0,
   );
   $self->add_arg(
@@ -122,6 +151,13 @@ sub add_default_args {
       required => 0,
   );
   $self->add_arg(
+      spec => 'selectedperfdata=s',
+      help => "--selectedperfdata
+     The parameter allows you to limit the list of performance data. It's a perl regexp.
+     Only matching perfdata show up in the output",
+      required => 0,
+  );
+  $self->add_arg(
       spec => 'report=s',
       help => "--report
      Can be used to shorten the output",
@@ -133,6 +169,19 @@ sub add_default_args {
       help => '--multiline
      Multiline output',
       required => 0,
+  );
+  $self->add_arg(
+      spec => 'with-mymodules-dyn-dir=s',
+      help => "--with-mymodules-dyn-dir
+     Add-on modules for the my-modes will be searched in this directory",
+      required => 0,
+  );
+  $self->add_arg(
+      spec => 'statefilesdir=s',
+      help => '--statefilesdir
+     An alternate directory where the plugin can save files',
+      required => 0,
+      env => 'STATEFILESDIR',
   );
   $self->add_arg(
       spec => 'isvalidtime=i',
