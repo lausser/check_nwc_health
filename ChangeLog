@@ -2,7 +2,8 @@
   allow --name dest/cidr for mode count-routes
 * 2015-06-22 3.5.3
   fix a bug in f5 member connection limit noSuchInstance
-  add mode --count-routes (find mpls problems)
+  add mode count-routes (find mpls problems)
+  add mode count-bgp-peers
 * 2015-05-06 3.5.2
   add --community2 (necessary if there are different ospf contexts)
   raise max-repetitions for table-bulk-requests (large number of interfaces)
