@@ -261,6 +261,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
     ipCidrRouteMetric4 => '1.3.6.1.2.1.4.24.4.1.14',
     ipCidrRouteMetric5 => '1.3.6.1.2.1.4.24.4.1.15',
     ipCidrRouteStatus => '1.3.6.1.2.1.4.24.4.1.16',
+    ipCidrRouteStatusDefinition => 'SNMPv2-TC-v1::RowStatus',
     ipForward => '1.3.6.1.2.1.4.24',
     ipForwardNumber => '1.3.6.1.2.1.4.24.1.0',
     ipForwardTable => '1.3.6.1.2.1.4.24.2',
