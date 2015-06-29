@@ -19,7 +19,25 @@ sub init {
   if (! @{$self->{routes}}) {
     $self->get_snmp_tables('IP-FORWARD-MIB', [
         ['routes', 'ipCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute',
-            sub { my $o = shift; return defined $o->{ipCidrRouteDest} && ($o->filter_name($o->{ipCidrRouteDest}) && $o->filter_name2($o->{ipCidrRouteNextHop})) }
+            sub {
+              my $o = shift;
+              if ($o->opts->name && $o->opts->name =~ /\//) {
+                my ($dest, $cidr) = split(/\//, $o->opts->name);
+                my $bits = ( 2 ** (32 - $cidr) ) - 1;
+                my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
+                my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
+                return defined $o->{ipCidrRouteDest} && (
+                    $o->filter_namex($dest, $o->{ipCidrRouteDest}) &&
+                    $o->filter_namex($netmask, $o->{ipCidrRouteMask}) &&
+                    $o->filter_name2($o->{ipCidrRouteNextHop})
+                );
+              } else {
+                return defined $o->{ipCidrRouteDest} && (
+                    $o->filter_name($o->{ipCidrRouteDest}) &&
+                    $o->filter_name2($o->{ipCidrRouteNextHop})
+                );
+              }
+            }
         ],
     ]);
   }
@@ -72,6 +90,20 @@ our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
 
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute;
 our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
+
+sub finish {
+  my $self = shift;
+  if (! defined $self->{ipCidrRouteDest}) {
+    # we can reconstruct a few attributes from the index
+    # one customer only made ipCidrRouteStatus visible
+    $self->{ipCidrRouteDest} = join(".", map { $self->{indices}->[$_] } (0, 1, 2, 3));
+    $self->{ipCidrRouteMask} = join(".", map { $self->{indices}->[$_] } (4, 5, 6, 7));
+    $self->{ipCidrRouteTos} = $self->{indices}->[8];
+    $self->{ipCidrRouteNextHop} = join(".", map { $self->{indices}->[$_] } (9, 10, 11, 12));
+    $self->{ipCidrRouteType} = "other"; # maybe not, who cares
+    $self->{ipCidrRouteProto} = "other"; # maybe not, who cares
+  }
+}
 
 sub list {
   my $self = shift;

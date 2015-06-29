@@ -73,16 +73,25 @@ sub check {
   my $self = shift;
   my $errorfound = 0;
   $self->add_info('checking bgp peers');
-  if (scalar(@{$self->{peers}}) == 0) {
-    $self->add_unknown('no peers');
-    return;
-  }
   if ($self->mode =~ /peer::list/) {
     foreach (sort {$a->{bgpPeerRemoteAddr} cmp $b->{bgpPeerRemoteAddr}} @{$self->{peers}}) {
       printf "%s\n", $_->{bgpPeerRemoteAddr};
       #$_->list();
     }
+    $self->add_ok("have fun");
+  } elsif ($self->mode =~ /peer::count/) {
+    $self->add_info(sprintf "found %d peers", scalar(@{$self->{peers}}));
+    $self->set_thresholds(warning => '1:', critical => '1:');
+    $self->add_message($self->check_thresholds(scalar(@{$self->{peers}})));
+    $self->add_perfdata(
+        label => 'peers',
+        value => scalar(@{$self->{peers}}),
+    );
   } else {
+    if (scalar(@{$self->{peers}}) == 0) {
+      $self->add_unknown('no peers');
+      return;
+    }
     # es gibt 
     # kleine installation: 1 peer zu 1 as, evt 2. as als fallback
     # grosse installation: n peer zu 1 as, alternative routen zum provider

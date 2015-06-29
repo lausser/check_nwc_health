@@ -56,6 +56,13 @@ sub v2tov3 {
 sub add_snmp_args {
   my $self = shift;
   $self->add_arg(
+      spec => 'hostname|H=s',
+      help => '--hostname
+     Hostname or IP-address of the switch or router',
+      required => 0,
+      env => 'HOSTNAME',
+  );
+  $self->add_arg(
       spec => 'port=i',
       help => '--port
      The SNMP port to use (default: 161)',
@@ -130,6 +137,29 @@ sub add_snmp_args {
       help => '--community2
      SNMP community which can be used to switch the context during runtime',
       required => 0,
+  );
+  $self->add_arg(
+      spec => 'snmpwalk=s',
+      help => '--snmpwalk
+     A file with the output of a snmpwalk (used for simulation)
+     Use it instead of --hostname',
+      required => 0,
+      env => 'SNMPWALK',
+  );
+  $self->add_arg(
+      spec => 'oids=s',
+      help => '--oids
+     A list of oids which are downloaded and written to a cache file.
+     Use it together with --mode oidcache',
+      required => 0,
+  );
+  $self->add_arg(
+      spec => 'offline:i',
+      help => '--offline
+     The maximum number of seconds since the last update of cache file before
+     it is considered too old',
+      required => 0,
+      env => 'OFFLINE',
   );
 }
 
