@@ -1,3 +1,11 @@
+{
+  no warnings qw(once);
+  $GLPlugin::SNMP::discover_ids = {};
+  $GLPlugin::SNMP::mib_ids = {};
+  $GLPlugin::SNMP::mibs_and_oids = {};
+  $GLPlugin::SNMP::definitions = {};
+}
+
 $GLPlugin::SNMP::discover_ids = {
   '1.3.6.1.4.1.12532.252.5.1' => 'Classes::Juniper::IVE',
   '1.3.6.1.4.1.9.1.1348' => 'Classes::CiscoCCM',

@@ -1,6 +1,16 @@
 # /usr/bin/perl -w
 
 use strict;
+no warnings qw(once);
+eval {
+  require GLPlugin;
+  require GLPluginSNMP;
+  require GLPluginUPNP;
+};
+if ($@) {
+  printf "UNKNOWN - module GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";
+  exit 3;
+}
 
 my $plugin = Classes::Device->new(
     shortname => '',
