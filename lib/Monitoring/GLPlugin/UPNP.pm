@@ -1,5 +1,5 @@
-package GLPlugin::UPNP;
-our @ISA = qw(GLPlugin);
+package Monitoring::GLPlugin::UPNP;
+our @ISA = qw(Monitoring::GLPlugin);
 
 use strict;
 use File::Basename;
@@ -38,7 +38,7 @@ sub init {
         critical => $self->{critical},
     );
     my ($code, $message) = $self->check_messages(join => ', ', join_all => ', ');
-    $GLPlugin::plugin->nagios_exit($code, $message);
+    $Monitoring::GLPlugin::plugin->nagios_exit($code, $message);
   }
 }
 
@@ -119,3 +119,4 @@ sub create_statefile {
       $self->opts->hostname, $self->opts->mode, lc $extension;
 }
 
+1;

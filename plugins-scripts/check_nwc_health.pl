@@ -2,13 +2,30 @@
 
 use strict;
 no warnings qw(once);
+
+
 eval {
-  require GLPlugin;
-  require GLPluginSNMP;
-  require GLPluginUPNP;
+  if ( ! grep /AUTOLOAD/, keys %Monitoring::GLPlugin::) {
+printf "no glplugin loaded\n";
+    require "Monitoring::GLPlugin";
+    require "Monitoring::GLPlugin::SNMP";
+    require "Monitoring::GLPlugin::UPNP";
+} else {
+printf "glplugin loaded\n";
+  }
+
+# static
+#-->Monitoring::GLPlugin
+#-->Monitoring::GLPlugin::
+#glplugin loaded main
+#glplugin loaded Monitoring::GLPlugin
+#glplugin loaded $VAR1 = *{'::Monitoring::GLPlugin::'};
+
+# disable $VAR1 = *{'::Monitoring::GLPlugin::'};
 };
 if ($@) {
-  printf "UNKNOWN - module GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";
+  printf "UNKNOWN - module Monitoring::GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";
+  printf "%s\n", $@;
   exit 3;
 }
 
@@ -22,7 +39,7 @@ my $plugin = Classes::Device->new(
     blurb => 'This plugin checks various parameters of network components ',
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
-    plugin => $GLPlugin::pluginname,
+    plugin => $Monitoring::GLPlugin::pluginname,
 );
 $plugin->add_mode(
     internal => 'device::uptime',

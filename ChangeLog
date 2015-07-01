@@ -1,3 +1,6 @@
+* 2015-06-28 4.0
+  --disable-standalone
+  add --watch-bgp-peers
 * 2015-06-25 3.5.4
   allow --name dest/cidr for mode count-routes
 * 2015-06-22 3.5.3

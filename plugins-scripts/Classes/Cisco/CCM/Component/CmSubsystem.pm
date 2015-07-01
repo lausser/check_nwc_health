@@ -1,5 +1,5 @@
 package Classes::Cisco::CCM::Component::CmSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -23,7 +23,7 @@ sub check {
 
 
 package Classes::Cisco::CCM::Component::CmSubsystem::Cm;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

@@ -1,5 +1,5 @@
 package Classes::Device;
-our @ISA = qw(GLPlugin::SNMP GLPlugin::UPNP);
+our @ISA = qw(Monitoring::GLPlugin::SNMP Monitoring::GLPlugin::UPNP);
 use strict;
 
 sub classify {
@@ -196,7 +196,7 @@ sub init {
     #$self->analyze_and_check_ospf_subsystem("Classes::OSPF");
     $self->init();
   } else {
-    bless $self, 'GLPlugin::SNMP';
+    bless $self, 'Monitoring::GLPlugin::SNMP';
     $self->no_such_mode();
   }
 }

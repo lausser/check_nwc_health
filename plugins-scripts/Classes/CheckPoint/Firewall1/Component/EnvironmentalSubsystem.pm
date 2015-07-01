@@ -1,5 +1,5 @@
 package Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

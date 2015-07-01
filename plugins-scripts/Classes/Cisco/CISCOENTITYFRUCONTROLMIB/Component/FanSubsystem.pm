@@ -1,5 +1,5 @@
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -21,7 +21,7 @@ sub init {
 }
 
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem::Fan;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

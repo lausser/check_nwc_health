@@ -1,5 +1,5 @@
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 # ipRouteTable		1.3.6.1.2.1.4.21 
@@ -83,7 +83,7 @@ sub check {
 
 
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipRoute;
 our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);

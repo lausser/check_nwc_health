@@ -1,5 +1,5 @@
 package Classes::Cisco::CISCOENTITYALARMMIB::Component::AlarmSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -55,7 +55,7 @@ sub check {
 }
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -125,7 +125,7 @@ sub check {
 
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::PhysicalEntity;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
@@ -134,7 +134,7 @@ sub finish {
 }
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescription;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
   my $self = shift;
@@ -144,7 +144,7 @@ sub finish {
 
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescriptionMapping;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
   my $self = shift;
@@ -152,10 +152,10 @@ sub finish {
 }
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmFilterProfile;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHistory;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
   my $self = shift;

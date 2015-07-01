@@ -1,5 +1,5 @@
 package Classes::Cisco::IOS::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 use constant PHYS_NAME => 1;
 use constant PHYS_ASSET => 2;
@@ -57,7 +57,7 @@ sub init {
 }
 
 package Classes::Cisco::IOS::Component::CpuSubsystem::Cpu;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {

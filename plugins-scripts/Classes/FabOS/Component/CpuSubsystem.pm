@@ -1,5 +1,5 @@
 package Classes::FabOS::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {

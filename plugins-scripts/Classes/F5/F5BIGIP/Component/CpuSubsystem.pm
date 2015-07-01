@@ -1,5 +1,5 @@
 package Classes::F5::F5BIGIP::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub new {
@@ -54,7 +54,7 @@ sub check {
 
 
 package Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

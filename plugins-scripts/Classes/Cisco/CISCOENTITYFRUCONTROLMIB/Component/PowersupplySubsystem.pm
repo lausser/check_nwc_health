@@ -1,5 +1,5 @@
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -23,7 +23,7 @@ sub init {
 
 
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -45,7 +45,7 @@ return;
 
 
 package Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 

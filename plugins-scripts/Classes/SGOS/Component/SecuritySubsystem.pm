@@ -1,5 +1,5 @@
 package Classes::SGOS::Component::SecuritySubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -28,7 +28,7 @@ sub check {
 
 
 package Classes::SGOS::Component::SecuritySubsystem::Attack;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

@@ -1,19 +1,19 @@
 {
   no warnings qw(once);
-  $GLPlugin::SNMP::discover_ids = {};
-  $GLPlugin::SNMP::mib_ids = {};
-  $GLPlugin::SNMP::mibs_and_oids = {};
-  $GLPlugin::SNMP::definitions = {};
+  $Monitoring::GLPlugin::SNMP::discover_ids = {};
+  $Monitoring::GLPlugin::SNMP::mib_ids = {};
+  $Monitoring::GLPlugin::SNMP::mibs_and_oids = {};
+  $Monitoring::GLPlugin::SNMP::definitions = {};
 }
 
-$GLPlugin::SNMP::discover_ids = {
+$Monitoring::GLPlugin::SNMP::discover_ids = {
   '1.3.6.1.4.1.12532.252.5.1' => 'Classes::Juniper::IVE',
   '1.3.6.1.4.1.9.1.1348' => 'Classes::CiscoCCM',
   '1.3.6.1.4.1.9.1.746' => 'Classes::CiscoCCM',
   '1.3.6.1.4.1.244.1.11' => 'Classes::Lantronix::SLS',
 };
 
-$GLPlugin::SNMP::mib_ids = {
+$Monitoring::GLPlugin::SNMP::mib_ids = {
   'SW-MIB' => '1.3.6.1.4.1.1588.2.1.1.1',
   'NETSCREEN-PRODUCTS-MIB' => '1.3.6.1.4.1.3224.1',
   'HOST-RESOURCES-MIB' => '1.3.6.1.2.1.25',
@@ -27,7 +27,7 @@ $GLPlugin::SNMP::mib_ids = {
   'RAPID-CITY-MIB' => '1.3.6.1.4.1.2272',
 };
 
-$GLPlugin::SNMP::mibs_and_oids = {
+$Monitoring::GLPlugin::SNMP::mibs_and_oids = {
   'MIB-II' => {
       sysDescr => '1.3.6.1.2.1.1.1',
       sysObjectID => '1.3.6.1.2.1.1.2',
@@ -7002,7 +7002,7 @@ $GLPlugin::SNMP::mibs_and_oids = {
   },
 };
 
-$GLPlugin::SNMP::definitions = {
+$Monitoring::GLPlugin::SNMP::definitions = {
   'CISCO-ENVMON-MIB' => {
      ciscoEnvMonState => {
        1 => 'normal',

@@ -1,5 +1,5 @@
 package Classes::IPMIB::Component::RoutingSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -24,5 +24,5 @@ printf "%s\n", Data::Dumper::Dumper($_);
 
 
 package Classes::IPMIB::Component::RoutingSubsystem::Route;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 

@@ -1,5 +1,5 @@
 package Classes::PaloAlto::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -27,7 +27,7 @@ sub check {
 
 
 package Classes::PaloAlto::Component::EnvironmentalSubsystem::Fan;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -44,7 +44,7 @@ sub check {
 
 
 package Classes::PaloAlto::Component::EnvironmentalSubsystem::Power;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -60,7 +60,7 @@ sub check {
 
 
 package Classes::PaloAlto::Component::EnvironmentalSubsystem::Slot;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
@@ -76,7 +76,7 @@ sub check {
 
 
 package Classes::PaloAlto::Component::EnvironmentalSubsystem::Temperature;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

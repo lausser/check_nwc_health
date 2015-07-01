@@ -1,5 +1,5 @@
 package Classes::Juniper::IVE::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -49,7 +49,7 @@ sub unix_dump {
 
 
 package Classes::Juniper::IVE::Component::CpuSubsystem::Load;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

@@ -1,5 +1,5 @@
 package Classes::AVOS::Component::MemSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -32,7 +32,7 @@ sub init {
 
 
 package Classes::AVOS::Component::MemSubsystem::AVOS3;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub check {

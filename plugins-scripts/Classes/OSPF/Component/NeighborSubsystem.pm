@@ -1,5 +1,5 @@
 package Classes::OSPF::Component::NeighborSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -26,7 +26,7 @@ sub check {
 }
 
 package Classes::OSPF::Component::NeighborSubsystem::Neighbor;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 # Index: ospfNbrIpAddr, ospfNbrAddressLessIndex
 

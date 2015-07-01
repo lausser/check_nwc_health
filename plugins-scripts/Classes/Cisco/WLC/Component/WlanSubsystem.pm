@@ -1,5 +1,5 @@
 package Classes::Cisco::WLC::Component::WlanSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -96,17 +96,17 @@ sub assign_loads_to_ifs {
 
 
 package Classes::Cisco::WLC::Component::WlanSubsystem::IF;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 
 package Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 
 package Classes::Cisco::WLC::Component::WlanSubsystem::AP;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {

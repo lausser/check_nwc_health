@@ -16,9 +16,9 @@ VPATH=$(top_srcdir) $(top_srcdir)/plugins-scripts $(top_srcdir)/plugins-scripts/
 
 libexec_SCRIPTS=check_nwc_health
 GL_MODULES=\
-  GLPlugin.pm \
-  GLPluginSNMP.pm \
-  GLPluginUPNP.pm
+  ../lib/Monitoring/GLPlugin.pm \
+  ../lib/Monitoring/GLPlugin/SNMP.pm \
+  ../lib/Monitoring/GLPlugin/UPNP.pm
 EXTRA_MODULES=\
   Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
@@ -70,8 +70,6 @@ EXTRA_MODULES=\
   Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/AsyncOS.pm \
   Classes/Cisco.pm \
-  Classes/Nortel/Component/CpuSubsystem.pm \
-  Classes/Nortel/Component/MemSubsystem.pm \
   Classes/Nortel.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \

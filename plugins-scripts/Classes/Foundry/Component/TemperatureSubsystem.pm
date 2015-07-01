@@ -1,5 +1,5 @@
 package Classes::Foundry::Component::TemperatureSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -16,7 +16,7 @@ sub init {
 
 
 package Classes::Foundry::Component::TemperatureSubsystem::Temperature;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

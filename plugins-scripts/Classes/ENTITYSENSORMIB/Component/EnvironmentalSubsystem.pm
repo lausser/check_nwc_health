@@ -1,11 +1,11 @@
 package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
   my $self = shift;
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'GLPlugin::TableItem', sub { my $o = shift; $o->{entPhysicalClass} eq 'sensor';}],
+    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem', sub { my $o = shift; $o->{entPhysicalClass} eq 'sensor';}],
   ]);
   $self->get_snmp_tables('ENTITY-SENSOR-MIB', [
     ['sensors', 'entPhySensorTable', 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor' ],
@@ -35,7 +35,7 @@ sub dump {
 
 
 package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {

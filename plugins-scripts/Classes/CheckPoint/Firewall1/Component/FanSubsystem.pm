@@ -1,5 +1,5 @@
 package Classes::CheckPoint::Firewall1::Component::FanSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -18,7 +18,7 @@ sub check {
 
 
 package Classes::CheckPoint::Firewall1::Component::FanSubsystem::Fan;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

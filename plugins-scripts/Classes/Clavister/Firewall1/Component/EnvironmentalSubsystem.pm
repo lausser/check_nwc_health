@@ -1,5 +1,5 @@
 package Classes::Clavister::Firewall1::Component::EnvironmentalSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 use Data::Dumper;
 
@@ -19,7 +19,7 @@ sub check {
 
 
 package Classes::Clavister::Firewall1::Component::HWSensor;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

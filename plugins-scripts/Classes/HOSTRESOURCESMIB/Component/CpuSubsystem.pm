@@ -1,5 +1,5 @@
 package Classes::HOSTRESOURCESMIB::Component::CpuSubsystem;
-our @ISA = qw(GLPlugin::SNMP::Item);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
@@ -14,7 +14,7 @@ sub init {
 }
 
 package Classes::HOSTRESOURCESMIB::Component::CpuSubsystem::Cpu;
-our @ISA = qw(GLPlugin::SNMP::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {

@@ -13,21 +13,21 @@ sub init {
 
 
 package Classes::OSPF::Component::AreaSubsystem;
-our @ISA = qw(GLPlugin::Item);
+our @ISA = qw(Monitoring::GLPlugin::Item);
 use strict;
 
 package Classes::OSPF::Component::AreaSubsystem::Area;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::TableItem);
 use strict;
 # Index: ospfAreaId
 
 package Classes::OSPF::Component::HostSubsystem::Host;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::TableItem);
 use strict;
 # Index: ospfHostIpAddress, ospfHostTOS
 
 package Classes::OSPF::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(GLPlugin::TableItem);
+our @ISA = qw(Monitoring::GLPlugin::TableItem);
 use strict;
 # Index: ospfIfIpAddress, ospfAddressLessIf
 
