@@ -57,7 +57,7 @@ our $errorcodes = {
 sub init {
   my $self = shift;
   $self->{peers} = [];
-  if ($self->mode =~ /device::bgp::peer::list/) {
+  if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }
   foreach ($self->get_snmp_table_objects_with_cache(
@@ -87,12 +87,61 @@ sub check {
         label => 'peers',
         value => scalar(@{$self->{peers}}),
     );
+  } elsif ($self->mode =~ /peer::watch/) {
+    # take a snapshot of the peer list. -> good baseline
+    # warning if there appear peers, mitigate to ok
+    # critical if warn/crit percent disappear
+    $self->{numOfPeers} = scalar (@{$self->{peers}});
+    $self->{peerNameList} = [map { $_->{bgpPeerRemoteAddr} } @{$self->{peers}}];
+    #$self->opts->override_opt('lookback', 3600*24*5) if ! $self->opts->lookback;
+    $self->valdiff({name => 'bgppeerlist', lastarray => 1},
+        qw(peerNameList numOfPeers));
+    if ($self->opts->warning || $self->opts->critical) {
+      $self->set_thresholds(warning => $self->opts->warning,
+          critical => $self->opts->critical);
+      my $before = $self->{numOfPeers} - scalar(@{$self->{delta_found_peerNameList}}) + scalar(@{$self->{delta_lost_peerNameList}});
+      # use own delta_numOfPeers, because the glplugin version treats
+      # negative deltas as overflows
+      $self->{delta_numOfPeers} = $self->{numOfPeers} - $before;
+      if ($self->opts->units && $self->opts->units eq "%") {
+        my $delta_pct = $before ? (($self->{delta_numOfPeers} / $before) * 100) : 0;
+        $self->add_message($self->check_thresholds($delta_pct),
+          sprintf "%.2f%% delta, before: %d, now: %d", $delta_pct, $before, $self->{numOfPeers});
+      } else {
+        $self->add_message($self->check_thresholds($self->{delta_numOfPeers}),
+          sprintf "%d delta, before: %d, now: %d", $self->{delta_numOfPeers}, $before, $self->{numOfPeers});
+      }
+      if (scalar(@{$self->{delta_found_peerNameList}}) > 0) {
+        $self->add_ok(sprintf 'found: %s',
+            join(", ", @{$self->{delta_found_peerNameList}}));
+      }
+      if (scalar(@{$self->{delta_lost_peerNameList}}) > 0) {
+        $self->add_ok(sprintf 'lost: %s',
+            join(", ", @{$self->{delta_lost_peerNameList}}));
+      }
+    } else {
+      if (scalar(@{$self->{delta_found_peerNameList}}) > 0) {
+        $self->add_warning(sprintf '%d new bgp peers (%s)',
+            scalar(@{$self->{delta_found_peerNameList}}),
+            join(", ", @{$self->{delta_found_peerNameList}}));
+      }
+      if (scalar(@{$self->{delta_lost_peerNameList}}) > 0) {
+        $self->add_critical(sprintf '%d bgp peers missing (%s)',
+            scalar(@{$self->{delta_lost_peerNameList}}),
+            join(", ", @{$self->{delta_lost_peerNameList}}));
+      }
+      $self->add_ok(sprintf 'found %d bgp peers', scalar (@{$self->{peers}}));
+    }
+    $self->add_perfdata(
+        label => 'num_peers',
+        value => scalar (@{$self->{peers}}),
+    );
   } else {
     if (scalar(@{$self->{peers}}) == 0) {
       $self->add_unknown('no peers');
       return;
     }
-    # es gibt 
+    # es gibt
     # kleine installation: 1 peer zu 1 as, evt 2. as als fallback
     # grosse installation: n peer zu 1 as, alternative routen zum provider
     #                      n peer zu m as, mehrere provider, mehrere alternativrouten
@@ -126,14 +175,13 @@ sub check {
           $self->set_thresholds(warning => "100:", critical => "50:");
           $self->add_message($self->check_thresholds($as_numbers->{$as}->{availability}),
               sprintf "%d from %d connections to %s are up (%.2f%%%s)",
-              $num_ok_peers, $num_peers, $asname ? $asname : "AS".$as, 
+              $num_ok_peers, $num_peers, $asname ? $asname : "AS".$as,
               $as_numbers->{$as}->{availability},
               $num_admdown_peers ? sprintf(", but %d are admin down and counted as up!", $num_admdown_peers) : "");
         } else {
           $self->add_critical(sprintf 'found no peer for %s', $asname ? $asname : "AS".$as);
         }
       }
-      
     }
     if ($self->opts->report eq "short") {
       $self->clear_ok();
