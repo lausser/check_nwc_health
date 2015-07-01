@@ -170,6 +170,12 @@ $plugin->add_mode(
     help => 'Count the number of BGP peers',
 );
 $plugin->add_mode(
+    internal => 'device::bgp::peer::watch',
+    spec => 'watch-bgp-peers',
+    alias => undef,
+    help => 'Watch BGP peers appear and disappear',
+);
+$plugin->add_mode(
     internal => 'device::bgp::peer::list',
     spec => 'list-bgp-peers',
     alias => undef,
@@ -362,11 +368,10 @@ $plugin->add_mode(
     help => 'Shows the names of the mibs which this devices has implemented (only lausser may run this command)',
 );
 $plugin->add_snmp_args();
-$plugin->add_arg(
-    spec => 'name=s',
+$plugin->add_default_args();
+$plugin->mod_arg("name",
     help => "--name
-   The name of an interface (ifDescr)",
-    required => 0,
+   The name of an interface (ifDescr) or pool or ...",
 );
 $plugin->add_arg(
     spec => 'alias=s',
@@ -393,12 +398,6 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
-    spec => 'name2=s',
-    help => "--name2
-   The secondary name of a component",
-    required => 0,
-);
-$plugin->add_arg(
     spec => 'role=s',
     help => "--role
    The role of this device in a hsrp group (active/standby/listen)",
@@ -411,7 +410,6 @@ $plugin->add_arg(
    is not possible',
     required => 0,
 );
-$plugin->add_default_args();
 
 $plugin->getopts();
 $plugin->classify();
