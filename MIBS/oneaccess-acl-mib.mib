@@ -1,0 +1,393 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V04.2R3E8
+--
+--          Creation date : 22/01/2003
+--
+--          Compatibility with ONEOS_V31
+--
+--          Compatibility with ONEOS_V32
+--
+--          Compatibility with ONEOS_V33    
+--
+--          Compatibility with ONEOS_V34
+--
+--          Compatibility with ONEOS_V35
+--
+--          Compatibility with ONEOS_V37
+--
+--          Add for ACL StateFul
+--
+--          Modification date : 27/07/2007
+--
+--          Add for IP Accounting statistics
+
+     
+     ONEACCESS-ACL-MIB DEFINITIONS ::= BEGIN 
+
+     IMPORTS
+		MODULE-IDENTITY, OBJECT-TYPE,Counter32,Unsigned32,IpAddress,Gauge32	  
+			FROM SNMPv2-SMI
+		DisplayString 
+			FROM RFC1213-MIB
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+		oacExpIMIpAcl, oacMIBModules
+ 	    	FROM ONEACCESS-GLOBAL-REG
+
+       InterfaceIndex
+       		FROM IF-MIB ;     		
+       		
+InterfaceType ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "The interface type"
+
+        SYNTAX   INTEGER {
+			  mainInterface(1),
+			  subInterface(2)
+                         }
+
+
+     oacAclMIBModule MODULE-IDENTITY
+         LAST-UPDATED "9911301545Z"
+         ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses 
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes IP ACL Management objects."
+	
+	::= { oacMIBModules 669 }
+
+oacExpIMIpAclStatistics OBJECT IDENTIFIER ::= { oacExpIMIpAcl 1 }
+oacExpIMIpAclNotifications OBJECT IDENTIFIER ::= { oacExpIMIpAcl 2 }
+oacExpIMIpAccountingStatistics OBJECT IDENTIFIER ::= { oacExpIMIpAcl 3 }
+
+oacAclNotificationMaximumSessionReached NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification maximum session reached signifies that
+	the number of ACL sessions has reached its configured limit"
+	::= {oacExpIMIpAclNotifications 1}
+
+oacAclNotificationWarningSessionReachingLimit NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification warning session reaching limit signifies that
+	the number of ACL sessions is near from its maximum configured 
+	limit"
+	::= {oacExpIMIpAclNotifications 2}
+
+oacAclNotificationMaximumHalfSessionReached NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification maximum half-session reached signifies that
+	the number of ACL half-sessions has reached its configured limit,
+	as stateful inspection is enabled on the device"
+	::= {oacExpIMIpAclNotifications 3}
+
+oacAclNotificationWarningHalfSessionReachingLimit NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification warning half-session reaching limit 
+	signifies that the number of ACL half-sessions is near from 
+	its configured limit. Note that this notification is received
+	only if stateful inspection is enabled on the device"
+	::= {oacExpIMIpAclNotifications 4}
+
+oacAclNotificationMaximumSessionReachedPerHost NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification maximum session per host reached signifies that
+	the number of ACL sessions per host has reached its configured 
+	limit for the host whose IP address is added to the notification 
+	message. This trap is sent only if inspection per host and 
+	stateful inspection is enabled "
+	::= {oacExpIMIpAclNotifications 5}
+
+oacAclNotificationMaximumHalfSessionReachedPerHost NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ACL Notification maximum half-session per host reached signifies that
+	the number of ACL half-sessions per host has reached its configured limit,
+	for the host whose IP address is added to the notification message. This
+	trap is sent only if inspection per host and stateful inspection
+	are enabled "
+	::= {oacExpIMIpAclNotifications 6}
+
+oacAclStatObjects OBJECT IDENTIFIER ::= { oacExpIMIpAclStatistics 1 }
+oacAclStatNotifications OBJECT IDENTIFIER ::= { oacExpIMIpAclStatistics 2 }
+oacAclStatConformance OBJECT IDENTIFIER ::= { oacExpIMIpAclStatistics 3 }
+
+oacAclStatGlobal OBJECT IDENTIFIER ::= { oacAclStatObjects 1 }
+
+oacAclMaxSessions OBJECT-TYPE
+		SYNTAX Unsigned32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" Maximum number of sessions "
+	 ::= { oacAclStatGlobal 1 }
+
+
+oacAclActiveSessions OBJECT-TYPE
+		SYNTAX Unsigned32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Number of active sessions "
+	 ::= { oacAclStatGlobal 2 }
+
+oacAclSessionsClosed OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Total number of  sessions closed"
+	 ::= { oacAclStatGlobal 3 }
+
+oacAclDynamicAllocFailures OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Dynamic allocation failures"
+	 ::= { oacAclStatGlobal 4 }
+
+oacAclInboundPkts OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Total inbound packets"
+	 ::= { oacAclStatGlobal 5 }
+
+oacAclOutboundPkts OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Total outbound packets"
+	 ::= { oacAclStatGlobal 6 }
+
+oacAclInboundPktsDropped OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Total inbound packets"
+	 ::= { oacAclStatGlobal 7 }
+
+oacAclOutboundPktsDropped OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Total outbound packets"
+	 ::= { oacAclStatGlobal 8 }
+
+oacIpAccountingTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF OacIpAccountingEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Interface Accounting Table"
+	::={oacExpIMIpAccountingStatistics 1}
+
+oacIpAccountingEntry OBJECT-TYPE
+	SYNTAX OacIpAccountingEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Description"
+	INDEX {oacIpAccountingIndex}
+	::={oacIpAccountingTable 1}
+
+OacIpAccountingEntry ::=
+	SEQUENCE{
+		oacIpAccountingIndex
+			Gauge32,
+		oacIpAccountingIfIndex
+			InterfaceIndex,
+		oacIpAccountingIfType
+			InterfaceType	
+	}
+	
+oacIpAccountingIndex OBJECT-TYPE
+	SYNTAX Gauge32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"IP Accounting Index"
+    ::={ oacIpAccountingEntry 1} 
+
+oacIpAccountingIfIndex OBJECT-TYPE
+	SYNTAX InterfaceIndex
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"IP Accounting Interface Index"
+    ::={ oacIpAccountingEntry 2} 
+
+oacIpAccountingIfType OBJECT-TYPE
+	SYNTAX InterfaceType
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"IP Accounting Interface Type"
+    ::={ oacIpAccountingEntry 3}                 
+   
+oacIpAccountingStatTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF OacIpAccountingStatEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"IP Accounting Statistic Table"
+	::={oacExpIMIpAccountingStatistics 2}
+	
+oacIpAccountingStatEntry OBJECT-TYPE
+	SYNTAX OacIpAccountingStatEntry
+	MAX-ACCESS not-accessible
+	STATUS current
+	DESCRIPTION
+		"Description"
+	INDEX {oacIpAccountingIndex}
+	::={oacIpAccountingStatTable 1}
+	
+OacIpAccountingStatEntry ::=
+	SEQUENCE{
+		oacIpAccountingStatIpSource
+			IpAddress,   
+		oacIpAccountingStatIpDest
+			IpAddress,   
+		oacIpAccountingStatNbPackets
+			Counter32, 	
+		oacIpAccountingStatNbBytes
+			Counter32
+	}
+
+    
+oacIpAccountingStatIpSource OBJECT-TYPE
+	SYNTAX IpAddress
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Ip Source"
+    ::={ oacIpAccountingStatEntry 1} 
+    
+oacIpAccountingStatIpDest OBJECT-TYPE
+	SYNTAX IpAddress
+	MAX-ACCESS read-only 
+	STATUS current
+	DESCRIPTION
+		"Ip Destination"
+    ::={ oacIpAccountingStatEntry 2} 
+    
+oacIpAccountingStatNbPackets OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Nb packets"
+    ::={ oacIpAccountingStatEntry 3}  
+    
+oacIpAccountingStatNbBytes OBJECT-TYPE
+	SYNTAX Counter32
+	MAX-ACCESS read-only
+	STATUS current
+	DESCRIPTION
+		"Nb Bytes"
+    ::={ oacIpAccountingStatEntry 4}
+    
+oacIpAccoutingGlobal OBJECT IDENTIFIER ::= { oacExpIMIpAccountingStatistics 3 }
+oacIpAccountingMaxSessions OBJECT-TYPE
+		SYNTAX Gauge32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" Maximum number of Ip Accounting sessions "
+	 ::= { oacIpAccoutingGlobal 1 }
+
+oacIpAccountingCurrentSessions OBJECT-TYPE
+		SYNTAX Gauge32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" Number of current Ip Accounting sessions "
+	 ::= { oacIpAccoutingGlobal 2 }  
+	 
+oacIpAccountingAge OBJECT-TYPE
+		SYNTAX DisplayString
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" IP Accounting data Age"
+	 ::= { oacIpAccoutingGlobal 3 }	 
+
+oacIpAccountingNbNotAnalysedBytes OBJECT-TYPE
+		SYNTAX Gauge32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" Number of not annalysed bytes"
+	 ::= { oacIpAccoutingGlobal 4 }	 
+
+oacIpAccountingNbNotAnalysedPackets OBJECT-TYPE
+		SYNTAX Gauge32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			" Number of not annalysed packets"
+	 ::= { oacIpAccoutingGlobal 5 }	     
+      
+ 
+oacAclStatGroups OBJECT IDENTIFIER ::= { oacAclStatConformance 1}
+
+oacAclStatCompliances OBJECT IDENTIFIER ::= { oacAclStatConformance 2}
+
+oacAclStatCompliance MODULE-COMPLIANCE
+      STATUS  current
+      DESCRIPTION
+          "The compliance statement for agents that support the
+          ONEACCESS-ACL-MIB."
+      MODULE -- this module
+          MANDATORY-GROUPS { oacAclStatGeneralGroup
+                }
+
+	::= { oacAclStatCompliances 1}
+
+oacAclStatGeneralGroup OBJECT-GROUP
+	OBJECTS {
+
+oacAclMaxSessions,
+oacAclActiveSessions,
+oacAclSessionsClosed,
+oacAclDynamicAllocFailures,
+oacAclInboundPkts,
+oacAclOutboundPkts,
+oacAclInboundPktsDropped,
+oacAclOutboundPktsDropped
+}
+
+STATUS  current
+      DESCRIPTION
+          "This group is mandatory for all  ACL entities."
+      ::= { oacAclStatGroups 1 }
+
+
+END
+--

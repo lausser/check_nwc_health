@@ -6,22 +6,10 @@ no warnings qw(once);
 
 eval {
   if ( ! grep /AUTOLOAD/, keys %Monitoring::GLPlugin::) {
-printf "no glplugin loaded\n";
     require "Monitoring::GLPlugin";
     require "Monitoring::GLPlugin::SNMP";
     require "Monitoring::GLPlugin::UPNP";
-} else {
-printf "glplugin loaded\n";
   }
-
-# static
-#-->Monitoring::GLPlugin
-#-->Monitoring::GLPlugin::
-#glplugin loaded main
-#glplugin loaded Monitoring::GLPlugin
-#glplugin loaded $VAR1 = *{'::Monitoring::GLPlugin::'};
-
-# disable $VAR1 = *{'::Monitoring::GLPlugin::'};
 };
 if ($@) {
   printf "UNKNOWN - module Monitoring::GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";

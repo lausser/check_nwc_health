@@ -1,0 +1,448 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.6.R008_E019
+--
+--          Creation date : 22/01/2003
+--
+--          Compatibility with ONEOS_V31
+--
+--          Compatibility with ONEOS_V32
+--
+--	    21072005: Add oacExpIMIpNatNotifications
+--
+
+
+
+
+     ONEACCESS-NAT-MIB    DEFINITIONS ::= BEGIN
+
+     IMPORTS
+		MODULE-IDENTITY, OBJECT-TYPE,Counter32,Integer32,IpAddress,Unsigned32
+			FROM SNMPv2-SMI
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+		TimeInterval
+			FROM SNMPv2-TC
+		ifIndex
+			FROM IF-MIB
+ 	    	oacExpIMIpNatStatistics,oacMIBModules
+			FROM ONEACCESS-GLOBAL-REG;
+
+     oacNatMIBModule MODULE-IDENTITY
+         LAST-UPDATED "9911301545Z"
+         ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes IP NAT Managed objects."
+
+	::= { oacMIBModules 668 }
+
+oacNatStatObjects OBJECT IDENTIFIER ::= { oacExpIMIpNatStatistics 1 }
+oacNatStatNotifications OBJECT IDENTIFIER ::= { oacExpIMIpNatStatistics 2 }
+oacNatStatConformance OBJECT IDENTIFIER ::= { oacExpIMIpNatStatistics 3 }
+
+
+oacNatNotificationMaximumSessionReached NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An NAT Notification maximum session reached signifies that
+	the number of ACL sessions has reached its configured limit"
+	::= {oacExpIMIpNatNotifications 1}
+
+oacNatNotificationWarningSessionReachingLimit NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An NAT Notification warning session reaching limit signifies that
+	the number of ACL sessions is near from its maximum configured 
+	limit"
+	::= {oacExpIMIpNatNotifications 2}
+
+oacNatStatGlobal OBJECT IDENTIFIER ::= { oacNatStatObjects 1 }
+
+oacNatActiveSessions OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of active sessions"
+	 ::= { oacNatStatGlobal 1 }
+
+oacNatSessionsClosed OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of sessions closed"
+	 ::= { oacNatStatGlobal 2 }
+
+oacNatInTranslations  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of inbound translations"
+	 ::= { oacNatStatGlobal 3 }
+
+oacNatOutTranslations  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of outbound translations"
+	 ::= { oacNatStatGlobal 4 }
+
+oacNatInsideAddrMaps OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of active inside address bindings"
+	 ::= { oacNatStatGlobal 5 }
+
+oacNatOutsideAddrMaps OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of active outside address bindings"
+	 ::= { oacNatStatGlobal 6 }
+
+oacNatInPktsDropped  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of inbound packets dropped"
+	 ::= { oacNatStatGlobal 7 }
+
+oacNatOutPktsDropped  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Total number of outbound packets dropped"
+	 ::= { oacNatStatGlobal 8 }
+
+oacNatDynamicAllocFailures  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Number of sessions rejected due to memory full"
+	 ::= { oacNatStatGlobal 9 }
+
+
+oacNatSessionTable  OBJECT-TYPE
+		SYNTAX SEQUENCE OF OacNatSessionEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"Table of active sessions"
+	 ::= { oacNatStatObjects 2 }
+
+oacNatSessionEntry OBJECT-TYPE
+		SYNTAX OacNatSessionEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			" "
+		INDEX { ifIndex,oacNatSessionID}
+::= { oacNatSessionTable 1 }
+
+OacNatSessionEntry ::= SEQUENCE {
+oacNatSessionID Unsigned32,
+oacNatSessionProtocol INTEGER,
+oacNatSessionInsideLocalAddr IpAddress,
+oacNatSessionInsideLocalPort INTEGER,
+oacNatSessionOutsideLocalAddr IpAddress,
+oacNatSessionOutsidePort INTEGER,
+oacNatSessionInsideGlobalAddr IpAddress,
+oacNatSessionInsideGlobalPort INTEGER,
+oacNatSessionOutsideGlobalAddr IpAddress,
+oacNatSessionInPkts Counter32,
+oacNatSessionOutPkts Counter32,
+oacNatSessionTimeout TimeInterval
+}
+
+oacNatSessionID OBJECT-TYPE
+		SYNTAX Unsigned32
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"An integer ID which uniquely identifies the session
+                         at the NAT router."
+	 ::= { oacNatSessionEntry 1 }
+
+oacNatSessionProtocol OBJECT-TYPE
+		SYNTAX INTEGER (0..255)
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"IP protocol ID"
+	 ::= { oacNatSessionEntry 2 }
+
+oacNatSessionInsideLocalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside local address"
+	 ::= { oacNatSessionEntry 3 }
+
+oacNatSessionInsideLocalPort  OBJECT-TYPE
+		SYNTAX INTEGER (1..65535)
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside local port"
+	 ::= { oacNatSessionEntry 4 }
+
+oacNatSessionOutsideLocalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Outside local address"
+	 ::= { oacNatSessionEntry 5 }
+
+oacNatSessionOutsidePort  OBJECT-TYPE
+		SYNTAX INTEGER (1..65535)
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Outside port"
+	 ::= { oacNatSessionEntry 6 }
+
+oacNatSessionInsideGlobalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside Global address"
+	 ::= { oacNatSessionEntry 7 }
+
+oacNatSessionInsideGlobalPort  OBJECT-TYPE
+		SYNTAX INTEGER (1..65535)
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside global port"
+	 ::= { oacNatSessionEntry 8 }
+
+oacNatSessionOutsideGlobalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside global address"
+	 ::= { oacNatSessionEntry 9 }
+
+oacNatSessionInPkts  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Number of inbound packets"
+	 ::= { oacNatSessionEntry 10 }
+
+oacNatSessionOutPkts  OBJECT-TYPE
+		SYNTAX Counter32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Number of outbound packets"
+	 ::= { oacNatSessionEntry 11 }
+
+oacNatSessionTimeout  OBJECT-TYPE
+		SYNTAX TimeInterval
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"The timeout in seconds after which a session will be
+                         removed from the table if it remains idle"
+	 ::= { oacNatSessionEntry 12 }
+
+
+oacNatInsideMapTable  OBJECT-TYPE
+		SYNTAX SEQUENCE OF OacNatInsideMapEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"Table of inside address bindings"
+	 ::= { oacNatStatObjects 3 }
+
+oacNatInsideMapEntry OBJECT-TYPE
+		SYNTAX OacNatInsideMapEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			" "
+		INDEX { ifIndex,oacNatIMLocalAddr}
+::= { oacNatInsideMapTable 1 }
+
+
+OacNatInsideMapEntry ::= SEQUENCE {
+oacNatIMLocalAddr IpAddress,
+oacNatIMGlobalAddr IpAddress,
+oacNatIMSessions Integer32,
+oacNatIMTimeout TimeInterval
+}
+
+oacNatIMLocalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"Inside local address"
+	 ::= { oacNatInsideMapEntry 1 }
+
+
+oacNatIMGlobalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Inside global address"
+	 ::= { oacNatInsideMapEntry 2 }
+
+oacNatIMSessions OBJECT-TYPE
+		SYNTAX Integer32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Number of active sessions"
+	 ::= { oacNatInsideMapEntry 3 }
+
+oacNatIMTimeout OBJECT-TYPE
+		SYNTAX TimeInterval
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Timeout in seconds"
+	 ::= { oacNatInsideMapEntry 4 }
+
+oacNatOutsideMapTable  OBJECT-TYPE
+		SYNTAX SEQUENCE OF OacNatOutsideMapEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"Table of outside address bindings"
+	 ::= { oacNatStatObjects 4 }
+
+oacNatOutsideMapEntry OBJECT-TYPE
+		SYNTAX OacNatOutsideMapEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			" "
+		INDEX { ifIndex,oacNatOMGlobalAddr}
+::= { oacNatOutsideMapTable 1 }
+
+
+OacNatOutsideMapEntry ::= SEQUENCE {
+oacNatOMGlobalAddr IpAddress,
+oacNatOMLocalAddr IpAddress,
+oacNatOMSessions Integer32,
+oacNatOMTimeout TimeInterval
+}
+
+oacNatOMGlobalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION
+			"Outside global address"
+	 ::= { oacNatOutsideMapEntry 1 }
+
+oacNatOMLocalAddr OBJECT-TYPE
+		SYNTAX IpAddress
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Outside local address"
+	 ::= { oacNatOutsideMapEntry 2 }
+
+oacNatOMSessions OBJECT-TYPE
+		SYNTAX Integer32
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Number of active sessions"
+	 ::= { oacNatOutsideMapEntry 3 }
+
+oacNatOMTimeout OBJECT-TYPE
+		SYNTAX TimeInterval
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"Timeout in seconds"
+	 ::= { oacNatOutsideMapEntry 4 }
+
+oacNatStatGroups OBJECT IDENTIFIER ::= { oacNatStatConformance 1}
+
+oacNatStatCompliances OBJECT IDENTIFIER ::= { oacNatStatConformance 2}
+
+oacNatStatCompliance MODULE-COMPLIANCE
+      STATUS  current
+      DESCRIPTION
+          "The compliance statement for agents that support the
+          ONEACCESS-NAT-MIB."
+      MODULE -- this module
+          MANDATORY-GROUPS { oacNatStatGeneralGroup
+                }
+
+	::= { oacNatStatCompliances 1}
+
+oacNatStatGeneralGroup OBJECT-GROUP
+	OBJECTS {
+oacNatActiveSessions,
+oacNatSessionsClosed,
+oacNatInTranslations,
+oacNatOutTranslations,
+oacNatInsideAddrMaps,
+oacNatOutsideAddrMaps,
+oacNatInPktsDropped,
+oacNatOutPktsDropped,
+oacNatDynamicAllocFailures,
+oacNatSessionProtocol,
+oacNatSessionInsideLocalAddr,
+oacNatSessionInsideLocalPort,
+oacNatSessionOutsideLocalAddr,
+oacNatSessionOutsidePort,
+oacNatSessionInsideGlobalAddr,
+oacNatSessionInsideGlobalPort,
+oacNatSessionOutsideGlobalAddr,
+oacNatSessionInPkts,
+oacNatSessionOutPkts,
+oacNatSessionTimeout,
+oacNatIMGlobalAddr,
+oacNatIMSessions,
+oacNatIMTimeout,
+oacNatOMLocalAddr,
+oacNatOMSessions,
+oacNatOMTimeout
+}
+
+STATUS  current
+      DESCRIPTION
+          "This group is mandatory for all  NAT entities."
+      ::= { oacNatStatGroups 1 }
+
+
+END
+--

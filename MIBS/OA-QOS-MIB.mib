@@ -1,0 +1,1864 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.6.R008_E019
+--
+--          Creation date : 18/09/2003
+--
+--          Add QOS counters  30/03/06
+--
+
+
+OA-QOS-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+        MODULE-IDENTITY,
+        OBJECT-TYPE,
+        Integer32,
+        Counter32,
+        Gauge32,
+        Counter64
+                FROM SNMPv2-SMI
+
+        MODULE-COMPLIANCE,
+        OBJECT-GROUP
+                FROM SNMPv2-CONF
+
+        TEXTUAL-CONVENTION,
+        DisplayString,
+        TruthValue
+                FROM SNMPv2-TC
+
+	ifIndex, InterfaceIndex
+                FROM IF-MIB
+        oacExpIMIp
+		FROM ONEACCESS-GLOBAL-REG;
+
+
+oacQOS MODULE-IDENTITY
+        LAST-UPDATED    "0301201245Z"
+        ORGANIZATION    " OneAccess "
+        CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+	DESCRIPTION
+		""
+
+        ::= {oacExpIMIp 3 }
+
+--
+--
+-- Textual Conventions
+--
+--
+
+QosObjectType ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+        "QOS object types."
+        SYNTAX   INTEGER {
+                          policymap(1),
+                          classmap(2),
+                          matchStatement(3),
+			  queueing (4),
+			  randomDetect (5),
+			  police (7),
+			  set (8)
+                         }
+
+TrafficDirection ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "A policy is configured for the input or output directions."
+
+        SYNTAX   INTEGER {
+			  input(1),
+			  output(2)
+                         }
+
+QosClassInfo ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "A classmap can be match all or match any."
+
+        SYNTAX   INTEGER {
+			  none(1),
+			  matchAll(2),
+			  matchAny(3)
+                         }
+
+QosMatchInfo ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "A match can be match or match not."
+
+        SYNTAX   INTEGER {
+			  none(1),
+			  matchNot(2)
+                         }
+
+InterfaceType ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "The interface type."
+
+        SYNTAX   INTEGER {
+			  mainInterface(1),
+			  subInterface(2)
+                         }
+
+QueueingBandwidthUnits ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+                "Unit type for bandwidth."
+
+        SYNTAX  INTEGER { 
+			  kbps(1), 
+			  percentage(2),
+                          percentageRemaining(3)  
+			}
+
+
+PoliceAction ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+                "The available actions."
+ 
+        SYNTAX  INTEGER { 
+			  transmit(1),
+			  setIpDSCP(2),
+			  setIpPrecedence(3),
+			  setQosGroup(4),
+			  drop(5),
+			  setAtmClp(6),
+			  setDiscardClass(7)
+			}
+
+SetFeatureType ::= TEXTUAL-CONVENTION
+        STATUS  current
+    	DESCRIPTION
+        "The available packet marking features."
+
+        SYNTAX  BITS {
+                       ipDscp(0),
+                       ipPrecedence(1),
+                       qosGroupNumber(2),
+                       atmClpBit(3),
+                       discardClass(4)
+                     }
+
+
+WREDMechanism ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+                "WRED mechanism."
+
+        SYNTAX  INTEGER { 
+			  precedence(1), 
+			  dscp(2) 
+			}
+
+QosQueueUnitType ::= TEXTUAL-CONVENTION
+        STATUS      current
+        DESCRIPTION
+                "Unit type for queue size."
+        SYNTAX  INTEGER {
+                          packets(1),
+                          cells(2),
+                          bytes(3)
+                         }
+
+QosQueueDepth ::= TEXTUAL-CONVENTION
+        STATUS      current
+        DESCRIPTION
+                "Queue depth value."
+       SYNTAX   Gauge32
+
+--
+-- Overview of MIB Objects:
+--
+--
+-- The oacQosServicePolicy group
+--
+
+oacQosServicePolicyTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosServicePolicyEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           "This table describes the interfaces that have attached policies."
+        ::= { oacQOS 1 }
+
+oacQosServicePolicyEntry OBJECT-TYPE
+        SYNTAX      OacQosServicePolicyEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+
+        INDEX { oacQosPolicyIndex }
+        ::= { oacQosServicePolicyTable 1 }
+
+OacQosServicePolicyEntry ::= SEQUENCE {
+	oacQosPolicyIndex	Gauge32,
+	oacQosIfIndex		InterfaceIndex,
+	oacQosIfType		InterfaceType,
+    oacQosPolicyDirection 	TrafficDirection
+}
+
+oacQosPolicyIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+               "Each policy has a distinct index."
+       ::= { oacQosServicePolicyEntry 1 }
+
+oacQosIfIndex OBJECT-TYPE
+	SYNTAX      InterfaceIndex
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+		"The interface index."
+       ::= { oacQosServicePolicyEntry 2 }
+
+
+oacQosIfType OBJECT-TYPE
+	SYNTAX      InterfaceType
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+		"Interface type."
+       ::= { oacQosServicePolicyEntry 3 }
+
+oacQosPolicyDirection OBJECT-TYPE
+        SYNTAX      TrafficDirection
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Policy direction (input or output)."
+       ::= { oacQosServicePolicyEntry 4 }
+
+
+--
+-- End of the oacQosServicePolicy group
+--
+
+
+-- Beginning of oacQosInterfaceTable
+--
+oacQosInterfacePolicyTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosInterfacePolicyEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           "This describes the service policies attached to the interfaces."
+        ::= { oacQOS 2 }
+
+oacQosInterfacePolicyEntry OBJECT-TYPE
+        SYNTAX      OacQosInterfacePolicyEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           "Each entry is indexed by ifindex and direction."
+
+        INDEX { ifIndex, oacQosPolicyDirection }
+        ::= { oacQosInterfacePolicyTable 1 }
+
+OacQosInterfacePolicyEntry ::= SEQUENCE {
+	oacQosInterfacePolicyIndex	Gauge32
+}
+
+oacQosInterfacePolicyIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Index for policy, identical with oacQosPolicyIndex."
+	::= { oacQosInterfacePolicyEntry 1 }
+
+-- End of oacQosInterfaceTable
+--
+
+-- The oacQosObjects group 
+--
+-- oacQosObjects Table
+
+oacQosObjectsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosObjectsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This tables describes the hierarchy of objects(policies, classmaps,
+             actions, match statements). A policy can contain several classmaps,
+             a classmap several match statements, etc. For each object there is
+             also an index to the corresponding config table."
+        ::= { oacQOS 3 }
+
+oacQosObjectsEntry OBJECT-TYPE
+        SYNTAX      OacQosObjectsEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex }
+        ::= { oacQosObjectsTable 1 }
+
+OacQosObjectsEntry ::= SEQUENCE {
+        oacQosObjectsIndex        Gauge32,
+        oacQosConfigIndex  	 Gauge32,
+        oacQosObjectsType         QosObjectType,
+        oacQosParentObjectsIndex  Gauge32
+}
+
+oacQosObjectsIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+               "Each object has and unique index."
+
+       ::= { oacQosObjectsEntry 1 }
+
+oacQosConfigIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "The index of the config. A config can be shared by several objects."
+
+       ::= { oacQosObjectsEntry 2 }
+
+oacQosObjectsType OBJECT-TYPE
+	SYNTAX		QosObjectType
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"The type of the object: policymap, or classmap, or matchStatement, etc."
+
+       ::= { oacQosObjectsEntry 3 }
+
+oacQosParentObjectsIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "The index of the parent object."
+
+       ::= { oacQosObjectsEntry 4 }
+--
+-- end of oacQosObjectsTable
+--
+
+
+--
+-- Start of oacQosPolicyMapConfigTable
+--
+oacQosPolicyMapConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosPolicyMapConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This Table specifies the policy maps configuration."
+        ::= { oacQOS 4 }
+
+oacQosPolicyMapConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosPolicyMapConfigEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosPolicyMapConfigTable 1 }
+
+OacQosPolicyMapConfigEntry ::= SEQUENCE {
+        oacQosPolicyMapName	 DisplayString
+}
+
+oacQosPolicyMapName OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Policy map name."
+
+       ::= { oacQosPolicyMapConfigEntry 1 }
+
+--
+-- Start of oacQosPolicyMapConfigTable
+--
+
+
+--
+-- Start of oacQosClassMapConfig Group
+--
+oacQosClassMapConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosClassMapConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This Table specifies the classmaps configuration."
+        ::= { oacQOS 5 }
+
+oacQosClassMapConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosClassMapConfigEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosClassMapConfigTable 1 }
+
+OacQosClassMapConfigEntry ::= SEQUENCE {
+        oacQosClassMapName DisplayString,
+        oacQosClassMapInfo QosClassInfo
+}
+
+oacQosClassMapName OBJECT-TYPE
+        SYNTAX      DisplayString 
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Name of class map."
+
+       ::= { oacQosClassMapConfigEntry 1 }
+
+
+oacQosClassMapInfo OBJECT-TYPE
+        SYNTAX      QosClassInfo
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Type of classmap: Match all or Match any."
+
+       ::= { oacQosClassMapConfigEntry 2 }
+--
+-- End of oacQosClassMapConfig Group
+--
+
+
+oacQosClassMapStatsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosClassMapStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "Statistics for classmaps."
+        ::= { oacQOS 6 }
+
+oacQosClassMapStatsEntry OBJECT-TYPE
+        SYNTAX      OacQosClassMapStatsEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex }
+        ::= { oacQosClassMapStatsTable 1 }
+
+OacQosClassMapStatsEntry ::= SEQUENCE {
+        oacQosClassMapPreExecutePkt           Counter32,
+        oacQosClassMapPreExecutePkt64         Counter64,
+        oacQosClassMapPreExecuteByte          Counter32,
+        oacQosClassMapPreExecuteByte64        Counter64,
+        oacQosClassMapPreExecuteBitRate       Gauge32,
+        oacQosClassMapPostExecuteByte         Counter32,
+        oacQosClassMapPostExecuteByte64       Counter64,
+        oacQosClassMapPostExecuteBitRate      Gauge32,
+        oacQosClassMapDropPkt                Counter32,
+        oacQosClassMapDropPkt64              Counter64,
+        oacQosClassMapDropByte               Counter32,
+        oacQosClassMapDropByte64             Counter64,
+        oacQosClassMapDropBitRate             Gauge32,
+-- TF2704 +
+        oacQosClassMapRemarkedPkt             Counter32,
+        oacQosClassMapRemarkedPkt64           Counter64,
+        oacQosClassMapRemarkedByte            Counter32,
+        oacQosClassMapRemarkedByte64          Counter64
+-- TF2704 -
+}
+
+
+oacQosClassMapPreExecutePkt OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of inbound packets before executing any policy."
+       ::= { oacQosClassMapStatsEntry 1 }
+
+oacQosClassMapPreExecutePkt64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count64 of inbound packets before executing any policy."
+       ::= { oacQosClassMapStatsEntry 2 }
+
+
+oacQosClassMapPreExecuteByte OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of inbound bytes before executing any policy."
+       ::= { oacQosClassMapStatsEntry 3 }
+
+oacQosClassMapPreExecuteByte64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             ""
+       ::= { oacQosClassMapStatsEntry 4 }
+
+oacQosClassMapPreExecuteBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Bit rate of data before executing any policy."
+       ::= { oacQosClassMapStatsEntry 5 }
+
+oacQosClassMapPostExecuteByte OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of outbound bytes after applying policy."
+       ::= { oacQosClassMapStatsEntry 6 }
+
+oacQosClassMapPostExecuteByte64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count64 of outbound bytes after applying policy."
+       ::= { oacQosClassMapStatsEntry 7 }
+
+oacQosClassMapPostExecuteBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Rate of outbound bits after applying policy."
+       ::= { oacQosClassMapStatsEntry 8 }
+
+oacQosClassMapDropPkt OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Count of dropped packets."
+       ::= { oacQosClassMapStatsEntry 9 }
+
+oacQosClassMapDropPkt64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Count64 of dropped packets."
+       ::= { oacQosClassMapStatsEntry 10 }
+
+oacQosClassMapDropByte OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Count of dropped bytes."
+       ::= { oacQosClassMapStatsEntry 11 }
+
+oacQosClassMapDropByte64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Count64 of dropped bytes."
+       ::= { oacQosClassMapStatsEntry 12 }
+
+oacQosClassMapDropBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Rate of dropped bits."
+       ::= { oacQosClassMapStatsEntry 13 }
+
+-- TF2704 +
+oacQosClassMapRemarkedPkt OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of remarked packets."
+       ::= { oacQosClassMapStatsEntry 14 }
+
+oacQosClassMapRemarkedPkt64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count64 of remarked packets."
+       ::= { oacQosClassMapStatsEntry 15 }
+
+
+oacQosClassMapRemarkedByte OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of remarked bytes."
+       ::= { oacQosClassMapStatsEntry 16 }
+
+oacQosClassMapRemarkedByte64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of remarked bytes."
+       ::= { oacQosClassMapStatsEntry 17 }
+
+-- TF2704 -
+
+--
+-- End of oacQosClassMapStats group
+--
+
+
+--
+-- Start of oacQosMatchConfigTable
+--
+oacQosMatchConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosMatchConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies the match statements configuration."
+        ::= { oacQOS 7 }
+
+oacQosMatchConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosMatchConfigEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosMatchConfigTable 1 }
+
+OacQosMatchConfigEntry ::= SEQUENCE {
+        oacQosMatchName DisplayString,
+        oacQosMatchInfo QosMatchInfo
+}
+
+oacQosMatchName OBJECT-TYPE
+        SYNTAX      DisplayString
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "The name of the match statement."
+
+       ::= { oacQosMatchConfigEntry 1 }
+
+oacQosMatchInfo OBJECT-TYPE
+        SYNTAX      QosMatchInfo
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Match or Match not."
+
+       ::= { oacQosMatchConfigEntry 2 }
+--
+-- End of oacQosMatchConfigTable
+--
+
+
+
+
+--
+-- QoS Match Statement Object Stats Table
+--
+
+oacQosMatchStatsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosMatchStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies the match statements statistics."
+        ::= { oacQOS 8 }
+
+oacQosMatchStatsEntry OBJECT-TYPE
+        SYNTAX      OacQosMatchStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex }
+        ::= { oacQosMatchStatsTable 1 }
+
+OacQosMatchStatsEntry ::= SEQUENCE {
+        oacQosMatchPreExecutePkt           Counter32,
+        oacQosMatchPreExecutePkt64         Counter64,
+        oacQosMatchPreExecuteByte          Counter32,
+        oacQosMatchPreExecuteByte64        Counter64,
+        oacQosMatchPreExecuteBitRate       Gauge32
+}
+
+
+oacQosMatchPreExecutePkt OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of inbound packets before executing any policy."
+       ::= { oacQosMatchStatsEntry 1 }
+
+oacQosMatchPreExecutePkt64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count64 of inbound packets before executing any policy."
+       ::= { oacQosMatchStatsEntry 2 }
+
+
+oacQosMatchPreExecuteByte OBJECT-TYPE
+        SYNTAX      Counter32
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count of inbound bytes before executing any policy."
+       ::= { oacQosMatchStatsEntry 3 }
+
+oacQosMatchPreExecuteByte64 OBJECT-TYPE
+        SYNTAX      Counter64
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+             "Count64 of inbound bytes before executing any policy."
+       ::= { oacQosMatchStatsEntry 4 }
+
+oacQosMatchPreExecuteBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+               "Input bit rate."
+       ::= { oacQosMatchStatsEntry 5 }
+
+
+
+
+
+-- The oacQosSetConfigObject group
+--
+-- oacQosSetConfig
+ 
+oacQosSetConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosSetConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Actions configuration."
+        ::= { oacQOS 9 }
+ 
+oacQosSetConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosSetConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosSetConfigTable 1 }
+ 
+OacQosSetConfigEntry ::= SEQUENCE {
+        oacQosSetConfigFeature           SetFeatureType,
+        oacQosSetConfigIpDSCPValue       Integer32,
+        oacQosSetConfigIpPrecedenceValue Integer32,
+        oacQosSetConfigQosGroupValue     Integer32,
+        oacQosSetConfigDiscardClassValue Gauge32	
+}
+ 
+oacQosSetConfigFeature OBJECT-TYPE
+        SYNTAX  SetFeatureType
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+               ""
+        ::= { oacQosSetConfigEntry 1 }
+ 
+oacQosSetConfigIpDSCPValue OBJECT-TYPE
+        SYNTAX  Integer32 (0..63)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The IP DSCP value."
+        ::= { oacQosSetConfigEntry 2 }
+
+oacQosSetConfigIpPrecedenceValue OBJECT-TYPE
+        SYNTAX  Integer32 (0..7)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The IP Precedence value."
+        ::= { oacQosSetConfigEntry 3 }
+
+oacQosSetConfigQosGroupValue OBJECT-TYPE
+        SYNTAX  Integer32 (0..99)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The Qos Group value."
+        ::= { oacQosSetConfigEntry 4 }
+
+oacQosSetConfigDiscardClassValue OBJECT-TYPE
+        SYNTAX  Gauge32 (0..7)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                ""
+        ::= { oacQosSetConfigEntry 5 }
+
+-- end of oacQosSetConfigTable
+ 
+
+
+--
+-- Start of oacQosPoliceConfig Group
+--
+
+oacQosPoliceConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosPoliceConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Traffic Conditioning configuration information"
+        ::= { oacQOS 10 }
+
+oacQosPoliceConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosPoliceConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosPoliceConfigTable 1 }
+
+OacQosPoliceConfigEntry ::= SEQUENCE {
+        oacQosPoliceConfigCir               Gauge32,
+        oacQosPoliceConfigCir64             Counter64,
+        oacQosPoliceConfigConformBurstSize          Gauge32,
+	oacQosPoliceConfigPir 		 Gauge32,
+        oacQosPoliceConfigPeakBurstSize       Gauge32,
+	oacQosPoliceConfigConformAction      PoliceAction,
+	oacQosPoliceConfigConformSetValue    Gauge32,
+        oacQosPoliceConfigExceedAction       PoliceAction,
+	oacQosPoliceConfigExceedSetValue     Gauge32,
+        oacQosPoliceConfigViolateAction      PoliceAction,
+        oacQosPoliceConfigViolateSetValue    Gauge32
+}
+
+oacQosPoliceConfigCir OBJECT-TYPE
+        SYNTAX  Gauge32 (8000..2000000000)
+        UNITS   "bits/second"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Committed Information Rate."
+
+        ::= { oacQosPoliceConfigEntry 1 }
+
+
+oacQosPoliceConfigCir64 OBJECT-TYPE
+        SYNTAX  Counter64 
+        UNITS   "bits/second"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Committed Information Rate."
+	
+        ::= { oacQosPoliceConfigEntry 2 }
+
+oacQosPoliceConfigConformBurstSize OBJECT-TYPE
+        SYNTAX  Gauge32 (1000..512000000)
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Committed Burst Size."
+
+        ::= { oacQosPoliceConfigEntry 3 }
+
+oacQosPoliceConfigPir OBJECT-TYPE
+        SYNTAX  Gauge32 (8000..2000000000)
+        UNITS   "bits/second"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Peak Information Rate."
+
+        ::= { oacQosPoliceConfigEntry 4 }
+
+
+oacQosPoliceConfigPeakBurstSize OBJECT-TYPE
+        SYNTAX  Gauge32 (1000..512000000)
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Peak Burst Size."
+
+        ::= { oacQosPoliceConfigEntry 5 }
+
+oacQosPoliceConfigConformAction OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 6 }
+
+oacQosPoliceConfigConformSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (1..99)
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 7 }
+
+oacQosPoliceConfigExceedAction OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 8 }
+
+oacQosPoliceConfigExceedSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (1..99)
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 9 }
+
+oacQosPoliceConfigViolateAction OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 10 }
+
+oacQosPoliceConfigViolateSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (1..99)
+        MAX-ACCESS  read-only
+        STATUS  deprecated
+        DESCRIPTION
+                ""
+        ::= { oacQosPoliceConfigEntry 11 }
+--
+-- end of oacQosPoliceConfig Group
+--
+
+
+--
+-- Start of oacQosPoliceActionConfig Group
+--
+
+
+oacQosPoliceActionConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosPoliceActionConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Traffic Conditioning Action configuration."
+        ::= { oacQOS 11 }
+
+oacQosPoliceActionConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosPoliceActionConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex, oacQosPoliceActionConfigIndex }
+        ::= { oacQosPoliceActionConfigTable 1 }
+
+OacQosPoliceActionConfigEntry ::= SEQUENCE {
+        oacQosPoliceActionConfigIndex           Gauge32,
+        oacQosPoliceActionConfigConform         PoliceAction,
+        oacQosPoliceActionConfigConformSetValue Gauge32,
+        oacQosPoliceActionConfigExceed          PoliceAction,
+        oacQosPoliceActionConfigExceedSetValue  Gauge32,
+        oacQosPoliceActionConfigViolate         PoliceAction,
+        oacQosPoliceActionConfigViolateSetValue Gauge32
+}
+
+oacQosPoliceActionConfigIndex OBJECT-TYPE
+        SYNTAX      Gauge32
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+                ""
+       ::= { oacQosPoliceActionConfigEntry 1 }
+
+oacQosPoliceActionConfigConform OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "Action taken when traffic does not exceed conform token bucket."
+        ::= { oacQosPoliceActionConfigEntry 2 }
+
+oacQosPoliceActionConfigConformSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (0..99)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "New value set for each conform packets. If Action action does not 
+                 required a set value, this object is set to zero."
+        ::= { oacQosPoliceActionConfigEntry 3 }
+
+oacQosPoliceActionConfigExceed OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "Action taken when traffic is between conform and exceed token buckets."
+        ::= { oacQosPoliceActionConfigEntry 4 }
+
+oacQosPoliceActionConfigExceedSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (0..99)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "New value set for each exceed packets. If action does not 
+                 required a set value, this object is set to zero."
+        ::= { oacQosPoliceActionConfigEntry 5 }
+
+oacQosPoliceActionConfigViolate OBJECT-TYPE
+        SYNTAX      PoliceAction
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "Action taken when traffic exceeds conform token bucket."
+        ::= { oacQosPoliceActionConfigEntry 6 }
+
+oacQosPoliceActionConfigViolateSetValue OBJECT-TYPE
+        SYNTAX      Gauge32 (0..99)
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "New value set for each violate packets. If action does not 
+                 required a set value, this object is set to zero."
+        ::= { oacQosPoliceActionConfigEntry 7 }
+
+--
+-- end of oacQosPoliceActionConfig Group
+--
+
+
+--
+-- The oacQosPoliceStats group 
+--
+-- oacQosPoliceStatsTable
+
+oacQosPoliceStatsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosPoliceStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Traffic Conditioning Statistics information."
+        ::= { oacQOS 12 }
+
+oacQosPoliceStatsEntry OBJECT-TYPE
+        SYNTAX      OacQosPoliceStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex }
+        ::= { oacQosPoliceStatsTable 1 }
+
+OacQosPoliceStatsEntry ::= SEQUENCE {
+        oacQosPoliceConformPkt          Counter32,
+        oacQosPoliceConformPkt64        Counter64,
+        oacQosPoliceConformByte         Counter32,
+        oacQosPoliceConformByte64       Counter64,
+        oacQosPoliceConformBitRate      Gauge32,
+        oacQosPoliceExceedPkt           Counter32,
+        oacQosPoliceExceedPkt64         Counter64,
+        oacQosPoliceExceedByte          Counter32,
+        oacQosPoliceExceedByte64        Counter64,
+        oacQosPoliceExceedBitRate       Gauge32,
+        oacQosPoliceViolatePkt           Counter32,
+        oacQosPoliceViolatePkt64         Counter64,
+        oacQosPoliceViolateByte          Counter32,
+        oacQosPoliceViolateByte64        Counter64,
+        oacQosPoliceViolateBitRate       Gauge32
+}
+
+
+oacQosPoliceConformPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of conformed packets."
+        ::= { oacQosPoliceStatsEntry 1 }
+
+oacQosPoliceConformPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of conformed packets."
+        ::= { oacQosPoliceStatsEntry 2 }
+
+
+oacQosPoliceConformByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of conformed bytes."
+        ::= { oacQosPoliceStatsEntry 3 }
+
+oacQosPoliceConformByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of conformed bytes."
+        ::= { oacQosPoliceStatsEntry 4 }
+
+oacQosPoliceConformBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "The conform traffic rate."
+        ::= { oacQosPoliceStatsEntry 5 }
+
+
+oacQosPoliceExceedPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of exceeded packets."
+
+        ::= { oacQosPoliceStatsEntry 6 }
+
+oacQosPoliceExceedPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of exceeded packets."
+
+        ::= { oacQosPoliceStatsEntry 7 }
+
+
+oacQosPoliceExceedByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of exceeded bytes."
+
+        ::= { oacQosPoliceStatsEntry 8 }
+
+oacQosPoliceExceedByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of exceeded bytes."
+
+        ::= { oacQosPoliceStatsEntry 9 }
+
+oacQosPoliceExceedBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+	UNITS	    "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "The exceed traffic rate."
+
+        ::= { oacQosPoliceStatsEntry 10 }
+
+
+oacQosPoliceViolatePkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of violated packets."
+
+        ::= { oacQosPoliceStatsEntry 11 }
+
+oacQosPoliceViolatePkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of violated packets."
+
+        ::= { oacQosPoliceStatsEntry 12 }
+
+
+oacQosPoliceViolateByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of violated bytes."
+
+        ::= { oacQosPoliceStatsEntry 13 }
+
+oacQosPoliceViolateByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of violated bytes."
+
+        ::= { oacQosPoliceStatsEntry 14 }
+
+oacQosPoliceViolateBitRate OBJECT-TYPE
+        SYNTAX      Gauge32
+        UNITS       "bits per second"
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+                "The violate traffic rate."
+
+        ::= { oacQosPoliceStatsEntry 15 }
+
+-- end of oacQosPoliceStatsTable
+
+
+
+-- The oacQosWREDConfig group
+--
+-- oacQosWREDTable
+ 
+oacQosWREDConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosWREDConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies the WRED configuration information"
+        ::= { oacQOS 13 }
+ 
+oacQosWREDConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosWREDConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosWREDConfigTable 1 }
+ 
+OacQosWREDConfigEntry ::= SEQUENCE {
+        oacQosWREDConfigExponentialWeight    Integer32,
+        oacQosWREDConfigDscpPrecQosGroup       WREDMechanism,
+        oacQosWREDConfigECNEnabled     TruthValue
+}
+ 
+ 
+oacQosWREDConfigExponentialWeight OBJECT-TYPE
+        SYNTAX  Integer32 (1..16)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+               "The exponential weighting factor used to compute average queue size."
+ 
+        ::= { oacQosWREDConfigEntry 1 }
+ 
+ 
+oacQosWREDConfigDscpPrecQosGroup OBJECT-TYPE
+        SYNTAX  WREDMechanism
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The WRED based mechanism."
+ 
+        ::= { oacQosWREDConfigEntry 2 }
+
+oacQosWREDConfigECNEnabled OBJECT-TYPE
+        SYNTAX  TruthValue
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Indicate if Explicit Congestion Notification is enabled."
+
+        ::= { oacQosWREDConfigEntry 3 }
+
+--
+-- end of oacQosWREDConfigTable
+--
+
+
+--
+-- oacQosWREDClassConfig Group
+ 
+oacQosWREDClassConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosWREDClassConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies the WRED configuration information for each value."
+        ::= { oacQOS 14 }
+ 
+oacQosWREDClassConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosWREDClassConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+
+        INDEX { oacQosConfigIndex, oacQosWREDValue}
+        ::= { oacQosWREDClassConfigTable 1 }
+ 
+OacQosWREDClassConfigEntry ::= SEQUENCE {
+        oacQosWREDValue                  Integer32,
+        oacQosWREDConfigPktDropProb         Integer32,
+        oacQosWREDClassConfigThresholdUnit  QosQueueUnitType,
+        oacQosWREDClassConfigMinThreshold   QosQueueDepth,
+        oacQosWREDClassConfigMaxThreshold   QosQueueDepth
+}
+ 
+oacQosWREDValue OBJECT-TYPE
+        SYNTAX  Integer32 (0..63)
+        MAX-ACCESS  not-accessible
+        STATUS  current
+        DESCRIPTION
+                "The DSCP, Precedence or QosGroup value."
+ 
+        ::= { oacQosWREDClassConfigEntry 1 }
+
+ 
+oacQosWREDConfigPktDropProb OBJECT-TYPE
+        SYNTAX  Integer32 (1..65536)
+        UNITS   ""
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                 "The Mark Probality Drop factor."  
+ 
+        ::= { oacQosWREDClassConfigEntry 2 }
+
+oacQosWREDClassConfigThresholdUnit OBJECT-TYPE
+        SYNTAX  QosQueueUnitType
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The unit to specify WRED thresholds."
+
+        ::= { oacQosWREDClassConfigEntry 3 }
+
+oacQosWREDClassConfigMinThreshold OBJECT-TYPE
+        SYNTAX  QosQueueDepth
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The minimum WRED threshold value."
+
+        ::= { oacQosWREDClassConfigEntry 4 }
+ 
+
+oacQosWREDClassConfigMaxThreshold OBJECT-TYPE
+        SYNTAX  QosQueueDepth
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The maximum WRED threshold value."
+
+        ::= { oacQosWREDClassConfigEntry 5 }
+ 
+-- end of oacQosWREDClassConfig Group
+
+
+
+
+--
+-- oacQosWREDClassStats Group
+ 
+oacQosWREDClassStatsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosWREDClassStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies the WRED statistics information."
+        ::= { oacQOS 15 }
+ 
+oacQosWREDClassStatsEntry OBJECT-TYPE
+        SYNTAX      OacQosWREDClassStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex, oacQosWREDValue}
+        ::= { oacQosWREDClassStatsTable 1 }
+ 
+OacQosWREDClassStatsEntry ::= SEQUENCE {
+        oacQosWREDAverageQueueSizeUnits         QosQueueUnitType,
+        oacQosWREDAverageQueueSize              QosQueueDepth,
+        oacQosWREDRandomDropPkt          Counter32,
+        oacQosWREDRandomDropPkt64        Counter64,
+        oacQosWREDRandomDropByte         Counter32,
+        oacQosWREDRandomDropByte64       Counter64,
+        oacQosWREDTailDropPkt            Counter32,
+        oacQosWREDTailDropPkt64          Counter64,
+        oacQosWREDTailDropByte           Counter32,
+        oacQosWREDTailDropByte64         Counter64,
+        oacQosWREDTransmitPkt            Counter32,
+        oacQosWREDTransmitPkt64          Counter64,
+        oacQosWREDTransmitByte           Counter32,
+        oacQosWREDTransmitByte64         Counter64,
+        oacQosWREDECNMarkPkt             Counter32,
+        oacQosWREDECNMarkPkt64           Counter64,
+        oacQosWREDECNMarkByte            Counter32,
+        oacQosWREDECNMarkByte64          Counter64
+}
+
+oacQosWREDAverageQueueSizeUnits OBJECT-TYPE
+        SYNTAX  QosQueueUnitType
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The queue size unit type."
+ 
+        ::= { oacQosWREDClassStatsEntry 1 }
+
+oacQosWREDAverageQueueSize OBJECT-TYPE
+        SYNTAX  QosQueueDepth
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The average queue size used by WRED."
+ 
+        ::= { oacQosWREDClassStatsEntry 2 }
+
+ 
+oacQosWREDRandomDropPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of packets dropped ramdomly."
+ 
+        ::= { oacQosWREDClassStatsEntry 3 }
+
+oacQosWREDRandomDropPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of packets dropped ramdomly."
+ 
+        ::= { oacQosWREDClassStatsEntry 4 }
+
+
+oacQosWREDRandomDropByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes dropped ramdomly."
+ 
+        ::= { oacQosWREDClassStatsEntry 5 }
+
+oacQosWREDRandomDropByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of bytes dropped ramdomly."
+ 
+        ::= { oacQosWREDClassStatsEntry 6 }
+
+ 
+oacQosWREDTailDropPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of packets dropped when the number of packets exceeds the maximum threshold."
+ 
+        ::= { oacQosWREDClassStatsEntry 7 }
+ 
+oacQosWREDTailDropPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of packets dropped when the number of packets exceeds the maximum threshold."
+ 
+        ::= { oacQosWREDClassStatsEntry 8 }
+ 
+ 
+oacQosWREDTailDropByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes dropped when the number of packets exceeds the maximum threshold."
+ 
+        ::= { oacQosWREDClassStatsEntry 9 }
+ 
+oacQosWREDTailDropByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of bytes dropped when the number of packets exceeds the maximum threshold."
+ 
+        ::= { oacQosWREDClassStatsEntry 10 }
+ 
+oacQosWREDTransmitPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of packets transmitted."
+ 
+        ::= { oacQosWREDClassStatsEntry 11 }
+ 
+oacQosWREDTransmitPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of packets transmitted."
+ 
+        ::= { oacQosWREDClassStatsEntry 12 }
+
+oacQosWREDTransmitByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes transmitted."
+ 
+        ::= { oacQosWREDClassStatsEntry 13 }
+ 
+oacQosWREDTransmitByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of bytes transmitted."
+ 
+        ::= { oacQosWREDClassStatsEntry 14 }
+
+oacQosWREDECNMarkPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of packets marked with ECN."
+ 
+        ::= { oacQosWREDClassStatsEntry 15 }
+
+oacQosWREDECNMarkPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of packets marked with ECN."
+ 
+        ::= { oacQosWREDClassStatsEntry 16 }
+
+
+oacQosWREDECNMarkByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes marked with ECN."
+ 
+        ::= { oacQosWREDClassStatsEntry 17 }
+
+oacQosWREDECNMarkByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes marked with ECN."
+ 	
+        ::= { oacQosWREDClassStatsEntry 18 }
+
+
+-- end of oacQosWREDClassStatsTable
+
+
+--
+-- Start of oacQosQueueConfigTable
+--
+oacQosQueueConfigTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosQueueConfigEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Queue configuration information."
+	    ::= { oacQOS 16 }
+
+oacQosQueueConfigEntry OBJECT-TYPE
+        SYNTAX      OacQosQueueConfigEntry 
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+
+        INDEX { oacQosConfigIndex }
+        ::= { oacQosQueueConfigTable 1 }
+
+OacQosQueueConfigEntry ::= SEQUENCE {
+        oacQosQueueConfigFlowBasedEnabled      TruthValue,
+        oacQosQueueConfigPriorityEnabled  TruthValue,
+        oacQosQueueConfigBandwidth        Integer32,
+        oacQosQueueConfigBandwidthUnits   QueueingBandwidthUnits,
+        oacQosQueueConfigFlowBasedQSize  Integer32,
+        oacQosQueueConfigFlowBasedQNumber   Integer32,
+        oacQosQueueConfigPrioBurstSize    Gauge32,
+        oacQosQueueConfigQueueLimitUnits      QosQueueUnitType,
+        oacQosQueueConfigQueueLimit  QosQueueDepth
+}
+
+oacQosQueueConfigFlowBasedEnabled OBJECT-TYPE
+        SYNTAX  TruthValue
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Indicate if Flow-Based WFQ is enable."
+ 
+        ::= { oacQosQueueConfigEntry 1 }
+ 
+oacQosQueueConfigPriorityEnabled OBJECT-TYPE
+        SYNTAX  TruthValue
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Indicate if this class used priority queueing."
+ 
+        ::= { oacQosQueueConfigEntry 2 }
+ 
+
+oacQosQueueConfigBandwidth OBJECT-TYPE
+        SYNTAX  Integer32 (0..2000000)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Indicate the bandwidth configured to this class."
+ 
+        ::= { oacQosQueueConfigEntry 3 }
+ 
+oacQosQueueConfigBandwidthUnits OBJECT-TYPE
+        SYNTAX  QueueingBandwidthUnits
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Indicate the bandwidth unit."
+ 
+        ::= { oacQosQueueConfigEntry 4 }
+ 
+ 
+oacQosQueueConfigFlowBasedQSize OBJECT-TYPE
+        SYNTAX  Integer32 (1..32768)
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The maximum number of packets allowed for each Flow-Based WFQ queues."
+ 
+        ::= { oacQosQueueConfigEntry 5 }
+
+oacQosQueueConfigFlowBasedQNumber OBJECT-TYPE
+        SYNTAX  Integer32 (1..32768)
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The number of dynamic queues reserved for Flow-Based WFQ."
+ 
+        ::= { oacQosQueueConfigEntry 6 }
+
+oacQosQueueConfigPrioBurstSize OBJECT-TYPE
+        SYNTAX  Gauge32 (32..64000000)
+        UNITS   "Bytes"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                ""
+ 
+        ::= { oacQosQueueConfigEntry 7 }
+
+oacQosQueueConfigQueueLimitUnits OBJECT-TYPE
+        SYNTAX  QosQueueUnitType
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The maximum number of packets allowed for all queues associated for this class."
+
+        ::= { oacQosQueueConfigEntry 8 }
+
+oacQosQueueConfigQueueLimit OBJECT-TYPE
+        SYNTAX  QosQueueDepth
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The queue limit unit."
+
+        ::= { oacQosQueueConfigEntry 9 }
+
+--
+-- End of oacQosQueueConfig Group
+--
+
+
+
+
+
+--
+-- The oacQosQueueStats group
+--
+ 
+oacQosQueueStatsTable OBJECT-TYPE
+        SYNTAX      SEQUENCE OF OacQosQueueStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+            "This table specifies Queue statistics information."
+        ::= { oacQOS 17 }
+ 
+oacQosQueueStatsEntry OBJECT-TYPE
+        SYNTAX      OacQosQueueStatsEntry
+        MAX-ACCESS  not-accessible
+        STATUS      current
+        DESCRIPTION
+           ""
+        INDEX { oacQosPolicyIndex, oacQosObjectsIndex }
+ 
+        ::= { oacQosQueueStatsTable 1 }
+
+ 
+OacQosQueueStatsEntry ::= SEQUENCE {
+        oacQosQueueDiscardByte         Counter32,
+        oacQosQueueDiscardByte64       Counter64,
+        oacQosQueueDiscardPkt          Counter32,
+        oacQosQueueDiscardPkt64        Counter64,
+        oacQosQueueCurrentQDepth       Gauge32,
+        oacQosQueueMaxQDepth           Gauge32
+}
+ 
+
+oacQosQueueDiscardByte OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of bytes dropped by queueing."
+
+        ::= { oacQosQueueStatsEntry 1 }
+ 
+oacQosQueueDiscardByte64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of bytes dropped by queueing."
+
+        ::= { oacQosQueueStatsEntry 2 }
+ 
+ 
+oacQosQueueDiscardPkt OBJECT-TYPE
+        SYNTAX  Counter32
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count of packets dropped by queueing."
+ 
+        ::= { oacQosQueueStatsEntry 3 }
+ 
+oacQosQueueDiscardPkt64 OBJECT-TYPE
+        SYNTAX  Counter64
+        UNITS   "Packets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "Count64 of packets dropped by queueing." 
+        ::= { oacQosQueueStatsEntry 4 }
+
+oacQosQueueCurrentQDepth OBJECT-TYPE
+        SYNTAX  Gauge32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The current depth of the queue."
+
+        ::= { oacQosQueueStatsEntry 5 }
+
+oacQosQueueMaxQDepth OBJECT-TYPE
+        SYNTAX  Gauge32
+        UNITS   "Octets"
+        MAX-ACCESS  read-only
+        STATUS  current
+        DESCRIPTION
+                "The maximum depth of the queue."
+
+        ::= { oacQosQueueStatsEntry 6 }
+ 
+-- end of oacQosQueueStats Group
+
+
+
+END
+ 

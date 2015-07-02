@@ -1,0 +1,118 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.4.R003_E008
+--
+--          Creation date : 22/01/2003
+--
+--          Compatibility with ONEOS_V31
+--
+--          Compatibility with ONEOS_V32
+--
+--          Compatibility with ONEOS_V32
+--
+--         13122004 : Added oacEventSeverityLevel for events
+--
+
+
+     ONEACCESS-EVENTS-MIB DEFINITIONS ::= BEGIN 
+
+     IMPORTS
+          MODULE-IDENTITY, OBJECT-TYPE	  FROM SNMPv2-SMI
+		DisplayString FROM RFC1213-MIB
+MODULE-COMPLIANCE, OBJECT-GROUP				        FROM SNMPv2-CONF
+ 	    oneAccess,oacExpIMEvents,oacMIBModules	  FROM ONEACCESS-GLOBAL-REG;
+     oacEventsMIBModule MODULE-IDENTITY
+       LAST-UPDATED "9911301545Z"
+     ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses 
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes ATM Management objects."
+	
+	::= { oacMIBModules 6600 }
+
+oacEventsObjects OBJECT IDENTIFIER ::= { oacExpIMEvents 1 }
+oacEventsNotifications OBJECT IDENTIFIER ::= { oacExpIMEvents 2 }
+oacEventsConformance OBJECT IDENTIFIER ::= { oacExpIMEvents 3 }
+
+ oacEventText OBJECT-TYPE
+		SYNTAX DisplayString 
+		MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION 
+			"Textual representation of the event"
+	 ::= { oacEventsObjects 1 }
+
+ oacEventSeverityLevel OBJECT-TYPE
+    SYNTAX     OBJECT IDENTIFIER
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+            "Provides the associated severity level used when generating 
+            snmp traps. When the device generates a Trap-PDU into a
+            SNMPv2-Trap-PDU, and when it requires a severity level, 
+            this variable is inserted before the last varbind."            
+          ::= { oacEventsObjects 2 }
+                   
+ 	oacEventSeverity OBJECT IDENTIFIER ::= { oacEventsObjects 3 }
+	oacEventSeverityAlerts OBJECT IDENTIFIER ::= { oacEventSeverity 1 }
+	oacEventSeverityCritical OBJECT IDENTIFIER ::= { oacEventSeverity 2 }
+	oacEventSeverityErrors OBJECT IDENTIFIER ::= { oacEventSeverity 3 }
+	oacEventSeverityWarnings OBJECT IDENTIFIER ::= { oacEventSeverity 4 } 	
+	oacEventSeverityNotifications OBJECT IDENTIFIER ::= { oacEventSeverity 5 } 	
+	oacEventSeverityInformational OBJECT IDENTIFIER ::= { oacEventSeverity 6 }
+	oacEventSeverityDebug OBJECT IDENTIFIER ::= { oacEventSeverity 7 }
+
+      
+oacEvent TRAP-TYPE
+        ENTERPRISE  oneAccess
+        VARIABLES   { oacEventText }
+        DESCRIPTION "Trap generated from Event management"
+        ::= 1
+
+
+oacEventsGroups OBJECT IDENTIFIER ::= { oacEventsConformance 1}
+
+oacEventsCompliances OBJECT IDENTIFIER ::= { oacEventsConformance 2}
+
+oacEventsCompliance MODULE-COMPLIANCE
+      STATUS  current
+      DESCRIPTION
+          "The compliance statement for agents that support the
+          OA-EVENTS-MIB."
+      MODULE -- this module
+          MANDATORY-GROUPS { oacEventsGeneralGroup
+                }
+--          GROUP atmStatGeneralGroup
+--
+--         DESCRIPTION
+--             "This group optional, when declared here."
+	::= { oacEventsCompliances 1}
+
+oacEventsGeneralGroup OBJECT-GROUP
+	OBJECTS {
+oacEventText
+}
+
+STATUS  current
+      DESCRIPTION
+          "This group is mandatory for all  Events entities."
+      ::= { oacEventsGroups 1 }
+
+
+END
+--

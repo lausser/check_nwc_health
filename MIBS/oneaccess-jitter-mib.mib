@@ -1,0 +1,581 @@
+--------------------------------------------------------------------
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_V3.7R010E003
+--
+--          Creation date : 2006-01-31
+--
+--          2006-02-10 : add object oacJitterControlAdminStatus and suppress
+--                       oacJitterControlIndex from Conformance definitions
+--
+--          2006-02-17 : remove object oacJitterControlAdminStatus and add
+--                       default values for oacJitterStatsPacketLossSD, oacJitterStatsPacketLossDS,
+--                       oacJitterStatsPacketOutOfSequence, oacJitterStatsPacketLateArrival,
+--                       oacJitterStatsPacketLoss
+--
+--          2006-06-27 : TF3778: oacJitterStatsTime SNMP attribute from TimeTicks to
+--                       DateAndTime
+--          2006-09-12 : TF4306:added Max jitter objects to oacJitterStatsTable:
+--                       oacJitterStatsMaxPosSD, oacJitterStatsMaxNegSD,
+--                       oacJitterStatsMaxPosDS, oacJitterStatsMaxNegDS
+--------------------------------------------------------------------
+
+    ONEACCESS-JITTER-MIB DEFINITIONS ::= BEGIN
+
+--------------------------------------------------------------------
+-- Imports
+--------------------------------------------------------------------
+
+    IMPORTS
+        MODULE-IDENTITY, OBJECT-TYPE, Integer32
+            FROM SNMPv2-SMI
+    --
+        RowStatus, TimeStamp, DateAndTime, TEXTUAL-CONVENTION
+            FROM SNMPv2-TC
+    --
+        OwnerString
+            FROM IF-MIB
+    --
+        oacMIBModules, oacExpIMManagement, oacRequirements
+            FROM ONEACCESS-GLOBAL-REG
+    --
+        InetAddress
+            FROM INET-ADDRESS-MIB;           -- RFC2851
+
+--------------------------------------------------------------------
+-- Module Entity
+--------------------------------------------------------------------
+
+    oacJitterMIBModule MODULE-IDENTITY
+        LAST-UPDATED "200601310000Z"
+        ORGANIZATION "ONE ACCESS"
+        CONTACT-INFO
+            "Pascal KESTELOOT
+             Postal: ONE ACCESS
+                     28, rue de la redoute
+                     92260 Fontenay aux roses
+             FRANCE
+
+             Tel: (+33) 01 41 87 70 54
+             Fax: (+33) 01 41 87 74 39
+
+             E-mail: pascal.kesteloot@oneaccess-net.com"
+        DESCRIPTION
+            "This MIB module describes a MIB for getting statistics as jitter
+             calculation, transit time measurement and loss packet rate between
+             nodes"
+        ::= { oacMIBModules 2000 }
+
+--------------------------------------------------------------------
+-- Textual Conventions
+--------------------------------------------------------------------
+
+    OacJitterControlJitterType ::= TEXTUAL-CONVENTION
+        STATUS         current
+        DESCRIPTION    "Describes the type of probe to execute."
+        SYNTAX         INTEGER
+        {
+            jitter-ICMP-TIMESTAMP(1),
+            jitter-UDP-PING(2),
+            jitter-UDP-PING-TIMESTAMP(3)
+        }
+
+    OacJitterResponseSense ::= TEXTUAL-CONVENTION
+        STATUS        current
+        DESCRIPTION   "Values for status of the operation."
+        SYNTAX        INTEGER
+        {
+            ok(1),
+            disconnected(2),
+            overThreshold(3),
+            timeout(4),
+            busy(5),
+            notConnected(6),
+            dropped(7),
+            sequenceError(8),
+            verifyError(9),
+            applicationSpecific(10),
+            error(16)
+        }
+
+
+--------------------------------------------------------------------
+-- Objects Definitions
+--------------------------------------------------------------------
+
+    oacExpIMJitter        OBJECT IDENTIFIER ::= { oacExpIMManagement 5 }
+    oacJitterObjects      OBJECT IDENTIFIER ::= { oacExpIMJitter 1 }
+
+    --------------------------------------------------------------------
+    -- Control Table Definition
+    --------------------------------------------------------------------
+
+    oacJitterControlTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF OacJitterControlEntry
+        MAX-ACCESS         not-accessible
+        STATUS             current
+        DESCRIPTION        "Config Table for JITTER probe."
+        ::= { oacJitterObjects 1 }
+
+    oacJitterControlEntry OBJECT-TYPE
+        SYNTAX         OacJitterControlEntry
+        MAX-ACCESS     not-accessible
+        STATUS         current
+        DESCRIPTION    "List of objects defining a conceptual JITTER probe."
+        INDEX          { oacJitterControlIndex }
+        ::= { oacJitterControlTable 1 }
+
+    OacJitterControlEntry ::= SEQUENCE {
+        oacJitterControlIndex               INTEGER,
+        oacJitterControlOwner               OwnerString,
+        oacJitterControlType                OacJitterControlJitterType,
+        oacJitterControlFrequency           INTEGER,
+        oacJitterControlTimeout             INTEGER,
+        oacJitterControlTargetAddress       InetAddress,
+        oacJitterControlTargetPort          Integer32,
+        oacJitterControlSourceAddress       InetAddress,
+        oacJitterControlInterval            Integer32,
+        oacJitterControlPktDataRequestSize  Integer32,
+        oacJitterControlPacketCount         Integer32,
+        oacJitterControlTos                 Integer32,
+        oacJitterControlStatus              RowStatus
+    }
+
+    oacJitterControlIndex OBJECT-TYPE
+        SYNTAX         INTEGER (1..2147483647)
+        MAX-ACCESS     not-accessible
+        STATUS         current
+        DESCRIPTION    "Identifies a row (session number) in the control table."
+        ::= { oacJitterControlEntry 1 }
+
+    oacJitterControlOwner OBJECT-TYPE
+        SYNTAX         OwnerString
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Use as a comment field."
+        DEFVAL         { "" }
+        ::= { oacJitterControlEntry 2 }
+
+    oacJitterControlType OBJECT-TYPE
+        SYNTAX         OacJitterControlJitterType
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Specifies the protocol used by the probe."
+        DEFVAL         { jitter-ICMP-TIMESTAMP }
+        ::= { oacJitterControlEntry 3 }
+
+    oacJitterControlFrequency OBJECT-TYPE
+        SYNTAX         INTEGER (0..604800)
+        UNITS          "seconds"
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Defines the time in seconds between two probes."
+        DEFVAL         { 60 }
+        ::= { oacJitterControlEntry 4 }
+
+    oacJitterControlTimeout OBJECT-TYPE
+        SYNTAX         INTEGER (0..604800000)
+        UNITS          "milliseconds"
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Defines the maximum time of waiting a response to a packet."
+        DEFVAL         { 5000 }
+        ::= { oacJitterControlEntry 5 }
+
+    oacJitterControlTargetAddress OBJECT-TYPE
+        SYNTAX         InetAddress
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Specifies the IP address of the target."
+        ::= { oacJitterControlEntry 6 }
+
+    oacJitterControlTargetPort OBJECT-TYPE
+        SYNTAX         Integer32
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Specifies the port number of the target."
+        ::= { oacJitterControlEntry 7 }
+
+    oacJitterControlSourceAddress OBJECT-TYPE
+        SYNTAX         InetAddress
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Specifies the source IP address."
+        ::= { oacJitterControlEntry 8 }
+
+    oacJitterControlInterval OBJECT-TYPE
+        SYNTAX         Integer32
+        UNITS          "milliseconds"
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Time interval between each packet of a probe."
+        ::= { oacJitterControlEntry 9 }
+
+    oacJitterControlPktDataRequestSize OBJECT-TYPE
+        SYNTAX         Integer32
+        UNITS          "bytes"
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Specifies the size of the packet to send."
+        DEFVAL         { 32 }
+        ::= { oacJitterControlEntry 10 }
+
+    oacJitterControlPacketCount OBJECT-TYPE
+        SYNTAX         Integer32
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "Number of packets to send for a probe."
+        DEFVAL         { 10 }
+        ::= { oacJitterControlEntry 11 }
+
+    oacJitterControlTos OBJECT-TYPE
+        SYNTAX         Integer32
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "This object represents the type of service in an
+                        IP header."
+        DEFVAL         { 0 }
+        ::= { oacJitterControlEntry 12 }
+
+    oacJitterControlStatus OBJECT-TYPE
+        SYNTAX         RowStatus
+        MAX-ACCESS     read-create
+        STATUS         current
+        DESCRIPTION    "The status of the jitter probe (see definition from SNMPv2-TC module)."
+        ::= { oacJitterControlEntry 13 }
+
+    --------------------------------------------------------------------
+    -- Statistics Table Definition
+    --------------------------------------------------------------------
+
+    oacJitterStatsTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF OacJitterStatsEntry
+        MAX-ACCESS         not-accessible
+        STATUS             current
+        DESCRIPTION        "Statistics Table for JITTER probe."
+        ::= { oacJitterObjects 2 }
+
+    oacJitterStatsEntry OBJECT-TYPE
+        SYNTAX         OacJitterStatsEntry
+        MAX-ACCESS     not-accessible
+        STATUS         current
+        DESCRIPTION    "List of objects defining the results for JITTER probe."
+        INDEX          { oacJitterControlIndex }
+        ::= { oacJitterStatsTable 1 }
+
+    OacJitterStatsEntry ::= SEQUENCE {
+        oacJitterStatsCompleted            OacJitterResponseSense,
+        oacJitterStatsTime                 DateAndTime,
+        oacJitterStatsNumRTT               Integer32,
+        oacJitterStatsPacketRecv           Integer32,
+        oacJitterStatsAvgRTT               Integer32,
+        oacJitterStatsSumRTT               Integer32,
+        oacJitterStatsMinRTT               Integer32,
+        oacJitterStatsMaxRTT               Integer32,
+        oacJitterStatsSumPosJitter         Integer32,
+        oacJitterStatsNumPosJitter         Integer32,
+        oacJitterStatsSumNegJitter         Integer32,
+        oacJitterStatsNumNegJitter        Integer32,
+        oacJitterStatsSumPosSD             Integer32,
+        oacJitterStatsNumPosSD             Integer32,
+        oacJitterStatsSumNegSD             Integer32,
+        oacJitterStatsNumNegSD             Integer32,
+        oacJitterStatsSumPosDS             Integer32,
+        oacJitterStatsNumPosDS             Integer32,
+        oacJitterStatsSumNegDS             Integer32,
+        oacJitterStatsNumNegDS             Integer32,
+        oacJitterStatsPacketLossSD         Integer32,
+        oacJitterStatsPacketLossDS         Integer32,
+        oacJitterStatsPacketOutOfSequence   Integer32,
+        oacJitterStatsPacketLateArrival    Integer32,
+        oacJitterStatsPacketLoss           Integer32,
+        oacJitterStatsMaxPosSD	           Integer32,
+        oacJitterStatsMaxNegSD	           Integer32,
+        oacJitterStatsMaxPosDS	           Integer32,
+        oacJitterStatsMaxNegDS	           Integer32
+    }
+
+    oacJitterStatsCompleted OBJECT-TYPE
+        SYNTAX          OacJitterResponseSense
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The status of the last measure."
+        ::= { oacJitterStatsEntry 2 }
+
+    oacJitterStatsTime OBJECT-TYPE
+        SYNTAX          DateAndTime
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The date of the last measure."
+        ::= { oacJitterStatsEntry 3 }
+
+    oacJitterStatsNumRTT OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The total number of probe operations that have been done."
+        DEFVAL          { 0 }
+        ::= { oacJitterStatsEntry 4 }
+
+    oacJitterStatsPacketRecv OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of received packets during a probe test."
+        ::= { oacJitterStatsEntry 5 }
+
+    oacJitterStatsAvgRTT OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The average value of the Round Trip Time measures."
+        ::= { oacJitterStatsEntry 6 }
+
+    oacJitterStatsSumRTT OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of the Round Trip Time measures."
+        ::= { oacJitterStatsEntry 7 }
+
+    oacJitterStatsMinRTT OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The minimum value of the Round Trip Time measures."
+        ::= { oacJitterStatsEntry 8 }
+
+    oacJitterStatsMaxRTT OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The maximum value of the Round Trip Time measures."
+        ::= { oacJitterStatsEntry 9 }
+
+    oacJitterStatsSumPosJitter OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of positive jitter measures (Source <-> Target)."
+        ::= { oacJitterStatsEntry 10 }
+
+    oacJitterStatsNumPosJitter OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of positive jitter measures (Source <-> Target)."
+        ::= { oacJitterStatsEntry 11 }
+
+    oacJitterStatsSumNegJitter OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of negative jitter measures (Source <-> Target)."
+        ::= { oacJitterStatsEntry 12 }
+
+    oacJitterStatsNumNegJitter OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of negative jitter mesures (Source <-> Target)."
+        ::= { oacJitterStatsEntry 13 }
+
+    oacJitterStatsSumPosSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of positive jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 14 }
+
+    oacJitterStatsNumPosSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of positive jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 15 }
+
+    oacJitterStatsSumNegSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of negative jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 16 }
+
+    oacJitterStatsNumNegSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of negative jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 17 }
+
+    oacJitterStatsSumPosDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of positive jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 18 }
+
+    oacJitterStatsNumPosDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of positive jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 19 }
+
+    oacJitterStatsSumNegDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sum of negative jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 20 }
+
+    oacJitterStatsNumNegDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of negative jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 21 }
+
+    oacJitterStatsPacketLossSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of packets lost when sent from source to target."
+        DEFVAL         { 0 }
+        ::= { oacJitterStatsEntry 22 }
+
+    oacJitterStatsPacketLossDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of packets lost when sent from target to source."
+        DEFVAL         { 0 }
+        ::= { oacJitterStatsEntry 23 }
+
+    oacJitterStatsPacketOutOfSequence  OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of packets arrived out of sequence."
+        DEFVAL         { 0 }
+        ::= { oacJitterStatsEntry 24 }
+
+    oacJitterStatsPacketLateArrival OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of packets that arrived after the timeout."
+        DEFVAL         { 0 }
+        ::= { oacJitterStatsEntry 25 }
+
+    oacJitterStatsPacketLoss OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of packets that are lost for which we cannot determine the direction."
+        DEFVAL         { 0 }
+        ::= { oacJitterStatsEntry 26 }
+
+    oacJitterStatsMaxPosSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The maximum measure of positive jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 27 }
+
+    oacJitterStatsMaxNegSD OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The maximum measure of negative jitter measures (Source -> Target)."
+        ::= { oacJitterStatsEntry 28 }
+
+    oacJitterStatsMaxPosDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The maximum measure of positive jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 29 }
+
+    oacJitterStatsMaxNegDS OBJECT-TYPE
+        SYNTAX          Integer32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The maximum measure of negative jitter measures (Source <- Target)."
+        ::= { oacJitterStatsEntry 30 }
+
+--------------------------------------------------------------------
+-- Conformance Definitions
+--------------------------------------------------------------------
+
+    oacJitterConformance OBJECT IDENTIFIER ::= { oacRequirements 2000 }
+    oacJitterGroups      OBJECT IDENTIFIER ::= { oacJitterConformance 1 }
+    oacJitterCompliances OBJECT IDENTIFIER ::= { oacJitterConformance 2 }
+
+    oacJitterCompliance MODULE-COMPLIANCE
+        STATUS  current
+        DESCRIPTION
+            "The compliance statement for agents that support the
+             ONEACCESS-JITTER-MIB."
+        MODULE -- this module
+        MANDATORY-GROUPS { oacJitterGeneralGroup }
+	    ::= { oacJitterCompliances 1}
+
+    oacJitterGeneralGroup OBJECT-GROUP
+	    OBJECTS {
+            oacJitterControlOwner,
+            oacJitterControlType,
+            oacJitterControlFrequency,
+            oacJitterControlTimeout,
+            oacJitterControlStatus,
+            oacJitterControlTargetAddress,
+            oacJitterControlTargetPort,
+            oacJitterControlSourceAddress,
+            oacJitterControlInterval,
+            oacJitterControlPktDataRequestSize,
+            oacJitterControlPacketCount,
+            oacJitterControlTos,
+            oacJitterStatsCompleted,
+            oacJitterStatsTime,
+            oacJitterStatsNumRTT,
+            oacJitterStatsPacketRecv,
+            oacJitterStatsAvgRTT,
+            oacJitterStatsSumRTT,
+            oacJitterStatsMinRTT,
+            oacJitterStatsMaxRTT,
+            oacJitterStatsSumPosJitter,
+            oacJitterStatsNumPosJitter,
+            oacJitterStatsSumNegJitter,
+            oacJitterStatsNumNegJitter,
+            oacJitterStatsSumPosSD,
+            oacJitterStatsNumPosSD,
+            oacJitterStatsMaxPosSD,
+            oacJitterStatsSumNegSD,
+            oacJitterStatsNumNegSD,
+            oacJitterStatsMaxNegSD,
+            oacJitterStatsSumPosDS,
+            oacJitterStatsNumPosDS,
+            oacJitterStatsMaxPosDS,
+            oacJitterStatsSumNegDS,
+            oacJitterStatsNumNegDS,
+            oacJitterStatsMaxNegDS,
+            oacJitterStatsPacketLossSD,
+            oacJitterStatsPacketLossDS,
+            oacJitterStatsPacketOutOfSequence ,
+            oacJitterStatsPacketLateArrival,
+            oacJitterStatsPacketLoss
+        }
+        STATUS  current
+        DESCRIPTION
+            "This group is mandatory for Jitter entity."
+        ::= { oacJitterGroups 1 }
+
+END
+
+-----
+-------------------------- END OF FILE -----------------------------
+-----

@@ -25,6 +25,7 @@ $Monitoring::GLPlugin::SNMP::mib_ids = {
   'NETGEAR-MIB' => '1.3.6.1.4.1.4526',
   'IP-FORWARD-MIB' => '1.3.6.1.2.1.4.24',
   'RAPID-CITY-MIB' => '1.3.6.1.4.1.2272',
+  'S5-CHASSIS-MIB' => '1.3.6.1.4.1.45.1.6.3',
 };
 
 $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
@@ -6931,8 +6932,6 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     s5ChasUtilTable => '1.3.6.1.4.1.45.1.6.3.8.1',
     s5ChasUtilEntry => '1.3.6.1.4.1.45.1.6.3.8.1.1',
     s5ChasUtilGrpIndx => '1.3.6.1.4.1.45.1.6.3.8.1.1.1',
-    s5ChasUtilMemoryMinAvailable => '1.3.6.1.4.1.45.1.6.3.8.1.1.10',
-    s5ChasUtilCPUUsageLast10Seconds => '1.3.6.1.4.1.45.1.6.3.8.1.1.11',
     s5ChasUtilIndx => '1.3.6.1.4.1.45.1.6.3.8.1.1.2',
     s5ChasUtilSubIndx => '1.3.6.1.4.1.45.1.6.3.8.1.1.3',
     s5ChasUtilTotalCPUUsage => '1.3.6.1.4.1.45.1.6.3.8.1.1.4',
@@ -6941,6 +6940,8 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     s5ChasUtilCPUUsageLast1Hour => '1.3.6.1.4.1.45.1.6.3.8.1.1.7',
     s5ChasUtilCPUUsageLast24Hours => '1.3.6.1.4.1.45.1.6.3.8.1.1.8',
     s5ChasUtilMemoryAvailable => '1.3.6.1.4.1.45.1.6.3.8.1.1.9',
+    s5ChasUtilMemoryMinAvailable => '1.3.6.1.4.1.45.1.6.3.8.1.1.10',
+    s5ChasUtilCPUUsageLast10Seconds => '1.3.6.1.4.1.45.1.6.3.8.1.1.11',
   },
   'RAPID-CITY-MIB' => {
     rcSysCpuUtil => '1.3.6.1.4.1.2272.1.1.20',

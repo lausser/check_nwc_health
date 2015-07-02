@@ -70,6 +70,9 @@ EXTRA_MODULES=\
   Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/AsyncOS.pm \
   Classes/Cisco.pm \
+  Classes/Nortel/S5/Component/CpuSubsystem.pm \
+  Classes/Nortel/S5/Component/MemSubsystem.pm \
+  Classes/Nortel/S5.pm \
   Classes/Nortel.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \

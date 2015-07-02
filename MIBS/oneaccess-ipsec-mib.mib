@@ -1,0 +1,200 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.6.R008_E0019
+--
+--          Creation date : 13/12/2004
+--
+--          Compatibility with ONEOS_V33
+--
+--          Compatibility with ONEOS_V34
+--
+--          Compatibility with ONEOS_V35
+--
+--          Compatibility with ONEOS_V36
+--
+
+
+
+     ONEACCESS-IPSEC-MIB DEFINITIONS ::= BEGIN 
+
+
+     IMPORTS
+		MODULE-IDENTITY, OBJECT-TYPE,Counter32,Integer32,IpAddress,Unsigned32
+			FROM SNMPv2-SMI
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+		TimeInterval
+			FROM SNMPv2-TC
+		ifIndex
+			FROM IF-MIB
+ 	    oacMIBModules, oacExpIMIp, oacExpIMIPSec
+			FROM ONEACCESS-GLOBAL-REG;
+
+     oacNatMIBModule MODULE-IDENTITY
+         LAST-UPDATED "9911301545Z"
+         ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes IPSec Managed objects."
+
+	::= { oacMIBModules 668 }
+	
+oacIPSecNotifications OBJECT IDENTIFIER ::= { oacExpIMIPSec 1 }
+oacIsakmpNotifications OBJECT IDENTIFIER ::= { oacExpIMIPSec 2 }
+
+oacIPSecSAcreated NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec SA created notification signifies that the 
+	device created an IPSec security association."
+	::= {oacIPSecNotifications 1}
+
+oacIPSecSAremoved NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec SA removed notification signifies that the 
+	device removed an IPSec security association."
+	::= {oacIPSecNotifications 2}
+
+oacIPSecCmapEnabled NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec crypto map enabled notification signifies that the
+	device validated the crypto map attached to an interface 
+	and the crypto map becomes valid on this interface." 
+	::= {oacIPSecNotifications 3}
+
+oacIPSecCmapDisabled NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec crypto map disabled notification signifies that the
+	device did not validate the crypto map attached to an interface 
+	and the crypto map becomes invalid on this interface." 
+	::= {oacIPSecNotifications 4}
+
+oacIPSecCpolEnabled NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec crypto map policy enabled notification signifies that the
+	device validated the crypto map policy. configuration is considered 
+	as active and can be used by Isakmp daemon, or IPSec manual keying."
+	::= {oacIPSecNotifications 5}
+
+oacIPSecCpolDisabled NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec crypto map policy disabled notification signifies that the
+	device did not validate the crypto map policy. Configuration is considered 
+	as inactive and can not be used by Isakmp or manual IPSec manual keying."
+	::= {oacIPSecNotifications 6}
+
+oacIPSecHwModuleDown NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An IPSec hardware module down notification signifies that the 
+	device can not use any hardware encryption module, because it is
+	not activated, or it is not present on the device."
+	::= {oacIPSecNotifications 7}
+
+oacISAKMPBadProposal NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP bad proposal notification signifies that the device 
+	did not validate proposal for IPSec phase 1 with a remote peer."
+	::= {oacIsakmpNotifications 1}
+
+oacISAKMPNoResponse  NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP No Response notification signifies that the device
+	was exchanging ISAKMP information with a remote ISAKMP peer, 
+	and the peer did not give any answer to the device."
+	::= {oacIsakmpNotifications 2}
+
+oacISAKMPConnectionEstablished  NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP Connection established notification signifies 
+	that the device established an ISAKMP connection with 
+	a remote ISAKMP device."
+	::= {oacIsakmpNotifications 3}
+
+oacISAKMPConnectionRemoved  NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP Connection removed notification signifies 
+	that the device removed an ISAKMP connection with 
+	a remote ISAKMP device, because the lifetime of the connection
+	reached the limit, or a reset has been carried out on the device, 
+	either by using clear crypto isakmp sa, or by shutting down the 
+	IPSec working interface."
+	::= {oacIsakmpNotifications 4}
+
+oacISAMPIPSecConnectionEstablished  NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP IPSec Connection established notification signifies that
+	the ISAKMP daemon of the device successfully created an IPSec tunnel between
+	 two ISAKMP peers." 
+	::= {oacIsakmpNotifications 5}
+
+oacISAKMPIPSecConnectionRemoved  NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP IPSec Connection removed notification signifies that
+	the ISAKMP daemon of the device removed an IPSec connection, either because 
+	the lifetime of the IPSec session reached the limit, or because
+	a reset has been carried out on the IPSec working interface of
+	the device."
+	::= {oacIsakmpNotifications 6}
+
+oacISAKMPUnknownPeer NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP unknown peer notification signifies that the device
+	received an unknown isakmp request and did not process it."
+	::= {oacIsakmpNotifications 7}
+
+oacISAKMPNotificationMsgReceived NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP notification message received notification signifies
+	that the device received a notification from a known ISAKMP peer."
+	::= {oacIsakmpNotifications 8}
+
+oacISAKMPNotificationMsgSent NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP notification message sent notification signifies
+	that the device sent a notification to a known ISAKMP peer.
+	Generally, a sent notification is due to a problem on the 
+	ISAKMP connection between two ISAKMP peers. For example,
+	if received packet is malformed, a notification message is 
+	sent."
+	::= {oacIsakmpNotifications 9}
+
+oacISAKMPDeadPeerDetected NOTIFICATION-TYPE
+	STATUS current
+	DESCRIPTION
+	"An ISAKMP Dead Peer detection signifies that the device 
+	detected a DPD when using ISAKMP keepalive."
+	::= {oacIsakmpNotifications 10}
+
+
+END
+--

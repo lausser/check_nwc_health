@@ -1,0 +1,1701 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.6R008_E019
+--
+--          Creation date : 18/09/2003
+--          jitter table added 26/01/2004
+--
+--          Add of oacRttAppl : 29/03/2004
+--
+--          Change DESCRIPTION for oacRttControlTimeout : 20/04/2004
+--
+--          Add  description for objects  30/03/06
+--
+
+OneAccess-RoundTripTime-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+  MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE,
+  Integer32, Counter32, Gauge32, TimeTicks
+    FROM SNMPv2-SMI
+
+  MODULE-COMPLIANCE, OBJECT-GROUP
+    FROM SNMPv2-CONF
+
+  DisplayString,
+  TruthValue,
+  RowStatus,
+  TimeInterval,
+  TimeStamp,
+  TEXTUAL-CONVENTION
+    FROM SNMPv2-TC
+
+  OwnerString
+    FROM IF-MIB
+
+    oacMIBModules, oacExpIMManagement
+        FROM ONEACCESS-GLOBAL-REG
+    InetAddressType, InetAddress
+        FROM INET-ADDRESS-MIB;           -- RFC2851
+
+
+oacRttChkMIB MODULE-IDENTITY
+  LAST-UPDATED "200309150000Z"
+  ORGANIZATION "ONE ACCESS"
+  CONTACT-INFO
+      "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+  DESCRIPTION
+       "This MIB module describes a MIB for watching a
+       list of hosts using different protocols for Round
+       Trip Time(RTT)"
+
+  ::= { oacExpIMManagement 1223 }
+
+RttResponseSense ::= TEXTUAL-CONVENTION
+  STATUS      current
+  DESCRIPTION
+     "Values for status of the operation."
+  SYNTAX      INTEGER
+  {
+   ok(1),
+   disconnected(2),
+   overThreshold(3),
+   timeout(4),
+   busy(5),
+   notConnected(6),
+   dropped(7),
+   sequenceError(8),
+   verifyError(9),
+   applicationSpecific(10),
+   error(16)
+  }
+
+OacRttRttType ::= TEXTUAL-CONVENTION
+  STATUS       current
+  DESCRIPTION
+    "Describe the type of operation to execute."
+  SYNTAX        INTEGER
+  {
+    echo(1),
+    pathEcho(2)
+    }
+
+
+OacRttProtocol ::= TEXTUAL-CONVENTION
+  STATUS       current
+  DESCRIPTION
+    "Describe the protocol to be used for operation."
+  SYNTAX       INTEGER
+  {
+    notApplicable(1),
+    ipIcmpEcho(2)
+  }
+
+
+OacRttTargetAddress ::= TEXTUAL-CONVENTION
+  STATUS       current
+  DESCRIPTION
+    "Target address"
+  SYNTAX       OCTET STRING
+
+
+oacRttChkObj OBJECT IDENTIFIER ::= { oacRttChkMIB 1 }
+
+oacRttControl    OBJECT IDENTIFIER ::= { oacRttChkObj 1 }
+oacRttHistory OBJECT IDENTIFIER ::= { oacRttChkObj 2 }
+oacRttStats   OBJECT IDENTIFIER ::= { oacRttChkObj 3 }
+oacRttAppl	OBJECT IDENTIFIER ::= { oacRttChkObj 4 }
+
+oacRttApplVersion OBJECT-TYPE
+    SYNTAX DisplayString
+--    Rsyntax OCTET STRING(SIZE(0..255))
+    MAX-ACCESS  read-only
+    STATUS current
+    DESCRIPTION
+        "Version"
+    ::= { oacRttAppl 1 }
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+OacRttApplType ::= INTEGER {
+        echo(1),
+        pathEcho(2),
+        fileIO(3),
+        script(4),
+        udpEcho(5),
+        tcpConnect(6),
+        http(7),
+        dns(8),
+        jitter(9),
+        dlsw(10),
+        dhcp(11),
+        ftp(12)
+        }
+OacRttApplProtocol ::= INTEGER {
+        notApplicable(1),
+        ipIcmpEcho(2),
+        ipUdpEchoAppl(3),
+        snaRUEcho(4),
+        snaLU0EchoAppl(5),
+        snaLU2EchoAppl(6),
+        snaLU62Echo(7),
+        snaLU62EchoAppl(8),
+        appleTalkEcho(9),
+        appleTalkEchoAppl(10),
+        decNetEcho(11),
+        decNetEchoAppl(12),
+        ipxEcho(13),
+        ipxEchoAppl(14),
+        isoClnsEcho(15),
+        isoClnsEchoAppl(16),
+        vinesEcho(17),
+        vinesEchoAppl(18),
+        xnsEcho(19),
+        xnsEchoAppl(20),
+        apolloEcho(21),
+        apolloEchoAppl(22),
+        netbiosEchoAppl(23),
+        ipTcpConn(24),
+        httpAppl(25),
+        dnsAppl(26),
+        jitterAppl(27),
+        dlswAppl(28),
+        dhcpAppl(29),
+        ftpAppl(30)
+        }
+
+oacRttApplSuppRttTypesTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF OacRttApplSuppRttTypesEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "A table of which contains the supported Rtt
+        Monitor Types."
+    ::= { oacRttAppl 2 }
+
+oacRttApplSuppRttTypesEntry OBJECT-TYPE
+    SYNTAX OacRttApplSuppRttTypesEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "Define valid Rtt Monitor types."
+    INDEX { oacRttApplSuppRttTypes }
+    ::= { oacRttApplSuppRttTypesTable 1 }
+
+OacRttApplSuppRttTypesEntry ::= SEQUENCE {
+    oacRttApplSuppRttTypes OacRttApplType,
+    oacRttApplSuppRttTypesValid TruthValue
+    }
+
+oacRttApplSuppRttTypes OBJECT-TYPE
+    SYNTAX OacRttApplType
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "This object indexes the supported
+        'RttType' types."
+    ::= { oacRttApplSuppRttTypesEntry 1 }
+
+oacRttApplSuppRttTypesValid OBJECT-TYPE
+    SYNTAX TruthValue
+--    INTEGER {
+--        true(1),
+--        false(2)
+--        }
+    MAX-ACCESS read-only
+    STATUS current
+    DESCRIPTION
+        "This object defines the supported
+        'RttMonRttType' types."
+    ::= { oacRttApplSuppRttTypesEntry 2 }
+
+oacRttApplSuppProtocolsTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF OacRttApplSuppProtocolsEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "A table of which contains the supported Rtt
+        Monitor Protocols."
+    ::= { oacRttAppl 3 }
+
+oacRttApplSuppProtocolsEntry OBJECT-TYPE
+    SYNTAX OacRttApplSuppProtocolsEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "A list that presents the valid Rtt Monitor
+        Protocols."
+    INDEX { oacRttApplSuppProtocols }
+    ::= { oacRttApplSuppProtocolsTable 1 }
+
+OacRttApplSuppProtocolsEntry ::= SEQUENCE {
+    oacRttApplSuppProtocols OacRttApplProtocol ,
+    oacRttApplSuppProtocolsValid TruthValue
+    }
+
+oacRttApplSuppProtocols OBJECT-TYPE
+    SYNTAX OacRttApplProtocol
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "This object indexes the supported
+        'oacRttProtocol' protocols."
+    ::= { oacRttApplSuppProtocolsEntry 1 }
+
+oacRttApplSuppProtocolsValid OBJECT-TYPE
+    SYNTAX TruthValue
+--   INTEGER {
+--        true(1),
+--        false(2)
+--        }
+    MAX-ACCESS read-only
+    STATUS current
+    DESCRIPTION
+        "This object defines the supported
+        'oacRttProtocol' protocols."
+    ::= { oacRttApplSuppProtocolsEntry 2 }
+
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+
+
+
+oacRttControlTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttControlEntry
+  MAX-ACCESS   not-accessible
+  STATUS       current
+  DESCRIPTION
+    "Definitions for RTT operations."
+  ::= { oacRttControl 1 }
+
+
+oacRttControlEntry OBJECT-TYPE
+  SYNTAX      OacRttControlEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "List of objetcts defining a conceptual RTT operation."
+  INDEX { oacRttControlIndex }
+  ::= { oacRttControlTable 1 }
+
+OacRttControlEntry ::= SEQUENCE
+{
+  oacRttControlIndex               Integer32,
+  oacRttControlStatus              RowStatus,
+  oacRttControlTag                 DisplayString,
+  oacRttControlFrequency           Integer32,
+  oacRttControlRttType             OacRttRttType,
+  oacRttControlTimeout             Integer32,
+  oacRttControlOwner               OwnerString,
+  oacRttControlThreshold           Integer32
+
+}
+
+
+oacRttControlIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Identifies a RTT row in oacRttControlTable."
+  ::= { oacRttControlEntry 1 }
+
+
+oacRttControlStatus OBJECT-TYPE
+  SYNTAX      RowStatus
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "The status of the RTT row."
+  ::= { oacRttControlEntry 2 }
+
+
+oacRttControlTag OBJECT-TYPE
+  SYNTAX      DisplayString (SIZE (0..16))
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "String used only by application for identify the row."
+  DEFVAL      { "" }
+  ::= { oacRttControlEntry 3 }
+
+
+oacRttControlFrequency OBJECT-TYPE
+  SYNTAX      Integer32 (0..604800)
+  UNITS       "seconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Define frequency in seconds of RTT operations."
+  DEFVAL      { 60 }
+  ::= { oacRttControlEntry 4 }
+
+
+oacRttControlRttType OBJECT-TYPE
+  SYNTAX      OacRttRttType
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Define type of RTT operation."
+  DEFVAL      { echo }
+  ::= { oacRttControlEntry 5 }
+
+
+oacRttControlTimeout OBJECT-TYPE
+  SYNTAX      Integer32 (0..604800000)
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Defines the timeout for an operation. It must be
+    set to a smaller value then oacRttControlFrequency*1000"
+  DEFVAL      { 5000 }
+  ::= { oacRttControlEntry 6 }
+
+
+oacRttControlOwner OBJECT-TYPE
+  SYNTAX      OwnerString
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+      "Identifies the creator of the row."
+  DEFVAL     { "" }
+  ::= { oacRttControlEntry 7 }
+
+
+oacRttControlThreshold OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Define threshold limit."
+  DEFVAL      { 5000 }
+  ::= { oacRttControlEntry 8 }
+
+
+
+oacRttEchoTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttEchoEntry
+  MAX-ACCESS   not-accessible
+  STATUS       current
+  DESCRIPTION
+    "A table with definitions for an RTT entry."
+  ::= { oacRttControl 2 }
+
+oacRttEchoEntry OBJECT-TYPE
+  SYNTAX      OacRttEchoEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "List of objects for RTT entry configuration."
+  INDEX { oacRttControlIndex }
+  ::= { oacRttEchoTable 1 }
+
+
+OacRttEchoEntry ::= SEQUENCE
+{
+  oacRttEchoSourceAddress       OacRttTargetAddress,
+  oacRttEchoTargetAddress       OacRttTargetAddress,
+  oacRttEchoPktDataRequestSize  Integer32,
+  oacRttEchoPktDataResponseSize Integer32,
+  oacRttEchoTOS                 Integer32,
+  oacRttEchoProtocol            OacRttProtocol
+}
+
+oacRttEchoSourceAddress       OBJECT-TYPE
+  SYNTAX      OacRttTargetAddress
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Source address to use when sending probes."
+  DEFVAL      { "" }
+  ::= { oacRttEchoEntry 1 }
+
+
+oacRttEchoTargetAddress OBJECT-TYPE
+  SYNTAX      OacRttTargetAddress
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies the IP address of the target."
+  DEFVAL      { "" }
+  ::= { oacRttEchoEntry 2 }
+
+
+oacRttEchoPktDataRequestSize OBJECT-TYPE
+  SYNTAX      Integer32 (0..16384)
+  UNITS       "octets"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies the size of the packet to send."
+  DEFVAL      { 1 }
+  ::= { oacRttEchoEntry 3 }
+
+
+oacRttEchoPktDataResponseSize OBJECT-TYPE
+  SYNTAX      Integer32 (0..16384)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies the size of the packet to receive."
+  DEFVAL      { 0 }
+  ::= { oacRttEchoEntry 4 }
+
+
+oacRttEchoTOS                 OBJECT-TYPE
+  SYNTAX      Integer32 (0..255)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "This object represents the type of service in an IP header."
+  DEFVAL      { 0 }
+  ::= { oacRttEchoEntry 5 }
+
+
+oacRttEchoProtocol OBJECT-TYPE
+  SYNTAX      OacRttProtocol
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Protocol type to use for the probes."
+  DEFVAL      { notApplicable }
+  ::= { oacRttEchoEntry 6 }
+
+
+oacRttHistoryTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttHistoryEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Definitions for history chcking for an RTT entry."
+  ::= { oacRttControl 3 }
+
+
+oacRttHistoryEntry OBJECT-TYPE
+  SYNTAX      OacRttHistoryEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "List of definitions for hisotry collections."
+    AUGMENTS { oacRttControlEntry }
+  ::= { oacRttHistoryTable 1 }
+
+
+OacRttHistoryEntry ::= SEQUENCE
+{
+  oacRttHistoryNumBuckets     Integer32,
+  oacRttHistoryFilter         INTEGER,
+  oacRttHistoryNumLives       Integer32,
+  oacRttHistoryNumSamples     Integer32
+}
+
+
+oacRttHistoryNumBuckets OBJECT-TYPE
+  SYNTAX      Integer32 (1..60)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "MAximum buckets to record."
+    DEFVAL      { 15 }
+  ::= { oacRttHistoryEntry 1 }
+
+
+oacRttHistoryFilter OBJECT-TYPE
+  SYNTAX      INTEGER
+  {
+    none(1),
+    all(2),
+    overThreshold(3),
+    failures(4)
+  }
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Define filters for history recording."
+  DEFVAL      { none }
+  ::= { oacRttHistoryEntry 2 }
+
+oacRttHistoryNumLives OBJECT-TYPE
+  SYNTAX      Integer32 (0..2)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Define number of lives for history recording."
+    DEFVAL      { 0 }
+  ::= { oacRttHistoryEntry 3 }
+
+
+oacRttHistoryNumSamples OBJECT-TYPE
+  SYNTAX      Integer32 (1..30)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "The number of samples to record for one bucket."
+  DEFVAL      { 16 }
+  ::= { oacRttHistoryEntry 4 }
+
+
+oacRttSchedTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttSchedEntry
+  MAX-ACCESS   not-accessible
+  STATUS       current
+  DESCRIPTION   "Probe scheduling table."
+  ::= { oacRttControl 4 }
+
+
+oacRttSchedEntry OBJECT-TYPE
+  SYNTAX      OacRttSchedEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Probe scheduling entry in the scheduling table."
+  AUGMENTS { oacRttControlEntry }
+  ::= { oacRttSchedTable 1 }
+
+
+OacRttSchedEntry ::= SEQUENCE
+{
+  oacRttSchedRttStartTime        TimeTicks,
+  oacRttSchedRttLife             Integer32,
+  oacRttSchedConceptRowAgeout    Integer32
+}
+
+oacRttSchedRttStartTime OBJECT-TYPE
+  SYNTAX      TimeTicks
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies when to start the probe."
+  DEFVAL      { 0 }
+  ::= { oacRttSchedEntry 1 }
+
+
+oacRttSchedRttLife OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  UNITS       "seconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies for how long the probe will remain active."
+  DEFVAL      { 3600 }
+  ::= { oacRttSchedEntry 2 }
+
+
+oacRttSchedConceptRowAgeout OBJECT-TYPE
+  SYNTAX      Integer32 (0..2073600)
+  UNITS       "seconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    ""
+  DEFVAL     { 3600 }
+  ::= { oacRttSchedEntry 3 }
+
+
+
+oacRttReactTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttReactEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Probe reaction table."
+  ::= { oacRttControl 5 }
+
+
+oacRttReactEntry OBJECT-TYPE
+  SYNTAX      OacRttReactEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Probe reaction entry in the table."
+  AUGMENTS { oacRttControlEntry }
+  ::= { oacRttReactTable 1 }
+
+
+OacRttReactEntry ::= SEQUENCE
+{
+  oacRttReactActionType          INTEGER,
+  oacRttReactThresholdType       INTEGER,
+  oacRttReactThresholdCount      Integer32,
+  oacRttReactThresholdCount2     Integer32,
+  oacRttReactConnectionEnable    TruthValue,
+  oacRttReactVerifyErrorEnable   TruthValue,
+  oacRttReactThresholdFalling    Integer32,
+  oacRttReactTimeoutEnable       TruthValue
+}
+
+
+oacRttReactActionType OBJECT-TYPE
+  SYNTAX      INTEGER
+  {
+    none(1),
+    trapOnly(2),
+    nmvtOnly(3),
+    triggerOnly(4),
+    trapAndNmvt(5),
+    trapAndTrigger(6),
+    nmvtAndTrigger(7),
+    trapNmvtAndTrigger(8)
+  }
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies the trigger as reaction."
+
+  DEFVAL      { none }
+  ::= { oacRttReactEntry 1 }
+
+
+oacRttReactThresholdType OBJECT-TYPE
+  SYNTAX      INTEGER
+  {
+    never(1),
+    immediate(2),
+    consecutive(3),
+    xOfy(4),
+    average(5)
+  }
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies the threshold type for reaction."
+  DEFVAL      { never }
+  ::= { oacRttReactEntry 2 }
+
+
+oacRttReactThresholdCount OBJECT-TYPE
+  SYNTAX      Integer32 (1..16)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies the threshold count for reaction."
+
+  DEFVAL      { 5 }
+  ::= { oacRttReactEntry 3 }
+
+
+oacRttReactThresholdCount2 OBJECT-TYPE
+  SYNTAX      Integer32 (1..16)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies the threshold count for reaction."
+  DEFVAL      { 5 }
+  ::= { oacRttReactEntry 4 }
+
+
+oacRttReactConnectionEnable OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies if the connection is enabled for reaction."
+  DEFVAL     { false }
+  ::= { oacRttReactEntry 5 }
+
+
+oacRttReactVerifyErrorEnable OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION
+    "Specifies if the error verification is enabled for reaction."
+  DEFVAL      { false }
+  ::= { oacRttReactEntry 6 }
+
+
+oacRttReactThresholdFalling OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies the threshold falling for reaction."
+  DEFVAL     { 3000 }
+  ::= { oacRttReactEntry 7 }
+
+
+oacRttReactTimeoutEnable OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Specifies if the timeout is enabled for reaction."
+  DEFVAL      { false }
+  ::= { oacRttReactEntry 8 }
+
+
+
+oacRttStatisticsTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttStatisticsEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "RTT statistics table."
+  ::= { oacRttControl 6 }
+
+oacRttStatisticsEntry OBJECT-TYPE
+  SYNTAX      OacRttStatisticsEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "RTT statistics table entry."
+  AUGMENTS { oacRttControlEntry }
+  ::= { oacRttStatisticsTable 1 }
+
+
+OacRttStatisticsEntry ::= SEQUENCE
+{
+  oacRttStatisticsNumDistBuckets    Integer32,
+  oacRttStatisticsNumHops           Integer32,
+  oacRttStatisticsNumPaths          Integer32,
+  oacRttStatisticsDistInterval      Integer32,
+  oacRttStatisticsNumHourGroups     Integer32
+}
+
+oacRttStatisticsNumDistBuckets OBJECT-TYPE
+  SYNTAX      Integer32 (1..20)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Number of distibution buckets."
+    DEFVAL      { 1 }
+  ::= { oacRttStatisticsEntry 1 }
+
+
+oacRttStatisticsNumHops OBJECT-TYPE
+  SYNTAX      Integer32 (1..30)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION      "Number of hops."
+  DEFVAL      { 16 }
+  ::= { oacRttStatisticsEntry 2 }
+
+
+oacRttStatisticsNumPaths OBJECT-TYPE
+  SYNTAX      Integer32 (1..128)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Number of paths."
+  DEFVAL      { 5 }
+  ::= { oacRttStatisticsEntry 3 }
+
+
+oacRttStatisticsDistInterval OBJECT-TYPE
+  SYNTAX      Integer32 (1..100)
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Distribution interval."
+    DEFVAL      { 20 }
+  ::= { oacRttStatisticsEntry 4 }
+
+
+oacRttStatisticsNumHourGroups OBJECT-TYPE
+  SYNTAX      Integer32 (0..25)
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Number of hour groups."
+  DEFVAL      { 2 }
+  ::= { oacRttStatisticsEntry 5 }
+
+
+
+oacRttControlOperTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttControlOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "A table with values for a RTT entry."
+  ::= { oacRttControl 7 }
+
+
+oacRttControlOperEntry OBJECT-TYPE
+  SYNTAX      OacRttControlOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "RTT entry."
+  AUGMENTS { oacRttControlEntry }
+  ::= { oacRttControlOperTable 1 }
+
+
+OacRttControlOperEntry ::= SEQUENCE
+{
+  oacRttControlOperNumRtts                   Integer32,
+  oacRttControlOperOctetsInUse               Gauge32,
+  oacRttControlOperDiagText                  DisplayString,
+  oacRttControlOperOverThresholdOccurred     TruthValue,
+  oacRttControlOperState                     INTEGER,
+  oacRttControlOperTimeoutOccurred           TruthValue,
+  oacRttControlOperRttLife                   Integer32,
+  oacRttControlOperModificationTime          TimeStamp,
+  oacRttControlOperConnLostOccurred          TruthValue,
+  oacRttControlOperResetTime                 TimeStamp
+}
+
+
+oacRttControlOperNumRtts OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "The number of probe total initialisation."
+  ::= { oacRttControlOperEntry 1 }
+
+
+oacRttControlOperOctetsInUse OBJECT-TYPE
+  SYNTAX      Gauge32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Octets in use by the entry."
+  ::= { oacRttControlOperEntry 2 }
+
+
+oacRttControlOperDiagText OBJECT-TYPE
+  SYNTAX      DisplayString (SIZE(0..51))
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    ""
+  DEFVAL      { "" }
+  ::= { oacRttControlOperEntry 3 }
+
+
+oacRttControlOperOverThresholdOccurred OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Specifies if threshold occured."
+  DEFVAL      { false }
+  ::= { oacRttControlOperEntry 4 }
+
+
+oacRttControlOperState OBJECT-TYPE
+  SYNTAX      INTEGER
+  {
+    reset(1),
+    orderlyStop(2),
+    immediateStop(3),
+    pending(4),
+    inactive(5),
+    active(6),
+    restart(7)
+  }
+  MAX-ACCESS  read-write
+  STATUS      current
+  DESCRIPTION    "Operations state of the RTT entry."
+  ::= { oacRttControlOperEntry 5 }
+
+
+oacRttControlOperTimeoutOccurred OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "True if a timeout occured."
+  DEFVAL      { false }
+  ::= { oacRttControlOperEntry 6 }
+
+
+oacRttControlOperRttLife OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  UNITS       "seconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "A value witch is decremented on every seconds.
+                  When it reaches zero, the RTT entry is suspended."
+  ::= { oacRttControlOperEntry 7 }
+
+
+oacRttControlOperModificationTime OBJECT-TYPE
+  SYNTAX      TimeStamp
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    ""
+  ::= { oacRttControlOperEntry 8 }
+
+
+oacRttControlOperConnLostOccurred OBJECT-TYPE
+  SYNTAX      TruthValue
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Connection loss occured."
+  DEFVAL      { false }
+  ::= { oacRttControlOperEntry 9 }
+
+
+oacRttControlOperResetTime OBJECT-TYPE
+  SYNTAX      TimeStamp
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Reset time."
+  ::= { oacRttControlOperEntry 10 }
+
+
+
+oacRttReactTriggerTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttReactTriggerEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Table witch defines witch entries became active
+                  when a problem is detected."
+  ::= { oacRttControl 8 }
+
+
+oacRttReactTriggerEntry OBJECT-TYPE
+  SYNTAX      OacRttReactTriggerEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Reaction trigger entry."
+  INDEX { oacRttControlIndex,
+          oacRttReactTriggerOacRttControlIndex }
+  ::= { oacRttReactTriggerTable 1 }
+
+
+OacRttReactTriggerEntry ::= SEQUENCE
+{
+  oacRttReactTriggerOacRttControlIndex   Integer32,
+  oacRttReactTriggerStatus                 RowStatus
+}
+
+oacRttReactTriggerOacRttControlIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Reaction trigger control index."
+  ::= { oacRttReactTriggerEntry 1 }
+
+oacRttReactTriggerStatus OBJECT-TYPE
+  SYNTAX      RowStatus
+  MAX-ACCESS  read-create
+  STATUS      current
+  DESCRIPTION    "Used to create a trigger."
+  DEFVAL      { createAndGo }
+  ::= { oacRttReactTriggerEntry 2 }
+
+
+
+oacRttReactTriggerOperTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttReactTriggerOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Reaction trigger operation table."
+  ::= { oacRttControl 9 }
+
+
+oacRttReactTriggerOperEntry OBJECT-TYPE
+  SYNTAX      OacRttReactTriggerOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Reaction trigger operation table entry."
+  AUGMENTS { oacRttReactTriggerEntry }
+  ::= { oacRttReactTriggerOperTable 1 }
+
+
+OacRttReactTriggerOperEntry ::= SEQUENCE
+{
+  oacRttReactTriggerOperState   INTEGER
+}
+
+oacRttReactTriggerOperState OBJECT-TYPE
+  SYNTAX      INTEGER
+  {
+    active(1),
+    pending(2)
+  }
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Trigger state."
+  ::= { oacRttReactTriggerOperEntry 1 }
+
+
+
+oacRttLatestRttOperTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttLatestRttOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Table with values for the latest RTT operation."
+  ::= { oacRttControl 10 }
+
+
+oacRttLatestRttOperEntry OBJECT-TYPE
+  SYNTAX      OacRttLatestRttOperEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Operation entry."
+  AUGMENTS { oacRttControlEntry }
+  ::= { oacRttLatestRttOperTable 1 }
+
+
+OacRttLatestRttOperEntry ::= SEQUENCE
+{
+  oacRttLatestRttOperTime               TimeStamp,
+  oacRttLatestRttOperSense              RttResponseSense,
+  oacRttLatestRttOperSenseDescription   DisplayString,
+  oacRttLatestRttOperAddress            OacRttTargetAddress,
+  oacRttLatestRttOperCompletionTime     Gauge32,
+  oacRttLatestRttOperApplSpecificSense  Integer32
+}
+
+
+oacRttLatestRttOperTime OBJECT-TYPE
+  SYNTAX      TimeStamp
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "The system time when the latest operation occured."
+  ::= { oacRttLatestRttOperEntry 1 }
+
+
+oacRttLatestRttOperSense OBJECT-TYPE
+  SYNTAX      RttResponseSense
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Operation time."
+  ::= { oacRttLatestRttOperEntry 2 }
+
+
+oacRttLatestRttOperSenseDescription OBJECT-TYPE
+  SYNTAX      DisplayString
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Operation sense description."
+  ::= { oacRttLatestRttOperEntry 3 }
+
+
+oacRttLatestRttOperAddress OBJECT-TYPE
+  SYNTAX      OacRttTargetAddress
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "The address of the target."
+  ::= { oacRttLatestRttOperEntry 4 }
+
+
+oacRttLatestRttOperCompletionTime OBJECT-TYPE
+  SYNTAX      Gauge32
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Operation completion time."
+  ::= { oacRttLatestRttOperEntry 5 }
+
+
+oacRttLatestRttOperApplSpecificSense OBJECT-TYPE
+  SYNTAX      Integer32 (1001..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Operation application specific sense."
+  ::= { oacRttLatestRttOperEntry 6 }
+
+
+
+
+oacRttHistoryCollectionTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttHistoryCollectionEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "The table with collected history information."
+  ::= { oacRttHistory 1 }
+
+
+oacRttHistoryCollectionEntry OBJECT-TYPE
+  SYNTAX      OacRttHistoryCollectionEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "History collection entry."
+  INDEX { oacRttControlIndex,
+          oacRttHistoryCollectionLifeIndex,
+          oacRttHistoryCollectionBucketIndex,
+          oacRttHistoryCollectionSampleIndex
+        }
+  ::= { oacRttHistoryCollectionTable 1 }
+
+
+OacRttHistoryCollectionEntry ::= SEQUENCE
+{
+  oacRttHistoryCollectionLifeIndex         Integer32,
+  oacRttHistoryCollectionBucketIndex       Integer32,
+  oacRttHistoryCollectionSampleIndex       Integer32,
+  oacRttHistoryCollectionApplSpecificSense Integer32,
+  oacRttHistoryCollectionAddress           OacRttTargetAddress,
+  oacRttHistoryCollectionSampleTime        TimeStamp,
+  oacRttHistoryCollectionSense             RttResponseSense,
+  oacRttHistoryCollectionSenseDescription  DisplayString,
+  oacRttHistoryCollectionCompletionTime    Gauge32
+}
+
+
+oacRttHistoryCollectionLifeIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "History collection life index."
+  ::= { oacRttHistoryCollectionEntry 1 }
+
+
+oacRttHistoryCollectionBucketIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "History collection bucket index."
+  ::= { oacRttHistoryCollectionEntry 2 }
+
+
+oacRttHistoryCollectionSampleIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..512)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "History collection sample index."
+  ::= { oacRttHistoryCollectionEntry 3 }
+
+
+oacRttHistoryCollectionApplSpecificSense OBJECT-TYPE
+  SYNTAX      Integer32 (1001..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection application specific sense."
+  ::= { oacRttHistoryCollectionEntry 4 }
+
+
+oacRttHistoryCollectionAddress OBJECT-TYPE
+  SYNTAX      OacRttTargetAddress
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection address."
+  ::= { oacRttHistoryCollectionEntry 5 }
+
+
+oacRttHistoryCollectionSampleTime OBJECT-TYPE
+  SYNTAX      TimeStamp
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection sample time."
+  ::= { oacRttHistoryCollectionEntry 6 }
+
+
+oacRttHistoryCollectionSense OBJECT-TYPE
+  SYNTAX      RttResponseSense
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection sense."
+  ::= { oacRttHistoryCollectionEntry 7 }
+
+
+oacRttHistoryCollectionSenseDescription OBJECT-TYPE
+  SYNTAX      DisplayString
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection sense description."
+  ::= { oacRttHistoryCollectionEntry 8 }
+
+
+oacRttHistoryCollectionCompletionTime OBJECT-TYPE
+  SYNTAX      Gauge32
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "History collection completion time."
+  ::= { oacRttHistoryCollectionEntry 9 }
+
+oacRttStatsCollectTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttStatsCollectEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Table for collected statistical information."
+  ::= { oacRttStats 1 }
+
+
+oacRttStatsCollectEntry OBJECT-TYPE
+  SYNTAX      OacRttStatsCollectEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Statistics collection entry."
+  INDEX { oacRttControlIndex,
+          oacRttStatsCaptureStartTimeIndex,
+          oacRttStatsCapturePathIndex,
+          oacRttStatsCaptureHopIndex
+        }
+  ::= { oacRttStatsCollectTable 1 }
+
+
+OacRttStatsCollectEntry  ::= SEQUENCE
+{
+  oacRttStatsCollectAddress          OacRttTargetAddress,
+  oacRttStatsCollectNoConnections    Integer32,
+  oacRttStatsCollectBusies           Integer32,
+  oacRttStatsCollectTimeouts         Integer32,
+  oacRttStatsCollectSequenceErrors   Integer32,
+  oacRttStatsCollectNumDisconnects   Integer32,
+  oacRttStatsCollectVerifyErrors     Integer32,
+  oacRttStatsCollectDrops            Integer32
+}
+
+
+oacRttStatsCollectAddress OBJECT-TYPE
+  SYNTAX      OacRttTargetAddress
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Collection address."
+  ::= { oacRttStatsCollectEntry 1 }
+
+
+oacRttStatsCollectNoConnections OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many times the connection cannot be etabilished."
+  ::= { oacRttStatsCollectEntry 2 }
+
+
+oacRttStatsCollectBusies OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many times the connection status was busy."
+  ::= { oacRttStatsCollectEntry 3 }
+
+
+oacRttStatsCollectTimeouts OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many timeouts."
+  ::= { oacRttStatsCollectEntry 4 }
+
+
+oacRttStatsCollectSequenceErrors OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many sequence errors."
+  ::= { oacRttStatsCollectEntry 5 }
+
+
+oacRttStatsCollectNumDisconnects OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many times the connection was disconnected."
+  ::= { oacRttStatsCollectEntry 6 }
+
+
+oacRttStatsCollectVerifyErrors OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many verify errors."
+  ::= { oacRttStatsCollectEntry 7 }
+
+
+oacRttStatsCollectDrops OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "How many drops."
+  ::= { oacRttStatsCollectEntry 8 }
+
+
+
+oacRttStatsCaptureTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttStatsCaptureEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Statistics capture table."
+  ::= { oacRttStats 2 }
+
+
+oacRttStatsCaptureEntry OBJECT-TYPE
+  SYNTAX      OacRttStatsCaptureEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Statistics capture table entry."
+  INDEX { oacRttControlIndex,
+          oacRttStatsCaptureStartTimeIndex,
+          oacRttStatsCapturePathIndex,
+          oacRttStatsCaptureHopIndex,
+          oacRttStatsCaptureDistIndex
+        }
+  ::= { oacRttStatsCaptureTable 1 }
+
+
+OacRttStatsCaptureEntry  ::= SEQUENCE
+{
+  oacRttStatsCaptureStartTimeIndex           TimeStamp,
+  oacRttStatsCapturePathIndex                Integer32,
+  oacRttStatsCaptureHopIndex                 Integer32,
+  oacRttStatsCaptureDistIndex                Integer32,
+  oacRttStatsCaptureSumCompletionTime        Gauge32,
+  oacRttStatsCaptureSumCompletionTime2Low    Gauge32,
+  oacRttStatsCaptureSumCompletionTime2High   Gauge32,
+  oacRttStatsCaptureCompletionTimeMin        Gauge32,
+  oacRttStatsCaptureCompletionTimeMax        Gauge32,
+  oacRttStatsCaptureOverThresholds           Integer32,
+  oacRttStatsCaptureCompletions              Integer32
+}
+
+
+oacRttStatsCaptureStartTimeIndex OBJECT-TYPE
+  SYNTAX      TimeStamp
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Capture start time index."
+  ::= { oacRttStatsCaptureEntry 1 }
+
+
+oacRttStatsCapturePathIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..128)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Capture path index."
+  ::= { oacRttStatsCaptureEntry 2 }
+
+
+oacRttStatsCaptureHopIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..30)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Capture hop index."
+  ::= { oacRttStatsCaptureEntry 3 }
+
+
+oacRttStatsCaptureDistIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..20)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Identifies buckets for a hop."
+  ::= { oacRttStatsCaptureEntry 4 }
+
+
+oacRttStatsCaptureSumCompletionTime OBJECT-TYPE
+  SYNTAX      Gauge32
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Capture sum completion time."
+  ::= { oacRttStatsCaptureEntry 5 }
+
+
+oacRttStatsCaptureSumCompletionTime2Low OBJECT-TYPE
+  SYNTAX      Gauge32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Low part of the accumulated squares of completion times."
+  ::= { oacRttStatsCaptureEntry 6 }
+
+
+oacRttStatsCaptureSumCompletionTime2High OBJECT-TYPE
+  SYNTAX      Gauge32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "High part of the accumulated squares of completion times."
+  ::= { oacRttStatsCaptureEntry 7 }
+
+
+oacRttStatsCaptureCompletionTimeMin OBJECT-TYPE
+  SYNTAX      Gauge32
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Minimum completion time."
+  ::= { oacRttStatsCaptureEntry 8 }
+
+
+oacRttStatsCaptureCompletionTimeMax OBJECT-TYPE
+  SYNTAX      Gauge32
+  UNITS       "milliseconds"
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Maximum completion time."
+  ::= { oacRttStatsCaptureEntry 9 }
+
+oacRttStatsCaptureOverThresholds OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Capture over tresholds."
+  ::= { oacRttStatsCaptureEntry 10 }
+
+
+oacRttStatsCaptureCompletions OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Number of completed RTT probes."
+  ::= { oacRttStatsCaptureEntry 11 }
+
+
+
+oacRttStatsTotalsTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttStatsTotalsEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Totals table."
+  ::= { oacRttStats 3 }
+
+
+oacRttStatsTotalsEntry OBJECT-TYPE
+  SYNTAX      OacRttStatsTotalsEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Totals table entry."
+  INDEX { oacRttControlIndex,
+          oacRttStatsCaptureStartTimeIndex
+        }
+  ::= { oacRttStatsTotalsTable 1 }
+
+
+OacRttStatsTotalsEntry  ::= SEQUENCE
+{
+  oacRttStatsTotalsInitiations       Integer32,
+  oacRttStatsTotalsElapsedTime       TimeInterval
+
+}
+
+
+oacRttStatsTotalsInitiations OBJECT-TYPE
+  SYNTAX      Integer32 (0..2147483647)
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Totals initiations."
+  ::= { oacRttStatsTotalsEntry 1 }
+
+
+oacRttStatsTotalsElapsedTime OBJECT-TYPE
+  SYNTAX      TimeInterval
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION
+    "Totals elapsed time."
+  ::= { oacRttStatsTotalsEntry 2 }
+
+
+-- bodhi's jitter table
+oacRttStatsJitterHopTable OBJECT-TYPE
+  SYNTAX SEQUENCE OF OacRttStatsJitterHopEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Jitter HOP table."
+  ::= { oacRttStats 4 }
+
+
+oacRttStatsJitterHopEntry OBJECT-TYPE
+  SYNTAX      OacRttStatsJitterHopEntry
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION    "Jitter HOP table entry."
+  INDEX { oacRttControlIndex,
+          oacRttStatsJitterPathIndex,
+          oacRttStatsJitterHopIndex
+        }
+  ::= { oacRttStatsJitterHopTable 1 }
+
+
+OacRttStatsJitterHopEntry  ::= SEQUENCE
+{
+	oacRttStatsJitterPathIndex		Integer32,
+        oacRttStatsJitterHopIndex		Integer32,
+        oacRttStatsJitterHopIpAddress		InetAddress,
+        oacRttStatsJitterHopRTT 		Integer32,
+        oacRttStatsJitterHopPacketLoss		Integer32,
+        oacRttStatsJitterHopJitter		Integer32,
+        oacRttStatsJitterHopMinRTT		Integer32,
+        oacRttStatsJitterHopMaxRTT		Integer32,
+        oacRttStatsJitterHopSumRTT		Integer32,
+        oacRttStatsJitterHopSum2RTT		Integer32,
+        oacRttStatsJitterHopMinPosJitter	Integer32,
+        oacRttStatsJitterHopMaxPosJitter	Integer32,
+        oacRttStatsJitterHopSumPos		Integer32,
+        oacRttStatsJitterHopSum2Pos		Integer32,
+        oacRttStatsJitterHopMinNegJitter	Integer32,
+        oacRttStatsJitterHopMaxNegJitter	Integer32,
+        oacRttStatsJitterHopSumNeg		Integer32,
+        oacRttStatsJitterHopSum2Neg		Integer32,
+        oacRttStatsJitterHopOutOfSequence	Integer32,
+        oacRttStatsJitterHopDiscardedSamples	Integer32
+}
+
+oacRttStatsJitterPathIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Identifies a RTT row in oacRttStatsJitterHopTable along with oacRttStatsJitterHopIndex."
+  ::= { oacRttStatsJitterHopEntry 1 }
+
+oacRttStatsJitterHopIndex OBJECT-TYPE
+  SYNTAX      Integer32 (1..2147483647)
+  MAX-ACCESS  not-accessible
+  STATUS      current
+  DESCRIPTION
+    "Identifies a RTT row in oacRttStatsJitterHopTable along with oacRttStatsJitterPathIndex."
+  ::= { oacRttStatsJitterHopEntry 2 }
+
+oacRttStatsJitterHopIpAddress OBJECT-TYPE
+  SYNTAX      InetAddress
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "IP Address of the Hop."
+  ::= { oacRttStatsJitterHopEntry 3 }
+
+oacRttStatsJitterHopRTT OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "RTT for the Hop."
+  ::= { oacRttStatsJitterHopEntry 4 }
+
+oacRttStatsJitterHopPacketLoss OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Packet loss for the Hop."
+  ::= { oacRttStatsJitterHopEntry 5 }
+
+oacRttStatsJitterHopJitter OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 6 }
+
+oacRttStatsJitterHopMinRTT OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Min RTT for the Hop."
+  ::= { oacRttStatsJitterHopEntry 7 }
+
+oacRttStatsJitterHopMaxRTT OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Max RTT for the Hop."
+  ::= { oacRttStatsJitterHopEntry 8 }
+
+oacRttStatsJitterHopSumRTT OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum RTT for the Hop."
+  ::= { oacRttStatsJitterHopEntry 9 }
+
+oacRttStatsJitterHopSum2RTT OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum2 RTT for the Hop."
+  ::= { oacRttStatsJitterHopEntry 10 }
+
+oacRttStatsJitterHopMinPosJitter OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Min pos jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 11 }
+
+oacRttStatsJitterHopMaxPosJitter OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Max pos jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 12 }
+
+oacRttStatsJitterHopSumPos OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum pos jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 13 }
+
+oacRttStatsJitterHopSum2Pos OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum2 pos jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 14 }
+
+oacRttStatsJitterHopMinNegJitter OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Min neg jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 15 }
+
+oacRttStatsJitterHopMaxNegJitter OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Max neg jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 16 }
+
+oacRttStatsJitterHopSumNeg OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum neg jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 17 }
+
+oacRttStatsJitterHopSum2Neg OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Sum2 neg jitter for the Hop."
+  ::= { oacRttStatsJitterHopEntry 18 }
+
+oacRttStatsJitterHopOutOfSequence OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Out of sequence pkts for the Hop."
+  ::= { oacRttStatsJitterHopEntry 19 }
+
+oacRttStatsJitterHopDiscardedSamples OBJECT-TYPE
+  SYNTAX      Integer32
+  MAX-ACCESS  read-only
+  STATUS      current
+  DESCRIPTION    "Discarded samples for the Hop."
+  ::= { oacRttStatsJitterHopEntry 20 }
+
+
+-- endof bodhi's jitter table
+
+oacRttNotificationsPrefix   OBJECT IDENTIFIER
+                             ::= { oacRttChkMIB 2 }
+oacRttNotifications         OBJECT IDENTIFIER
+                             ::= { oacRttNotificationsPrefix 0 }
+
+oacRttConnectionChangeNotification NOTIFICATION-TYPE
+  OBJECTS   {     oacRttControlTag,
+                  oacRttHistoryCollectionAddress,
+                  oacRttControlOperConnLostOccurred
+            }
+  STATUS    current
+  DESCRIPTION
+           ""
+  ::= { oacRttNotifications 1 }
+
+
+oacRttTimeoutNotification NOTIFICATION-TYPE
+  OBJECTS   {     oacRttControlTag,
+                  oacRttHistoryCollectionAddress,
+                  oacRttControlOperTimeoutOccurred
+            }
+  STATUS    current
+  DESCRIPTION    ""
+  ::= { oacRttNotifications 2 }
+
+
+oacRttThresholdNotification NOTIFICATION-TYPE
+  OBJECTS   {     oacRttControlTag,
+                  oacRttHistoryCollectionAddress,
+                  oacRttControlOperOverThresholdOccurred
+            }
+  STATUS    current
+  DESCRIPTION    ""
+  ::= { oacRttNotifications 3 }
+
+END

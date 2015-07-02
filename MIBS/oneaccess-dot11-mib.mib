@@ -1,0 +1,179 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_V4.2R3E8
+--
+--          Creation date : 06/12/2007 (TF10288)
+--
+--------------------------------------------------------------------
+
+    ONEACCESS-DOT11-MIB DEFINITIONS ::= BEGIN
+
+--------------------------------------------------------------------
+-- Imports
+--------------------------------------------------------------------
+    IMPORTS
+        ifIndex
+            FROM IF-MIB
+        MODULE-IDENTITY, OBJECT-TYPE,Counter32
+            FROM SNMPv2-SMI
+        MacAddress, TEXTUAL-CONVENTION
+            FROM SNMPv2-TC
+        oacExpIMDot11, oacMIBModules, oacRequirements
+            FROM ONEACCESS-GLOBAL-REG
+        MODULE-COMPLIANCE, OBJECT-GROUP
+            FROM SNMPv2-CONF
+            oacExpIMDot11,oacMIBModules
+            FROM ONEACCESS-GLOBAL-REG;
+
+--------------------------------------------------------------------
+-- Module Entity
+--------------------------------------------------------------------
+oacDot11MIBModule MODULE-IDENTITY
+    LAST-UPDATED "200712080000Z"
+    ORGANIZATION "ONE ACCESS"
+    CONTACT-INFO
+        "Pascal KESTELOOT
+        Postal: ONE ACCESS
+        28, rue de la redoute
+        92260 Fontenay aux roses
+        FRANCE
+
+        Tel: (+33) 01 41 87 70 54
+        Fax: (+33) 01 41 87 74 39
+
+        E-mail: pascal.kesteloot@oneaccess-net.com"
+
+    DESCRIPTION
+        "This MIB module describes DOT11 objects."
+
+    ::= { oacMIBModules 900 }
+
+--------------------------------------------------------------------
+-- Interface type
+--------------------------------------------------------------------
+        InterfaceType ::= TEXTUAL-CONVENTION
+        STATUS  current
+        DESCRIPTION
+            "The interface type"
+
+        SYNTAX   INTEGER {
+			  mainInterface(1),
+			  subInterface(2)
+                         }
+
+
+--------------------------------------------------------------------
+-- Objects Definitions
+--------------------------------------------------------------------
+oacExpIMDot11Objects    OBJECT IDENTIFIER ::= { oacExpIMDot11 1 }
+
+--------------------------------------------------------------------
+-- Wifi Interface Table Definition
+--------------------------------------------------------------------
+oacExpIMDot11InterfaceTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF OacExpIMDot11InterfaceEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        " Table to collect status information counters
+          on an dot11 interface basis, either logical or
+          physical (i.e. radio)
+          For these interfaces, IANAifType is ieee80211(71)
+          This table is an extension to MIBII ifTable where
+          standard status and counters are collected"
+
+    ::= { oacExpIMDot11Objects 1 }
+
+oacExpIMDot11InterfaceEntry OBJECT-TYPE
+    SYNTAX OacExpIMDot11InterfaceEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        " index is MIBII standard index "
+        INDEX  {ifIndex }
+    ::= { oacExpIMDot11InterfaceTable 1 }
+
+OacExpIMDot11InterfaceEntry ::= SEQUENCE {
+    oacExpIMDot11EntryType  		   InterfaceType,
+    oacExpIMDot11MACAddress            MacAddress,
+    oacExpIMDot11SSID		           OCTET STRING,
+    oacExpIMDot11AssociatedStations    Counter32
+
+}
+
+oacExpIMDot11EntryType OBJECT-TYPE
+		SYNTAX InterfaceType
+        MAX-ACCESS  read-only
+		STATUS current
+		DESCRIPTION
+			"This attribute shall specify the type of entry
+			 mainInterface i.e. radio interface is physical radio interface
+			 subInterface  i.e. vap   is logical dot11 interface aka Virtual Access Point"
+	::= { oacExpIMDot11InterfaceEntry 1 }
+
+oacExpIMDot11MACAddress OBJECT-TYPE
+        SYNTAX MacAddress
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "Unique MAC Address assigned to the VAP
+             available for VAP entries"
+    ::= {  oacExpIMDot11InterfaceEntry 2 }
+
+oacExpIMDot11SSID OBJECT-TYPE
+		SYNTAX OCTET STRING (SIZE(0..32))
+        MAX-ACCESS read-only
+		STATUS current
+		DESCRIPTION
+			"This attribute reflects the Service Set ID used
+			available for VAP entries"
+	::= { oacExpIMDot11InterfaceEntry 3 }
+
+oacExpIMDot11AssociatedStations OBJECT-TYPE
+        SYNTAX Counter32
+        MAX-ACCESS read-only
+        STATUS current
+        DESCRIPTION
+            "This counter is the number of currently associated
+            stations, for vap entries, the stations associated on
+            the SSID of this vap, for radio entry the total of
+           all associated stations"
+    ::= {  oacExpIMDot11InterfaceEntry 4 }
+
+--------------------------------------------------------------------
+-- Conformance Definitions
+--------------------------------------------------------------------
+    oacExpIMDot11Conformance OBJECT IDENTIFIER ::= { oacRequirements 900 }
+    oacExpIMDot11Groups      OBJECT IDENTIFIER ::= { oacExpIMDot11Conformance 1 }
+    oacExpIMDot11Compliances OBJECT IDENTIFIER ::= { oacExpIMDot11Conformance 2 }
+
+    oacExpIMDot11Compliance MODULE-COMPLIANCE
+        STATUS  current
+        DESCRIPTION
+            "The compliance statement for agents that support the
+             ONEACCESS-DOT11-MIB."
+        MODULE -- this module
+        MANDATORY-GROUPS { oacExpIMDot11GeneralGroup }
+    ::= { oacExpIMDot11Compliances 1}
+
+    oacExpIMDot11GeneralGroup OBJECT-GROUP
+        OBJECTS {
+                oacExpIMDot11EntryType,
+                oacExpIMDot11MACAddress,
+                oacExpIMDot11SSID,
+                oacExpIMDot11AssociatedStations
+        }
+        STATUS  current
+        DESCRIPTION
+            "This group is mandatory for DOT11 entity."
+        ::= { oacExpIMDot11Groups 1 }
+
+END
+
+
+
+

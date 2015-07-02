@@ -1,0 +1,153 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_V4.2R3E8
+--
+--          Creation date : 06/07/2008
+--
+     ONEACCESS-SHDSL-MIB DEFINITIONS ::= BEGIN 
+
+     IMPORTS
+		MODULE-IDENTITY, OBJECT-TYPE,Counter32,Counter64,Integer32
+			FROM SNMPv2-SMI
+--		MODULE-COMPLIANCE, OBJECT-GROUP
+--			FROM SNMPv2-CONF
+		ifIndex
+			FROM IF-MIB
+		oacExpIMSystem	  
+			FROM ONEACCESS-GLOBAL-REG
+		hdsl2ShdslSpanStatusEntry,hdsl2ShdslEndpointCurrEntry
+			FROM HDSL2-SHDSL-LINE-MIB;
+
+     oacSHDSLMIBModule MODULE-IDENTITY
+         LAST-UPDATED "200710101431Z"
+         ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses 
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes private extensions to the RFC4319 MIB."
+	
+	::= { oacExpIMSystem 3 }
+
+oacSHDSLObjects OBJECT IDENTIFIER ::= { oacSHDSLMIBModule 1 }
+
+
+oacSHDSLSpanStatusTable OBJECT-TYPE
+      SYNTAX     SEQUENCE OF OacSHDSLSpanStatusEntry
+      MAX-ACCESS not-accessible
+      STATUS     current
+      DESCRIPTION
+        "This table provides overall status information of
+         HDSL2/SHDSL spans.  This table contains live data from
+         equipment.  As such, it is NOT persistent."
+      ::= { oacSHDSLObjects 2 }
+
+ oacSHDSLSpanStatusEntry OBJECT-TYPE
+      SYNTAX      OacSHDSLSpanStatusEntry
+      MAX-ACCESS  not-accessible
+      STATUS      current
+      DESCRIPTION
+        "An entry in the oacSHDSLSpanStatusTable.  Each entry
+         represents the complete span in a single HDSL2/SHDSL line.
+         It is indexed by the ifIndex of the associated HDSL2/SHDSL
+         line."
+      AUGMENTS { hdsl2ShdslSpanStatusEntry }
+      ::= { oacSHDSLSpanStatusTable 1 }
+
+   OacSHDSLSpanStatusEntry ::=
+      SEQUENCE
+      {
+      oacSHDSLSpanStatusUpDown        Counter32
+      }
+
+
+   oacSHDSLSpanStatusUpDown OBJECT-TYPE
+      SYNTAX      Counter32
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+        "Contains the Global Up/Down Counter for the span."
+      ::= { oacSHDSLSpanStatusEntry 1 }
+
+oacSHDSLEndpointCurrTable OBJECT-TYPE
+	SYNTAX SEQUENCE OF OacSHDSLEndpointCurrEntry
+		MAX-ACCESS not-accessible
+		STATUS current
+		DESCRIPTION 
+		"This table contains current status and performance information
+         for segment endpoints in HDSL2/SHDSL lines.  As with other
+         tables in this MIB module indexed by ifIndex, entries in this
+         table MUST be maintained in a persistent manner."
+	 ::= { oacSHDSLObjects 5 }
+
+oacSHDSLEndpointCurrEntry OBJECT-TYPE
+    SYNTAX     OacSHDSLEndpointCurrEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "Defines an entry in the oacSHDSLEndpointCurrTable."
+    AUGMENTS {hdsl2ShdslEndpointCurrEntry}
+    ::= { oacSHDSLEndpointCurrTable 1 }
+
+ OacSHDSLEndpointCurrEntry ::=
+    SEQUENCE {
+        oacSHDSLEndpointCurrAtn              	Integer32,
+	oacSHDSLEndpointCurrSnrMgn		Integer32,
+	oacSHDSLEndpointCurrTxPwr		Integer32,
+	oacSHDSLEndpointCurrRxGain		Integer32
+
+     }
+
+   oacSHDSLEndpointCurrAtn OBJECT-TYPE
+      SYNTAX      Integer32(-1270..1280)
+      UNITS       "dB/10"
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+        "The current loop attenuation for this endpoint as reported in
+         a Network or Customer Side Performance Status message. In tenths of dB."
+      ::= { oacSHDSLEndpointCurrEntry 1 }
+
+  oacSHDSLEndpointCurrSnrMgn OBJECT-TYPE
+      SYNTAX      Integer32(-1270..1280)
+      UNITS       "dB/10"
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+        "The current SNR margin for this endpoint as reported in a
+         Status Response/SNR message. In tenths of dB."
+      ::= { oacSHDSLEndpointCurrEntry 2 }
+
+ oacSHDSLEndpointCurrTxPwr OBJECT-TYPE
+      SYNTAX      Integer32
+      UNITS       "dB/10"
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+        "The current transmit power for this endpoint. In tenths of dB."
+      ::= { oacSHDSLEndpointCurrEntry 3 }
+
+ oacSHDSLEndpointCurrRxGain OBJECT-TYPE
+      SYNTAX      Integer32
+      UNITS       "dB/10"
+      MAX-ACCESS  read-only
+      STATUS      current
+      DESCRIPTION
+        "The current receiver gain for this endpoint. In tenths of dB."
+      ::= { oacSHDSLEndpointCurrEntry 4 }
+
+END
+--

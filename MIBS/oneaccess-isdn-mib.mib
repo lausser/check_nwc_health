@@ -1,0 +1,83 @@
+--          *****************************
+--          *                           *
+--          *         ONEOS MIB         *
+--          *                           *
+--          *****************************
+--
+--          ONEOS_MIB_STD_V03.4.R003_E016
+--
+--          Creation date : 05/06/2005
+--
+--          Compatibility with ONEOS_V31
+--
+--          Compatibility with ONEOS_V32
+--
+
+
+     ONEACCESS-ISDN-MIB DEFINITIONS ::= BEGIN
+
+     IMPORTS
+		MODULE-IDENTITY, OBJECT-TYPE,Counter32,Unsigned32, NOTIFICATION-TYPE
+			FROM SNMPv2-SMI
+		DisplayString
+			FROM RFC1213-MIB
+        ifIndex, ifDescr, ifType, ifAdminStatus, ifOperStatus, ifName, ifAlias
+            FROM IF-MIB
+		MODULE-COMPLIANCE, OBJECT-GROUP
+			FROM SNMPv2-CONF
+ 	    	oacExpIMIsdn,oacExpIMIsdnNotifications,oacMIBModules
+			FROM ONEACCESS-GLOBAL-REG
+			oacEventText
+			FROM ONEACCESS-EVENTS-MIB;
+
+     oacIsdnMIBModule MODULE-IDENTITY
+         LAST-UPDATED "9911301545Z"
+         ORGANIZATION "ONE ACCESS"
+         CONTACT-INFO
+           "Pascal KESTELOOT
+            Postal: ONE ACCESS
+                    28, rue de la redoute
+                    92260 Fontenay aux roses
+		    FRANCE
+
+            Tel: (+33) 01 41 87 70 54
+            Fax: (+33) 01 41 87 74 39
+
+            E-mail: pascal.kesteloot@oneaccess-net.com"
+
+         DESCRIPTION
+              "This MIB module describes IP Isdn Management objects."
+
+	::= { oacMIBModules 670 }
+
+
+   dialDown NOTIFICATION-TYPE
+           OBJECTS { ifIndex, ifDescr, ifType, ifAdminStatus, 
+                 ifOperStatus, ifName, ifAlias }
+
+           STATUS  current
+           DESCRIPTION
+               "A IsdnlinkDown trap signifies that the SNMPv2 entity,
+               acting in an agent role, has detected that the
+               ifOperStatus object for its Isdn physical link
+               is about to enter the down state from some other state
+               (but not from the notPresent state).  This other state
+               is indicated by the included value of ifOperStatus."
+       ::= { oacExpIMIsdnNotifications 3 }
+
+   dialUp NOTIFICATION-TYPE
+           OBJECTS { ifIndex, ifDescr, ifType, ifAdminStatus, 
+                 ifOperStatus, ifName, ifAlias }
+           STATUS  current
+           DESCRIPTION
+               "A linkDown trap signifies that the SNMPv2 entity,
+               acting in an agent role, has detected that the
+               ifOperStatus object for for its Isdn physical communication links
+               left the down state and transitioned into some other
+               state (but not into the notPresent state).  This other
+               state is indicated by the included value of
+               ifOperStatus."
+       ::= { oacExpIMIsdnNotifications 4 }
+
+END
+--
