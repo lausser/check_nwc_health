@@ -119,7 +119,6 @@ our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
 sub finish {
   my $self = shift;
   # http://www.mibdepot.com/cgi-bin/vendor_index.cgi?r=ietf_rfcs
-  printf "%s\n", Data::Dumper::Dumper($self->{indices});
   # INDEX { inetCidrRouteDestType, inetCidrRouteDest, inetCidrRoutePfxLen, inetCidrRoutePolicy, inetCidrRouteNextHopType, inetCidrRouteNextHop }
   $self->{inetCidrRouteDestType} = $self->mibs_and_oids_definition(
       'RFC4001-MIB', 'inetAddressType', $self->{indices}->[0]);
