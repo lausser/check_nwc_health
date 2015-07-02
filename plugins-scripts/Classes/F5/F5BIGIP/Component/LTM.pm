@@ -382,9 +382,18 @@ sub finish {
   if ($self->mode =~ /device::lb::pool::comple/) {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   }
+  if (! exists $self->{ltmPoolMemberStatPoolName}) {
+    # if ltmPoolMbrStatusDetailReason: Forced down
+    #    ltmPoolMbrStatusEnabledState: disabled
+    # then we have no ltmPoolMemberStat*
+    $self->{ltmPoolMemberStatServerCurConns} = 0;
+  }
   if ($self->mode =~ /device::lb::pool::co.*ctions/) {
     # in rare cases we suddenly get noSuchInstance for ltmPoolMemberConnLimit
-    $self->protect_value($self->{ltmPoolMemberNodeName},
+    # looks like shortly before a member goes down, all attributes get noSuchInstance
+    #  except ltmPoolMemberStatAddr, ltmPoolMemberAddr,ltmPoolMemberStatusAddr
+    # after a while, the member appears again, but Forced down and without Stats (see above)
+    $self->protect_value($self->{ltmPoolMemberAddr},
         'ltmPoolMemberConnLimit', 'positive');
     if (! $self->{ltmPoolMemberConnLimit}) {
       $self->{ltmPoolMemberConnLimit} = $self->max_l4_connections();
