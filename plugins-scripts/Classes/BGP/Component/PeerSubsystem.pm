@@ -96,6 +96,7 @@ sub check {
     #$self->opts->override_opt('lookback', 3600*24*5) if ! $self->opts->lookback;
     $self->valdiff({name => 'bgppeerlist', lastarray => 1},
         qw(peerNameList numOfPeers));
+    my $problem = 0;
     if ($self->opts->warning || $self->opts->critical) {
       $self->set_thresholds(warning => $self->opts->warning,
           critical => $self->opts->critical);
@@ -107,9 +108,11 @@ sub check {
         my $delta_pct = $before ? (($self->{delta_numOfPeers} / $before) * 100) : 0;
         $self->add_message($self->check_thresholds($delta_pct),
           sprintf "%.2f%% delta, before: %d, now: %d", $delta_pct, $before, $self->{numOfPeers});
+        $problem = $self->check_thresholds($delta_pct);
       } else {
         $self->add_message($self->check_thresholds($self->{delta_numOfPeers}),
           sprintf "%d delta, before: %d, now: %d", $self->{delta_numOfPeers}, $before, $self->{numOfPeers});
+        $problem = $self->check_thresholds($self->{delta_numOfPeers});
       }
       if (scalar(@{$self->{delta_found_peerNameList}}) > 0) {
         $self->add_ok(sprintf 'found: %s',
@@ -124,13 +127,22 @@ sub check {
         $self->add_warning(sprintf '%d new bgp peers (%s)',
             scalar(@{$self->{delta_found_peerNameList}}),
             join(", ", @{$self->{delta_found_peerNameList}}));
+        $problem = 1;
       }
       if (scalar(@{$self->{delta_lost_peerNameList}}) > 0) {
         $self->add_critical(sprintf '%d bgp peers missing (%s)',
             scalar(@{$self->{delta_lost_peerNameList}}),
             join(", ", @{$self->{delta_lost_peerNameList}}));
+        $problem = 2;
       }
       $self->add_ok(sprintf 'found %d bgp peers', scalar (@{$self->{peers}}));
+    }
+    if ($problem) { # relevant only for lookback=9999 and support contract customers
+      $self->valdiff({name => 'bgppeerlist', lastarray => 1, freeze => 1},
+          qw(peerNameList numOfPeers));
+    } else {
+      $self->valdiff({name => 'bgppeerlist', lastarray => 1, freeze => 2},
+          qw(peerNameList numOfPeers));
     }
     $self->add_perfdata(
         label => 'num_peers',

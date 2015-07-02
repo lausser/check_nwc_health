@@ -907,6 +907,32 @@ sub valdiff {
   my @keys = @_;
   my $now = time;
   my $newest_history_set = {};
+  $params{freeze} = 0 if ! $params{freeze};
+  my $mode = "normal";
+  if ($self->opts->lookback && $self->opts->lookback == 99999 && $params{freeze} == 0) {
+    $mode = "lookback_freeze_chill";
+  } elsif ($self->opts->lookback && $self->opts->lookback == 99999 && $params{freeze} == 1) {
+    $mode = "lookback_freeze_shockfrost";
+  } elsif ($self->opts->lookback && $self->opts->lookback == 99999 && $params{freeze} == 2) {
+    $mode = "lookback_freeze_defrost";
+  } elsif ($self->opts->lookback) {
+    $mode = "lookback";
+  }
+printf "valdiff %s\n", $mode;
+  # lookback=99999, freeze=0(default)
+  #  nimm den letzten lauf und schreib ihn nach {cold}
+  #  vergleich dann 
+  #    wenn es frozen gibt, vergleich frozen und den letzten lauf
+  #    sonst den letzten lauf und den aktuellen lauf
+  # lookback=99999, freeze=1
+  #  wird dann aufgerufen,wenn nach dem freeze=0 ein problem festgestellt wurde 
+  #     (also als 2.valdiff hinterher)
+  #  schreib cold nach frozen
+  # lookback=99999, freeze=2
+  #  wird dann aufgerufen,wenn nach dem freeze=0 wieder alles ok ist
+  #     (also als 2.valdiff hinterher)
+  #  loescht frozen
+  #  
   my $last_values = $self->load_state(%params) || eval {
     my $empty_events = {};
     foreach (@keys) {
@@ -917,14 +943,48 @@ sub valdiff {
       }
     }
     $empty_events->{timestamp} = 0;
-    if ($self->opts->lookback) {
+    if ($mode eq "lookback") {
       $empty_events->{lookback_history} = {};
+    } elsif ($mode eq "lookback_freeze_chill") {
+      $empty_events->{cold} = {};
+      $empty_events->{frozen} = {};
     }
     $empty_events;
   };
   $self->{'delta_timestamp'} = $now - $last_values->{timestamp};
   foreach (@keys) {
-    if ($self->opts->lookback) {
+    if ($mode eq "lookback_freeze_chill") {
+      # die werte vom letzten lauf wegsichern.
+      # vielleicht gibts gleich einen freeze=1, dann muessen die eingefroren werden
+      if (exists $last_values->{$_}) {
+        if (ref($self->{$_}) eq "ARRAY") {
+          $last_values->{cold}->{$_} = [];
+          foreach my $value (@{$last_values->{$_}}) {
+            push(@{$last_values->{cold}->{$_}}, $value);
+          }
+        } else {
+          $last_values->{cold}->{$_} = $last_values->{$_};
+        }
+      } else {
+        if (ref($self->{$_}) eq "ARRAY") {
+          $last_values->{cold}->{$_} = [];
+        } else {
+          $last_values->{cold}->{$_} = 0;
+        }
+      }
+printf "cool last values %s\n", Data::Dumper::Dumper($last_values->{cold});
+      # es wird so getan, als sei der frozen wert vom letzten lauf
+      if (exists $last_values->{frozen}->{$_}) {
+        if (ref($self->{$_}) eq "ARRAY") {
+          $last_values->{$_} = [];
+          foreach my $value (@{$last_values->{frozen}->{$_}}) {
+            push(@{$last_values->{$_}}, $value);
+          }
+        } else {
+          $last_values->{$_} = $last_values->{frozen}->{$_};
+        }
+      } 
+    } elsif ($mode eq "lookback") {
       # find a last_value in the history which fits lookback best
       # and overwrite $last_values->{$_} with historic data
       if (exists $last_values->{lookback_history}->{$_}) {
@@ -943,57 +1003,80 @@ sub valdiff {
         }
       }
     }
-    if ($self->{$_} =~ /^\d+$/) {
-      $last_values->{$_} = 0 if ! exists $last_values->{$_};
-      if ($self->{$_} >= $last_values->{$_}) {
-        $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
-      } else {
-        # vermutlich db restart und zaehler alle auf null
-        $self->{'delta_'.$_} = $self->{$_};
+    if ($mode eq "normal" || $mode eq "lookback" || $mode eq "lookback_freeze_chill") {
+      if ($self->{$_} =~ /^\d+$/) {
+        if ($self->opts->lookback) {
+          $last_values->{$_} = 0 if ! exists $last_values->{$_};
+          if ($self->{$_} >= $last_values->{$_}) {
+            $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
+          } else {
+            # vermutlich db restart und zaehler alle auf null
+            $self->{'delta_'.$_} = $self->{$_};
+          }
+        }
+        $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
+        $self->{$_.'_per_sec'} = $self->{'delta_timestamp'} ?
+            $self->{'delta_'.$_} / $self->{'delta_timestamp'} : 0;
+      } elsif (ref($self->{$_}) eq "ARRAY") {
+        if ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && exists $params{lastarray}) {
+          # innerhalb der lookback-zeit wurde nichts in der lookback_history
+          # gefunden. allenfalls irgendwas aelteres. normalerweise
+          # wuerde jetzt das array als [] initialisiert.
+          # d.h. es wuerde ein delta geben, @found s.u.
+          # wenn man das nicht will, sondern einfach aktuelles array mit
+          # dem array des letzten laufs vergleichen will, setzt man lastarray
+          $last_values->{$_} = %{$newest_history_set} ?
+              $newest_history_set->{$_} : []
+        } elsif ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && ! exists $params{lastarray}) {
+          $last_values->{$_} = [] if ! exists $last_values->{$_};
+        } elsif (exists $last_values->{$_} && ! defined $last_values->{$_}) {
+          # $_ kann es auch ausserhalb des lookback_history-keys als normalen
+          # key geben. der zeigt normalerweise auf den entspr. letzten
+          # lookback_history eintrag. wurde der wegen ueberalterung abgeschnitten
+          # ist der hier auch undef.
+          $last_values->{$_} = %{$newest_history_set} ?
+              $newest_history_set->{$_} : []
+        }
+        my %saved = map { $_ => 1 } @{$last_values->{$_}};
+        my %current = map { $_ => 1 } @{$self->{$_}};
+        my @found = grep(!defined $saved{$_}, @{$self->{$_}});
+        my @lost = grep(!defined $current{$_}, @{$last_values->{$_}});
+        $self->{'delta_found_'.$_} = \@found;
+        $self->{'delta_lost_'.$_} = \@lost;
       }
-      $self->debug(sprintf "delta_%s %f", $_, $self->{'delta_'.$_});
-      $self->{$_.'_per_sec'} = $self->{'delta_timestamp'} ?
-          $self->{'delta_'.$_} / $self->{'delta_timestamp'} : 0;
-    } elsif (ref($self->{$_}) eq "ARRAY") {
-      if ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && exists $params{lastarray}) {
-        # innerhalb der lookback-zeit wurde nichts in der lookback_history
-        # gefunden. allenfalls irgendwas aelteres. normalerweise
-        # wuerde jetzt das array als [] initialisiert.
-        # d.h. es wuerde ein delta geben, @found s.u.
-        # wenn man das nicht will, sondern einfach aktuelles array mit
-        # dem array des letzten laufs vergleichen will, setzt man lastarray
-        $last_values->{$_} = %{$newest_history_set} ?
-            $newest_history_set->{$_} : []
-      } elsif ((! exists $last_values->{$_} || ! defined $last_values->{$_}) && ! exists $params{lastarray}) {
-        $last_values->{$_} = [] if ! exists $last_values->{$_};
-      } elsif (exists $last_values->{$_} && ! defined $last_values->{$_}) {
-        # $_ kann es auch ausserhalb des lookback_history-keys als normalen
-        # key geben. der zeigt normalerweise auf den entspr. letzten
-        # lookback_history eintrag. wurde der wegen ueberalterung abgeschnitten
-        # ist der hier auch undef.
-        $last_values->{$_} = %{$newest_history_set} ?
-            $newest_history_set->{$_} : []
-      }
-      my %saved = map { $_ => 1 } @{$last_values->{$_}};
-      my %current = map { $_ => 1 } @{$self->{$_}};
-      my @found = grep(!defined $saved{$_}, @{$self->{$_}});
-      my @lost = grep(!defined $current{$_}, @{$last_values->{$_}});
-      $self->{'delta_found_'.$_} = \@found;
-      $self->{'delta_lost_'.$_} = \@lost;
     }
   }
   $params{save} = eval {
     my $empty_events = {};
     foreach (@keys) {
       $empty_events->{$_} = $self->{$_};
+      if ($mode =~ /lookback_freeze/) {
+printf "save %s to cold\n", $_;
+        if (exists $last_values->{frozen}->{$_}) {
+          $empty_events->{cold}->{$_} = $last_values->{frozen}->{$_};
+        } else {
+          $empty_events->{cold}->{$_} = $last_values->{cold}->{$_};
+        }
+        $empty_events->{cold}->{timestamp} = $last_values->{cold}->{timestamp};
+      }
+      if ($mode eq "lookback_freeze_shockfrost") {
+printf "save %s to freeze\n", $_;
+        $empty_events->{frozen}->{$_} = $empty_events->{cold}->{$_};
+        $empty_events->{frozen}->{timestamp} = $now;
+      }
     }
     $empty_events->{timestamp} = $now;
-    if ($self->opts->lookback) {
+    if ($mode eq "lookback") {
       $empty_events->{lookback_history} = $last_values->{lookback_history};
       foreach (@keys) {
         $empty_events->{lookback_history}->{$_}->{$now} = $self->{$_};
       }
     }
+    if ($mode eq "lookback_freeze_defrost") {
+      delete $empty_events->{freeze};
+    }
+printf "%s\n", Data::Dumper::Dumper($empty_events);
+printf "store cool last values %s\n", Data::Dumper::Dumper($empty_events->{cold});
     $empty_events;
   };
   $self->save_state(%params);
