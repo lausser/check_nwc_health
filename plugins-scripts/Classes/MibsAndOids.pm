@@ -2073,6 +2073,11 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     cEthernetFabricExtenderMIBGroups => '1.3.6.1.4.1.9.9.691.2.1.1.1',
     hardware => '1.3.6.1.4.1.3764.1.1.200',
   },
+  'CISCO-BGP4-MIB' => {
+      cbgpPeerAddrFamilyPrefixTable => '1.3.6.1.4.1.9.9.187.1.2.4',
+      cbgpPeerAddrFamilyPrefixEntry => '1.3.6.1.4.1.9.9.187.1.2.4.1',
+      cbgpPeerAddrAcceptedPrefixes => '1.3.6.1.4.1.9.9.187.1.2.4.1.1',
+  },
   'AIRESPACE-SWITCHING-MIB' => {
       bsnSwitching => '1.3.6.1.4.1.14179.1',
       agentInfoGroup => '1.3.6.1.4.1.14179.1.1',

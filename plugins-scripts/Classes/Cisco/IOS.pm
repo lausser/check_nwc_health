@@ -20,6 +20,8 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
   } elsif ($self->mode =~ /device::interfaces::nat::rejects/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
+  } elsif ($self->mode =~ /device::bgp::prefix::count/) {
+    $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::BgpSubsystem");
   } else {
     $self->no_such_mode();
   }

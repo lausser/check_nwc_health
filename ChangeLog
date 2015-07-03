@@ -1,3 +1,5 @@
+* 2015-07-03 4.1
+  add --count-bgp-prefixes for cisco
 * 2015-06-28 4.0
   --disable-standalone
   add --watch-bgp-peers

@@ -187,6 +187,12 @@ $plugin->add_mode(
     help => 'Show BGP peers known to this device',
 );
 $plugin->add_mode(
+    internal => 'device::bgp::prefix::count',
+    spec => 'count-bgp-prefixes',
+    alias => undef,
+    help => 'Count the number of BGP prefixes (for specific peer with --name)',
+);
+$plugin->add_mode(
     internal => 'device::ospf::neighbor::status',
     spec => 'ospf-neighbor-status',
     alias => undef,
