@@ -395,6 +395,8 @@ sub finish {
     # after a while, the member appears again, but Forced down and without Stats (see above)
     $self->protect_value($self->{ltmPoolMemberAddr},
         'ltmPoolMemberConnLimit', 'positive');
+    $self->protect_value($self->{ltmPoolMemberAddr},
+        'ltmPoolMemberStatServerCurConns', 'positive');
     if (! $self->{ltmPoolMemberConnLimit}) {
       $self->{ltmPoolMemberConnLimit} = $self->max_l4_connections();
     }
