@@ -29,8 +29,11 @@ sub check {
     $self->set_thresholds(warning => '14:', critical => '7:');
     $self->add_message($self->check_thresholds($self->{keyDaysUntilExpire}));
   }
+  $self->{keyDescription} =~ s/Ironport//gi;
+  $self->{keyDescription} =~ s/^ //;
+  $self->{keyDescription} =~ s/ /_/g;
   $self->add_perfdata(
-      label => sprintf('lifetime_%s', $self->{keyDaysUntilExpire}),
+      label => sprintf('lifetime_%s', $self->{keyDescription}),
       value => $self->{keyDaysUntilExpire},
       thresholds => $self->{keyIsPerpetual} eq 'true' ? 0 : 1,
   );
