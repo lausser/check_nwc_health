@@ -6947,6 +6947,8 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     s5ChasUtilMemoryAvailable => '1.3.6.1.4.1.45.1.6.3.8.1.1.9',
     s5ChasUtilMemoryMinAvailable => '1.3.6.1.4.1.45.1.6.3.8.1.1.10',
     s5ChasUtilCPUUsageLast10Seconds => '1.3.6.1.4.1.45.1.6.3.8.1.1.11',
+    s5ChasUtilMemoryTotalMB => '1.3.6.1.4.1.45.1.6.3.8.1.1.12',
+    s5ChasUtilMemoryAvailableMB => '1.3.6.1.4.1.45.1.6.3.8.1.1.13',
   },
   'RAPID-CITY-MIB' => {
     rcSysCpuUtil => '1.3.6.1.4.1.2272.1.1.20',

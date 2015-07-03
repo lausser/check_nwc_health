@@ -1,3 +1,6 @@
+* 2015-07-03 4.2 !
+  pull request #36. bugfix in cisco asyncos keys (Thanks Frank Meischner)
+  pull request #25. cisco check-config more useful. (Thanks mhoogveld)
 * 2015-07-03 4.1
   add --count-bgp-prefixes for cisco
 * 2015-06-28 4.0
