@@ -1,6 +1,7 @@
 * 2015-06-28 4.0
   --disable-standalone
   add --watch-bgp-peers
+  add --reset for watch-bgp-peers
   bugfix in f5-pool-checks, where oids are not available during a transition"
 * 2015-06-25 3.5.4
   allow --name dest/cidr for mode count-routes

@@ -203,6 +203,14 @@ sub add_default_args {
       default => 1,
   );
   $self->add_arg(
+      spec => 'reset',
+      help => "--reset
+   remove the state file",
+      aliasfor => "name",
+      required => 0,
+      hidden => 1,
+  );
+  $self->add_arg(
       spec => 'drecksptkdb=s',
       help => "--drecksptkdb
    This parameter must be used instead of --name, because Devel::ptkdb is stealing the latter from the command line",
@@ -918,7 +926,6 @@ sub valdiff {
   } elsif ($self->opts->lookback) {
     $mode = "lookback";
   }
-printf "valdiff %s\n", $mode;
   # lookback=99999, freeze=0(default)
   #  nimm den letzten lauf und schreib ihn nach {cold}
   #  vergleich dann 
@@ -972,7 +979,6 @@ printf "valdiff %s\n", $mode;
           $last_values->{cold}->{$_} = 0;
         }
       }
-printf "cool last values %s\n", Data::Dumper::Dumper($last_values->{cold});
       # es wird so getan, als sei der frozen wert vom letzten lauf
       if (exists $last_values->{frozen}->{$_}) {
         if (ref($self->{$_}) eq "ARRAY") {
@@ -1051,7 +1057,6 @@ printf "cool last values %s\n", Data::Dumper::Dumper($last_values->{cold});
     foreach (@keys) {
       $empty_events->{$_} = $self->{$_};
       if ($mode =~ /lookback_freeze/) {
-printf "save %s to cold\n", $_;
         if (exists $last_values->{frozen}->{$_}) {
           $empty_events->{cold}->{$_} = $last_values->{frozen}->{$_};
         } else {
@@ -1060,7 +1065,6 @@ printf "save %s to cold\n", $_;
         $empty_events->{cold}->{timestamp} = $last_values->{cold}->{timestamp};
       }
       if ($mode eq "lookback_freeze_shockfrost") {
-printf "save %s to freeze\n", $_;
         $empty_events->{frozen}->{$_} = $empty_events->{cold}->{$_};
         $empty_events->{frozen}->{timestamp} = $now;
       }
@@ -1075,8 +1079,6 @@ printf "save %s to freeze\n", $_;
     if ($mode eq "lookback_freeze_defrost") {
       delete $empty_events->{freeze};
     }
-printf "%s\n", Data::Dumper::Dumper($empty_events);
-printf "store cool last values %s\n", Data::Dumper::Dumper($empty_events->{cold});
     $empty_events;
   };
   $self->save_state(%params);

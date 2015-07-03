@@ -93,7 +93,11 @@ sub check {
     # critical if warn/crit percent disappear
     $self->{numOfPeers} = scalar (@{$self->{peers}});
     $self->{peerNameList} = [map { $_->{bgpPeerRemoteAddr} } @{$self->{peers}}];
-    #$self->opts->override_opt('lookback', 3600*24*5) if ! $self->opts->lookback;
+    $self->opts->override_opt('lookback', 3600) if ! $self->opts->lookback;
+    if ($self->opts->reset) {
+      my $statefile = $self->create_statefile(name => 'bgppeerlist', lastarray => 1);
+      unlink $statefile if -f $statefile;
+    }
     $self->valdiff({name => 'bgppeerlist', lastarray => 1},
         qw(peerNameList numOfPeers));
     my $problem = 0;
