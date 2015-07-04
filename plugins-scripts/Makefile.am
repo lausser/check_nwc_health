@@ -71,6 +71,10 @@ EXTRA_MODULES=\
   Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/AsyncOS.pm \
   Classes/Cisco.pm \
+  Classes/OneOS/Component/EnvironmentalSubsystem.pm \
+  Classes/OneOS/Component/CpuSubsystem.pm \
+  Classes/OneOS/Component/MemSubsystem.pm \
+  Classes/OneOS.pm \
   Classes/Nortel/S5/Component/EnvironmentalSubsystem.pm \
   Classes/Nortel/S5/Component/CpuSubsystem.pm \
   Classes/Nortel/S5/Component/MemSubsystem.pm \
