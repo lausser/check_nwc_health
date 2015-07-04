@@ -3,7 +3,7 @@
 SUBDIRS = plugins-scripts
 
 dist-hook:
-	test -f ../glplugin/lib/Monitoring/GLPlugin.pm && cp -r ../glplugin/lib .
+	if [ -f ../glplugin/lib/Monitoring/GLPlugin.pm ]; then cp -r ../glplugin/lib .; fi
 	rm -f t/var/tmp/*
 	rm -f t/var/adm/*
 	find $(distdir) -type f -exec fromdos -v {} \;

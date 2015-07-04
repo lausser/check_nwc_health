@@ -16,6 +16,7 @@ use strict;
 
 sub finish {
   my $self = shift;
+printf "%s\n", Data::Dumper::Dumper($self);
   $self->{s5ChasUtilMemoryUsage} = 100 - 
       ($self->{s5ChasUtilMemoryAvailableMB} /
       $self->{s5ChasUtilMemoryTotalMB} * 100);
