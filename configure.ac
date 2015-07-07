@@ -106,8 +106,6 @@ AC_SUBST(PERL, $with_perl)
 
 AC_ARG_ENABLE([standalone],
     AS_HELP_STRING([--disable-standalone], [Disable feature standalone]))
-echo variable disable-standalone $disable_standalone
-echo variable enable-standalone $enable_standalone
 AS_IF([test "x$enable_standalone" != "xno"], [
   dnl Do the stuff needed for enabling the feature
 ])

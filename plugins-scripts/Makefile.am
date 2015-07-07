@@ -240,5 +240,4 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "package main;" >> $@
 	$(CAT) $(libexec_SCRIPTS).pl | $(AWK) -f ./subst >> $@
 	chmod +x $@
-#| $(GREP) -v "use Nagios" >> $@;
 
