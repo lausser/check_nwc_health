@@ -238,7 +238,7 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 		$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst | $(GREP) -v "use Nagios::Plugin" >> $@; \
 	done
 	$(ECHO) "package main;" >> $@
-	$(CAT) check_nwc_health.pl | $(AWK) -f ./subst >> $@
+	$(CAT) $(libexec_SCRIPTS).pl | $(AWK) -f ./subst >> $@
 	chmod +x $@
 #| $(GREP) -v "use Nagios" >> $@;
 
