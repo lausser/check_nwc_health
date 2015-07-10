@@ -1,5 +1,6 @@
 package Monitoring::GLPlugin::SNMP;
 our @ISA = qw(Monitoring::GLPlugin);
+# ABSTRACT: helper functions to build a snmp-based monitoring plugin
 
 use strict;
 use File::Basename;
@@ -7,6 +8,7 @@ use Digest::MD5 qw(md5_hex);
 use Data::Dumper;
 use AutoLoader;
 our $AUTOLOAD;
+our $VERSION = "1.0";
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -145,6 +147,13 @@ sub add_snmp_args {
    Use it instead of --hostname',
       required => 0,
       env => 'SNMPWALK',
+  );
+  $self->add_arg(
+      spec => 'servertype=s',
+      help => '--servertype
+     The type of the network device: cisco (default). Use it if auto-detection
+     is not possible',
+      required => 0,
   );
   $self->add_arg(
       spec => 'oids=s',

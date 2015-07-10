@@ -1,11 +1,13 @@
 package Monitoring::GLPlugin;
+# ABSTRACT: helper functions to build a upnp-based monitoring plugin
+
 use strict;
 use IO::File;
 use File::Basename;
 use Digest::MD5 qw(md5_hex);
 use Errno;
-#use AutoLoader;
 our $AUTOLOAD;
+our $VERSION = "1.0";
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -1011,9 +1013,12 @@ sub valdiff {
     }
     if ($mode eq "normal" || $mode eq "lookback" || $mode eq "lookback_freeze_chill") {
       if ($self->{$_} =~ /^\d+$/) {
-        if ($self->opts->lookback) {
-          $last_values->{$_} = 0 if ! exists $last_values->{$_};
-          if ($self->{$_} >= $last_values->{$_}) {
+        $last_values->{$_} = 0 if ! exists $last_values->{$_};
+        if ($self->{$_} >= $last_values->{$_}) {
+          $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
+        } else {
+          if ($mode =~ /lookback_freeze/) {
+            # hier koennen delta-werte auch negativ sein, wenn z.b. peers verschwinden
             $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
           } else {
             # vermutlich db restart und zaehler alle auf null

@@ -3,7 +3,6 @@
 use strict;
 no warnings qw(once);
 
-
 eval {
   if ( ! grep /AUTOLOAD/, keys %Monitoring::GLPlugin::) {
     require "Monitoring::GLPlugin";
@@ -414,13 +413,6 @@ $plugin->add_arg(
    The role of this device in a hsrp group (active/standby/listen)",
     required => 0,
 );
-$plugin->add_arg(
-    spec => 'servertype=s',
-    help => '--servertype
-   The type of the network device: cisco (default). Use it if auto-detection
-   is not possible',
-    required => 0,
-);
 
 $plugin->getopts();
 $plugin->classify();
@@ -444,7 +436,5 @@ my ($code, $message) = $plugin->opts->multiline ?
     $plugin->check_messages(join => ', ', join_all => ', ');
 $message .= sprintf "\n%s\n", $plugin->get_info("\n")
     if $plugin->opts->verbose >= 1;
-#printf "%s\n", Data::Dumper::Dumper($plugin);
 
 $plugin->nagios_exit($code, $message);
-printf "schluss\n";
