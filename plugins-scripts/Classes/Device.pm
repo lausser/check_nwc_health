@@ -9,9 +9,14 @@ sub classify {
   } else {
     if ($self->opts->servertype && $self->opts->servertype eq 'linuxlocal') {
     } elsif ($self->opts->servertype && $self->opts->servertype eq 'windowslocal') {
-      eval "use DBD::WMI";
+      eval "require DBD::WMI";
       if ($@) {
         $self->add_unknown("module DBD::WMI is not installed");
+      }
+    } elsif ($self->opts->servertype && $self->opts->servertype eq 'solarislocal') {
+      eval "require Sun::Solaris::Kstat";
+      if ($@) {
+        $self->add_unknown("module Sun::Solaris::Kstat is not installed");
       }
     } elsif ($self->opts->port && $self->opts->port == 49000) {
       $self->{productname} = 'upnp';
@@ -51,6 +56,9 @@ sub classify {
       } elsif ($self->{productname} =~ /windowslocal/i) {
         bless $self, 'Server::Windows';
         $self->debug('using Server::Windows');
+      } elsif ($self->{productname} =~ /solarislocal/i) {
+        bless $self, 'Server::Solaris';
+        $self->debug('using Server::Solaris');
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');

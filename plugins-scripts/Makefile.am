@@ -11,6 +11,7 @@ EXTRA_MODULES=\
   Classes/UPNP.pm \
   Classes/Server/Linux.pm \
   Classes/Server/Windows.pm \
+  Classes/Server/Solaris.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
