@@ -47,6 +47,8 @@ sub init {
           }
           if ($self->filter_name($name)) {
             $self->{kstat_interfaces}->{$name} =
+                exists $self->{kstat}->{$module}->{$instance}->{mac} ?
+                $self->{kstat}->{$module}->{$instance}->{mac} :
                 $self->{kstat}->{$module}->{$instance}->{$name};
           }
         }
