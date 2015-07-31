@@ -55,6 +55,28 @@ sub v2tov3 {
   }
 }
 
+sub add_snmp_modes {
+  my $self = shift;
+  $self->add_mode(
+      internal => 'device::uptime',
+      spec => 'uptime',
+      alias => undef,
+      help => 'Check the uptime of the device',
+  );
+  $self->add_mode(
+      internal => 'device::walk',
+      spec => 'walk',
+      alias => undef,
+      help => 'Show snmpwalk command with the oids necessary for a simulation',
+  );
+  $self->add_mode(
+      internal => 'device::supportedmibs',
+      spec => 'supportedmibs',
+      alias => undef,
+      help => 'Shows the names of the mibs which this devices has implemented (only lausser may run this command)',
+  );
+}
+
 sub add_snmp_args {
   my $self = shift;
   $self->add_arg(

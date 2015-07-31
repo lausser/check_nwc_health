@@ -70,8 +70,7 @@ sub add_default_args {
   $self->add_arg(
       spec => 'regexp',
       help => "--regexp
-   if this parameter is used, name will be interpreted as a
-   regular expression",
+   Parameter name/name2/name3 will be interpreted as (perl) regular expression",
       required => 0,);
   $self->add_arg(
       spec => 'warning=s',
@@ -113,6 +112,12 @@ sub add_default_args {
       spec => 'name2=s',
       help => "--name2
    The secondary name of a component",
+      required => 0,
+  );
+  $self->add_arg(
+      spec => 'name3=s',
+      help => "--name3
+   The tertiary name of a component",
       required => 0,
   );
   $self->add_arg(
@@ -655,7 +660,8 @@ sub decode_password {
   my $self = shift;
   my $password = shift;
   if ($password && $password =~ /^rfc3986:\/\/(.*)/) {
-    $password =~ s/\%([A-Fa-f0-9]{2})/pack('C', hex($1))/seg;
+    $password = $1;
+    $password =~ s/%([A-Za-z0-9]{2})/chr(hex($1))/seg;
   }
   return $password;
 }
@@ -1343,6 +1349,7 @@ sub new {
     $self->{$_} = $params{$_};
   }
   bless $self, $class;
+  $self->{plugin} ||= $Monitoring::GLPlugin::pluginname;
   $self->{name} = $self->{plugin};
   $Monitoring::GLPlugin::plugin = $self;
 }

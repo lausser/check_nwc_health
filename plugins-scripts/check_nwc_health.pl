@@ -5,9 +5,9 @@ no warnings qw(once);
 
 eval {
   if ( ! grep /AUTOLOAD/, keys %Monitoring::GLPlugin::) {
-    require "Monitoring::GLPlugin";
-    require "Monitoring::GLPlugin::SNMP";
-    require "Monitoring::GLPlugin::UPNP";
+    require Monitoring::GLPlugin;
+    require Monitoring::GLPlugin::SNMP;
+    require Monitoring::GLPlugin::UPNP;
   }
 };
 if ($@) {
@@ -27,12 +27,6 @@ my $plugin = Classes::Device->new(
     url => 'http://labs.consol.de/nagios/check_nwc_health',
     timeout => 60,
     plugin => $Monitoring::GLPlugin::pluginname,
-);
-$plugin->add_mode(
-    internal => 'device::uptime',
-    spec => 'uptime',
-    alias => undef,
-    help => 'Check the uptime of the device',
 );
 $plugin->add_mode(
     internal => 'device::hardware::health',
@@ -365,18 +359,7 @@ $plugin->add_mode(
     alias => undef,
     help => 'Show the cumulated power consumption of a Fritz!DECT 200 plug',
 );
-$plugin->add_mode(
-    internal => 'device::walk',
-    spec => 'walk',
-    alias => undef,
-    help => 'Show snmpwalk command with the oids necessary for a simulation',
-);
-$plugin->add_mode(
-    internal => 'device::supportedmibs',
-    spec => 'supportedmibs',
-    alias => undef,
-    help => 'Shows the names of the mibs which this devices has implemented (only lausser may run this command)',
-);
+$plugin->add_snmp_modes();
 $plugin->add_snmp_args();
 $plugin->add_default_args();
 $plugin->mod_arg("name",
