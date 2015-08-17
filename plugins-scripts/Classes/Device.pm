@@ -156,6 +156,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
         bless $self, 'Classes::Fortigate';
         $self->debug('using Classes::Fortigate');
+      } elsif ($self->implements_mib('ALCATEL-IND1-BASE-MIB')) {
+        bless $self, 'Classes::Alcatel';
+        $self->debug('using Classes::Alcatel');
       } elsif ($self->implements_mib('ONEACCESS-SYS-MIB')) {
         bless $self, 'Classes::OneOS';
         $self->debug('using Classes::OneOS');

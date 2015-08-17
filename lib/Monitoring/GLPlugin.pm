@@ -1018,10 +1018,14 @@ sub valdiff {
       }
     }
     if ($mode eq "normal" || $mode eq "lookback" || $mode eq "lookback_freeze_chill") {
-      if ($self->{$_} =~ /^\d+$/) {
+      if ($self->{$_} =~ /^\d+\.*\d*$/) {
         $last_values->{$_} = 0 if ! exists $last_values->{$_};
         if ($self->{$_} >= $last_values->{$_}) {
           $self->{'delta_'.$_} = $self->{$_} - $last_values->{$_};
+        } elsif ($self->{$_} eq $last_values->{$_}) {
+          # dawischt! in einem fall wurde 131071.999023438 >= 131071.999023438 da oben nicht erkannt
+          # subtrahieren ging auch daneben, weil ein winziger negativer wert rauskam.
+          $self->{'delta_'.$_} = 0;
         } else {
           if ($mode =~ /lookback_freeze/) {
             # hier koennen delta-werte auch negativ sein, wenn z.b. peers verschwinden
@@ -1167,7 +1171,7 @@ sub protect_value {
     }
     $self->save_state(name => 'protect_'.$ident.'_'.$key, save => {
         $key => $laststate->{$key},
-        exception => $laststate->{exception}++,
+        exception => ++$laststate->{exception},
     });
   }
 }
@@ -1303,7 +1307,7 @@ sub AUTOLOAD {
         if $self->opts->verbose >= 2;
   } elsif ($AUTOLOAD =~ /^.*::(status_code|check_messages|nagios_exit|html_string|perfdata_string|selected_perfdata|check_thresholds|get_thresholds|opts)$/) {
     return $Monitoring::GLPlugin::plugin->$1(@_);
-  } elsif ($AUTOLOAD =~ /^.*::(clear_messages|suppress_messages|add_html|add_perfdata|override_opt|create_opt|set_thresholds|force_thresholds)$/) {
+  } elsif ($AUTOLOAD =~ /^.*::(reduce_messages|reduce_messages_short|clear_messages|suppress_messages|add_html|add_perfdata|override_opt|create_opt|set_thresholds|force_thresholds)$/) {
     $Monitoring::GLPlugin::plugin->$1(@_);
   } elsif ($AUTOLOAD =~ /^.*::mod_arg_(.*)$/) {
     return $Monitoring::GLPlugin::plugin->mod_arg($1, @_);
@@ -1551,6 +1555,22 @@ sub clear_messages {
   $code = (qw(ok warning critical unknown))[$code] if $code =~ /^\d+$/;
   $code = lc $code;
   $self->{messages}->{$code} = [];
+}
+
+sub reduce_messages_short {
+  my $self = shift;
+  my $message = shift || "no problems";
+  if ($self->opts->report && $self->opts->report eq "short") {
+    $self->clear_messages(OK);
+    $self->add_message(OK, $message) if ! $self->check_messages();
+  }
+}
+
+sub reduce_messages {
+  my $self = shift;
+  my $message = shift || "no problems";
+  $self->clear_messages(OK);
+  $self->add_message(OK, $message) if ! $self->check_messages();
 }
 
 sub check_messages {

@@ -171,6 +171,16 @@ EXTRA_MODULES=\
   Classes/AVOS/Component/MemSubsystem.pm \
   Classes/AVOS/Component/CpuSubsystem.pm \
   Classes/AVOS.pm \
+  Classes/Alcatel/OmniAccess/Component/MemSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/CpuSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/AlarmSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/PowersupplySubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/FanSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/StorageSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/EnvironmentalSubsystem.pm \
+  Classes/Alcatel/OmniAccess/Component/WlanSubsystem.pm \
+  Classes/Alcatel/OmniAccess.pm \
+  Classes/Alcatel.pm \
   Classes/Foundry/Component/SLBSubsystem.pm \
   Classes/Foundry/Component/MemSubsystem.pm \
   Classes/Foundry/Component/CpuSubsystem.pm \

@@ -31,9 +31,7 @@ sub check {
   $self->{temperature_subsystem}->check();
   $self->{powersupply_subsystem}->check();
   $self->{disk_subsystem}->check();
-  if (! $self->check_messages()) {
-    $self->add_ok("environmental hardware working fine");
-  }
+  $self->reduce_messages("environmental hardware working fine");
 }
 
 sub dump {
