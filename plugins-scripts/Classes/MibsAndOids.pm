@@ -7537,6 +7537,7 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     wlsxSysExtHostname => '1.3.6.1.4.1.14823.2.2.1.2.1.2',
     wlsxSysExtModelName => '1.3.6.1.4.1.14823.2.2.1.2.1.3',
     wlsxSysExtSwitchRole => '1.3.6.1.4.1.14823.2.2.1.2.1.4',
+    wlsxSysExtSwitchRoleDefinition => 'ARUBA-TC::ArubaSwitchRole',
     wlsxSysExtSwitchMasterIp => '1.3.6.1.4.1.14823.2.2.1.2.1.5',
     wlsxSysExtSwitchDate => '1.3.6.1.4.1.14823.2.2.1.2.1.6',
     wlsxSysExtSwitchBaseMacaddress => '1.3.6.1.4.1.14823.2.2.1.2.1.7',

@@ -52,10 +52,19 @@ sub check {
           value => scalar (@{$self->{aps}}),
       );
     } elsif ($self->mode =~ /device::wlan::aps::status/) {
-      if ($self->opts->report eq "short") {
-        $self->clear_ok();
-        $self->add_ok('no problems') if ! $self->check_messages();
-      }
+      $self->reduce_messages('no problems');
+      $self->add_perfdata(
+          label => 'num_aps',
+          value => scalar (@{$self->{aps}}),
+      );
+      $self->add_perfdata(
+          label => 'num_up_aps',
+          value => scalar (grep { $_->{wlanAPStatus} ne "down" } @{$self->{aps}}),
+      );
+      $self->add_perfdata(
+          label => 'num_down_aps',
+          value => scalar (grep { $_->{wlanAPStatus} eq "down" } @{$self->{aps}}),
+      );
     } elsif ($self->mode =~ /device::wlan::aps::list/) {
       foreach (@{$self->{aps}}) {
         printf "%s\n", $_->{wlanAPName};

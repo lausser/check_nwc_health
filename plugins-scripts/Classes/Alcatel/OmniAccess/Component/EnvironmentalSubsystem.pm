@@ -12,8 +12,6 @@ sub init {
       Classes::Alcatel::OmniAccess::Component::PowersupplySubsystem->new();
   $self->{storage_subsystem} = 
       Classes::Alcatel::OmniAccess::Component::StorageSubsystem->new();
-  $self->{alarm_subsystem} = 
-      Classes::Alcatel::OmniAccess::Component::AlarmSubsystem->new();
 }
 
 sub check {
@@ -21,7 +19,6 @@ sub check {
   $self->{fan_subsystem}->check();
   $self->{powersupply_subsystem}->check();
   $self->{storage_subsystem}->check();
-  $self->{alarm_subsystem}->check();
   $self->add_info(sprintf "temperature is %s", $self->{wlsxSysExtInternalTemparature});
   if ($self->{wlsxSysExtInternalTemparature} =~ /\(.*\)/ &&
       $self->{wlsxSysExtInternalTemparature} !~ /normal/i) {
@@ -41,6 +38,5 @@ sub dump {
   $self->{fan_subsystem}->dump();
   $self->{powersupply_subsystem}->dump();
   $self->{storage_subsystem}->dump();
-  $self->{alarm_subsystem}->dump();
 }
 

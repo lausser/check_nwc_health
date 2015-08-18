@@ -15,7 +15,6 @@ sub check {
   $self->add_info('checking routes');
   if ($self->mode =~ /device::routes::list/) {
     foreach (@{$self->{routes}}) {
-printf "%s\n", Data::Dumper::Dumper($_);
       $_->list();
     }
     $self->add_ok("have fun");
