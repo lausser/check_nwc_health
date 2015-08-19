@@ -14,10 +14,7 @@ sub check {
   foreach (@{$self->{comps}}) {
     $_->check();
   }
-  if (! $self->check_messages()) {
-    $self->clear_ok();
-    $self->add_ok("environmental hardware working fine");
-  }
+  $self->reduce_messages("environmental hardware working fine");
 }
 
 
@@ -32,7 +29,6 @@ sub finish {
 
 sub check {
   my $self = shift;
-  my $label = sprintf 'usage', $self->{flat_indices};
   $self->add_info(sprintf 'component %s/%s status is %s (admin %s)',
       $self->{flat_indices}, $self->{s5ChasComShortDescr},
       $self->{s5ChasComOperState}, $self->{s5ChasComAdminState});
@@ -50,7 +46,4 @@ sub check {
   } else {
     $self->add_unknown();
   }
-
-  $self->add_message($self->check_thresholds(
-      metric => $label, value => $self->{s5ChasUtilMemoryUsage}));
 }

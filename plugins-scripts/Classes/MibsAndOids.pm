@@ -30,6 +30,7 @@ $Monitoring::GLPlugin::SNMP::mib_ids = {
   'ALCATEL-IND1-BASE-MIB' => '1.3.6.1.4.1.6486.800',
   'WLSX-SYSTEMEXT-MIB' => '1.3.6.1.4.1.14823.2.2.1.2',
   'WLSX-WLAN-MIB' => '1.3.6.1.4.1.14823.2.2.1.5',
+  'SYNOPTICS-ROOT-MIB' => '1.3.6.1.4.1.45.3',
 };
 
 $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
@@ -7152,6 +7153,10 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
     rcChasPowerSupplyDetailHardwareRevision => '1.3.6.1.4.1.2272.1.4.8.2.1.4',
     rcChasPowerSupplyDetailPartNumber => '1.3.6.1.4.1.2272.1.4.8.2.1.5',
     rcChasPowerSupplyDetailDescription => '1.3.6.1.4.1.2272.1.4.8.2.1.6',
+    rc2kChassisPortOperStatus => '1.3.6.1.4.1.2272.1.100.1.1.0',
+    rc2kChassisTemperature => '1.3.6.1.4.1.2272.1.100.1.2.0',
+    rc2kChassisAmbientLowerTemperature => '1.3.6.1.4.1.2272.1.100.1.3.0',
+    rc2kChassisAmbientUpperTemperature => '1.3.6.1.4.1.2272.1.100.1.4.0',
   },
   'ONEACCESS-SYS-MIB' => {
     oacSysMIBModule => '1.3.6.1.4.1.13191.1.100.671',

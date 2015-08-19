@@ -71,6 +71,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Nortel/i) {
         bless $self, 'Classes::Nortel';
         $self->debug('using Classes::Nortel');
+      } elsif ($self->implements_mib('SYNOPTICS-ROOT-MIB')) {
+        bless $self, 'Classes::Nortel';
+        $self->debug('using Classes::Nortel');
       } elsif ($self->{productname} =~ /AT-GS/i) {
         bless $self, 'Classes::AlliedTelesyn';
         $self->debug('using Classes::AlliedTelesyn');
