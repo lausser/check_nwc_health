@@ -289,6 +289,24 @@ sub validate_args {
     $input =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
     printf "%s\n", $input;
     exit 0;
+  } elsif ($self->opts->mode eq 'decode') {
+    if (! -t STDIN) {
+      my $input = <>;
+      chomp $input;
+      $input =~ s/%([A-Za-z0-9]{2})/chr(hex($1))/seg;
+      printf "%s\n", $input;
+      exit OK;
+    } else {
+      if ($self->opts->name) {
+        my $input = $self->opts->name;
+        $input =~ s/%([A-Za-z0-9]{2})/chr(hex($1))/seg;
+        printf "%s\n", $input;
+        exit OK;
+      } else {
+        printf "i can't find your encoded statement. use --name or pipe it in my stdin\n";
+        exit UNKNOWN;
+      }
+    }
   } elsif ((! grep { $self->opts->mode eq $_ } map { $_->{spec} } @{$Monitoring::GLPlugin::plugin->{modes}}) &&
       (! grep { $self->opts->mode eq $_ } map { defined $_->{alias} ? @{$_->{alias}} : () } @{$Monitoring::GLPlugin::plugin->{modes}})) {
     printf "UNKNOWN - mode %s\n", $self->opts->mode;
