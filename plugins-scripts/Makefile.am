@@ -87,6 +87,11 @@ EXTRA_MODULES=\
   Classes/FabOS/Component/EnvironmentalSubsystem.pm \
   Classes/FabOS/Component/SensorSubsystem.pm \
   Classes/FabOS.pm \
+  Classes/HH3C/Component/EntitySubsystem.pm \
+  Classes/HH3C/Component/EnvironmentalSubsystem.pm \
+  Classes/HH3C/Component/MemSubsystem.pm \
+  Classes/HH3C/Component/CpuSubsystem.pm \
+  Classes/HH3C.pm \
   Classes/HP/Procurve/Component/MemSubsystem.pm \
   Classes/HP/Procurve/Component/CpuSubsystem.pm \
   Classes/HP/Procurve/Component/EnvironmentalSubsystem.pm \
