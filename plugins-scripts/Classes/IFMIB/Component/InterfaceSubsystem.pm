@@ -493,9 +493,13 @@ sub init {
 
 sub check {
   my $self = shift;
+  my $full_descr = sprintf "%s%s",
+      $self->{ifDescr},
+      $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
+          " (alias ".$self->{ifAlias}.")" : "";
   if ($self->mode =~ /device::interfaces::usage/) {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
-        $self->{ifDescr}, 
+        $full_descr,
         $self->{inputUtilization}, 
         sprintf("%.2f%s/s", $self->{inputRate},
             ($self->opts->units ? $self->opts->units : 'Bits')),
@@ -562,7 +566,7 @@ sub check {
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
-        $self->{ifDescr},
+        $full_descr,
         $self->{inputErrorRate} , $self->{outputErrorRate});
     $self->set_thresholds(warning => 1, critical => 10);
     my $in = $self->check_thresholds($self->{inputErrorRate});
@@ -579,7 +583,7 @@ sub check {
     );
   } elsif ($self->mode =~ /device::interfaces::discards/) {
     $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
-        $self->{ifDescr},
+        $full_descr,
         $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(warning => 1, critical => 10);
     my $in = $self->check_thresholds($self->{inputDiscardRate});
@@ -616,17 +620,18 @@ sub check {
 #      }
 #    } 
     $self->add_info(sprintf '%s is %s/%s',
-        $self->{ifDescr}, $self->{ifOperStatus}, $self->{ifAdminStatus});
+        $full_descr,
+        $self->{ifOperStatus}, $self->{ifAdminStatus});
     $self->add_ok();
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
       $self->add_critical(
           sprintf 'fault condition is presumed to exist on %s',
-          $self->{ifDescr});
+          $full_descr);
     }
     if ($self->{ifAdminStatus} eq 'down') {
       $self->add_message(
           defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
-          sprintf '%s is admin down', $self->{ifDescr});
+          sprintf '%s is admin down', $full_descr);
     }
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 

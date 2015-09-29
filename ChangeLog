@@ -1,5 +1,6 @@
 * 2015-09-29 4.5
   merge huawei h3c from lazyfrosch-hh3c-switches
+  output ifAlias in interface-modes (if it exists and != ifDescr)
 * 2015-09-06 4.4
   add rapid-city-mib
   add entity-mib for cisco asa
