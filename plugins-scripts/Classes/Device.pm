@@ -28,6 +28,7 @@ sub classify {
       $self->{productname} = $self->opts->servertype;
       $self->{productname} = 'cisco' if $self->opts->servertype eq 'cisco';
       $self->{productname} = 'huawei' if $self->opts->servertype eq 'huawei';
+      $self->{productname} = 'hh3c' if $self->opts->servertype eq 'hh3c';
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
       $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
       $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
@@ -133,6 +134,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'Classes::F5';
         $self->debug('using Classes::F5');
+      } elsif ($self->{productname} =~ /(Huawei|H?H3C|HP Comware)/i) {
+        bless $self, 'Classes::HH3C';
+        $self->debug('using Classes::HH3C');
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'Classes::HP';
         $self->debug('using Classes::HP');
