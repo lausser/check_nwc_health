@@ -376,7 +376,19 @@ sub new {
 
 sub init {
   my $self = shift;
-  if ($self->mode =~ /device::interfaces::usage/) {
+  if ($self->mode =~ /device::interfaces::complete/) {
+    # uglatto, but $self->mode is an lvalue
+    $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
+    $self->init();
+    if ($self->{ifOperStatus} eq "up") {
+      foreach my $mode (qw(device::interfaces::usage
+          device::interfaces::errors device::interfaces::discards)) {
+        $Monitoring::GLPlugin::mode = $mode;
+        $self->init();
+      }
+    }
+    $Monitoring::GLPlugin::mode = "device::interfaces::complete";
+  } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInOctets ifOutOctets));
     if ($self->{ifSpeed} == 0) {
       # vlan graffl
@@ -497,7 +509,19 @@ sub check {
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
           " (alias ".$self->{ifAlias}.")" : "";
-  if ($self->mode =~ /device::interfaces::usage/) {
+  if ($self->mode =~ /device::interfaces::complete/) {
+    # uglatto, but $self->mode is an lvalue
+    $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
+    $self->check();
+    if ($self->{ifOperStatus} eq "up") {
+      foreach my $mode (qw(device::interfaces::usage
+          device::interfaces::errors device::interfaces::discards)) {
+        $Monitoring::GLPlugin::mode = $mode;
+        $self->check();
+      }
+    }
+    $Monitoring::GLPlugin::mode = "device::interfaces::complete";
+  } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
         $full_descr,
         $self->{inputUtilization}, 

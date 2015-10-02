@@ -71,6 +71,12 @@ $plugin->add_mode(
     help => 'Check the status of interfaces (oper/admin)',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::complete',
+    spec => 'interface-health',
+    alias => undef,
+    help => 'Check everything interface',
+);
+$plugin->add_mode(
     internal => 'device::interfaces::nat::sessions::count',
     spec => 'interface-nat-count-sessions',
     alias => undef,
