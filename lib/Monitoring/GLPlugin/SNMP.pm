@@ -2188,10 +2188,10 @@ sub create_statefile {
   } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
     return sprintf "%s/%s_%s%s", $self->statefilesdir(),
         'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
+        $self->mode, lc $extension;
   } else {
     return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        $self->opts->hostname, $self->opts->mode, lc $extension;
+        $self->opts->hostname, $self->mode, lc $extension;
   }
 }
 

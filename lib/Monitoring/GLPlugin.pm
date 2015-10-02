@@ -1145,7 +1145,7 @@ sub create_statefile {
   $extension =~ s/\*/_/g;
   $extension =~ s/\s/_/g;
   return sprintf "%s/%s%s", $self->statefilesdir(),
-      $self->opts->mode, lc $extension;
+      $self->mode, lc $extension;
 }
 
 sub schimpf {
