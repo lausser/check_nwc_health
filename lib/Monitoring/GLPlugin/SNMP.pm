@@ -740,7 +740,7 @@ sub init {
     }
     my $toplevels = {};
     map {
-        /^(1\.3\.6\.1\.(2|4)\.1\.\d+\.\d+)\./; $toplevels->{$1} = 1; 
+        /^(1\.3\.6\.1\.(\d+)\.(\d+)\.\d+\.\d+)\./; $toplevels->{$1} = 1; 
     } keys %{$unknowns};
     foreach (sort {$a cmp $b} keys %{$toplevels}) {
       push(@outputlist, ["<unknown>", $_]);
