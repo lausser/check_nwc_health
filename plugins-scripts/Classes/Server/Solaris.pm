@@ -137,9 +137,18 @@ sub finish {
   foreach (qw(ifSpeed ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors ifSnapTime)) {
     $self->{$_} = 0 if ! defined $self->{$_};
   }
-  if ($self->mode =~ /device::interfaces::traffic/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors i
-fSnapTime));
+  if ($self->mode =~ /device::interfaces::complete/) {
+    # uglatto, but $self->mode is an lvalue
+    $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
+    $self->init();
+    #if ($self->{ifOperStatus} eq "up") {
+      foreach my $mode (qw(device::interfaces::usage
+          device::interfaces::errors)) {
+        $Monitoring::GLPlugin::mode = $mode;
+        $self->init();
+      }
+    #}
+    $Monitoring::GLPlugin::mode = "device::interfaces::complete";
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifOutOctets ifSnapTime));
     $self->{delta_timestamp} = $self->{delta_ifSnapTime};
@@ -223,7 +232,18 @@ fSnapTime));
 
 sub check {
   my $self = shift;
-  if ($self->mode =~ /device::interfaces::traffic/) {
+  if ($self->mode =~ /device::interfaces::complete/) {
+    # uglatto, but $self->mode is an lvalue
+    $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
+    $self->check();
+    #if ($self->{ifOperStatus} eq "up") {
+      foreach my $mode (qw(device::interfaces::usage
+          device::interfaces::errors)) {
+        $Monitoring::GLPlugin::mode = $mode;
+        $self->check();
+      }
+    #}
+    $Monitoring::GLPlugin::mode = "device::interfaces::complete";
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
         $self->{ifDescr},
