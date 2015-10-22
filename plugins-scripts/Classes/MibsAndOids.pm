@@ -31,6 +31,7 @@ $Monitoring::GLPlugin::SNMP::mib_ids = {
   'WLSX-SYSTEMEXT-MIB' => '1.3.6.1.4.1.14823.2.2.1.2',
   'WLSX-WLAN-MIB' => '1.3.6.1.4.1.14823.2.2.1.5',
   'SYNOPTICS-ROOT-MIB' => '1.3.6.1.4.1.45.3',
+  'BLUECOAT-MIB' => '1.3.6.1.4.1.3417.1.1.30',
 };
 
 $Monitoring::GLPlugin::SNMP::mibs_and_oids = {

@@ -146,7 +146,7 @@ sub classify {
       } elsif ($self->{productname} =~ /Clavister/i) {
         bless $self, 'Classes::Clavister';
         $self->debug('using Classes::Clavister');
-      } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
+      } elsif ($self->{productname} =~ /Blue\s*Coat/i || $self->implements_mib('BLUECOAT-MIB')) {
         bless $self, 'Classes::Bluecoat';
         $self->debug('using Classes::Bluecoat');
       } elsif ($self->{productname} =~ /Foundry/i) {
