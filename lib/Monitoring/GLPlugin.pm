@@ -2132,4 +2132,4 @@ sub check {
   # normal tableitems should have their own check-method
 }
 
-
+__PACKAGE__

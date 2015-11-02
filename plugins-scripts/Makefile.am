@@ -253,7 +253,7 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	if [ "${STANDALONE}" == "yes" ]; then \
 		$(ECHO) i am standalone; \
 		for m in ${GL_MODULES}; do \
-			$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(AWK) -f ./subst >> $@; \
+			$(SED) -e 's/^1;//g' < $$m | $(SED) -e '/^__END__/,$$d' | $(SED) -e '/^__PACKAGE__/,$$d' | $(AWK) -f ./subst >> $@; \
 		done \
 	fi
 	for m in ${EXTRA_MODULES}; do \
