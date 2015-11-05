@@ -3,17 +3,17 @@
 use strict;
 no warnings qw(once);
 
-eval {
-  if ( ! grep /AUTOLOAD/, keys %Monitoring::GLPlugin::) {
+if ( ! grep /BEGIN/, keys %Monitoring::GLPlugin::) {
+  eval {
     require Monitoring::GLPlugin;
     require Monitoring::GLPlugin::SNMP;
     require Monitoring::GLPlugin::UPNP;
+  };
+  if ($@) {
+    printf "UNKNOWN - module Monitoring::GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";
+    printf "%s\n", $@;
+    exit 3;
   }
-};
-if ($@) {
-  printf "UNKNOWN - module Monitoring::GLPlugin was not found. Either build a standalone version of this plugin or set PERL5LIB\n";
-  printf "%s\n", $@;
-  exit 3;
 }
 
 my $plugin = Classes::Device->new(

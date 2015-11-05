@@ -26,6 +26,22 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
   our $uptime = 0;
 }
 
+sub new {
+  my $class = shift;
+  my %params = @_;
+  require Monitoring::GLPlugin
+      if ! grep /BEGIN/, keys %Monitoring::GLPlugin::;
+  require Monitoring::GLPlugin::SNMP::CSF
+      if ! grep /BEGIN/, keys %Monitoring::GLPlugin::SNMP::CSF::;
+  require Monitoring::GLPlugin::SNMP::Item
+      if ! grep /BEGIN/, keys %Monitoring::GLPlugin::SNMP::Item::;
+  require Monitoring::GLPlugin::SNMP::TableItem
+      if ! grep /BEGIN/, keys %Monitoring::GLPlugin::SNMP::TableItem::;
+  my $self = Monitoring::GLPlugin->new(%params);
+  bless $self, $class;
+  return $self;
+}
+
 sub v2tov3 {
   my $self = shift;
   if ($self->opts->community && $self->opts->community =~ /^snmpv3(.)(.+)/) {
@@ -2162,86 +2178,6 @@ sub get_cache_indices {
   return map { join('.', ref($_) eq "ARRAY" ? @{$_} : $_) } @indices;
 }
 
+1;
 
-package Monitoring::GLPlugin::SNMP::CSF;
-#our @ISA = qw(Monitoring::GLPlugin::SNMP);
-use Digest::MD5 qw(md5_hex);
-use strict;
-
-sub create_statefile {
-  my $self = shift;
-  my %params = @_;
-  my $extension = "";
-  $extension .= $params{name} ? '_'.$params{name} : '';
-  if ($self->opts->community) {
-    $extension .= md5_hex($self->opts->community);
-  }
-  $extension =~ s/\//_/g;
-  $extension =~ s/\(/_/g;
-  $extension =~ s/\)/_/g;
-  $extension =~ s/\*/_/g;
-  $extension =~ s/\s/_/g;
-  if ($self->opts->snmpwalk && ! $self->opts->hostname) {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->opts->mode, lc $extension;
-  } elsif ($self->opts->snmpwalk && $self->opts->hostname eq "walkhost") {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        'snmpwalk.file'.md5_hex($self->opts->snmpwalk),
-        $self->mode, lc $extension;
-  } else {
-    return sprintf "%s/%s_%s%s", $self->statefilesdir(),
-        $self->opts->hostname, $self->mode, lc $extension;
-  }
-}
-
-package Monitoring::GLPlugin::SNMP::Item;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::CSF Monitoring::GLPlugin::Item Monitoring::GLPlugin::SNMP);
-use strict;
-
-
-package Monitoring::GLPlugin::SNMP::TableItem;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::CSF Monitoring::GLPlugin::TableItem Monitoring::GLPlugin::SNMP);
-use strict;
-
-sub ensure_index {
-  my $self = shift;
-  my $key = shift;
-  $self->{$key} ||= $self->{flat_indices};
-}
-
-sub unhex_ip {
-  my $self = shift;
-  my $value = shift;
-  if ($value && $value =~ /^0x(\w{8})/) {
-    $value = join(".", unpack "C*", pack "H*", $1);
-  } elsif ($value && $value =~ /^0x(\w{2} \w{2} \w{2} \w{2})/) {
-    $value = $1;
-    $value =~ s/ //g;
-    $value = join(".", unpack "C*", pack "H*", $value);
-  } elsif ($value && $value =~ /^([A-Z0-9]{2} [A-Z0-9]{2} [A-Z0-9]{2} [A-Z0-9]{2})/i) {
-    $value = $1;
-    $value =~ s/ //g;
-    $value = join(".", unpack "C*", pack "H*", $value);
-  } elsif ($value && unpack("H8", $value) =~ /(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $value = join(".", map { hex($_) } ($1, $2, $3, $4));
-  }
-  return $value;
-}
-
-sub unhex_mac {
-  my $self = shift;
-  my $value = shift;
-  if ($value && $value =~ /^0x(\w{12})/) {
-    $value = join(".", unpack "C*", pack "H*", $1);
-  } elsif ($value && $value =~ /^0x(\w{2}\s*\w{2}\s*\w{2}\s*\w{2}\s*\w{2}\s*\w{2})/) {
-    $value = $1;
-    $value =~ s/ //g;
-    $value = join(":", unpack "C*", pack "H*", $value);
-  } elsif ($value && unpack("H12", $value) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $value = join(":", map { hex($_) } ($1, $2, $3, $4, $5, $6));
-  }
-  return $value;
-}
-
-__PACKAGE__
+__END__

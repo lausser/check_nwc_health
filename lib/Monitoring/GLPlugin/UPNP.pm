@@ -121,4 +121,6 @@ sub create_statefile {
       $self->opts->hostname, $self->opts->mode, lc $extension;
 }
 
-__PACKAGE__
+1;
+
+__END__
