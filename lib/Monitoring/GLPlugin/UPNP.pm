@@ -7,7 +7,6 @@ use File::Basename;
 use Digest::MD5 qw(md5_hex);
 use AutoLoader;
 our $AUTOLOAD;
-our $VERSION = "1.0";
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 

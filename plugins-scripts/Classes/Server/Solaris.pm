@@ -208,6 +208,7 @@ sub finish {
         $factor = 1/8;
       }
     }
+    $factor = $self->number_of_bits($self->opts->units) / 8;
     $self->{inputRate} /= $factor;
     $self->{outputRate} /= $factor;
     $self->{maxInputRate} /= $factor;
