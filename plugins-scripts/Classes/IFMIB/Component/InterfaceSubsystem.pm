@@ -426,7 +426,6 @@ sub init {
     }
     $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    my $factor = 1/8; # default Bits
     $self->override_opts("units", "Bits") if ! $self->opts->units;
     $self->{inputRate} /= $self->number_of_bits($self->opts->units);
     $self->{outputRate} /= $self->number_of_bits($self->opts->units);
@@ -668,6 +667,8 @@ sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifHCInOctets ifHCOutOctets));
+    $self->{delta_ifInBits} = $self->{delta_ifHCInOctets} * 8;
+    $self->{delta_ifOutBits} = $self->{delta_ifHCOutOctets} * 8;
     # ifSpeed = Bits/sec
     # ifHighSpeed = 1000000Bits/sec
     if ($self->{ifSpeed} == 0) {
@@ -677,66 +678,45 @@ sub init {
       $self->{maxInputRate} = 0;
       $self->{maxOutputRate} = 0;
     } elsif ($self->{ifSpeed} == 4294967295) {
-      $self->{inputUtilization} = $self->{delta_ifHCInOctets} * 8 * 100 /
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->{ifHighSpeed} * 1000000);
-      $self->{outputUtilization} = $self->{delta_ifHCOutOctets} * 8 * 100 /
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->{ifHighSpeed} * 1000000);
       $self->{maxInputRate} = $self->{ifHighSpeed} * 1000000;
       $self->{maxOutputRate} = $self->{ifHighSpeed} * 1000000;
     } else {
-      $self->{inputUtilization} = $self->{delta_ifHCInOctets} * 8 * 100 /
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->{ifSpeed});
-      $self->{outputUtilization} = $self->{delta_ifHCOutOctets} * 8 * 100 /
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->{ifSpeed});
       $self->{maxInputRate} = $self->{ifSpeed};
       $self->{maxOutputRate} = $self->{ifSpeed};
     }
     if (defined $self->opts->ifspeedin) {
-      $self->{inputUtilization} = $self->{delta_ifHCInOctets} * 8 * 100 /
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedin);
       $self->{maxInputRate} = $self->opts->ifspeedin;
     }
     if (defined $self->opts->ifspeedout) {
-      $self->{outputUtilization} = $self->{delta_ifHCOutOctets} * 8 * 100 /
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedout);
       $self->{maxOutputRate} = $self->opts->ifspeedout;
     }
     if (defined $self->opts->ifspeed) {
-      $self->{inputUtilization} = $self->{delta_ifHCInOctets} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{outputUtilization} = $self->{delta_ifHCOutOctets} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{maxInputRate} = $self->opts->ifspeed;
-      $self->{maxOutputRate} = $self->opts->ifspeed;
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+          ($self->{delta_timestamp} * $self->opts->ifspeedin);
+      $self->{maxInputRate} = $self->opts->ifspeedin;
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+          ($self->{delta_timestamp} * $self->opts->ifspeedout);
+      $self->{maxOutputRate} = $self->opts->ifspeedout;
     }
-    $self->{inputRate} = $self->{delta_ifHCInOctets} / $self->{delta_timestamp};
-    $self->{outputRate} = $self->{delta_ifHCOutOctets} / $self->{delta_timestamp};
-    $self->{maxInputRate} /= 8; # auf octets umrechnen wie die in/out
-    $self->{maxOutputRate} /= 8;
-    my $factor = 1/8; # default Bits
-    if ($self->opts->units) {
-      if ($self->opts->units eq "GB") {
-        $factor = 1024 * 1024 * 1024;
-      } elsif ($self->opts->units eq "MB") {
-        $factor = 1024 * 1024;
-      } elsif ($self->opts->units eq "KB") {
-        $factor = 1024;
-      } elsif ($self->opts->units eq "GBi") {
-        $factor = 1024 * 1024 * 1024 / 8;
-      } elsif ($self->opts->units eq "MBi") {
-        $factor = 1024 * 1024 / 8;
-      } elsif ($self->opts->units eq "KBi") {
-        $factor = 1024 / 8;
-      } elsif ($self->opts->units eq "B") {
-        $factor = 1;
-      } elsif ($self->opts->units eq "Bit") {
-        $factor = 1/8;
-      }
-    }
-    $self->{inputRate} /= $factor;
-    $self->{outputRate} /= $factor;
-    $self->{maxInputRate} /= $factor;
-    $self->{maxOutputRate} /= $factor;
+    $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
+    $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
+    $self->override_opts("units", "Bits") if ! $self->opts->units;
+    $self->{inputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{outputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{MaxInputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{MaxOutputRate} /= $self->number_of_bits($self->opts->units);
     if ($self->{ifOperStatus} eq 'down') {
       $self->{inputUtilization} = 0;
       $self->{outputUtilization} = 0;
