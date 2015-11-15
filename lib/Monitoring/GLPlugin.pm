@@ -695,6 +695,44 @@ sub decode_password {
   return $password;
 }
 
+sub number_of_bits {
+  my $self = shift;
+  my $unit = shift;
+  # https://en.wikipedia.org/wiki/Data_rate_units
+  my $bits => {
+    'bit' => 1,			# Bit per second
+    'B' => 8,			# Byte per second, 8 bits per second
+    'kbit' => 1000,		# Kilobit per second, 1,000 bits per second
+    'kb' => 1000,		# Kilobit per second, 1,000 bits per second
+    'Kibit' => 1024,		# Kibibit per second, 1,024 bits per second
+    'kB' => 8000,		# Kilobyte per second, 8,000 bits per second
+    'KiB' => 8192,		# Kibibyte per second, 1,024 bytes per second
+    'Mbit' => 1000000,		# Megabit per second, 1,000,000 bits per second
+    'Mb' => 1000000,		# Megabit per second, 1,000,000 bits per second
+    'Mibit' => 1048576,		# Mebibit per second, 1,024 kibibits per second
+    'MB' => 8000000,		# Megabyte per second, 1,000 kilobytes per second
+    'MiB' => 8388608,		# Mebibyte per second, 1,024 kibibytes per second
+    'Gbit' => 1000000000,	# Gigabit per second, 1,000 megabits per second
+    'Gb' => 1000000000,		# Gigabit per second, 1,000 megabits per second
+    'Gibit' => 1073741824,	# Gibibit per second, 1,024 mebibits per second
+    'GB' => 8000000000,		# Gigabyte per second, 1,000 megabytes per second
+    'GiB' => 8589934592,	# Gibibyte per second, 8192 mebibits per second
+    'Tbit' => 1000000000000,	# Terabit per second, 1,000 gigabits per second
+    'Tb' => 1000000000000,	# Terabit per second, 1,000 gigabits per second
+    'Tibit' => 1099511627776,	# Tebibit per second, 1,024 gibibits per second
+    'TB' => 8000000000000,	# Terabyte per second, 1,000 gigabytes per second
+    # eigene kreationen
+    'KBi' => 1024,
+    'MBi' => 1024 * 1024,
+    'GBi' => 1024 * 1024 * 1024,
+  };
+  if (exists $bits->{$unit}) {
+    return $bits->{$unit};
+  } else {
+    return 0;
+  }
+}
+
 
 #########################################################
 # runtime methods
