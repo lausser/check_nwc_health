@@ -140,9 +140,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'Classes::HP';
         $self->debug('using Classes::HP');
-      } elsif ($self->{productname} =~ /(cpx86_64)|(Check\s*Point)|(Linux.*\dcp )/i) {
-        bless $self, 'Classes::CheckPoint';
-        $self->debug('using Classes::CheckPoint');
+      } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i) {
+        bless $self, 'Classes::CheckPoint::Firewall1';
+        $self->debug('using Classes::CheckPoint::Firewall1');
       } elsif ($self->{productname} =~ /Clavister/i) {
         bless $self, 'Classes::Clavister';
         $self->debug('using Classes::Clavister');
