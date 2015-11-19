@@ -16,6 +16,7 @@ sub init {
 
 sub check {
   my $self = shift;
+  chomp($self->{haState});
   $self->add_info('checking ha');
   $self->add_info(sprintf 'ha %sstarted, role is %s, status is %s', 
       $self->{haStarted} eq 'yes' ? '' : 'not ', 
