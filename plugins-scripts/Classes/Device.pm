@@ -134,9 +134,12 @@ sub classify {
       } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'Classes::F5';
         $self->debug('using Classes::F5');
-      } elsif ($self->{productname} =~ /(Huawei|H?H3C|HP Comware)/i) {
+      } elsif ($self->{productname} =~ /(H?H3C|HP Comware)/i) {
         bless $self, 'Classes::HH3C';
         $self->debug('using Classes::HH3C');
+      } elsif ($self->{productname} =~ /(Huawei)/i) {
+        bless $self, 'Classes::Huawei';
+        $self->debug('using Classes::Huawei');
       } elsif ($self->{productname} =~ /Procurve/i) {
         bless $self, 'Classes::HP';
         $self->debug('using Classes::HP');

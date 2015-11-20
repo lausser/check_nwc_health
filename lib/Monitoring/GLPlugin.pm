@@ -699,7 +699,7 @@ sub number_of_bits {
   my $self = shift;
   my $unit = shift;
   # https://en.wikipedia.org/wiki/Data_rate_units
-  my $bits => {
+  my $bits = {
     'bit' => 1,			# Bit per second
     'B' => 8,			# Byte per second, 8 bits per second
     'kbit' => 1000,		# Kilobit per second, 1,000 bits per second

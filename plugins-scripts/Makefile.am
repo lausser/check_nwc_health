@@ -98,6 +98,8 @@ EXTRA_MODULES=\
   Classes/HH3C/Component/MemSubsystem.pm \
   Classes/HH3C/Component/CpuSubsystem.pm \
   Classes/HH3C.pm \
+  Classes/Huawei/CloudEngine.pm \
+  Classes/Huawei.pm \
   Classes/HP/Procurve/Component/MemSubsystem.pm \
   Classes/HP/Procurve/Component/CpuSubsystem.pm \
   Classes/HP/Procurve/Component/EnvironmentalSubsystem.pm \

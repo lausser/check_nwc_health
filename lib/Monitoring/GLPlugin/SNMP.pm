@@ -1292,6 +1292,24 @@ sub get_snmp_tables {
   }
 }
 
+sub merge_tables {
+  my $self = shift;
+  my $into = shift;
+  my @from = @_;
+  my $into_indices = {};
+  map { $into_indices->{$_->{flat_indices}} = $_ } @{$self->{$into}};
+  foreach (@from) {
+    foreach my $element (@{$self->{$_}}) {
+      if (exists $into_indices->{$element->{flat_indices}}) {
+        foreach my $key (keys %{$element}) {
+          $into_indices->{$element->{flat_indices}}->{$key} = $element->{$key};
+        }
+      }
+    }
+  }
+
+}
+
 sub mibs_and_oids_definition {
   my $self = shift;
   my $mib = shift;
