@@ -12,8 +12,11 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
     hwEntityStateTable => '1.3.6.1.4.1.2011.5.25.31.1.1.1',
     hwEntityStateEntry => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1',
     hwEntityAdminStatus => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.1',
+    hwEntityAdminStatusDefinition => 'HUAWEI-ENTITY-EXTENT-MIB::HwAdminState',
     hwEntityOperStatus => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.2',
+    hwEntityOperStatusDefinition => 'HUAWEI-ENTITY-EXTENT-MIB::HwOperState',
     hwEntityStandbyStatus => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.3',
+    hwEntityStandbyStatusDefinition => 'HUAWEI-ENTITY-EXTENT-MIB::HwStandbyStatus',
     hwEntityAlarmLight => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.4',
     hwEntityCpuUsage => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.5',
     hwEntityCpuUsageThreshold => '1.3.6.1.4.1.2011.5.25.31.1.1.1.1.6',
@@ -351,6 +354,33 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
 };
 
 $Monitoring::GLPlugin::SNMP::definitions->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
+    HwAdminState => {
+      '1' => 'notSupported',
+      '2' => 'locked',
+      '3' => 'shuttingDown',
+      '4' => 'unlocked',
+      '11' => 'up',
+      '12' => 'down',
+      '13' => 'loopback',
+    },
+    HwOperState => {
+      '1' => 'notSupported',
+      '2' => 'disabled',
+      '3' => 'enabled',
+      '4' => 'offline',
+      '11' => 'up',
+      '12' => 'down',
+      '13' => 'connect',
+      '15' => 'protocolUp',
+      '16' => 'linkUp',
+      '17' => 'linkDown',
+    },
+    HwStandbyStatus => {
+      '1' => 'notSupported',
+      '2' => 'hotStandby',
+      '3' => 'coldStandby',
+      '4' => 'providingService',
+    },
     hwEntitySupportFlexCard => {
       '1' => 'notSupported',
       '2' => 'flexible',
