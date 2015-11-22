@@ -1274,10 +1274,11 @@ sub get_snmp_tables {
     my $table = $info->[1];
     my $class = $info->[2];
     my $filter = $info->[3];
+    my $rows = $info->[4];
     $self->{$arrayname} = [] if ! exists $self->{$arrayname};
     if (! exists $Monitoring::GLPlugin::SNMP::tablecache->{$mib} || ! exists $Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
       $Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table} = [];
-      foreach ($self->get_snmp_table_objects($mib, $table)) {
+      foreach ($self->get_snmp_table_objects($mib, $table, undef, $rows)) {
         my $new_object = $class->new(%{$_});
         next if (defined $filter && ! &$filter($new_object));
         push(@{$self->{$arrayname}}, $new_object);
@@ -1306,8 +1307,8 @@ sub merge_tables {
         }
       }
     }
+    delete $self->{$_};
   }
-
 }
 
 sub mibs_and_oids_definition {
@@ -1368,6 +1369,29 @@ sub get_snmp_table_objects_with_cache {
   return @entries;
 }
 
+sub get_table_row_oids {
+  my $self = shift;
+  my $mib = shift;
+  my $table = shift;
+  my $rows = shift;
+  my $entry = $table;
+  $entry =~ s/Table/Entry/g;
+  my $eoid = $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.';
+  my $eoidlen = length($eoid);
+  my @columns = scalar(@{$rows}) ?
+  map {
+      $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
+  } @{$rows}
+  :
+  map {
+      $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}
+  } grep {
+    substr($Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$_}, 0, $eoidlen) eq
+        $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry}.'.'
+  } keys %{$Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}};
+  return @columns;
+}
+
 # get_snmp_table_objects('MIB-Name', 'Table-Name', 'Table-Entry', [indices])
 # returns array of hashrefs
 sub get_snmp_table_objects {
@@ -1375,6 +1399,7 @@ sub get_snmp_table_objects {
   my $mib = shift;
   my $table = shift;
   my $indices = shift || [];
+  my $rows = shift || [];
   my @entries = ();
   my $augmenting_table;
   $self->debug(sprintf "get_snmp_table_objects %s %s", $mib, $table);
@@ -1531,6 +1556,21 @@ sub get_snmp_table_objects {
       # $self->get_indices($Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry});
       @entries = $self->make_symbolic($mib, $result, $indices);
       @entries = map { $_->{indices} = shift @{$indices}; $_ } @entries;
+    } elsif (scalar(@{$rows})) {
+      my @columns = $self->get_table_row_oids($mib, $table, $rows);
+      my $result = $self->get_entries(
+          -columns => \@columns,
+      );
+      $self->debug(sprintf "get_snmp_table_objects get_table_r returns %d oids",
+          scalar(keys %{$result}));
+      my @indices = 
+          $self->get_indices(
+              -baseoid => $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry},
+              -oids => [keys %{$result}]);
+      $self->debug(sprintf "get_snmp_table_objects get_table_r returns %d indices",
+          scalar(@indices));
+      @entries = $self->make_symbolic($mib, $result, \@indices);
+      @entries = map { $_->{indices} = shift @indices; $_ } @entries;
     } else {
       $self->debug(sprintf "get_snmp_table_objects calls get_table %s",
           $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$table});

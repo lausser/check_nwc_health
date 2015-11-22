@@ -650,9 +650,18 @@ $Monitoring::GLPlugin::SNMP::definitions->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
       '4' => 'supportTunableType',
     },
 };
-    $self->get_snmp_tables('ENTITY-MIB', [
-      ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
-    ]);
+  if ($self->mode =~ /device::hardware::health/) {
+    $self->analyze_and_check_environmental_subsystem("Classes::Huawei::Component::EnvironmentalSubsystem");
+  } elsif ($self->mode =~ /device::hardware::load/) {
+    $self->analyze_and_check_cpu_subsystem("Classes::Huawei::Component::CpuSubsystem");
+  } elsif ($self->mode =~ /device::hardware::memory/) {
+    $self->analyze_and_check_mem_subsystem("Classes::Huawei::Component::MemSubsystem");
+  } else {
+    $self->no_such_mode();
+  }
+}
+
+__END__
 foreach my $ding (qw(
 hwEntityStateTable
 hwRUModuleInfoTable
@@ -677,21 +686,5 @@ hwPreDisposeEntInfoTable)) {
     $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
 #      [$ding, $ding, 'Monitoring::GLPlugin::SNMP::TableItem'],
     ]);
-}
-foreach my $ding (qw(
-hwEntityStateTable)) {
-    $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-      [$ding, $ding, 'Monitoring::GLPlugin::SNMP::TableItem'],
-    ]);
-}
-
-#printf "entities %s\n", join(" ", map { $_->{flat_indices}} @{$self->{entities}});
-#printf "entities %s\n", join(" ", map { $_->{flat_indices}} @{$self->{hwEntityStateTable}});
-
-$self->merge_tables("entities", "hwEntityStateTable");
-foreach (@{$self->{entities}}) {
-  $_->dump();
-}
-
 }
 
