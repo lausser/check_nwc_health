@@ -3859,6 +3859,10 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
       entPhysicalAlias => '1.3.6.1.2.1.47.1.1.1.1.14',
       entPhysicalAssetID => '1.3.6.1.2.1.47.1.1.1.1.15',
       entPhysicalIsFRU => '1.3.6.1.2.1.47.1.1.1.1.16',
+      entPhysicalIsFRUDefinition => {
+        1 => 'true',
+        2 => 'false',
+      },
       entPhysicalMfgDate => '1.3.6.1.2.1.47.1.1.1.1.17',
       entPhysicalUris => '1.3.6.1.2.1.47.1.1.1.1.18',
 

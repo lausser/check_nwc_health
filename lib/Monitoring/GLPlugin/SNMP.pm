@@ -1279,15 +1279,17 @@ sub get_snmp_tables {
     if (! exists $Monitoring::GLPlugin::SNMP::tablecache->{$mib} || ! exists $Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table}) {
       $Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table} = [];
       foreach ($self->get_snmp_table_objects($mib, $table, undef, $rows)) {
+        push(@{$Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table}}, $_);
         my $new_object = $class->new(%{$_});
         next if (defined $filter && ! &$filter($new_object));
         push(@{$self->{$arrayname}}, $new_object);
-        push(@{$Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table}}, $new_object);
       }
     } else {
       $self->debug(sprintf "get_snmp_tables %s %s cache hit", $mib, $table);
       foreach (@{$Monitoring::GLPlugin::SNMP::tablecache->{$mib}->{$table}}) {
-        push(@{$self->{$arrayname}}, $_);
+        my $new_object = $class->new(%{$_});
+        next if (defined $filter && ! &$filter($new_object));
+        push(@{$self->{$arrayname}}, $new_object);
       }
     }
   }
@@ -1308,6 +1310,31 @@ sub merge_tables {
       }
     }
     delete $self->{$_};
+  }
+}
+
+sub merge_tables_with_code {
+  my $self = shift;
+  my $into = shift;
+  my @from = @_;
+  my $into_indices = {};
+  my @to_del = ();
+  foreach my $into_elem (@{$self->{$into}}) {
+    for (my $i = 0; $i < @from; $i += 2) {
+      my ($from_elems, $func) = @from[$i, $i+1];
+      foreach my $from_elem (@{$self->{$from_elems}}) {
+        if (&$func($into_elem, $from_elem)) {
+printf "rong! %s to %s\n", Data::Dumper::Dumper($into_elem), Data::Dumper::Dumper($from_elem);
+          foreach my $key (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$from_elem}) {
+            $into_elem->{$key} = $from_elem->{$key};
+          }
+        }
+      }
+    }
+  }
+  for (my $i = 0; $i < @from; $i += 2) {
+    my ($from_elems, $func) = @from[$i, $i+1];
+    delete $self->{$from_elems};
   }
 }
 
@@ -1563,7 +1590,7 @@ sub get_snmp_table_objects {
       );
       $self->debug(sprintf "get_snmp_table_objects get_table_r returns %d oids",
           scalar(keys %{$result}));
-      my @indices = 
+      my @indices =
           $self->get_indices(
               -baseoid => $Monitoring::GLPlugin::SNMP::mibs_and_oids->{$mib}->{$entry},
               -oids => [keys %{$result}]);
