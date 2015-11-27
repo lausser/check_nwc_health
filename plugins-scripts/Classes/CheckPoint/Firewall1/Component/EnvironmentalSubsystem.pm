@@ -12,6 +12,8 @@ sub init {
       Classes::CheckPoint::Firewall1::Component::FanSubsystem->new();
   $self->{voltage_subsystem} =
       Classes::CheckPoint::Firewall1::Component::VoltageSubsystem->new();
+  $self->{powersupply_subsystem} =
+      Classes::CheckPoint::Firewall1::Component::PowersupplySubsystem->new();
 }
 
 sub check {
@@ -20,6 +22,7 @@ sub check {
   $self->{temperature_subsystem}->check();
   $self->{fan_subsystem}->check();
   $self->{voltage_subsystem}->check();
+  $self->{powersupply_subsystem}->check();
   if (! $self->check_messages()) {
     $self->clear_ok(); # too much noise
     $self->add_ok("environmental hardware working fine");
@@ -32,5 +35,6 @@ sub dump {
   $self->{temperature_subsystem}->dump();
   $self->{fan_subsystem}->dump();
   $self->{voltage_subsystem}->dump();
+  $self->{powersupply_subsystem}->dump();
 }
 

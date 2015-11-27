@@ -159,6 +159,7 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1/Component/TemperatureSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/FanSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/VoltageSubsystem.pm \
+  Classes/CheckPoint/Firewall1/Component/PowersupplySubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/DiskSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/MngmtSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/SvnSubsystem.pm \
