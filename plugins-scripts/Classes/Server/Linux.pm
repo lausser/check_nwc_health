@@ -115,6 +115,8 @@ sub finish {
     $Monitoring::GLPlugin::mode = "device::interfaces::complete";
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInOctets ifOutOctets));
+    $self->{delta_ifInBits} = $self->{delta_ifInOctets} * 8;
+    $self->{delta_ifOutBits} = $self->{delta_ifOutOctets} * 8;
     if ($self->{ifSpeed} == 0) {
       # vlan graffl
       $self->{inputUtilization} = 0;
@@ -122,59 +124,46 @@ sub finish {
       $self->{maxInputRate} = 0;
       $self->{maxOutputRate} = 0;
     } else {
-      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->{ifSpeed});
-      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->{ifSpeed});
       $self->{maxInputRate} = $self->{ifSpeed};
       $self->{maxOutputRate} = $self->{ifSpeed};
     }
     if (defined $self->opts->ifspeedin) {
-      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedin);
       $self->{maxInputRate} = $self->opts->ifspeedin;
     }
     if (defined $self->opts->ifspeedout) {
-      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedout);
       $self->{maxOutputRate} = $self->opts->ifspeedout;
     }
     if (defined $self->opts->ifspeed) {
-      $self->{inputUtilization} = $self->{delta_ifInOctets} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{outputUtilization} = $self->{delta_ifOutOctets} * 8 * 100 /
-          ($self->{delta_timestamp} * $self->opts->ifspeed);
-      $self->{maxInputRate} = $self->opts->ifspeed;
-      $self->{maxOutputRate} = $self->opts->ifspeed;
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+          ($self->{delta_timestamp} * $self->opts->ifspeedin);
+      $self->{maxInputRate} = $self->opts->ifspeedin;
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+          ($self->{delta_timestamp} * $self->opts->ifspeedout);
+      $self->{maxOutputRate} = $self->opts->ifspeedout;
     }
-    $self->{inputRate} = $self->{delta_ifInOctets} / $self->{delta_timestamp};
-    $self->{outputRate} = $self->{delta_ifOutOctets} / $self->{delta_timestamp};
-    $self->{maxInputRate} /= 8; # auf octets umrechnen wie die in/out
-    $self->{maxOutputRate} /= 8;
-    my $factor = 1/8; # default Bits
-    if ($self->opts->units) {
-      if ($self->opts->units eq "GB") {
-        $factor = 1024 * 1024 * 1024;
-      } elsif ($self->opts->units eq "MB") {
-        $factor = 1024 * 1024;
-      } elsif ($self->opts->units eq "KB") {
-        $factor = 1024;
-      } elsif ($self->opts->units eq "GBi") {
-        $factor = 1024 * 1024 * 1024 / 8;
-      } elsif ($self->opts->units eq "MBi") {
-        $factor = 1024 * 1024 / 8;
-      } elsif ($self->opts->units eq "KBi") {
-        $factor = 1024 / 8;
-      } elsif ($self->opts->units eq "B") {
-        $factor = 1;
-      } elsif ($self->opts->units eq "Bit") {
-        $factor = 1/8;
-      }
+    $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
+    $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
+    $self->override_opt("units", "Bits") if ! $self->opts->units;
+    $self->{inputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{outputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
+    if ($self->{ifOperStatus} eq 'down') {
+      $self->{inputUtilization} = 0;
+      $self->{outputUtilization} = 0;
+      $self->{inputRate} = 0;
+      $self->{outputRate} = 0;
+      $self->{maxInputRate} = 0;
+      $self->{maxOutputRate} = 0;
     }
-    $self->{inputRate} /= $factor;
-    $self->{outputRate} /= $factor;
-    $self->{maxInputRate} /= $factor;
-    $self->{maxOutputRate} /= $factor;
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
     $self->{inputErrorRate} = $self->{delta_ifInErrors}
@@ -210,11 +199,9 @@ sub check {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)',
         $self->{ifDescr},
         $self->{inputUtilization},
-        sprintf("%.2f%s/s", $self->{inputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits')),
+        sprintf("%.2f%s/s", $self->{inputRate}, $self->opts->units),
         $self->{outputUtilization},
-        sprintf("%.2f%s/s", $self->{outputRate},
-            ($self->opts->units ? $self->opts->units : 'Bits')));
+        sprintf("%.2f%s/s", $self->{outputRate}, $self->opts->units));
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
         warning => 80,
@@ -252,7 +239,7 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
-        uom => $self->opts->units,
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
         min => 0,
         max => $self->{maxInputRate},
@@ -265,7 +252,7 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
         value => $self->{outputRate},
-        uom => $self->opts->units,
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
         min => 0,
         max => $self->{maxOutputRate},

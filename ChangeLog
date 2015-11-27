@@ -1,4 +1,9 @@
+* 2015-11-24 5.0
+  introduce new units (based on 1000 instead of 1024), will have an impact on interface perfdata thresholds
+* 2015-11-24 4.8
+  add Huawei CloudEngine
   pull request #45 chomp Checkpoint HA state (Thanks Claudio Kuenzler)
+  pull request #46  Add CheckPoint Power Supply Check (Thanks Claudio Kuenzler)
 * 2015-11-18 4.7.1
   detect CheckPoint IPSO (Thanks Claudio Kuenzler)
 * 2015-11-05 4.7

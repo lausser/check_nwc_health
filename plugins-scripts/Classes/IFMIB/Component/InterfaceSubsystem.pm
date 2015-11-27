@@ -426,11 +426,11 @@ sub init {
     }
     $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    $self->override_opts("units", "Bits") if ! $self->opts->units;
+    $self->override_opt("units", "Bits") if ! $self->opts->units;
     $self->{inputRate} /= $self->number_of_bits($self->opts->units);
     $self->{outputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{MaxInputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{MaxOutputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
     if ($self->{ifOperStatus} eq 'down') {
       $self->{inputUtilization} = 0;
       $self->{outputUtilization} = 0;
@@ -547,7 +547,7 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
-        uom => $self->opts->units,
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
         min => 0,
         max => $self->{maxInputRate},
@@ -560,7 +560,7 @@ sub check {
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
         value => $self->{outputRate},
-        uom => $self->opts->units,
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
         min => 0,
         max => $self->{maxOutputRate},
@@ -712,11 +712,11 @@ sub init {
     }
     $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    $self->override_opts("units", "Bits") if ! $self->opts->units;
+    $self->override_opt("units", "Bits") if ! $self->opts->units;
     $self->{inputRate} /= $self->number_of_bits($self->opts->units);
     $self->{outputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{MaxInputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{MaxOutputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
+    $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
     if ($self->{ifOperStatus} eq 'down') {
       $self->{inputUtilization} = 0;
       $self->{outputUtilization} = 0;

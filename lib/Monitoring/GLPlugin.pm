@@ -12,7 +12,7 @@ use File::Basename;
 use Digest::MD5 qw(md5_hex);
 use Errno;
 our $AUTOLOAD;
-*VERSION = \'1.2.1';
+*VERSION = \'1.3';
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -722,6 +722,7 @@ sub number_of_bits {
     'Tibit' => 1099511627776,	# Tebibit per second, 1,024 gibibits per second
     'TB' => 8000000000000,	# Terabyte per second, 1,000 gigabytes per second
     # eigene kreationen
+    'Bits' => 1,
     'KBi' => 1024,
     'MBi' => 1024 * 1024,
     'GBi' => 1024 * 1024 * 1024,

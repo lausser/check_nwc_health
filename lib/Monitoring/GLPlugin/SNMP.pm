@@ -1324,7 +1324,6 @@ sub merge_tables_with_code {
       my ($from_elems, $func) = @from[$i, $i+1];
       foreach my $from_elem (@{$self->{$from_elems}}) {
         if (&$func($into_elem, $from_elem)) {
-printf "rong! %s to %s\n", Data::Dumper::Dumper($into_elem), Data::Dumper::Dumper($from_elem);
           foreach my $key (grep !/^(info|trace|warning|critical|blacklisted|extendedinfo|flat_indices|indices)/, sort keys %{$from_elem}) {
             $into_elem->{$key} = $from_elem->{$key};
           }
