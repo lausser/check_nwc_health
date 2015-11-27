@@ -5,24 +5,32 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['modules', 'entPhysicalTable', 'Classes::Huawei::Component::EnvironmentalSubsystem::Module', sub { my $o = shift; $o->{entPhysicalClass} eq 'module' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['fans', 'entPhysicalTable', 'Classes::Huawei::Component::EnvironmentalSubsystem::Fan', sub { my $o = shift; $o->{entPhysicalClass} eq 'fan' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['powersupplies', 'entPhysicalTable', 'Classes::Huawei::Component::EnvironmentalSubsystem::Module', sub { my $o = shift; $o->{entPhysicalClass} eq 'powerSupply' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    #['modules', 'entPhysicalTable', 'Classes::Huawei::Component::EnvironmentalSubsystem::Module'],
+    ['modules', 'entPhysicalTable',
+        'Classes::Huawei::Component::EnvironmentalSubsystem::Module',
+        sub { my $o = shift; $o->{entPhysicalClass} eq 'module' },
+        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
+    ['fans', 'entPhysicalTable',
+        'Classes::Huawei::Component::EnvironmentalSubsystem::Fan', 
+        sub { my $o = shift; $o->{entPhysicalClass} eq 'fan' },
+        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
+    ['powersupplies', 'entPhysicalTable',
+        'Classes::Huawei::Component::EnvironmentalSubsystem::Powersupply',
+        sub { my $o = shift; $o->{entPhysicalClass} eq 'powerSupply' },
+       ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
   ]);
-printf "%d modules\n", scalar(@{$self->{modules}});
-printf "%d fans\n",  scalar(@{$self->{fans}});
   $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-    ['entitystates', 'hwEntityStateTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
     ['fanstates', 'hwFanStatusTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
-  $self->merge_tables("modules", "entitystates");
+  foreach (qw(modules fans powersupplies)) {
+    $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
+      ['entitystates', 'hwEntityStateTable',
+      'Monitoring::GLPlugin::SNMP::TableItem'],
+    ]);
+    $self->merge_tables($_, "entitystates");
+  }
   $self->merge_tables_with_code("fans", "fanstates", sub {
     my $fan = shift;
     my $fanstate = shift;
-printf "-------------->compare %s with %s\n", $fan->{entPhysicalName}, 
-sprintf("FAN %d/%d",
-        $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn});
     return ($fan->{entPhysicalName} eq sprintf("FAN %d/%d",
         $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn})) ? 1 : 0;
   });
@@ -32,6 +40,39 @@ sprintf("FAN %d/%d",
 package Classes::Huawei::Component::EnvironmentalSubsystem::Fan;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
+
+sub check {
+  my $self = shift;
+  $self->add_info(sprintf 'fan %s is %s, state is %s, admin status is %s, oper status is %s',
+      $self->{entPhysicalName}, $self->{hwEntityFanPresent},
+      $self->{hwEntityFanState},
+      $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
+  if ($self->{hwEntityFanPresent} eq 'present') {
+    if ($self->{hwEntityFanState} ne 'normal') {
+      $self->add_warning();
+    }
+    $self->add_perfdata(
+        label => 'rpm_'.$self->{entPhysicalName},
+        value => $self->{hwEntityFanSpeed},
+        uom => '%',
+    );
+  }
+}
+
+package Classes::Huawei::Component::EnvironmentalSubsystem::Powersupply;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
+  $self->add_info(sprintf 'powersupply %s has admin status is %s, oper status is %s',
+      $self->{entPhysicalName},
+      $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
+  if ($self->{hwEntityOperStatus} eq 'down' ||
+      $self->{hwEntityOperStatus} eq 'offline') {
+    $self->add_warning();
+  }
+}
 
 package Classes::Huawei::Component::EnvironmentalSubsystem::Module;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
@@ -44,7 +85,7 @@ sub finish {
 
 sub check {
   my $self = shift;
-  my $id = shift;
+  #my $id = shift;
   $self->add_info(sprintf 'module %s admin status is %s, oper status is %s',
       $self->{name}, $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
   $self->add_info(sprintf 'module %s temperature is %.2f',
