@@ -5257,6 +5257,10 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids = {
           1 => 'abnormal',
           2 => 'unknown',
       },
+      'powerSupplyTable' => '1.3.6.1.4.1.2620.1.6.7.9.1',
+      'powerSupplyEntry' => '1.3.6.1.4.1.2620.1.6.7.9.1.1',
+      'powerSupplyIndex' => '1.3.6.1.4.1.2620.1.6.7.9.1.1.1',
+      'powerSupplyStatus' => '1.3.6.1.4.1.2620.1.6.7.9.1.1.2',
   },
   'CLAVISTER-MIB' => {
       'clvSystem' => '1.3.6.1.4.1.5089.1.2.1',
