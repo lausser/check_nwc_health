@@ -18,27 +18,29 @@ sub init {
       $self->add_unknown("could not find $module module");
     }
   }
-  $self->login();
   if (! $self->check_messages()) {
     if ($self->mode =~ /device::hardware::health/) {
+      $self->login();
       $self->analyze_environmental_subsystem();
       $self->check_environmental_subsystem();
     } elsif ($self->mode =~ /device::hardware::load/) {
+      $self->login();
       $self->analyze_cpu_subsystem();
       $self->check_cpu_subsystem();
     } elsif ($self->mode =~ /device::hardware::memory/) {
+      $self->login();
       $self->analyze_mem_subsystem();
       $self->check_mem_subsystem();
     } elsif ($self->mode =~ /device::interfaces/) {
       $self->analyze_and_check_interface_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::InterfaceSubsystem");
     } elsif ($self->mode =~ /device::smarthome/) {
+      $self->login();
       $self->analyze_and_check_smarthome_subsystem("Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem");
     } else {
-      $self->logout();
       $self->no_such_mode();
     }
+    $self->logout();
   }
-  $self->logout();
 }
 
 sub login {
