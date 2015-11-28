@@ -712,7 +712,7 @@ sub init {
     }
     $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
     $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    $self->override_opt("units", "Bits") if ! $self->opts->units;
+    $self->override_opt("units", "bit") if ! $self->opts->units;
     $self->{inputRate} /= $self->number_of_bits($self->opts->units);
     $self->{outputRate} /= $self->number_of_bits($self->opts->units);
     $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
