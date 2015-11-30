@@ -8,7 +8,8 @@ GL_MODULES=\
   ../lib/Monitoring/GLPlugin/SNMP.pm \
   ../lib/Monitoring/GLPlugin/SNMP/CSF.pm \
   ../lib/Monitoring/GLPlugin/SNMP/Item.pm \
-  ../lib/Monitoring/GLPlugin/SNMP/TableItem.pm
+  ../lib/Monitoring/GLPlugin/SNMP/TableItem.pm \
+  ../lib/Monitoring/GLPlugin/UPNP.pm
 EXTRA_MODULES=\
   Classes/UPNP/AVM/FritzBox7390/Components/InterfaceSubsystem.pm \
   Classes/UPNP/AVM/FritzBox7390/Components/SmartHomeSubsystem.pm \
