@@ -540,7 +540,6 @@ sub check {
         value => $self->{outputUtilization},
         uom => '%',
     );
-
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
@@ -571,9 +570,24 @@ sub check {
     $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
         $full_descr,
         $self->{inputErrorRate} , $self->{outputErrorRate});
-    $self->set_thresholds(warning => 1, critical => 10);
-    my $in = $self->check_thresholds($self->{inputErrorRate});
-    my $out = $self->check_thresholds($self->{outputErrorRate});
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_errors_in',
+        warning => 1,
+        critical => 10
+    );
+    my $in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_errors_in',
+        value => $self->{inputErrorRate}
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_errors_out',
+        warning => 1,
+        critical => 10
+    );
+    my $out = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_errors_out',
+        value => $self->{outputErrorRate}
+    );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
@@ -588,9 +602,24 @@ sub check {
     $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
         $full_descr,
         $self->{inputDiscardRate} , $self->{outputDiscardRate});
-    $self->set_thresholds(warning => 1, critical => 10);
-    my $in = $self->check_thresholds($self->{inputDiscardRate});
-    my $out = $self->check_thresholds($self->{outputDiscardRate});
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_discards_in',
+        warning => 1,
+        critical => 10
+    );
+    my $in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_discards_in',
+        value => $self->{inputDiscardRate}
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_discards_out',
+        warning => 1,
+        critical => 10
+    );
+    my $out = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_discards_out',
+        value => $self->{outputDiscardRate}
+    );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
