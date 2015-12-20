@@ -40,3 +40,10 @@ sub check {
   }
 }
 
+__END__
+The operational state of the fan or fan tray.
+unknown(1) - unknown.
+up(2) - powered on.
+down(3) - powered down.
+warning(4) - partial failure, needs replacement
+ as soon as possible.
