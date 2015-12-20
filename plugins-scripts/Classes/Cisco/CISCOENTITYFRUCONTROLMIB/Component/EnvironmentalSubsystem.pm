@@ -6,14 +6,14 @@ sub init {
   my $self = shift;
   $self->{fan_subsystem} =
       Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem->new();
-  $self->{supply_subsystem} =
+  $self->{powersupply_subsystem} =
       Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem->new();
 }
 
 sub check {
   my $self = shift;
   $self->{fan_subsystem}->check();
-  $self->{supply_subsystem}->check();
+  $self->{powersupply_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_ok("environmental hardware working fine");
   }
@@ -22,6 +22,6 @@ sub check {
 sub dump {
   my $self = shift;
   $self->{fan_subsystem}->dump();
-  $self->{supply_subsystem}->dump();
+  $self->{powersupply_subsystem}->dump();
 }
 
