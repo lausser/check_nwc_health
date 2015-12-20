@@ -12,7 +12,7 @@ sub init {
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
   ]);
   @{$self->{entities}} = grep { $_->{entPhysicalClass} eq 'powerSupply' } @{$self->{entities}};
-  foreach my $supply (@{$self->{supplies}}) {
+  foreach my $supply (@{$self->{powersupplies}}) {
     foreach my $entity (@{$self->{entities}}) {
       if ($supply->{flat_indices} eq $entity->{entPhysicalIndex}) {
         $supply->{entity} = $entity;
@@ -34,9 +34,10 @@ sub check {
       exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.' )' : '',
       $self->{cefcFRUPowerAdminStatus},
       $self->{cefcFRUPowerOperStatus});
-return;
-  if ($self->{cefcSupplyTrayOperStatus} eq "on") {
-  } elsif ($self->{cefcSupplyTrayOperStatus} eq "onButFanFail") {
+  if ($self->{cefcFRUPowerOperStatus} eq "on") {
+  } elsif ($self->{cefcFRUPowerOperStatus} eq "unknown") {
+    $self->add_unknown();
+  } elsif ($self->{cefcFRUPowerOperStatus} eq "onButFanFail") {
     $self->add_warning();
   } else {
     $self->add_critical();

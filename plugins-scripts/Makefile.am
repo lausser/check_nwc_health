@@ -22,6 +22,7 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/ModuleSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENTITYSENSORMIB/Component/SensorSubsystem.pm \
   Classes/Cisco/CISCOENTITYALARMMIB/Component/AlarmSubsystem.pm \
