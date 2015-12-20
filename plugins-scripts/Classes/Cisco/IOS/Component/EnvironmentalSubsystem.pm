@@ -23,6 +23,9 @@ sub init {
         Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem->new();
     $self->{voltage_subsystem} =
         Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem->new();
+  } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
+    $self->{fru_subsystem} =
+        Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::EnvironmentalSubsystem->new();
   } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     # (IOS can have ENVMON+ENTITY. Sensors are copies, so not needed)
     $self->{sensor_subsystem} =
@@ -39,12 +42,15 @@ sub init {
 
 sub check {
   my $self = shift;
-  if ($self->{ciscoEnvMonPresent}) {
+  if ($self->{ciscoEnvMonPresent} &&
+      $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem}->check();
     $self->{temperature_subsystem}->check();
     $self->{voltage_subsystem}->check();
     $self->{powersupply_subsystem}->check();
-  } elsif ($self->{ciscoEntitySensorPresent}) {
+  } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
+    $self->{fru_subsystem}->check();
+  } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     $self->{sensor_subsystem}->check();
   }
   if (! $self->check_messages()) {
@@ -54,12 +60,15 @@ sub check {
 
 sub dump {
   my $self = shift;
-  if ($self->{ciscoEnvMonPresent}) {
+  if ($self->{ciscoEnvMonPresent} &&
+      $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem}->dump();
     $self->{temperature_subsystem}->dump();
     $self->{voltage_subsystem}->dump();
     $self->{powersupply_subsystem}->dump();
-  } elsif ($self->{ciscoEntitySensorPresent}) {
+  } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
+    $self->{fru_subsystem}->dump();
+  } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     $self->{sensor_subsystem}->dump();
   }
 }
