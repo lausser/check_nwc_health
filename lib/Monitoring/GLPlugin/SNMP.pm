@@ -827,8 +827,10 @@ sub check_snmp_and_model {
         } elsif (/^([\d\.]+) = Network Address: (.*)/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = Hex-STRING: (.*)/) {
-          $response->{$1} = "0x".$2;
-          $response->{$1} =~ s/\s+$//;
+          my $k = $1;
+          my $h = $2;
+          $h =~ s/\s+//g;
+          $response->{$h} = pack('H*', $h);
         } elsif (/^([\d\.]+) = \w+: (\-*\d+)\s*$/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {
