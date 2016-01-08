@@ -5,12 +5,22 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CISCO-BGP4-MIB', [
-      ['prefixes', 'cbgpPeerAddrFamilyPrefixTable', 'Classes::Cisco::IOS::Component::BgpSubsystem::Prefix', sub { return $self->filter_name(shift->{cbgpPeerRemoteAddr}) } ],
+      ['peers', 'cbgpPeerAddrFamilyPrefixTable', 'Classes::Cisco::IOS::Component::BgpSubsystem::Peer', sub { return $self->filter_name(shift->{cbgpPeerRemoteAddr}) } ],
   ]);
 }
 
+sub check {
+  my $self = shift;
+  if ($self->mode =~ /prefix::count/) {
+    if (scalar(@{$self->{peers}}) == 0) {
+      $self->add_critical('no peers found');
+    } else {
+      $self->SUPER::check();
+    }
+  }
+}
 
-package Classes::Cisco::IOS::Component::BgpSubsystem::Prefix;
+package Classes::Cisco::IOS::Component::BgpSubsystem::Peer;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
