@@ -301,6 +301,7 @@ sub new {
   my $class = shift;
   my %params = @_;
   my $self = {
+    flat_indices => $params{flat_indices},
     ifTable => $params{ifTable},
     ifEntry => $params{ifEntry},
     ifIndex => $params{ifIndex},
