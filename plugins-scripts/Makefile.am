@@ -6,6 +6,7 @@ GL_MODULES=\
   ../lib/Monitoring/GLPlugin/Item.pm \
   ../lib/Monitoring/GLPlugin/TableItem.pm \
   ../lib/Monitoring/GLPlugin/SNMP.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
   ../lib/Monitoring/GLPlugin/SNMP/CSF.pm \
   ../lib/Monitoring/GLPlugin/SNMP/Item.pm \
   ../lib/Monitoring/GLPlugin/SNMP/TableItem.pm \
@@ -224,7 +225,6 @@ EXTRA_MODULES=\
   Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
-  Classes/MibsAndOids.pm \
   Classes/Device.pm
 
 SED=/bin/sed
