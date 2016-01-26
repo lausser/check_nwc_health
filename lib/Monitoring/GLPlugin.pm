@@ -1,6 +1,6 @@
 package Monitoring::GLPlugin;
 
-=head1 Monitoring::GLPlugin 
+=head1 Monitoring::GLPlugin
 
 Monitoring::GLPlugin - infrastructure functions to build a monitoring plugin
 
@@ -12,7 +12,7 @@ use File::Basename;
 use Digest::MD5 qw(md5_hex);
 use Errno;
 our $AUTOLOAD;
-*VERSION = \'1.3';
+*VERSION = \'1.4.3';
 
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
@@ -358,17 +358,17 @@ sub validate_args {
       $self->override_opt('statefilesdir', "/var/tmp/".$Monitoring::GLPlugin::plugin->{name});
     }
   }
-  $Monitoring::GLPlugin::plugin->{statefilesdir} = $self->opts->statefilesdir 
+  $Monitoring::GLPlugin::plugin->{statefilesdir} = $self->opts->statefilesdir
       if $self->opts->can("statefilesdir");
   if ($self->opts->can("warningx") && $self->opts->warningx) {
     foreach my $key (keys %{$self->opts->warningx}) {
-      $self->set_thresholds(metric => $key, 
+      $self->set_thresholds(metric => $key,
           warning => $self->opts->warningx->{$key});
     }
   }
   if ($self->opts->can("criticalx") && $self->opts->criticalx) {
     foreach my $key (keys %{$self->opts->criticalx}) {
-      $self->set_thresholds(metric => $key, 
+      $self->set_thresholds(metric => $key,
           critical => $self->opts->criticalx->{$key});
     }
   }
@@ -415,7 +415,7 @@ sub debug {
     printf "\n";
   }
   if ($self->{trace}) {
-    my $logfh = new IO::File;
+    my $logfh = IO::File->new();
     $logfh->autoflush(1);
     if ($logfh->open($tracefile, "a")) {
       $logfh->printf("%s: ", scalar localtime);
@@ -664,7 +664,9 @@ sub load_my_extension {
     }
     my $original_class = ref($self);
     my $original_init = $self->can("init");
+    $self->compatibility_class() if $self->can('compatibility_class');
     bless $self, "My$class";
+    $self->compatibility_methods() if $self->can('compatibility_methods');
     if ($self->isa("Monitoring::GLPlugin")) {
       my $new_init = $self->can("init");
       if ($new_init == $original_init) {
@@ -723,9 +725,11 @@ sub number_of_bits {
     'TB' => 8000000000000,	# Terabyte per second, 1,000 gigabytes per second
     # eigene kreationen
     'Bits' => 1,
-    'KBi' => 1024,
-    'MBi' => 1024 * 1024,
-    'GBi' => 1024 * 1024 * 1024,
+    'Bit' => 1,			# Bit per second
+    'KB' => 1024,		# Kilobyte (like disk kilobyte)
+    'KBi' => 1024,		# -"-
+    'MBi' => 1024 * 1024,	# Megabyte (like disk megabyte)
+    'GBi' => 1024 * 1024 * 1024, # Gigybate (like disk gigybyte)
   };
   if (exists $bits->{$unit}) {
     return $bits->{$unit};
@@ -921,7 +925,7 @@ sub is_blacklisted {
         }
       }
     }
-  } 
+  }
   return $self->{blacklisted};
 }
 
@@ -1004,18 +1008,18 @@ sub valdiff {
   }
   # lookback=99999, freeze=0(default)
   #  nimm den letzten lauf und schreib ihn nach {cold}
-  #  vergleich dann 
+  #  vergleich dann
   #    wenn es frozen gibt, vergleich frozen und den letzten lauf
   #    sonst den letzten lauf und den aktuellen lauf
   # lookback=99999, freeze=1
-  #  wird dann aufgerufen,wenn nach dem freeze=0 ein problem festgestellt wurde 
+  #  wird dann aufgerufen,wenn nach dem freeze=0 ein problem festgestellt wurde
   #     (also als 2.valdiff hinterher)
   #  schreib cold nach frozen
   # lookback=99999, freeze=2
   #  wird dann aufgerufen,wenn nach dem freeze=0 wieder alles ok ist
   #     (also als 2.valdiff hinterher)
   #  loescht frozen
-  #  
+  #
   my $last_values = $self->load_state(%params) || eval {
     my $empty_events = {};
     foreach (@keys) {
@@ -1065,7 +1069,7 @@ sub valdiff {
         } else {
           $last_values->{$_} = $last_values->{frozen}->{$_};
         }
-      } 
+      }
     } elsif ($mode eq "lookback") {
       # find a last_value in the history which fits lookback best
       # and overwrite $last_values->{$_} with historic data
@@ -1253,7 +1257,7 @@ sub save_state {
   if ((ref($params{save}) eq "HASH") && exists $params{save}->{timestamp}) {
     $params{save}->{localtime} = scalar localtime $params{save}->{timestamp};
   }
-  my $seekfh = new IO::File;
+  my $seekfh = IO::File->new();
   if ($seekfh->open($tmpfile, "w")) {
     $seekfh->printf("%s", Data::Dumper::Dumper($params{save}));
     $seekfh->flush();
@@ -1291,7 +1295,7 @@ sub load_state {
 #
 sub check_pidfile {
   my $self = shift;
-  my $fh = new IO::File;
+  my $fh = IO::File->new();
   if ($fh->open($self->{pidfile}, "r")) {
     my $pid = $fh->getline();
     $fh->close();
@@ -1334,7 +1338,7 @@ sub write_pidfile {
       } split(/\//, dirname($self->{pidfile}));
     }
   }
-  my $fh = new IO::File;
+  my $fh = IO::File->new();
   $fh->autoflush(1);
   if ($fh->open($self->{pidfile}, "w")) {
     $fh->printf("%s", $$);
@@ -1344,6 +1348,123 @@ sub write_pidfile {
     die "pid file could not be written";
   }
 }
+
+sub system_vartmpdir {
+  my $self = shift;
+  if ($^O =~ /MSWin/) {
+    return $self->system_tmpdir();
+  } else {
+    return "/var/tmp/".$Monitoring::GLPlugin::pluginname;
+  }
+}
+
+sub system_tmpdir {
+  my $self = shift;
+  if ($^O =~ /MSWin/) {
+    return $ENV{TEMP} if defined $ENV{TEMP};
+    return $ENV{TMP} if defined $ENV{TMP};
+    return File::Spec->catfile($ENV{windir}, 'Temp')
+        if defined $ENV{windir};
+    return 'C:\Temp';
+  } else {
+    return "/tmp";
+  }
+}
+
+sub convert_scientific_numbers {
+  my $self = shift;
+  my $n = shift;
+  # mostly used to convert numbers in scientific notation
+  if ($n =~ /^\s*\d+\s*$/) {
+    return $n;
+  } elsif ($n =~ /^\s*([-+]?)(\d*[\.,]*\d*)[eE]{1}([-+]?)(\d+)\s*$/) {
+    my ($vor, $num, $sign, $exp) = ($1, $2, $3, $4);
+    $n =~ s/E/e/g;
+    $n =~ s/,/\./g;
+    $num =~ s/,/\./g;
+    my $sig = $sign eq '-' ? "." . ($exp - 1 + length $num) : '';
+    my $dec = sprintf "%${sig}f", $n;
+    $dec =~ s/\.[0]+$//g;
+    return $dec;
+  } elsif ($n =~ /^\s*([-+]?)(\d+)[\.,]*(\d*)\s*$/) {
+    return $1.$2.".".$3;
+  } elsif ($n =~ /^\s*(.*?)\s*$/) {
+    return $1;
+  } else {
+    return $n;
+  }
+}
+
+sub compatibility_methods {
+  my $self = shift;
+  # add_perfdata
+  # add_message
+  # nagios_exit
+  # ->{warningrange}
+  # ->{criticalrange}
+  # ...
+  $self->{warningrange} = ($self->get_thresholds())[0];
+  $self->{criticalrange} = ($self->get_thresholds())[1];
+  my $old_init = $self->can('init');
+  my %params = (
+    'mode' => join('::', split(/-/, $self->opts->mode)),
+    'name' => $self->opts->name,
+    'name2' => $self->opts->name2,
+  );
+  {
+    no strict 'refs';
+    no warnings 'redefine';
+    *{ref($self).'::init'} = sub {
+      $self->$old_init(%params);
+      $self->nagios(%params);
+    };
+    *{ref($self).'::add_nagios'} = \&{"Monitoring::GLPlugin::add_message"};
+    *{ref($self).'::add_nagios_ok'} = \&{"Monitoring::GLPlugin::add_ok"};
+    *{ref($self).'::add_nagios_warning'} = \&{"Monitoring::GLPlugin::add_warning"};
+    *{ref($self).'::add_nagios_critical'} = \&{"Monitoring::GLPlugin::add_critical"};
+    *{ref($self).'::add_nagios_unknown'} = \&{"Monitoring::GLPlugin::add_unknown"};
+    *{ref($self).'::add_perfdata'} = sub {
+      my $self = shift;
+      my $message = shift;
+      foreach my $perfdata (split(/\s+/, $message)) {
+      my ($label, $perfstr) = split(/=/, $perfdata);
+      my ($value, $warn, $crit, $min, $max) = split(/;/, $perfstr);
+      $value =~ /^([\d\.\-\+]+)(.*)$/;
+      $value = $1;
+      my $uom = $2;
+      $Monitoring::GLPlugin::plugin->add_perfdata(
+        label => $label,
+        value => $value,
+        uom => $uom,
+        warn => $warn,
+        crit => $crit,
+        min => $min,
+        max => $max,
+      );
+      }
+    };
+    *{ref($self).'::check_thresholds'} = sub {
+      my $self = shift;
+      my $value = shift;
+      my $defaultwarningrange = shift;
+      my $defaultcriticalrange = shift;
+      $Monitoring::GLPlugin::plugin->set_thresholds(
+          metric => 'default',
+          warning => $defaultwarningrange,
+          critical => $defaultcriticalrange,
+      );
+      $self->{warningrange} = ($self->get_thresholds())[0];
+      $self->{criticalrange} = ($self->get_thresholds())[1];
+      return $Monitoring::GLPlugin::plugin->check_thresholds(
+          metric => 'default',
+          value => $value,
+          warning => $defaultwarningrange,
+          critical => $defaultcriticalrange,
+      );
+    };
+  }
+}
+
 
 sub AUTOLOAD {
   my $self = shift;

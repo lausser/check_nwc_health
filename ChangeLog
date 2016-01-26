@@ -1,3 +1,5 @@
+* 2015-12-20 5.1
+  Fix IOS-XE which no longer support the ENVMON MIB. Use FRU MIB instead. (Zhanks Daniel Hoffend, pull request #49)
 * 2015-11-24 5.0
   introduce new units (based on 1000 instead of 1024), will have an impact on interface perfdata thresholds
 * 2015-11-24 4.8

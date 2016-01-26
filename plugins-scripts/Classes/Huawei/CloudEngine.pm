@@ -4,8 +4,8 @@ use strict;
 
 sub init {
   my $self = shift;
-
-$Monitoring::GLPlugin::SNMP::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
+my $work_in_progress = {
+#$Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
     hwEntityExtentMIB => '1.3.6.1.4.1.2011.5.25.31',
     hwEntityExtObjects => '1.3.6.1.4.1.2011.5.25.31.1',
     hwEntityState => '1.3.6.1.4.1.2011.5.25.31.1.1',
@@ -353,7 +353,8 @@ $Monitoring::GLPlugin::SNMP::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
     hwEntityExtOSPTrapsPrefix => '1.3.6.1.4.1.2011.5.25.31.9.1',
 };
 
-$Monitoring::GLPlugin::SNMP::definitions->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
+my $definitions_work_in_progress = {
+#$Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
     HwAdminState => {
       '1' => 'notSupported',
       '2' => 'locked',
