@@ -830,7 +830,7 @@ sub check_snmp_and_model {
           my $k = $1;
           my $h = $2;
           $h =~ s/\s+//g;
-          $response->{$h} = pack('H*', $h);
+          $response->{$k} = pack('H*', $h);
         } elsif (/^([\d\.]+) = \w+: (\-*\d+)\s*$/) {
           $response->{$1} = $2;
         } elsif (/^([\d\.]+) = \w+: "(.*?)"/) {
