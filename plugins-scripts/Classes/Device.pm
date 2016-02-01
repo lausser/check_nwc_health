@@ -182,6 +182,14 @@ sub classify {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
       } else {
+        $self->map_oid_to_class('1.3.6.1.4.1.12532.252.5.1',
+            'Classes::Juniper::IVE');
+        $self->map_oid_to_class('1.3.6.1.4.1.9.1.1348',
+            'Classes::CiscoCCM');
+        $self->map_oid_to_class('1.3.6.1.4.1.9.1.746',
+            'Classes::CiscoCCM');
+        $self->map_oid_to_class('1.3.6.1.4.1.244.1.11',
+            'Classes::Lantronix::SLS');
         if (my $class = $self->discover_suitable_class()) {
           bless $self, $class;
           $self->debug('using '.$class);

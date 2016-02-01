@@ -54,10 +54,10 @@ sub init {
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
     bless $self, 'Classes::Cisco::IOS';
     $self->debug('using Classes::Cisco::IOS');
-  } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.1348') {
+  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.1348') {
     bless $self, 'Classes::Cisco::CCM';
     $self->debug('using Classes::Cisco::CCM');
-  } elsif ($self->get_snmp_object('MIB-II', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.746') {
+  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.746') {
     bless $self, 'Classes::Cisco::CCM';
     $self->debug('using Classes::Cisco::CCM');
   }

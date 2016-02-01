@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->{name} = $self->get_snmp_object('MIB-II', 'sysName', 0);
+  $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
   $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
       ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
       ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],

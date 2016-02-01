@@ -25,7 +25,7 @@ sub check {
   $self->add_info(sprintf 'mempool %s usage is %.2f%%',
       $self->{ciscoMemoryPoolName}, $self->{usage});
   if ($self->{ciscoMemoryPoolName} eq 'lsmpi_io' && 
-      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XE/i) {
+      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XE/i) {
     # https://supportforums.cisco.com/docs/DOC-16425
     $self->force_thresholds(
         metric => $self->{ciscoMemoryPoolName}.'_usage',
@@ -33,7 +33,7 @@ sub check {
         critical => 100,
     );
   } elsif ($self->{ciscoMemoryPoolName} eq 'reserved' && 
-      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XR/i) {
+      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XR/i) {
     # ASR9K "reserved" and "image" are always at 100%
     $self->force_thresholds(
         metric => $self->{ciscoMemoryPoolName}.'_usage',
@@ -41,7 +41,7 @@ sub check {
         critical => 100,
     );
   } elsif ($self->{ciscoMemoryPoolName} eq 'image' && 
-      $self->get_snmp_object('MIB-II', 'sysDescr', 0) =~ /IOS.*XR/i) {
+      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XR/i) {
     $self->force_thresholds(
         metric => $self->{ciscoMemoryPoolName}.'_usage',
         warning => 100,
