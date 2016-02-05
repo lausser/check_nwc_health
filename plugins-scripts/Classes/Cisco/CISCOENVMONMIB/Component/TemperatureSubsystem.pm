@@ -50,8 +50,7 @@ sub check {
         $self->{ciscoEnvMonTemperatureStatusIndex},
         $self->{ciscoEnvMonTemperatureStatusDescr},
         $self->{ciscoEnvMonTemperatureStatusValue},
-        $self->{ciscoEnvMonTemperatureThreshold},
-        $self->{ciscoEnvMonTemperatureState});
+        $self->{ciscoEnvMonTemperatureThreshold});
   }
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{ciscoEnvMonTemperatureStatusIndex}),

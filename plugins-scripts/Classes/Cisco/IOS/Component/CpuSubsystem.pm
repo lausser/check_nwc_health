@@ -17,24 +17,20 @@ sub init {
   ]);
   if (scalar(@{$self->{cpus}}) == 0) {
     # maybe too old. i fake a cpu. be careful. this is a really bad hack
-    my $response = $self->get_request(
-        -varbindlist => [
-            $Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1},
-            $Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5},
-            $Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{busyPer},
-        ]
-    );
-    if (exists $response->{$Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}}) {
+    $self->get_snmp_objects('OLD-CISCO-CPU-MIB', qw(avgBusy1
+        avgBusy5 busyPer
+    ));
+    if (defined $self->{avgBusy1}) {
       push(@{$self->{cpus}},
           Classes::Cisco::IOS::Component::CpuSubsystem::Cpu->new(
               cpmCPUTotalPhysicalIndex => 0, #fake
               cpmCPUTotalIndex => 0, #fake
               cpmCPUTotal5sec => 0, #fake
               cpmCPUTotal5secRev => 0, #fake
-              cpmCPUTotal1min => $response->{$Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}},
-              cpmCPUTotal1minRev => $response->{$Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy1}},
-              cpmCPUTotal5min => $response->{$Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5}},
-              cpmCPUTotal5minRev => $response->{$Classes::Device::mibs_and_oids->{'OLD-CISCO-CPU-MIB'}->{avgBusy5}},
+              cpmCPUTotal1min => $self->{avgBusy1},
+              cpmCPUTotal1minRev => $self->{avgBusy1},
+              cpmCPUTotal5min => $self->{avgBusy5},
+              cpmCPUTotal5minRev => $self->{avgBusy51},
               cpmCPUMonInterval => 0, #fake
               cpmCPUTotalMonIntervalValue => 0, #fake
               cpmCPUInterruptMonIntervalValue => 0, #fake
