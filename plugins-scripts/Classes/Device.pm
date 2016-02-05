@@ -144,12 +144,12 @@ sub classify {
         bless $self, 'Classes::HP';
         $self->debug('using Classes::HP');
       } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i) {
-        bless $self, 'Classes::CheckPoint::Firewall1';
-        $self->debug('using Classes::CheckPoint::Firewall1');
+        bless $self, 'Classes::CheckPoint';
+        $self->debug('using Classes::CheckPoint');
       } elsif ($self->{productname} =~ /Clavister/i) {
         bless $self, 'Classes::Clavister';
         $self->debug('using Classes::Clavister');
-      } elsif ($self->{productname} =~ /Blue\s*Coat/i || $self->implements_mib('BLUECOAT-MIB')) {
+      } elsif ($self->{productname} =~ /Blue\s*Coat/i) {
         bless $self, 'Classes::Bluecoat';
         $self->debug('using Classes::Bluecoat');
       } elsif ($self->{productname} =~ /Foundry/i) {

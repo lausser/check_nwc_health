@@ -12,6 +12,8 @@ GL_MODULES=\
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACESWITCHINGMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACEWIRELESSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALARMMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALCATELIND1BASEMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBATCMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ASYNCOSMAILMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ATTACKMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BGP4MIB.pm \
@@ -59,7 +61,9 @@ GL_MODULES=\
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LOADBALSYSTEMMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MINIIFMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETGEARMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENCHASSISMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENPRODUCTSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENRESOURCEMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSWITCHMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDCISCOCPUMIB.pm \
@@ -68,19 +72,21 @@ GL_MODULES=\
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ONEACCESSSYSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OSPFMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANCOMMONMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANPRODUCTSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PROXYMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RAPIDCITYMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RESOURCEMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/S5CHASSISMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SENSORMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPV2TCV1MIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STATISTICSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
+  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXWLANMIB.pm \
-  ../lib/Monitoring/GLPlugin/SNMP/MibsAndOids/XPANPRODUCTSMIB.pm \
   ../lib/Monitoring/GLPlugin/SNMP/CSF.pm \
   ../lib/Monitoring/GLPlugin/SNMP/Item.pm \
   ../lib/Monitoring/GLPlugin/SNMP/TableItem.pm \
@@ -245,6 +251,8 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/MemSubsystem.pm \
   Classes/CheckPoint/Firewall1.pm \
+  Classes/CheckPoint/VSX/Component/FwSubsystem.pm \
+  Classes/CheckPoint/VSX.pm \
   Classes/CheckPoint.pm \
   Classes/Clavister/Firewall1/Component/EnvironmentalSubsystem.pm \
   Classes/Clavister/Firewall1/Component/CpuSubsystem.pm \
