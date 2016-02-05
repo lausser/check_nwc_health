@@ -64,7 +64,7 @@ sub finish {
   $self->{ceAlarmTypes} = [];
   if ($self->{ceAlarmList}) {
     my $index = 0;
-    foreach my $octet (split(/\s+/, $self->{ceAlarmList})) {
+    foreach my $octet (unpack('H2', $self->{ceAlarmList})) {
       my $hexoctet = hex($octet) & 0xff;
       if ($hexoctet) {
         my $base = 8 * $index;
