@@ -1,0 +1,3 @@
+[submodule "GLPlugin"]
+	path = GLPlugin
+	url = git://github.com/lausser/GLPlugin.git
