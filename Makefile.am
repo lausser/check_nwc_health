@@ -4,7 +4,6 @@ SUBDIRS = plugins-scripts
 DOS2UNIX=$(shell which dos2unix || which fromdos)
 
 dist-hook:
-	if [ -f ../GLPlugin/lib/Monitoring/GLPlugin.pm ]; then cp -r ../GLPlugin/lib .; fi
 	rm -f t/var/tmp/*
 	rm -f t/var/adm/*
 	find $(distdir) -type f -exec $(DOS2UNIX) {} >/dev/null 2>&1 \;
