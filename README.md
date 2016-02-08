@@ -81,7 +81,10 @@ The list is not complete. Some devices that are not listed here can possibly be 
 Installation
 ============
 
-* unpack with tar -xf
+* git clone
+* cd check_nwc_health
+* git submodule update --init
+* autoreconf
 * ./configure
 * make
 * cp plugins-scripts/check_nwc_health wherever...
