@@ -54,14 +54,19 @@ sub check {
         $down_info);
     my $cavailability = $self->{num_if} ? (100 * 1 / $self->{num_if}) : 0;
     $cavailability = $cavailability == int($cavailability) ? $cavailability + 1: int($cavailability + 1.0);
-    $self->set_thresholds(warning => '100:', critical => $cavailability.':');
-    $self->add_message($self->check_thresholds($self->{availability}));
+    $self->set_thresholds(
+        metric => 'aggr_'.$self->{name}.'_availability',
+        warning => '100:',
+        critical => $cavailability.':'
+    );
+    $self->add_message($self->check_thresholds(
+        metric => 'aggr_'.$self->{name}.'_availability',
+        value => $self->{availability}
+    ));
     $self->add_perfdata(
         label => 'aggr_'.$self->{name}.'_availability',
         value => $self->{availability},
         uom => '%',
-        warning => $self->{warning},
-        critical => $self->{critical},
     );
   }
 }

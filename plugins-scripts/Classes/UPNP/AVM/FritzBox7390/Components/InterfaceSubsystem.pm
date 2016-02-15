@@ -121,18 +121,26 @@ sub check {
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
-    $self->add_perfdata(
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_traffic_in',
+        warning => $self->{maxInputRate} / 100 * $inwarning,
+        critical => $self->{maxInputRate} / 100 * $incritical
+    );
+    $self->ade_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
         min => 0,
         max => $self->{maxInputRate},
-        warning => $self->{maxInputRate} / 100 * $inwarning,
-        critical => $self->{maxInputRate} / 100 * $incritical,
     );
     my ($outwarning, $outcritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_out',
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_traffic_out',
+        warning => $self->{maxOutputRate} / 100 * $outwarning,
+        critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
@@ -141,8 +149,6 @@ sub check {
         places => 2,
         min => 0,
         max => $self->{maxOutputRate},
-        warning => $self->{maxOutputRate} / 100 * $outwarning,
-        critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     $self->add_info(sprintf 'interface %s%s status is %s',

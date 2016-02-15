@@ -1,3 +1,12 @@
+* 2016-02-15 5.2.1
+  refactor interface-usage, bugfix in list-interfaces
+  bugfix in link-aggregation-availability thresholds
+* 2016-02-09 5.2
+  fix cisco bgp prefix count if no peers were found
+  small fix in interfaces, add flat_indices
+  bugfix in entity-sensor-mib
+  add glplugin submodule (Thanks k0ste)
+  pr #52 cisco-alarm-mib parse octets (Thanks dhoffend)
 * 2015-12-20 5.1
   Fix IOS-XE which no longer support the ENVMON MIB. Use FRU MIB instead. (Zhanks Daniel Hoffend, pull request #49)
 * 2015-11-24 5.0
