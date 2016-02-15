@@ -50,7 +50,6 @@ sub check {
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
     #foreach (sort @{$self->{interfaces}}) {
       $_->list();
-printf "%s\n", Data::Dumper::Dumper($_);
     }
     $self->add_ok("have fun");
   } elsif ($self->mode =~ /device::interfaces::availability/) {
@@ -157,7 +156,6 @@ printf "%s\n", Data::Dumper::Dumper($_);
           $_->{ifDescr} .= ' '.$_->{ifIndex};
         }
         $_->check();
-printf "%s\n", Data::Dumper::Dumper($_);
       }
       if ($self->opts->report eq "short") {
         $self->clear_ok();
