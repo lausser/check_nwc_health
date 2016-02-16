@@ -371,6 +371,7 @@ sub new {
     map { $self->{$_} = $self64->{$_} } keys %{$self64};
     $self->{ifName} = unpack("Z*", $self->{ifName});
     $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
+    $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
   $self->init();

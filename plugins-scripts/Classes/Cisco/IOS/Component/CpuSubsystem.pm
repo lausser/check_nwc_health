@@ -84,6 +84,8 @@ sub finish {
     $self->{entPhysicalAssetID} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalAssetID', $self->{cpmCPUTotalPhysicalIndex});
     $self->{entPhysicalDescr} = $self->get_snmp_object('ENTITY-MIB', 'entPhysicalDescr', $self->{cpmCPUTotalPhysicalIndex});
     $self->{name} = $self->{entPhysicalName} || $self->{entPhysicalDescr};
+    # letzter Ausweg, weil auch alle drei get_snmp_object fehlschlagen koennen
+    $self->{name} ||= $self->{cpmCPUTotalIndex};
   } else {
     $self->{name} = $self->{cpmCPUTotalIndex};
     # waere besser, aber dann zerlegts wohl zu viele rrdfiles

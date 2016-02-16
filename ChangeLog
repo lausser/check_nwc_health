@@ -1,3 +1,6 @@
+* 2016-02-16 5.2.2
+  update checkpoint, use new mib
+  fallback if no cisco cpu index can be found
 * 2016-02-15 5.2.1
   refactor interface-usage, bugfix in list-interfaces
   bugfix in link-aggregation-availability thresholds

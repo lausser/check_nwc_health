@@ -5,7 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('CHECKPOINT-MIB', [
-      ['temperatures', 'sensorsTemperatureTable', 'Classes::CheckPoint::Firewall1::Component::TemperatureSubsystem::Temperature'],
+      ['temperatures', 'tempertureSensorTable', 'Classes::CheckPoint::Firewall1::Component::TemperatureSubsystem::Temperature'],
   ]);
 }
 
@@ -25,19 +25,19 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'temperature %s is %s (%d %s)', 
-      $self->{sensorsTemperatureName}, $self->{sensorsTemperatureStatus},
-      $self->{sensorsTemperatureValue}, $self->{sensorsTemperatureUOM});
-  if ($self->{sensorsTemperatureStatus} eq 'normal') {
+      $self->{tempertureSensorName}, $self->{tempertureSensorStatus},
+      $self->{tempertureSensorValue}, $self->{tempertureSensorUnit});
+  if ($self->{tempertureSensorStatus} eq 'normal') {
     $self->add_ok();
-  } elsif ($self->{sensorsTemperatureStatus} eq 'abnormal') {
+  } elsif ($self->{tempertureSensorStatus} eq 'abnormal') {
     $self->add_critical();
   } else {
     $self->add_unknown();
   }
   $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(
-      label => 'temperature_'.$self->{sensorsTemperatureName},
-      value => $self->{sensorsTemperatureValue},
+      label => 'temperature_'.$self->{tempertureSensorName},
+      value => $self->{tempertureSensorValue},
   );
 }
 

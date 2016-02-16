@@ -11,9 +11,12 @@ sub init {
   if (defined $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled')) {
     bless $self, 'Classes::CheckPoint::VSX';
     $self->debug('using Classes::CheckPoint::VSX');
-  } elsif ($self->{productname} =~ /(FireWall\-1\s)|(cpx86_64)|(Linux.*\dcp )/i) {
+  #} elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'fwProduct') || $self->{productname} =~ /(FireWall\-1\s)|(cpx86_64)|(Linux.*\dcp )/i) {
+  } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'fwProduct')) {
     bless $self, 'Classes::CheckPoint::Firewall1';
     $self->debug('using Classes::CheckPoint::Firewall1');
+  } else {
+    $self->no_such_model();
   }
   if (ref($self) ne "Classes::CheckPoint") {
     $self->init();

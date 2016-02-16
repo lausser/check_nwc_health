@@ -16,7 +16,7 @@ use strict;
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'power supply %d status is %s', 
-      $self->{flat_indices},
+      $self->{powerSupplyIndex},
       $self->{powerSupplyStatus});
   if ($self->{powerSupplyStatus} eq 'Up') {
     $self->add_ok();

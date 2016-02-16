@@ -8,19 +8,16 @@ sub init {
       ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk'}],
   ]);
   $self->get_snmp_tables('CHECKPOINT-MIB', [
-      ['volumes', 'volumesTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
-      ['disks', 'disksTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk'],
+      ['volumes', 'raidVolumeTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
+      ['disks', 'raidDiskTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk'],
   ]);
-  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
-      diskPercent diskPercent)));
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(diskPercent)));
 }
 
 sub check {
   my $self = shift;
   $self->add_info('checking disks');
   if (scalar (@{$self->{storages}}) == 0) {
-    $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
-        diskPercent diskPercent)));
     my $free = 100 - $self->{diskPercent};
     $self->add_info(sprintf 'disk has %.2f%% free space left', $free);
     $self->set_thresholds(warning => '10:', critical => '5:');
@@ -51,12 +48,12 @@ use strict;
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'volume %s with %d disks is %s',
-      $self->{volumesVolumeID},
-      $self->{volumesNumberOfDisks},
-      $self->{volumesVolumeState});
-  if ($self->{volumesVolumeState} eq 'degraded') {
+      $self->{raidVolumeID},
+      $self->{numOfDisksOnRaid},
+      $self->{raidVolumeState});
+  if ($self->{raidVolumeState} eq 'degraded') {
     $self->add_warning();
-  } elsif ($self->{volumesVolumeState} eq 'failed') {
+  } elsif ($self->{raidVolumeState} eq 'failed') {
     $self->add_critical();
   } else {
     $self->add_ok();
@@ -72,9 +69,9 @@ use strict;
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'disk %s (vol %s) is %s',
-      $self->{disksIndex},
-      $self->{disksVolumeID},
-      $self->{disksState});
+      $self->{raidDiskIndex},
+      $self->{raidDiskVolumeID},
+      $self->{raidDiskState});
   # warning/critical comes from the volume
 }
 
