@@ -1,3 +1,5 @@
+* 2016-02-16 5.3
+  add mode chassis-hardware-health (for cisco)
 * 2016-02-16 5.2.2
   update checkpoint, use new mib
   fallback if no cisco cpu index can be found
