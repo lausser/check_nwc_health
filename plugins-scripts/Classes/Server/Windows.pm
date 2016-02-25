@@ -139,20 +139,16 @@ sub finish {
       $self->{maxInputRate} = $self->{ifSpeed};
       $self->{maxOutputRate} = $self->{ifSpeed};
     }
+    if (defined $self->opts->ifspeed) {
+      $self->override_opt('ifspeedin', $self->opts->ifspeed);
+      $self->override_opt('ifspeedout', $self->opts->ifspeed);
+    }
     if (defined $self->opts->ifspeedin) {
       $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedin);
       $self->{maxInputRate} = $self->opts->ifspeedin;
     }
     if (defined $self->opts->ifspeedout) {
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedout);
-      $self->{maxOutputRate} = $self->opts->ifspeedout;
-    }
-    if (defined $self->opts->ifspeed) {
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedin);
-      $self->{maxInputRate} = $self->opts->ifspeedin;
       $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
           ($self->{delta_timestamp} * $self->opts->ifspeedout);
       $self->{maxOutputRate} = $self->opts->ifspeedout;
