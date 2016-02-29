@@ -306,7 +306,7 @@ $plugin->add_mode(
     help => 'Check if FEXes appear and disappear (use --lookup)',
 );
 $plugin->add_mode(
-    internal => 'device::hardware::health::chassis',
+    internal => 'device::hardware::chassis::health',
     spec => 'chassis-hardware-health',
     alias => undef,
     help => 'Check the status of stacked switches and chassis, count modules and ports',
