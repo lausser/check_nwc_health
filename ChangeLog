@@ -1,3 +1,5 @@
+* 2016-02-25 5.3.1
+  bugfix in --ifspeed
 * 2016-02-16 5.3
   add mode chassis-hardware-health (for cisco)
 * 2016-02-16 5.2.2
