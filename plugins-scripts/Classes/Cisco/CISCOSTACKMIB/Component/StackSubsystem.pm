@@ -139,11 +139,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
   my ($self) = @_;
-  $self->{modulePortStatus} = join("", map {
-    chr(hex($_));
-  } map {
-    /0x(\w+)/ ? $1 : $_;
-  } split(/\s+/, $self->{modulePortStatus}));
+  $self->{modulePortStatus} = unpack("H*", $self->{modulePortStatus});
 }
 
 sub check {
