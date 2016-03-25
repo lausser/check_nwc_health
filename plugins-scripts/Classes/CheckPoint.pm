@@ -15,6 +15,9 @@ sub init {
   } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'fwProduct')) {
     bless $self, 'Classes::CheckPoint::Firewall1';
     $self->debug('using Classes::CheckPoint::Firewall1');
+  } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'mgProdName')) {
+    bless $self, 'Classes::CheckPoint::Firewall1';
+    $self->debug('using Classes::CheckPoint::Firewall1');
   } else {
     $self->no_such_model();
   }
