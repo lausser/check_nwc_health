@@ -308,6 +308,7 @@ sub new {
     ifEntry => $params{ifEntry},
     ifIndex => $params{ifIndex},
     ifDescr => $params{ifDescr},
+    ifAlias => $params{ifAlias},
     ifType => $params{ifType},
     ifMtu => $params{ifMtu},
     ifSpeed => $params{ifSpeed},
@@ -686,7 +687,7 @@ sub list {
   if ($self->mode =~ /device::interfaces::listdetail/) {
     my $cL2L3IfModeOper = $self->get_snmp_object('CISCO-L2L3-INTERFACE-CONFIG-MIB', 'cL2L3IfModeOper', $self->{ifIndex}) || "unknown";
     my $vlanTrunkPortDynamicStatus = $self->get_snmp_object('CISCO-VTP-MIB', 'vlanTrunkPortDynamicStatus', $self->{ifIndex}) || "unknown";
-    printf "%06d %s %s %s\n", $self->{ifIndex}, $self->{ifDescr},
+    printf "%06d %s %s %s %s\n", $self->{ifIndex}, $self->{ifDescr}, $self->{ifAlias},
         $cL2L3IfModeOper, $vlanTrunkPortDynamicStatus;
   } else {
     printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
