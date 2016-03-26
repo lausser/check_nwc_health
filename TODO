@@ -1,6 +1,14 @@
-- interface up down, operstatus
-- traffic, in, out, 2xthresholds?
-- errors
-- cpu
-- mem
-- load
+=======================================================
+nortel
+
+For my 5500's running v6.2.4 I found all the CPU information in this OID:
+1.3.6.1.4.1.45.1.6.3.8.1.1
+
+If you walk this OID you will see the options for last 10s, 1min etc for each of the units.
+
+Here are the temp OID's:
+1.3.6.1.4.1.45.1.6.3.7.1.1
+
+If you need more info, Google nortel 5500 cpu oid
+
+

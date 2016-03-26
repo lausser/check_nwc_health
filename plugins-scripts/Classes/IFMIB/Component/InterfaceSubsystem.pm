@@ -5,6 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->{interfaces} = [];
+  #$self->session_translate(['-octetstring' => 1]);
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     foreach my $ifIndex (keys %{$self->{interface_cache}}) {
@@ -299,7 +300,7 @@ package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub new {
+sub new_ {
   my $class = shift;
   my %params = @_;
   my $self = {
@@ -377,6 +378,30 @@ sub new {
   }
   $self->init();
   return $self;
+}
+
+sub finish {
+  my $self = shift;
+  $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
+  if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
+    if ($self->{ifDescr} =~ $self->opts->name2) {
+      $self->{ifDescr} = $1;
+    }
+  }
+  # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
+  # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
+  if ($self->{ifName} && defined $self->{ifHCInOctets} && 
+      defined $self->{ifHCOutOctets} && $self->{ifHCInOctets} ne "noSuchObject") {
+    $self->{ifAlias} ||= $self->{ifName};
+    $self->{ifName} = unpack("Z*", $self->{ifName});
+    $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
+    $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
+    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
+  }
+  if ($self->{ifPhysAddress}) {
+    $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
+  }
+  $self->init();
 }
 
 sub init {

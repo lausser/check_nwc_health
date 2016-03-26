@@ -1,5 +1,8 @@
 * 2016-03-11 5.3.3
   Use 64bit-counters from cisco-enhanced-mempool-mib if available (cisco bug CSCuu46705)
+  Merge pull request #61 from Napsty/checkpoint-mgmt
+  Merge pull request #67 from Napsty/list-detail-alias
+  Simplify interface code
 * 2016-02-29 5.3.2
   Merge pull request #64 Claudio Kuenzler
 * 2016-02-25 5.3.1
