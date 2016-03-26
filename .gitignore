@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+check_nwc_health-*.tar.gz
+config.log
+config.status
+configure
+plugins-scripts/Makefile
+plugins-scripts/Makefile.in
+plugins-scripts/check_nwc_health
+plugins-scripts/subst
+MIBS
