@@ -58,32 +58,6 @@ sub overall_dump {
   printf "\n";
 }
 
-sub unix_init {
-  my $self = shift;
-  my %params = @_;
-  my $type = 0;
-  $self->get_snmp_tables('UCD-SNMP-MIB', [
-      ['loads', 'laTable', 'Classes::Foundry::Component::CpuSubsystem::Load'],
-  ]);
-}
-
-sub unix_check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info('checking loads');
-  foreach (@{$self->{loads}}) {
-    $_->check();
-  }
-}
-
-sub unix_dump {
-  my $self = shift;
-  foreach (@{$self->{loads}}) {
-    $_->dump();
-  }
-}
-
-
 package Classes::Foundry::Component::CpuSubsystem::Cpu;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
@@ -105,24 +79,6 @@ sub check {
       label => 'cpu_'.$self->{snAgentCpuUtilSlotNum},
       value => $self->{snAgentCpuUtilValue},
       uom => '%',
-  );
-}
-
-
-package Classes::Foundry::Component::CpuSubsystem::Load;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
-use strict;
-
-sub check {
-  my $self = shift;
-  my $errorfound = 0;
-  $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
-  $self->set_thresholds(warning => $self->{laConfig},
-      critical => $self->{laConfig});
-  $self->add_message($self->check_thresholds($self->{laLoadFloat}));
-  $self->add_perfdata(
-      label => lc $self->{laNames},
-      value => $self->{laLoadFloat},
   );
 }
 
