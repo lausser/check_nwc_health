@@ -103,6 +103,8 @@ EXTRA_MODULES=\
   Classes/Server/Windows.pm \
   Classes/Server/Solaris.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
+  Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
+  Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/ModuleSubsystem.pm \

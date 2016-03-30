@@ -1,5 +1,6 @@
 * 2016-03-29 5.4
   add CISCO-STACKWISE-MIB
+  add processor index in cisco enhanced memory
 * 2016-03-11 5.3.3
   Use 64bit-counters from cisco-enhanced-mempool-mib if available (cisco bug CSCuu46705)
   Merge pull request #61 from Napsty/checkpoint-mgmt
