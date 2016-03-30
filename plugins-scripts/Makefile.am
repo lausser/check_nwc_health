@@ -38,6 +38,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOMEMORYPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPROCESSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
@@ -113,6 +114,7 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
   Classes/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
+  Classes/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   Classes/Cisco/ASA.pm \
   Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
   Classes/Cisco/IOS/Component/CpuSubsystem.pm \

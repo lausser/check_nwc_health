@@ -5,7 +5,19 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::hardware::chassis::health/) {
-    $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOSTACKMIB::Component::StackSubsystem");
+    if ($self->implements_mib('CISCO-STACK-MIB')) {
+      $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOSTACKMIB::Component::StackSubsystem");
+    } elsif ($self->implements_mib('CISCO-STACKWISE-MIB')) {
+      $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem");
+    }
+    if (! $self->implements_mib('CISCO-STACKWISE-MIB') &&
+        !  $self->implements_mib('CISCO-STACK-MIB')) {
+      if (defined $self->opts->mitigation()) {
+        $self->add_message($self->opts->mitigation(), 'this is not a stacked device');
+      } else {
+        $self->add_unknown('this is not a stacked device');
+      }
+    }
   } elsif ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::IOS::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {

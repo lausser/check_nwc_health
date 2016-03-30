@@ -43,12 +43,6 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  if (! $self->implements_mib('CISCO-STACK-MIB')) {
-    $self->add_message(defined $self->opts->mitigation() ?
-        $self->opts->mitigation() : UNKNOWN,
-        'this is not a stacked device');
-    return;
-  }
   if ($self->{chassisSysType} eq 'other' &&
       ! $self->{chassisSerialNumberString} &&
       ! $self->{chassisSerialNumberString}) {
