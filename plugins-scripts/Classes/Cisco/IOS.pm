@@ -26,6 +26,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::IOS::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::hsrp/) {
     $self->analyze_and_check_hsrp_subsystem("Classes::HSRP::Component::HSRPSubsystem");
+  } elsif ($self->mode =~ /device::vrrp/) {
+    $self->analyze_and_check_vrrp_subsystem("Classes::VRRPMIB::Component::VRRPSubsystem");
   } elsif ($self->mode =~ /device::users/) {
     $self->analyze_and_check_connection_subsystem("Classes::Cisco::IOS::Component::ConnectionSubsystem");
   } elsif ($self->mode =~ /device::config/) {

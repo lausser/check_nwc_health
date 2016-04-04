@@ -162,6 +162,24 @@ $plugin->add_mode(
     help => 'Show the HSRP groups configured on this device',
 );
 $plugin->add_mode(
+    internal => 'device::vrrp::state',
+    spec => 'vrrp-state',
+    alias => undef,
+    help => 'Check the state in a VRRP group',
+);
+$plugin->add_mode(
+    internal => 'device::vrrp::failover',
+    spec => 'vrrp-failover',
+    alias => undef,
+    help => 'Check if a VRRP group\'s nodes have changed their roles',
+);
+$plugin->add_mode(
+    internal => 'device::vrrp::list',
+    spec => 'list-vrrp-groups',
+    alias => undef,
+    help => 'Show the VRRP groups configured on this device',
+);
+$plugin->add_mode(
     internal => 'device::bgp::peer::status',
     spec => 'bgp-peer-status',
     alias => undef,
