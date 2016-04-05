@@ -228,6 +228,12 @@ $plugin->add_mode(
     help => 'Check the status of the management subsystem',
 );
 $plugin->add_mode(
+    internal => 'device::process::status',
+    spec => 'process-status',
+    alias => undef,
+    help => 'Check the status of the running processes'
+);
+$plugin->add_mode(
     internal => 'device::fw::policy::installed',
     spec => 'fw-policy',
     alias => undef,
