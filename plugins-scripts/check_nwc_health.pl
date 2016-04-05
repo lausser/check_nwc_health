@@ -47,6 +47,12 @@ $plugin->add_mode(
     help => 'Check the memory usage of the device',
 );
 $plugin->add_mode(
+    internal => 'device::disk::usage',
+    spec => 'disk-usage',
+    alias => undef,
+    help => 'Check the disk usage of the device',
+);
+$plugin->add_mode(
     internal => 'device::interfaces::usage',
     spec => 'interface-usage',
     alias => undef,
