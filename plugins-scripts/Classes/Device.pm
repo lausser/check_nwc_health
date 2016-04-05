@@ -181,6 +181,9 @@ sub classify {
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.9\./) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
+      } elsif ($self->{productname} =~ /^Linux/i) {
+        bless $self, 'Classes::Server::Linux';
+        $self->debug('using Classes::Server::Linux');
       } else {
         $self->map_oid_to_class('1.3.6.1.4.1.12532.252.5.1',
             'Classes::Juniper::IVE');
