@@ -49,14 +49,17 @@ sub init {
       my $tmpif = {
         ifDescr => $name,
         ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x} * 1024*1024 : undef),
-        ifInOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_bytes"; my $x = <>; close ARGV; $x},
+        ifInOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_bytes"; my $x = <>; close ARGV; chomp $x},
         ifInDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_dropped"; my $x = <>; close ARGV; $x},
         ifInErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_errors"; my $x = <>; close ARGV; $x},
         ifOutOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_bytes"; my $x = <>; close ARGV; $x},
         ifOutDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_dropped"; my $x = <>; close ARGV; $x},
         ifOutErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_errors"; my $x = <>; close ARGV; $x},
+        ifOperStatus => do { local (@ARGV, $/) = "/sys/class/net/$name/operstate"; my $x = <>; close ARGV; $x},
       };
       *STDERR = *SAVEERR;
+printf "%s\n", Data::Dumper::Dumper($tmpif);
+      $tmpif->{ifOperStatus} = 'down' if $tmpif->{ifOperStatus} ne 'up';
       foreach (keys %{$tmpif}) {
         chomp($tmpif->{$_}) if defined $tmpif->{$_};
       }
@@ -109,7 +112,7 @@ sub finish {
       foreach my $mode (qw(device::interfaces::usage
           device::interfaces::errors device::interfaces::discards)) {
         $Monitoring::GLPlugin::mode = $mode;
-        $self->init();
+        $self->finish();
       }
     #}
     $Monitoring::GLPlugin::mode = "device::interfaces::complete";

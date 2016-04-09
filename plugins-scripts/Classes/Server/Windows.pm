@@ -62,6 +62,7 @@ sub init {
         ifOutOctets => $member->{BytesSentPerSec},
         ifOutDiscards => $member->{PacketsOutboundDiscarded},
         ifOutErrors => $member->{PacketsOutboundErrors},
+        ifOperStatus => 'up', # found no way to get interface status
       };
       *STDERR = *SAVEERR;
       foreach (keys %{$tmpif}) {
