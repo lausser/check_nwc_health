@@ -58,8 +58,11 @@ sub init {
         ifOutErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_errors"; my $x = <>; close ARGV; $x; },
         ifOperStatus => do { local (@ARGV, $/) = "/sys/class/net/$name/operstate"; my $x = <>; close ARGV; $x; },
       };
-      map { $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_}; } keys %{$tmpif};
       *STDERR = *SAVEERR;
+      map {
+          chomp $tmpif->{$_} if defined $tmpif->{$_}; 
+          $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_};
+      } keys %{$tmpif};
       $tmpif->{ifOperStatus} = 'down' if $tmpif->{ifOperStatus} ne 'up';
       $tmpif->{ifAdminStatus} = $tmpif->{ifOperStatus};
       if (defined $self->opts->ifspeed) {
