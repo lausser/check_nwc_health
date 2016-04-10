@@ -20,17 +20,60 @@ sub init {
   $self->{interfaces} = [];
 # bits per second
   if ($self->mode =~ /device::interfaces::list/) {
+    my $network_adapter_configs = {};
+    my $network_adapters = {};
     my $dbh = DBI->connect('dbi:WMI:');
-    my $sth = $dbh->prepare("select * from Win32_PerfRawData_Tcpip_NetworkInterface");
+    my $sth = $dbh->prepare("select * from Win32_NetworkAdapter");
+    # AdapterType, DeviceID, MACAddress, MaxSpeed, NetConnectionStatus, StatusInfo
+    $sth->execute();
+    map {
+      $network_adapters->{$_->{DeviceID}} = $_;
+    } map {
+      $_->[0];
+    } @{$sth->fetchall_arrayref()};
+    $sth->finish();
+    $sth = $dbh->prepare("select * from Win32_NetworkAdapterConfiguration");
+    # Description, InterfaceIndex, IPAddress, IPEndbled, IPSubnet, MTU
+    $sth->execute();
+    map {
+      $network_adapter_configs->{$_->{Description}} = $_;
+    } map {
+      $_->[0];
+    } @{$sth->fetchall_arrayref()};
+    $sth->finish();
+map { my $x = $_; 
+ if (ref($network_adapters->{$x}) eq "SCALAR") {
+ } else {
+   delete $network_adapters->{$x};
+  }
+} keys %{$network_adapters};
+map { my $x = $_; 
+ if (ref($network_adapter_configs->{$x}) eq "SCALAR") {
+ } else {
+   delete $network_adapter_configs->{$x};
+  }
+} keys %{$network_adapters};
+printf "%s\n", Data::Dumper::Dumper($network_adapters);
+printf "%s\n", Data::Dumper::Dumper($network_adapter_configs);
+    $sth = $dbh->prepare("select * from Win32_PerfRawData_Tcpip_NetworkInterface");
     $sth->execute();
     while (my $member_arr = $sth->fetchrow_arrayref()) {
       my $member = $member_arr->[0];
       my $tmpif = {
         ifDescr => $member->{Name},
       };
+      if (exists $network_adapter_configs->{$member->{Name}}) {
+        $tmpif->{ifIndex} = $network_adapter_configs->{$member->{Name}}->{Index};
+        $tmpif->{ifMTU} = $network_adapter_configs->{$member->{Name}}->{MTU};
+        if (exists $network_adapters->{$tmpif->{ifIndex}}) {
+          $tmpif->{ifOperStatus} = $network_adapters->{$tmpif->{ifIndex}}->{NetConnectionStatus};
+          $tmpif->{ifAdminStatus} = $network_adapters->{$tmpif->{ifIndex}}->{StatusInfo};
+        }
+      }
       push(@{$self->{interfaces}},
         Server::Windows::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
+    $sth->finish();
   } else {
     my $dbh = DBI->connect('dbi:WMI:');
     my $sth = $dbh->prepare("select * from Win32_PerfRawData_Tcpip_NetworkInterface");
@@ -70,7 +113,6 @@ sub init {
           chomp $tmpif->{$_} if defined $tmpif->{$_}; 
           $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_};
       } keys %{$tmpif};
-printf "%s\n", Data::Dumper::Dumper($tmpif);
       $tmpif->{ifOperStatus} = 'down' if $tmpif->{ifOperStatus} ne 'up';
       $tmpif->{ifAdminStatus} = $tmpif->{ifOperStatus};
       if (defined $self->opts->ifspeed) {
@@ -84,6 +126,16 @@ printf "%s\n", Data::Dumper::Dumper($tmpif);
         push(@{$self->{interfaces}},
           Server::Windows::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
       }
+    }
+    $sth->finish();
+    $sth = $dbh->prepare("select * from Win32_NetworkAdapter");
+    $sth->execute();
+    while (my $member_arr = $sth->fetchrow_arrayref()) {
+    }
+    $sth->finish();
+    $sth = $dbh->prepare("select * from CIM_NetworkAdapter");
+    $sth->execute();
+    while (my $member_arr = $sth->fetchrow_arrayref()) {
     }
     $sth->finish();
   }
