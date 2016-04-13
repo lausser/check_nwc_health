@@ -99,9 +99,9 @@ EXTRA_MODULES=\
   Classes/UPNP/AVM/FritzBox7390.pm \
   Classes/UPNP/AVM.pm \
   Classes/UPNP.pm \
-  Classes/Server/Linux.pm \
-  Classes/Server/Windows.pm \
-  Classes/Server/Solaris.pm \
+  Classes/Server/LinuxLocal.pm \
+  Classes/Server/WindowsLocal.pm \
+  Classes/Server/SolarisLocal.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \

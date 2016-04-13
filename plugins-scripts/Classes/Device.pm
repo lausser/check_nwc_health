@@ -52,14 +52,14 @@ sub classify {
         bless $self, 'Classes::UPNP::AVM';
         $self->debug('using Classes::UPNP::AVM');
       } elsif ($self->{productname} =~ /linuxlocal/i) {
-        bless $self, 'Server::Linux';
-        $self->debug('using Server::Linux');
+        bless $self, 'Server::LinuxLocal';
+        $self->debug('using Server::LinuxLocal');
       } elsif ($self->{productname} =~ /windowslocal/i) {
-        bless $self, 'Server::Windows';
-        $self->debug('using Server::Windows');
+        bless $self, 'Server::WindowsLocal';
+        $self->debug('using Server::WindowsLocal');
       } elsif ($self->{productname} =~ /solarislocal/i) {
-        bless $self, 'Server::Solaris';
-        $self->debug('using Server::Solaris');
+        bless $self, 'Server::SolarisLocal';
+        $self->debug('using Server::SolarisLocal');
       } elsif ($self->{productname} =~ /Cisco/i) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');

@@ -1,4 +1,4 @@
-package Server::Linux;
+package Server::LinuxLocal;
 our @ISA = qw(Classes::Device);
 use strict;
 
@@ -6,12 +6,12 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem('Server::Linux::Component::InterfaceSubsystem');
+    $self->analyze_and_check_interface_subsystem('Server::LinuxLocal::Component::InterfaceSubsystem');
   }
 }
 
 
-package Server::Linux::Component::InterfaceSubsystem;
+package Server::LinuxLocal::Component::InterfaceSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -27,7 +27,7 @@ sub init {
         ifDescr => $name,
       };
       push(@{$self->{interfaces}},
-        Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+        Server::LinuxLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
   } else {
     foreach (glob "/sys/class/net/*") {
@@ -74,7 +74,7 @@ sub init {
         $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
       } else {
         push(@{$self->{interfaces}},
-          Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+          Server::LinuxLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
       }
     }
   }
@@ -99,7 +99,7 @@ sub check {
 }
 
 
-package Server::Linux::Component::InterfaceSubsystem::Interface;
+package Server::LinuxLocal::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 

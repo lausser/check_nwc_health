@@ -1,4 +1,4 @@
-package Server::Windows;
+package Server::WindowsLocal;
 our @ISA = qw(Classes::Device);
 use strict;
 
@@ -6,12 +6,12 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem('Server::Windows::Component::InterfaceSubsystem');
+    $self->analyze_and_check_interface_subsystem('Server::WindowsLocal::Component::InterfaceSubsystem');
   }
 }
 
 
-package Server::Windows::Component::InterfaceSubsystem;
+package Server::WindowsLocal::Component::InterfaceSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -93,7 +93,7 @@ $self->debug("finish");
       };
       $self->merge_by_canonical($tmpif, $network_adapters, $network_adapter_configs);
       push(@{$self->{interfaces}},
-        Server::Windows::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+        Server::WindowsLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
     $sth->finish();
   } else {
@@ -146,7 +146,7 @@ $self->debug("finish");
         $self->add_unknown(sprintf "There is no CurrentBandwidth. Use --ifspeed", $name);
       } else {
         push(@{$self->{interfaces}},
-          Server::Windows::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+          Server::WindowsLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
       }
     }
     $sth->finish();
@@ -182,7 +182,7 @@ sub check {
 }
 
 
-package Server::Windows::Component::InterfaceSubsystem::Interface;
+package Server::WindowsLocal::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 
