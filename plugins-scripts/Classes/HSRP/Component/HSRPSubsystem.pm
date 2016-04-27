@@ -61,7 +61,8 @@ sub check {
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
         $self->{cHsrpGrpStandbyState},
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
-    if ($self->opts->role() eq $self->{cHsrpGrpStandbyState}) {
+    my @roles = split ',', $self->opts->role();
+    if (grep $_ eq $self->{cHsrpGrpStandbyState}, @roles) {
         $self->add_ok();
     } else {
       $self->add_critical(
