@@ -76,7 +76,8 @@ sub check {
         $self->{vrrpGrpNumber}, $self->{ifIndex},
         $self->{vrrpOperState},
         $self->{vrrpOperMasterIpAddr});
-    if ($self->opts->role() eq $self->{vrrpOperState}) {
+    my @roles = split ',', $self->opts->role();
+    if (grep $_ eq $self->{vrrpOperState}, @roles) {
       $self->add_ok();
     } else {
       $self->add_critical(
