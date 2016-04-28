@@ -57,13 +57,21 @@ sub finish {
 sub check {
   my $self = shift;
   if ($self->mode =~ /device::hsrp::state/) {
-    $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s',
+    $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s)',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
         $self->{cHsrpGrpStandbyState},
         $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter});
     my @roles = split ',', $self->opts->role();
     if (grep $_ eq $self->{cHsrpGrpStandbyState}, @roles) {
+      if ($self->{cHsrpGrpStandbyRouter} eq '0.0.0.0') {
+        $self->add_message(
+          defined $self->opts->mitigation() ? $self->opts->mitigation() : 1,
+          sprintf 'standby hsrp router missing in group %s (interface %s)',
+          $self->{cHsrpGrpNumber}, $self->{ifIndex}
+        );
+      } else {
         $self->add_ok();
+      }
     } else {
       $self->add_critical(
           sprintf 'state in group %s (interface %s) is %s instead of %s',
