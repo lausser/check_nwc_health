@@ -8,9 +8,7 @@ sub init {
     bless $self, 'Classes::Alcatel::OmniAccess';
     $self->debug('using Classes::Alcatel::OmniAccess');
   }
-  if ($self->mode =~ /device::vrrp/) {
-    $self->analyze_and_check_vrrp_subsystem("Classes::VRRPMIB::Component::VRRPSubsystem");
-  } elsif (ref($self) ne "Classes::Alcatel") {
+  if (ref($self) ne "Classes::Alcatel") {
     $self->init();
   }
 }

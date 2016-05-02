@@ -230,6 +230,8 @@ sub init {
     bless $self, "Classes::OSPF";
     #$self->analyze_and_check_ospf_subsystem("Classes::OSPF");
     $self->init();
+  } elsif ($self->mode =~ /device::vrrp/) {
+    $self->analyze_and_check_vrrp_subsystem("Classes::VRRPMIB::Component::VRRPSubsystem");
   } else {
     bless $self, 'Monitoring::GLPlugin::SNMP';
     $self->no_such_mode();
