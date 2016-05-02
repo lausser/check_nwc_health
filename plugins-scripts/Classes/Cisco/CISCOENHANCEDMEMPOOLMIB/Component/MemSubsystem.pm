@@ -31,7 +31,7 @@ sub check {
   $self->add_info(sprintf 'mempool %s usage is %.2f%%',
       $self->{name}, $self->{usage});
   if ($self->{name} =~ /^lsmpi_io/ &&
-      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XE/i) {
+      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*(XE|ASR1000)/i) {
     # https://supportforums.cisco.com/docs/DOC-16425
     $self->force_thresholds(
         metric => $self->{name}.'_usage',
