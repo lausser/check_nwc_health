@@ -99,9 +99,9 @@ EXTRA_MODULES=\
   Classes/UPNP/AVM/FritzBox7390.pm \
   Classes/UPNP/AVM.pm \
   Classes/UPNP.pm \
-  Classes/Server/Linux.pm \
-  Classes/Server/Windows.pm \
-  Classes/Server/Solaris.pm \
+  Classes/Server/LinuxLocal.pm \
+  Classes/Server/WindowsLocal.pm \
+  Classes/Server/SolarisLocal.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
@@ -214,6 +214,7 @@ EXTRA_MODULES=\
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/MemSubsystem.pm \
+  Classes/HOSTRESOURCESMIB/Component/UptimeSubsystem.pm \
   Classes/HOSTRESOURCESMIB.pm \
   Classes/LMSENSORSMIB/Component/EnvironmentalSubsystem.pm \
   Classes/LMSENSORSMIB/Component/FanSubsystem.pm \
@@ -233,6 +234,9 @@ EXTRA_MODULES=\
   Classes/FCEOS.pm \
   Classes/UCDMIB/Components/MemSubsystem.pm \
   Classes/UCDMIB/Components/CpuSubsystem.pm \
+  Classes/UCDMIB/Components/LoadSubsystem.pm \
+  Classes/UCDMIB/Components/DiskSubsystem.pm \
+  Classes/UCDMIB/Components/ProcessSubsystem.pm \
   Classes/UCDMIB.pm \
   Classes/F5/F5BIGIP/Component/LTM.pm \
   Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \

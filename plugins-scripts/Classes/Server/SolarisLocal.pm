@@ -1,4 +1,4 @@
-package Server::Solaris;
+package Server::SolarisLocal;
 our @ISA = qw(Classes::Device);
 use strict;
 
@@ -6,12 +6,12 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem('Server::Solaris::Component::InterfaceSubsystem');
+    $self->analyze_and_check_interface_subsystem('Server::SolarisLocal::Component::InterfaceSubsystem');
   }
 }
 
 
-package Server::Solaris::Component::InterfaceSubsystem;
+package Server::SolarisLocal::Component::InterfaceSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -61,7 +61,7 @@ sub init {
         ifDescr => $name,
       };
       push(@{$self->{interfaces}},
-        Server::Solaris::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+        Server::SolarisLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
   } else {
     foreach my $name (keys %{$self->{kstat_interfaces}}) {
@@ -104,7 +104,7 @@ sub init {
         $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
       } else {
         push(@{$self->{interfaces}},
-          Server::Solaris::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
+          Server::SolarisLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
       }
     }
   }
@@ -128,7 +128,7 @@ sub check {
   }
 }
 
-package Server::Solaris::Component::InterfaceSubsystem::Interface;
+package Server::SolarisLocal::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 

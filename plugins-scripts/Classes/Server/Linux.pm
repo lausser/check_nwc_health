@@ -1,106 +1,23 @@
-package Server::Linux;
+package Classes::Server::Linux;
 our @ISA = qw(Classes::Device);
 use strict;
 
-
 sub init {
   my $self = shift;
-  if ($self->mode =~ /device::interfaces/) {
-    $self->analyze_and_check_interface_subsystem('Server::Linux::Component::InterfaceSubsystem');
-  }
-}
-
-
-package Server::Linux::Component::InterfaceSubsystem;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
-use strict;
-
-sub init {
-  my $self = shift;
-  $self->{interfaces} = [];
-  if ($self->mode =~ /device::interfaces::list/) {
-    foreach (glob "/sys/class/net/*") {
-      my $name = $_;
-      next if ! -d $name;
-      $name =~ s/.*\///g;
-      my $tmpif = {
-        ifDescr => $name,
-      };
-      push(@{$self->{interfaces}},
-        Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
-    }
+  if ($self->mode =~ /device::hardware::health/) {
+    $self->analyze_and_check_environmental_subsystem("Classes::Server::Linux::Component::EnvironmentalSubsystem")
+  } elsif ($self->mode =~ /device::hardware::load/) {
+    $self->analyze_and_check_cpu_subsystem("Classes::Server::Linux::Component::CpuSubsystem");
+  } elsif ($self->mode =~ /device::disk::usage/) {
+    $self->analyze_and_check_disk_subsystem("Classes::UCDMIB::Component::DiskSubsystem");
+  } elsif ($self->mode =~ /device::hardware::memory/) {
+    $self->analyze_and_check_mem_subsystem("Classes::UCDMIB::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::process::status/) {
+    $self->analyze_and_check_process_subsystem("Classes::UCDMIB::Component::ProcessSubsystem");
+  } elsif ($self->mode =~ /device::uptime/) {
+    $self->analyze_and_check_uptime_subsystem("Classes::HOSTRESOURCESMIB::Component::UptimeSubsystem");
   } else {
-    foreach (glob "/sys/class/net/*") {
-      my $name = $_;
-      $name =~ s/.*\///g;
-      if ($self->opts->name) {
-        if ($self->opts->regexp) {
-          my $pattern = $self->opts->name;
-          if ($name !~ /$pattern/i) {
-            next;
-          }
-        } elsif (lc $name ne lc $self->opts->name) {
-          next;
-        }
-      }
-      *SAVEERR = *STDERR;
-      open ERR ,'>/dev/null';
-      *STDERR = *ERR;
-      my $tmpif = {
-        ifDescr => $name,
-        ifIndex => $name,
-        ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x; } : undef),
-        ifInOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_bytes"; my $x = <>; close ARGV; $x; },
-        ifInDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_dropped"; my $x = <>; close ARGV; $x; },
-        ifInErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_errors"; my $x = <>; close ARGV; $x; },
-        ifOutOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_bytes"; my $x = <>; close ARGV; $x; },
-        ifOutDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_dropped"; my $x = <>; close ARGV; $x; },
-        ifOutErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_errors"; my $x = <>; close ARGV; $x; },
-        ifOperStatus => do { local (@ARGV, $/) = "/sys/class/net/$name/operstate"; my $x = <>; close ARGV; $x; },
-      };
-      *STDERR = *SAVEERR;
-      map {
-          chomp $tmpif->{$_} if defined $tmpif->{$_}; 
-          $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_};
-      } keys %{$tmpif};
-      $tmpif->{ifOperStatus} = 'down' if $tmpif->{ifOperStatus} ne 'up';
-      $tmpif->{ifAdminStatus} = $tmpif->{ifOperStatus};
-      if (defined $self->opts->ifspeed) {
-        $tmpif->{ifSpeed} = $self->opts->ifspeed * 1024*1024;
-      } else {
-        $tmpif->{ifSpeed} *= 1024*1024 if defined $tmpif->{ifSpeed};
-      }
-      if (! defined $tmpif->{ifSpeed}) {
-        $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
-      } else {
-        push(@{$self->{interfaces}},
-          Server::Linux::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
-      }
-    }
+    $self->no_such_mode();
   }
 }
-
-sub check {
-  my $self = shift;
-  $self->add_info('checking interfaces');
-  if (scalar(@{$self->{interfaces}}) == 0) {
-    $self->add_unknown('no interfaces');
-    return;
-  }
-  if ($self->mode =~ /device::interfaces::list/) {
-    foreach (sort {$a->{ifDescr} cmp $b->{ifDescr}} @{$self->{interfaces}}) {
-      $_->list();
-    }
-  } else {
-    foreach (@{$self->{interfaces}}) {
-      $_->check();
-    }
-  }
-}
-
-
-package Server::Linux::Component::InterfaceSubsystem::Interface;
-our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
-use strict;
-
 
