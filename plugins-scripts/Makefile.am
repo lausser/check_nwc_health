@@ -87,6 +87,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXWLANMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/CSF.pm \
@@ -210,6 +211,8 @@ EXTRA_MODULES=\
   Classes/IPFORWARDMIB.pm \
   Classes/IPMIB/Component/RoutingSubsystem.pm \
   Classes/IPMIB.pm \
+  Classes/VRRPMIB/Component/VRRPSubsystem.pm \
+  Classes/VRRPMIB.pm \
   Classes/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
