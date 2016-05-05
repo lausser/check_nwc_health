@@ -103,6 +103,9 @@ EXTRA_MODULES=\
   Classes/Server/LinuxLocal.pm \
   Classes/Server/WindowsLocal.pm \
   Classes/Server/SolarisLocal.pm \
+  Classes/Server/Linux.pm \
+  Classes/Server/Linux/Component/CpuSubsystem.pm \
+  Classes/Server/Linux/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
