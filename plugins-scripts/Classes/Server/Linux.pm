@@ -11,7 +11,7 @@ sub init {
   } elsif ($self->mode =~ /device::disk::usage/) {
     $self->analyze_and_check_disk_subsystem("Classes::UCDMIB::Component::DiskSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
-    $self->analyze_and_check_mem_subsystem("Classes::UCDMIB::Component::MemSubsystem");
+    $self->analyze_and_check_mem_subsystem("Classes::Server::Linux::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::process::status/) {
     $self->analyze_and_check_process_subsystem("Classes::UCDMIB::Component::ProcessSubsystem");
   } elsif ($self->mode =~ /device::uptime/) {

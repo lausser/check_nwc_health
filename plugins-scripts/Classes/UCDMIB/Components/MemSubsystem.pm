@@ -17,11 +17,6 @@ sub init {
 
   # calc memory (no swap)
   $self->{mem_usage} = 100 - ($mem_available * 100 / $self->{memTotalReal});
-
-  # calc swap usage
-  if (defined $self->{memAvailSwap} && defined $self->{memTotalSwap}) {
-    $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
-  }
 }
 
 sub check {
@@ -44,27 +39,6 @@ sub check {
     );
   } else {
     $self->add_unknown('cannot aquire memory usage');
-  }
-
-  if (defined $self->{'swap_usage'}) {
-    $self->add_info(sprintf 'swap usage is %.2f%%',
-        $self->{swap_usage});
-    $self->set_thresholds(
-      metric => 'swap_usage',
-      warning => int(100 - ($self->{memMinimumSwap} * 100 / $self->{memTotalSwap})),
-      critical => int(100 - ($self->{memMinimumSwap} * 100 / $self->{memTotalSwap}))
-    );
-    $self->add_message($self->check_thresholds(
-        metric => 'swap_usage',
-        value => $self->{swap_usage}));
-    $self->add_perfdata(
-        label => 'swap_usage',
-        value => $self->{swap_usage},
-        uom => '%',
-    );
-  }
-  if ($self->{'memSwapError'} eq 'error') {
-    $self->add_critical('SwapError: ' . $self->{'memSwapErrorMsg'});
   }
 }
 

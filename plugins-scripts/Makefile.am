@@ -106,6 +106,7 @@ EXTRA_MODULES=\
   Classes/Server/Linux.pm \
   Classes/Server/Linux/Component/CpuSubsystem.pm \
   Classes/Server/Linux/Component/EnvironmentalSubsystem.pm \
+  Classes/Server/Linux/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
@@ -239,6 +240,7 @@ EXTRA_MODULES=\
   Classes/FCEOS/Components/FruSubsystem.pm \
   Classes/FCEOS.pm \
   Classes/UCDMIB/Components/MemSubsystem.pm \
+  Classes/UCDMIB/Components/SwapSubsystem.pm \
   Classes/UCDMIB/Components/CpuSubsystem.pm \
   Classes/UCDMIB/Components/LoadSubsystem.pm \
   Classes/UCDMIB/Components/DiskSubsystem.pm \
