@@ -20,21 +20,3 @@ sub check {
       uom => '%',
   );
 }
-
-
-package Classes::Juniper::NetScreen::Component::CpuSubsystem::Load;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
-use strict;
-
-sub check {
-  my $self = shift;
-  $self->add_info(sprintf '%s is %.2f', lc $self->{laNames}, $self->{laLoadFloat});
-  $self->set_thresholds(warning => $self->{laConfig},
-      critical => $self->{laConfig});
-  $self->add_message($self->check_thresholds($self->{laLoadFloat}));
-  $self->add_perfdata(
-      label => lc $self->{laNames},
-      value => $self->{laLoadFloat},
-  );
-}
-
