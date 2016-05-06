@@ -17,27 +17,59 @@ sub init {
     delta_ssCpuRawInterrupt)) {
     $cpu_total += $self->{$_} if defined($self->{$_});
   }
-  if ($cpu_total == 0) {
-    $self->{cpu_usage} = 0;
-  } else {
-    $self->{cpu_usage} = (100 - ($self->{delta_ssCpuRawIdle} / $cpu_total) * 100);
+
+  # main cpu usage (total - idle)
+  $self->{cpu_usage} =
+      $cpu_total == 0 ? 0 : (100 - ($self->{delta_ssCpuRawIdle} / $cpu_total) * 100);
+
+  # additional metrics (all but idle)
+  if (defined $self->{delta_ssCpuRawUser}) {
+    $self->{user_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawUser} / $cpu_total) * 100;
+  }
+  if (defined $self->{delta_ssCpuRawSystem}) {
+    $self->{system_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawSystem} / $cpu_total) * 100;
+  }
+  if (defined $self->{delta_ssCpuRawNice}) {
+    $self->{nice_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawNice} / $cpu_total) * 100;
+  }
+  if (defined $self->{delta_ssCpuRawWait}) {
+    $self->{wait_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawWait} / $cpu_total) * 100;
+  }
+  if (defined $self->{delta_ssCpuRawKernel}) {
+    $self->{kernel_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawKernel} / $cpu_total) * 100;
+  }
+  if (defined $self->{delta_ssCpuRawInterrupt}) {
+    $self->{interrupt_usage} =
+        $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawInterrupt} / $cpu_total) * 100;
   }
 }
 
 sub check {
   my $self = shift;
   $self->add_info('checking cpus');
-  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
-  $self->set_thresholds(
-      metric => 'cpu_usage',
-      warning => 50,
-      critical => 90);
-  $self->add_message($self->check_thresholds(
-      metric => 'cpu_usage',
-      value => $self->{cpu_usage}));
-  $self->add_perfdata(
-      label => 'cpu_usage',
-      value => $self->{cpu_usage},
-      uom => '%',
-  );
+  foreach (qw(cpu user system nice wait kernel interrupt)) {
+    my $key = $_ . '_usage';
+    if (defined($self->{$key})) {
+      $self->add_info(sprintf '%s: %.2f%%',
+          $_ . ($_ eq 'cpu' ? ' (total)' : ''),
+	  $self->{$key});
+      $self->set_thresholds(
+          metric => $key,
+          warning => 50,
+          critical => 90);
+      $self->add_message($self->check_thresholds(
+          metric => $key,
+          value => $self->{$key}));
+      $self->add_perfdata(
+          label => $key,
+          value => $self->{$key},
+          uom => '%',
+      );
+    }
+  }
 }
