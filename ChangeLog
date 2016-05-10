@@ -1,3 +1,10 @@
+* 2016-05-10 5.6.1
+  fix detection of Pulse Secure Gateways
+* 2016-05-06 5.6
+  more dhoffend pull requests (linux ucdmib memory, lmsensors)
+* 2016-05-02 5.5
+  add vrrp-modes
+  dhoffend pull requests (linux ucdmib, lsmpio bugfix, hsrp multiple roles)
 * 2016-03-29 5.4
   add CISCO-STACKWISE-MIB
   add processor index in cisco enhanced memory

@@ -21,7 +21,7 @@ sub check {
       value => $self->{iveTemperature},
       warning => $self->{warning},
       critical => $self->{critical},
-  );
+  ) if $self->{iveTemperature};
   if ($self->{fanDescription} && $self->{fanDescription} =~ /(failed)|(threshold)/) {
     $self->add_critical($self->{fanDescription});
   }
