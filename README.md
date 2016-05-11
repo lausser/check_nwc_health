@@ -249,6 +249,22 @@ Examples
     checking supplies
     powersupply 1 ( Power Supply 1, WS-CAC-3000W) is normal
     powersupply 2 ( Power Supply 2, WS-CAC-3000W) is normal | 'temp_100050'=35;65;;; 'temp_100051'=36;65;;; 'temp_40010'=31;115;;; 'temp_40020'=34;115;;; 'temp_40030'=30;115;;; 'temp_60010'=45;85;;; 'temp_60011'=34;65;;; 'temp_60020'=30;95;;; 'temp_60021'=30;70;;; 'temp_60030'=35;100;;; 'temp_60031'=29;70;;; 'temp_60050'=43;85;;; 'temp_60051'=29;80;;; 'temp_60054'=62;105;;; 'temp_60055'=45;110;;; 'temp_60056'=57;110;;; 'temp_90010'=38;80;;; 'temp_90011'=33;75;;; 'temp_90050'=38;75;;; 'temp_90051'=31;65;;;
+
+    $ check_nwc_health --hostname 10.0.12.114 --mode chassis hardware-health --community cisco/cisco-cat6509 --verbose
+    I am a Cisco IOS Software, s72033_rp Software (s72033_rp-ADVIPSERVICESK9_WAN-M), Version 12.2(33)SXJ, RELEASE SOFTWARE (fc3) Technical Support: http://www.cisco.com/techsupport Copyright (c) 1986-2011 by Cisco Systems, Inc. Compiled Thu 17-Mar-11 15:10 by pro
+    WARNING - 4 new module(s) (SAL1536ZWYC, SAL1538HZF9, SAL1521S03A, SAL1528D536), 85 new ports, chassis sys status is ok, power supply 1 status is ok, power supply 2 status is ok, found 4 modules with 85 ports
+    module 1 (serial SAL1536ZWYC) is ok
+    module 2 (serial SAL1538HZF9) is ok
+    module 3 (serial SAL1521S03A) is ok
+    module 5 (serial SAL1528D536) is ok
+    chassis sys status is ok
+    chassis fan status is ok
+    chassis minor alarm is off
+    chassis major alarm is off
+    chassis temperature alarm is off
+    power supply 1 status is ok
+    power supply 2 status is ok
+    found 4 modules with 85 ports
     
     $ check_nwc_health --hostname 10.0.12.114 --mode hardware-health --community foundry/ironware
     OK - environmental hardware working fine
@@ -267,7 +283,7 @@ Examples
     $ check_nwc_health --hostname 10.0.12.114 --mode hardware-health --community f5/f5app
     CRITICAL - chassis fan 1 is unknown_3 (9642rpm), chassis fan 2 is unknown_3 (10227rpm), chassis fan 3 is unknown_3 (9642rpm) | 'temp_c1'=38;;;; 'fan_c1'=9926;;;; 'fan_1'=9642;;;; 'fan_2'=10227;;;; 'fan_3'=9642;;;; 'temp_1'=25;;;;
     $ check_nwc_health --hostname 10.0.12.114 --mode hardware-health --community f5/f5app --verbose
-    I am a Linux l-lb03-1.lidl.net 2.6.18-164.11.1.el5.1.0.f5app #1 SMP Mon Mar 5 12:40:48 PST 2012 x86_64
+    I am a Linux lb02 2.6.1-1.1.el5.1.0.f5app #1 SMP Mon Mar 5 12:40:48 PST 2012 x86_64
     CRITICAL - chassis fan 1 is unknown_3 (9642rpm), chassis fan 2 is unknown_3 (10227rpm), chassis fan 3 is unknown_3 (9642rpm)
     checking cpus
     cpu 1 has 38C (9926rpm)
@@ -317,7 +333,7 @@ Examples
     cpu 1 usage is 18.00% | 'cpu_1_usage'=18%;80;90;0;100
     
     $ check_nwc_health --hostname 10.0.12.114 --mode cpu-load --community f5/f5app --verbose
-    I am a Linux l-lb03-1.lidl.net 2.6.18-164.11.1.el5.1.0.f5app #1 SMP Mon Mar 5 12:40:48 PST 2012 x86_64
+    I am a Linux lb02 2.6.1-1.1.el5.1.0.f5app #1 SMP Mon Mar 5 12:40:48 PST 2012 x86_64
     OK - tmm cpu usage is 1.24%
     checking cpus
     tmm cpu usage is 1.24% | 'cpu_tmm_usage'=1.24%;80;90;0;100
