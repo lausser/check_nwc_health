@@ -17,6 +17,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ASYNCOSMAILMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ATTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BGP4MIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BIANCABRICKMIBRESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BLUECOATAVMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BLUECOATSGPROXYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CHECKPOINTMIB.pm \
@@ -107,6 +108,11 @@ EXTRA_MODULES=\
   Classes/Server/Linux/Component/CpuSubsystem.pm \
   Classes/Server/Linux/Component/EnvironmentalSubsystem.pm \
   Classes/Server/Linux/Component/MemSubsystem.pm \
+  Classes/Bintec/Bibo/Components/EnvironmentalSubsystem.pm \
+  Classes/Bintec/Bibo/Components/MemSubsystem.pm \
+  Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
+  Classes/Bintec/Bibo.pm \
+  Classes/Bintec.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
@@ -123,6 +129,7 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   Classes/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   Classes/Cisco/ASA.pm \
+  Classes/Cisco/IOS/Component/HaSubsystem.pm \
   Classes/Cisco/IOS/Component/ConfigSubsystem.pm \
   Classes/Cisco/IOS/Component/CpuSubsystem.pm \
   Classes/Cisco/IOS/Component/MemSubsystem.pm \

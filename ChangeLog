@@ -1,3 +1,6 @@
+* 2016-05-10 5.7
+  add Bintec Bibo (1202)
+  add Cisco ASA mode ha-role (including cluster-health check)
 * 2016-05-10 5.6.1
   fix detection of Pulse Secure Gateways
 * 2016-05-06 5.6
