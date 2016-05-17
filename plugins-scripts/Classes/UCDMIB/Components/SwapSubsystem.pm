@@ -9,7 +9,9 @@ sub init {
       memSwapError memSwapErrorMsg)));
 
   # calc swap usage
-  $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
+  eval {
+    $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
+  };
 }
 
 sub check {
@@ -34,7 +36,8 @@ sub check {
       $self->add_critical('SwapError: ' . $self->{'memSwapErrorMsg'});
     }
   } else {
-    $self->add_unknown('cannot aquire swap usage');
+    # $self->add_unknown('cannot aquire swap usage');
+    # This system does not use swap
   }
 }
 
