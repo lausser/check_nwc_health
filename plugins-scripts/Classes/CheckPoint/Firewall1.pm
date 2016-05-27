@@ -8,6 +8,8 @@ sub init {
     $self->analyze_and_check_environmental_subsystem("Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::CheckPoint::Firewall1::Component::CpuSubsystem");
+  } elsif ($self->mode =~ /device::hardware::multi-load/) {
+    $self->analyze_and_check_multicpu_subsystem("Classes::CheckPoint::Firewall1::Component::MultiCpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::CheckPoint::Firewall1::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
@@ -23,4 +25,3 @@ sub init {
     $self->no_such_mode();
   }
 }
-

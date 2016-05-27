@@ -292,6 +292,7 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1/Component/FwSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/HaSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
+  Classes/CheckPoint/Firewall1/Component/MultiCpuSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/MemSubsystem.pm \
   Classes/CheckPoint/Firewall1.pm \
   Classes/CheckPoint/VSX/Component/FwSubsystem.pm \
