@@ -39,7 +39,7 @@ sub check {
     $self->add_ok();
   } elsif (grep { $self->{s5ChasComOperState} eq $_ }
       (qw(warning nonFatalErr))) {
-    $self->add_ok();
+    $self->add_warning();
   } elsif (grep { $self->{s5ChasComOperState} eq $_ }
       (qw(fatalErr))) {
     $self->add_critical();
