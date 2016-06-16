@@ -102,10 +102,9 @@ sub check {
 
   # raise critical error if errorflag is set
   if ($self->{dskErrorFlag} eq 'error') {
-    $self->add_message(Monitoring::GLPlugin::CRITICAL);
-
-  # otherwise check thresholds
+    $self->add_critical();
   } else {
+    # otherwise check thresholds
     $self->add_message($self->check_thresholds(
         metric => sprintf('%s_free_pct', $self->{dskPath}),
         value => $free));

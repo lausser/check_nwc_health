@@ -58,7 +58,7 @@ sub check {
       warning => $threshold,
       critical => $threshold);
   if ($self->{prErrorFlag} eq 'error') {
-    $self->add_message(Monitoring::GLPlugin::CRITICAL);
+    $self->add_critical();
   } else {
     $self->add_message($self->check_thresholds(
         metric => $self->{prNames},

@@ -48,7 +48,7 @@ sub check {
           : ''
   );
   if ($self->{'laErrorFlag'} eq 'error') {
-    $self->add_message(Monitoring::GLPlugin::CRITICAL);
+    $self->add_critical();
   } else {
     $self->add_message($self->check_thresholds(
         metric => lc $self->{laNames},
