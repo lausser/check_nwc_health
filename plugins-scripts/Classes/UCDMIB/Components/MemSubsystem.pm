@@ -4,9 +4,33 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
-      memTotalSwap memAvailSwap memTotalReal memAvailReal memBuffer memCached
-      memMinimumSwap memSwapError memSwapErrorMsg)));
+  my %params = @_;
+  $self->get_snmp_tables('UCD-SNMP-MIB', [
+      ['memory', 'memory', 'Classes::UCDMIB::Component::MemSubsystem::Memory'],
+  ]);
+}
+
+sub check {
+  my $self = shift;
+  $self->add_info('checking memory');
+  foreach (@{$self->{memory}}) {
+    $_->check();
+  }
+}
+
+sub dump {
+  my $self = shift;
+  foreach (@{$self->{memory}}) {
+    $_->dump();
+  }
+}
+
+package Classes::UCDMIB::Component::MemSubsystem::Memory;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
 
   # basically buffered memory can always be freed up (filesystem cache)
   # https://kc.mcafee.com/corporate/index?page=content&id=KB73175
@@ -17,11 +41,8 @@ sub init {
 
   # calc memory (no swap)
   $self->{mem_usage} = 100 - ($mem_available * 100 / $self->{memTotalReal});
-}
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking memory');
+  # add message/thresholds/perfdata
   if (defined $self->{mem_usage}) {
     $self->add_info(sprintf 'memory usage is %.2f%%',
         $self->{mem_usage});

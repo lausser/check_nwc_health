@@ -4,18 +4,38 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
-      memTotalSwap memAvailSwap memMinimumSwap
-      memSwapError memSwapErrorMsg)));
-
-  # calc swap usage
-  eval {
-    $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
-  };
+  my %params = @_;
+  $self->get_snmp_tables('UCD-SNMP-MIB', [
+      ['swap', 'memory', 'Classes::UCDMIB::Component::SwapSubsystem::Swap'],
+  ]);
 }
 
 sub check {
   my $self = shift;
+  $self->add_info('checking swap');
+  foreach (@{$self->{swap}}) {
+    $_->check();
+  }
+}
+
+sub dump {
+  my $self = shift;
+  foreach (@{$self->{swap}}) {
+    $_->dump();
+  }
+}
+
+package Classes::UCDMIB::Component::SwapSubsystem::Swap;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
+  # calc swap usage
+  eval {
+    $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
+  };
+
   if (defined $self->{'swap_usage'}) {
     $self->add_info(sprintf 'swap usage is %.2f%%',
         $self->{swap_usage});
