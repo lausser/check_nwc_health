@@ -96,12 +96,13 @@ sub check {
   $spaceleft =~ s/(?<=\d)(?=(?:\d\d\d)+\b)/,/g;
   $self->add_info(sprintf '%s has %s MB left (%.2f%%)%s',
       $self->{dskPath}, $spaceleft, $free,
-      $self->{dskErrorFlag} eq 'error'
-          ? sprintf ' - %s', $self->{dskErrorMsg}
-          : '');
+      defined $self->{dskErrorFlag} && defined $self->{dskErrorMsg}
+      	  && $self->{dskErrorFlag} eq 'error'
+        ? sprintf ' - %s', $self->{dskErrorMsg}
+        : '');
 
   # raise critical error if errorflag is set
-  if ($self->{dskErrorFlag} eq 'error') {
+  if (defined $self->{dskErrorFlag} && $self->{dskErrorFlag} eq 'error') {
     $self->add_critical();
   } else {
     # otherwise check thresholds

@@ -47,9 +47,10 @@ sub check {
   $self->add_info(sprintf '%s: %d%s',
       $self->{prNames},
       $self->{prCount},
-      $self->{prErrorFlag} eq 'error'
-          ? sprintf ' (%s)', $self->{prErrMessage}
-          : '');
+      defined $self->{prErrorFlag} && defined $self->{prErrMessage}
+          && $self->{prErrorFlag} eq 'error'
+        ? sprintf ' (%s)', $self->{prErrMessage}
+        : '');
   my $threshold = sprintf '%u:%s',
       !$self->{prMin} && !$self->{prMax} ? 1 : $self->{prMin},
       $self->{prMax} && $self->{prMax} >= $self->{prMin} ? $self->{prMax} : '';
@@ -57,7 +58,7 @@ sub check {
       metric => $self->{prNames},
       warning => $threshold,
       critical => $threshold);
-  if ($self->{prErrorFlag} eq 'error') {
+  if (defined $self->{prErrorFlag} && $self->{prErrorFlag} eq 'error') {
     $self->add_critical();
   } else {
     $self->add_message($self->check_thresholds(

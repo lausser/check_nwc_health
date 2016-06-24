@@ -43,11 +43,12 @@ sub check {
   $self->add_info(
       sprintf '%s is %.2f%s',
       lc $self->{laNames}, $self->{laLoad},
-      $self->{'laErrorFlag'} eq 'error'
-          ? sprintf ' (%s)', $self->{'laErrMessage'}
-          : ''
+      $self->{'laErrorFlag'} && defined $self->{'laErrMessage'}
+          && $self->{'laErrorFlag'} eq 'error'
+        ? sprintf ' (%s)', $self->{'laErrMessage'}
+        : ''
   );
-  if ($self->{'laErrorFlag'} eq 'error') {
+  if (defined $self->{'laErrorFlag'} && $self->{'laErrorFlag'} eq 'error') {
     $self->add_critical();
   } else {
     $self->add_message($self->check_thresholds(
