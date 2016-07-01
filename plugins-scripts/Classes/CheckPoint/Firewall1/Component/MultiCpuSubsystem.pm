@@ -29,8 +29,8 @@ sub check {
   $self->add_info(sprintf 'cpu%s usage is %.2f%%',
       $self->{multiProcIndex},
       $self->{multiProcUsage});
-  $self->set_thresholds(warning => 80, critical => 90);
-  $self->add_message($self->check_thresholds($self->{multiProcUsage}));
+  $self->set_thresholds(metric => "cpu".$self->{multiProcIndex}."_usage", warning => 80, critical => 90);
+  $self->add_message($self->check_thresholds(metric => "cpu".$self->{multiProcIndex}."_usage", value => $self->{multiProcUsage}));
   $self->add_perfdata(
       label => "cpu".$self->{multiProcIndex}."_usage",
       value => $self->{multiProcUsage},
