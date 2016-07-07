@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->bulk_is_baeh();
   # there is temperature/sensor information in these mibs
   # mib-sensor.mib mib-box.mib mib-sysped.mib mib-sysiny.mib mibsysx8.mib
   # but i don't have a device which implements them

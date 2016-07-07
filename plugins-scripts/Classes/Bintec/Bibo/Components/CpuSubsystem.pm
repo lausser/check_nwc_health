@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->bulk_is_baeh();
   $self->get_snmp_tables('BIANCA-BRICK-MIBRES-MIB', [
       ['cpus', 'cpuTable', 'Classes::Bintec::Bibo::Component::CpuSubsystem::Cpu'],
   ]);

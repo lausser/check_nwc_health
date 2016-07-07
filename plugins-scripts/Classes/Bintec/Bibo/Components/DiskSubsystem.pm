@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->bulk_is_baeh();
   $self->get_snmp_tables('BINTEC-FILESYS', [
       ['disks', 'fsDiskTable', 'Classes::Bintec::Bibo::Component::DiskSubsystem::Disk'],
   ]);
