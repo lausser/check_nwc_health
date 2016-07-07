@@ -35,6 +35,7 @@ use strict;
 sub check {
   my $self = shift;
   $self->{memoryDescr} = $self->unhex_octet_string($self->{memoryDescr});
+  $self->{memoryDescr} =~ s/\0//g;
   $self->add_info(sprintf '%s usage is %.2f%%',
       $self->{memoryDescr}, $self->{usage});
   my $label = 'memory_'.$self->{memoryDescr}.'_usage';
@@ -55,6 +56,7 @@ use strict;
 sub check {
   my $self = shift;
   $self->{memoryDescr} = $self->unhex_octet_string($self->{memoryDescr});
+  $self->{memoryDescr} =~ s/\0//g;
   $self->add_info(sprintf '%s usage is %.2f%%',
       $self->{memoryDescr}, $self->{usage});
   my $label = 'memory_'.$self->{memoryDescr}.'_usage';
