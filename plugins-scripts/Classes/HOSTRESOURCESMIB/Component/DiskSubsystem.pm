@@ -16,22 +16,32 @@ use strict;
 sub check {
   my $self = shift;
   my $free = 100 - 100 * $self->{hrStorageUsed} / $self->{hrStorageSize};
+  my $label = $self->{hrStorageDescr};
+  # add trailing /
+  $label =~ s!/*$!/!;
+  # remove first /
+  $label =~ s/^\///;
+  # replace spaces with underscore
+  $label =~ s/\s+/_/g;
+  # replace all slashes/colons with underscore
+  $label =~ s/[:\/]/_/g;
+
+  $label = sprintf('%sfree_pct', $label);
+
   $self->add_info(sprintf 'storage %s (%s) has %.2f%% free space left',
       $self->{hrStorageIndex},
       $self->{hrStorageDescr},
       $free);
   if ($self->{hrStorageDescr} eq "/dev" || $self->{hrStorageDescr} =~ /.*cdrom.*/) {
     # /dev is usually full, so we ignore it.
-    $self->set_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
-        warning => '0:', critical => '0:');
+    $self->set_thresholds(metric => $label, warning => '0:', critical => '0:');
   } else {
-    $self->set_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
-        warning => '10:', critical => '5:');
+    $self->set_thresholds(metric => $label, warning => '10:', critical => '5:');
   }
-  $self->add_message($self->check_thresholds(metric => sprintf('%s_free_pct', $self->{hrStorageDescr}),
-      value => $free));
+
+  $self->add_message($self->check_thresholds(metric => $label, value => $free));
   $self->add_perfdata(
-      label => sprintf('%s_free_pct', $self->{hrStorageDescr}),
+      label => $label,
       value => $free,
       uom => '%',
   );
