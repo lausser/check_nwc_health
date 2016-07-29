@@ -114,8 +114,13 @@ sub check {
   $self->SUPER::check();
   my $label = $self->{entPhySensorEntityName};
   $label =~ s/[Tt]emperature\s*@\s*(.*)/$1/;
+  $label =~ s/[\s\/]+/_/g;
+  $self->set_thresholds(warning => 70, critical => 80);
+  if ($self->check_thresholds($self->{entPhySensorValue})) {
+    $self->add_message($self->check_thresholds($self->{entPhySensorValue}), $self->{info});
+  }
   $self->add_perfdata(
-    label => 'temp_'.$label,
+    label => sprintf('temp_%s', $label),
     value => $self->{entPhySensorValue},
   );
 }
@@ -130,9 +135,11 @@ sub check {
   my $label = $self->{entPhySensorEntityName};
   $label =~ s/ RPM$//g;
   $label =~ s/Fan #(\d+)/$1/g;
+  $label =~ s/[\s\/]+/_/g;
   $self->add_perfdata(
     label => 'fan_'.$label,
     value => $self->{entPhySensorValue},
+    thresholds => 0
   );
 }
 
