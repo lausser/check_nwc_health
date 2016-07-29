@@ -257,7 +257,10 @@ EXTRA_MODULES=\
   Classes/UCDMIB/Components/ProcessSubsystem.pm \
   Classes/UCDMIB.pm \
   Classes/F5/F5BIGIP/Component/LTM.pm \
+  Classes/F5/F5BIGIP/Component/ConfigSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/ConnectionSubsystem.pm \
   Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/HaSubsystem.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
   Classes/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   Classes/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
