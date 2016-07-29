@@ -1,5 +1,6 @@
 libexec_SCRIPTS=check_nwc_health
 GL_MODULES=\
+  ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Extraopts.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Getopt.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin.pm \
@@ -32,6 +33,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOETHERNETFABRICEXTENDERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFEATURECONTROLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREWALLMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFLASHMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOHSRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOIETFNATMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOIPSECFLOWMONITORMIB.pm \
@@ -126,6 +128,7 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/CISCOFLASHMIB/Component/StorageSubsystem.pm \
   Classes/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   Classes/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   Classes/Cisco/ASA.pm \
