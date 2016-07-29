@@ -83,17 +83,17 @@ sub check {
     return;
   }
   if ($self->mode =~ /pool::list/) {
+    printf("OK - %d LTM Pools listed\n", scalar @{$self->{pools}});
     foreach (sort {$a->{ltmPoolName} cmp $b->{ltmPoolName}} @{$self->{pools}}) {
       printf "%s\n", $_->{ltmPoolName};
-      #$_->list();
     }
+    $self->suppress_messages();
   } else {
     foreach (@{$self->{pools}}) {
       $_->check();
     }
   }
 }
-
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9;
 our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem Monitoring::GLPlugin::SNMP::TableItem);
@@ -282,7 +282,7 @@ sub check {
         value => $self->{completeness}));
     if ($self->{ltmPoolMinActiveMembers} > 0 &&
         $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
-      $self->annotate_info(sprintf("not enough active members (%d, min is %d)",
+      $self->annotate_info(sprintf("pool %s has not enough active members (%d, min is %d)",
               $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt},
               $self->{ltmPoolMinActiveMembers}));
       $self->add_message(defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL);
@@ -302,10 +302,19 @@ sub check {
         value => $self->{ltmPoolStatServerCurConns},
         warning => undef, critical => undef,
     );
+
     if ($self->opts->report eq "html") {
       printf "%s - %s%s\n", $self->status_code($self->check_messages()), $pool_info, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
       $self->suppress_messages();
-      $self->draw_html_table();
+      my ($titles, $rows, $summary) = $self->build_table();
+      print $self->table_html($rows, $titles, $summary);
+    } elsif ( $self->opts->report eq "short" ) {
+      ;
+    } else {
+      printf "%s - %s%s\n", $self->status_code($self->check_messages()), $pool_info, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
+      $self->suppress_messages();
+      my ($titles, $rows) = $self->build_table();
+      print $self->table_ascii($rows, $titles);
     }
   } elsif ($self->mode =~ /device::lb::pool::connections/) {
     foreach my $member (@{$self->{members}}) {
@@ -314,57 +323,45 @@ sub check {
   }
 }
 
-sub draw_html_table {
+sub build_table {
   my $self = shift;
+  my (@headers, @rows, $summary);
   if ($self->mode =~ /device::lb::pool::comple/) {
-    my @headers = qw(Node Port Enabled Avail Reason);
-    my @columns = qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason);
+    @headers = qw(Node Port Enabled Prio Rule Avail Reason);
+    my @columns = qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMemberPriority ltmPoolMemberMonitorRule ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason);
     if ($self->mode =~ /device::lb::pool::complections/) {
       push(@headers, "Connections");
       push(@headers, "ConnPct");
       push(@columns, "ltmPoolMemberStatServerCurConns");
       push(@columns, "ltmPoolMemberStatServerPctConns");
       foreach my $member (@{$self->{members}}) {
-        $member->{ltmPoolMemberStatServerPctConns} = sprintf "%.5f", $member->{ltmPoolMemberStatServerPctConns};
+        $member->{ltmPoolMemberStatServerPctConns} = sprintf "%.4f", $member->{ltmPoolMemberStatServerPctConns};
       }
     }
-    printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
-    printf "<tr>";
-    foreach (@headers) {
-      printf "<th style=\"text-align: left; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
-    }
-    printf "</tr>";
+
+    $summary = sprintf "Pool mode: %s, Pool Monitor: %s", $_->{'ltmPoolLbMode'}, $_->{'ltmPoolMonitorRule'};
     foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
-      printf "<tr>";
-      printf "<tr style=\"border: 1px solid black;\">";
-      foreach my $attr (@columns) {
-        if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
-          if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
-            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #33ff00;\">%s</td>", $_->{$attr};
-          } else {
-            printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #f83838;\">%s</td>", $_->{$attr};
-          }
+      my %trh;
+      if ($_->{ltmPoolMbrStatusEnabledState} eq "enabled") {
+        if ($_->{ltmPoolMbrStatusAvailState} eq "green") {
+          $trh{style} = "border: 1px solid black; text-align: right; padding-left: 4px; padding-right: 6px; background-color: Lime;"
         } else {
-          printf "<td style=\"text-align: left; padding-left: 4px; padding-right: 6px; background-color: #acacac;\">%s</td>", $_->{$attr};
+          $trh{style} = "border: 1px solid black; text-align: right; padding-left: 4px; padding-right: 6px; background-color: Red;"
         }
+      } else {
+        $trh{style} = "border: 1px solid black; text-align: right; padding-left: 4px; padding-right: 6px; background-color: DarkGray;"
       }
-      printf "</tr>";
-    }
-    printf "</table>\n";
-    printf "<!--\nASCII_NOTIFICATION_START\n";
-    foreach (@headers) {
-      printf "%20s", $_;
-    }
-    printf "\n";
-    foreach (sort {$a->{ltmPoolMemberNodeName} cmp $b->{ltmPoolMemberNodeName}} @{$self->{members}}) {
+      my @row;
       foreach my $attr (@columns) {
-        printf "%20s", $_->{$attr};
+        my %tdh;
+        $tdh{content} = $_->{$attr};
+        push(@row, \%tdh);
       }
-      printf "\n";
+      $trh{content} = [ @row ];
+      push(@rows, { %trh });
     }
-    printf "ASCII_NOTIFICATION_END\n-->\n";
-  } elsif ($self->mode =~ /device::lb::pool::complections/) {
   }
+  return (\@headers, \@rows, $summary);
 }
 
 package Classes::F5::F5BIGIP::Component::LTMSubsystem9::LTMPoolMember;
