@@ -39,7 +39,7 @@ use strict;
 
 sub check {
   my ($self) = @_;
-  my @roles = split ',', $self->opts->role(); # active,standby for checking the cluster status
+  #my @roles = split ',', $self->opts->role(); # active,standby for checking the cluster status
   $self->add_info(sprintf "resource %s has status %s (%s)", 
       $self->{cfwHardwareInformationShort},
       $self->{cfwHardwareStatusValue},
@@ -47,7 +47,7 @@ sub check {
   if ($self->{cfwHardwareStatusDetail} eq "Failover Off") {
     $self->add_ok();
   } elsif ($self->{cfwHardwareInformation} =~ /this device/) {
-    if (grep { "active" eq $_ } @roles) {
+    if ( $self->{cfwHardwareStatusValue} eq 'active' ) {
       $self->add_ok();
     } else {
       $self->add_critical();
@@ -72,7 +72,7 @@ use strict;
 
 sub check {
   my ($self) = @_;
-  my @roles = split ',', $self->opts->role(); # active,standby for checking the cluster status
+  #my @roles = split ',', $self->opts->role(); # active,standby for checking the cluster status
   $self->add_info(sprintf "resource %s has status %s (%s)", 
       $self->{cfwHardwareInformationShort},
       $self->{cfwHardwareStatusValue},
@@ -80,7 +80,7 @@ sub check {
   if ($self->{cfwHardwareStatusDetail} eq "Failover Off") {
     $self->add_ok();
   } elsif ($self->{cfwHardwareInformation} =~ /this device/) {
-    if (grep { "standby" eq $_ } @roles) {
+    if ( $self->{cfwHardwareStatusValue} eq 'standby' ) {
       $self->add_ok();
     } else {
       $self->add_critical();
@@ -105,17 +105,31 @@ use strict;
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf "resource %s has status %s (%s)", 
+
+  my $abort = 0;
+  foreach (qw(cfwHardwareInformationShort cfwHardwareStatusValue cfwHardwareStatusDetail)) {
+    if (! defined $self->{$_}) {
+      $self->add_unknown(sprintf "%s is not defined", $_);
+      $abort = 1;
+    }
+  }
+  return if $abort;
+  $self->add_info(sprintf "resource %s has status %s (%s)",
       $self->{cfwHardwareInformationShort},
       $self->{cfwHardwareStatusValue},
-      $self->{cfwHardwareStatusDetail});
-  if ($self->{cfwHardwareStatusDetail} eq "Failover Off") {
+      $self->{cfwHardwareStatusDetail}
+  );
+  if ($self->{cfwHardwareStatusDetail} eq "Failover Off" ||
+      $self->{cfwHardwareStatusDetail} eq "not Configured") {
     $self->add_ok();
   } elsif ($self->{cfwHardwareStatusDetail} =~ /FAILOVER/) {
+    $self->add_ok();
     $self->add_warning_mitigation("cluster has switched");
   } elsif ($self->{cfwHardwareStatusValue} eq "error") {
+    $self->add_ok();
     $self->add_warning_mitigation("cluster has lost redundancy");
   } elsif ($self->{cfwHardwareStatusValue} ne "up") {
+    $self->add_ok();
     $self->add_warning_mitigation("LAN interface has a problem");
   }
 }

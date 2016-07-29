@@ -24,7 +24,7 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
   } elsif ($self->mode =~ /device::vpn::status/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem");
-  } elsif ($self->mode =~ /device::ha::role/) {
+  } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::HaSubsystem");
   } else {
     $self->no_such_mode();

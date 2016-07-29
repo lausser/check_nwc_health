@@ -12,6 +12,7 @@ sub init {
       ccmHistoryStartupLastChanged))) {
     if (! defined $self->{$_}) {
       $self->add_unknown(sprintf "%s is not defined", $_);
+      next;
     }
     $self->{$_} = time - $self->uptime() + $self->timeticks($self->{$_});
   }
@@ -59,7 +60,7 @@ sub check {
       $self->add_message($errorlevel);
     }
   } else {
-    $self->add_ok("saved config is up to date");
+    $self->add_ok(sprintf("saved config is up to date (saved %s ago)", $self->human_timeticks(time - $self->{ccmHistoryRunningLastSaved})));
   }
 }
 

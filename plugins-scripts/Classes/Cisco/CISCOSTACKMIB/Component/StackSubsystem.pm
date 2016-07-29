@@ -65,12 +65,11 @@ sub check {
       $self->add_ok();
     }
   }
-  if ($self->{chassisFanStatus} ne 'ok') {
-    $self->add_critical();
-  }
   $self->add_info(sprintf 'chassis fan status is %s',
       $self->{chassisFanStatus});
-  if ($self->{chassisFanStatus} ne 'ok') {
+  if ($self->{chassisFanStatus} eq 'other') {
+    # ignore it, fan should not be present
+  } elsif ($self->{chassisFanStatus} ne 'ok') {
     $self->add_critical();
   }
   $self->add_info(sprintf 'chassis minor alarm is %s',
