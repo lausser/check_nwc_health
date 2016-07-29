@@ -28,7 +28,7 @@ sub overall_init {
 sub init {
   my $self = shift;
   $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
-      ['cpus', 'sysCpuTable', 'Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu'],
+      ['cpus', 'sysCpuSensorTable', 'Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu'],
   ]);
 }
 
@@ -60,17 +60,20 @@ use strict;
 sub check {
   my $self = shift;
   $self->add_info(sprintf 'cpu %d has %dC (%drpm)',
-      $self->{sysCpuIndex},
-      $self->{sysCpuTemperature},
-      $self->{sysCpuFanSpeed});
+      $self->{sysCpuSensorIndex},
+      $self->{sysCpuSensorTemperature},
+      $self->{sysCpuSensorFanSpeed});
+  $self->set_thresholds(warning => 60, critical => 70);
+  if ($self->check_thresholds($self->{sysCpuSensorTemperature})) {
+      $self->add_message($self->check_thresholds($self->{sysCpuSensorTemperature}), $self->{info});
+  }
   $self->add_perfdata(
-      label => sprintf('temp_c%s', $self->{sysCpuIndex}),
-      value => $self->{sysCpuTemperature},
-      thresholds => 0,
+      label => sprintf('temp_c%s', $self->{sysCpuSensorIndex}),
+      value => $self->{sysCpuSensorTemperature}
   );
   $self->add_perfdata(
-      label => sprintf('fan_c%s', $self->{sysCpuIndex}),
-      value => $self->{sysCpuFanSpeed},
+      label => sprintf('fan_c%s', $self->{sysCpuSensorIndex}),
+      value => $self->{sysCpuSensorFanSpeed},
       thresholds => 0,
   );
 }

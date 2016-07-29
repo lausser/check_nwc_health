@@ -20,6 +20,7 @@ sub check {
       $self->{sysChassisFanStatus},
       $self->{sysChassisFanSpeed});
   if ($self->{sysChassisFanStatus} eq 'notpresent') {
+    #$self->add_warning();
   } else {
     if ($self->{sysChassisFanStatus} ne 'good') {
       $self->add_critical();
@@ -27,6 +28,7 @@ sub check {
     $self->add_perfdata(
         label => sprintf('fan_%s', $self->{sysChassisFanIndex}),
         value => $self->{sysChassisFanSpeed},
+        thresholds => 0
     );
   }
 }

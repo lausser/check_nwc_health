@@ -18,6 +18,10 @@ sub check {
   $self->add_info(sprintf 'chassis temperature %d is %sC',
       $self->{sysChassisTempIndex},
       $self->{sysChassisTempTemperature});
+  $self->set_thresholds(warning => 60, critical => 70);
+  if ($self->check_thresholds($self->{sysChassisTempTemperature})) {
+      $self->add_message($self->check_thresholds($self->{sysChassisTempTemperature}), $self->{info});
+  }
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{sysChassisTempIndex}),
       value => $self->{sysChassisTempTemperature},

@@ -7,11 +7,15 @@ sub init {
   #
   # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
   # 
-  $self->get_snmp_objects('CISCO-ENVMON-MIB', qw(
-      ciscoEnvMonPresent));
+  $self->get_snmp_objects('CISCO-ENVMON-MIB', qw(ciscoEnvMonPresent));
+  $self->get_snmp_objects('CISCO-FLASH-MIB', qw(ciscoFlashDevicesSupported));
   if (! $self->{ciscoEnvMonPresent}) {
     # gibt IOS-Kisten, die haben kein ciscoEnvMonPresent
     $self->{ciscoEnvMonPresent} = $self->implements_mib('CISCO-ENVMON-MIB');
+  }
+  if ($self->{ciscoFlashDevicesSupported}) {
+    $self->{storage_subsystem} = 
+        Classes::Cisco::CISCOFLASHMIB::Component::StorageSubsystem->new();
   }
   if ($self->{ciscoEnvMonPresent} && 
       $self->{ciscoEnvMonPresent} ne 'oldAgs') {
@@ -42,6 +46,9 @@ sub init {
 
 sub check {
   my $self = shift;
+  if ($self->{ciscoFlashDevicesSupported}) {
+    $self->{storage_subsystem}->check();
+  }
   if ($self->{ciscoEnvMonPresent} &&
       $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem}->check();
@@ -53,13 +60,14 @@ sub check {
   } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     $self->{sensor_subsystem}->check();
   }
-  if (! $self->check_messages()) {
-    $self->add_ok("environmental hardware working fine");
-  }
+  $self->reduce_messages("environmental hardware working fine");
 }
 
 sub dump {
   my $self = shift;
+  if ($self->{ciscoFlashDevicesSupported}) {
+    $self->{storage_subsystem}->dump();
+  }
   if ($self->{ciscoEnvMonPresent} &&
       $self->{ciscoEnvMonPresent} ne 'oldAgs') {
     $self->{fan_subsystem}->dump();

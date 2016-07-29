@@ -42,6 +42,7 @@ sub init {
 
 sub check {
   my $self = shift;
+  use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3, DEPENDENT => 4 };
   $self->add_info('checking interfaces');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
@@ -58,10 +59,8 @@ sub check {
       $_->check();
     }
     my $num_interfaces = scalar(@{$self->{interfaces}});
-    my $up_interfaces =
-        scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
-    my $available_interfaces =
-        scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
+    my $up_interfaces =  scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
+    my $available_interfaces = scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
     $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are available",
         $available_interfaces, $num_interfaces, $up_interfaces);
     $self->set_thresholds(warning => "3:", critical => "2:");
@@ -76,14 +75,11 @@ sub check {
         value => $available_interfaces,
     );
 
-    printf "%s\n", $self->{info};
-    printf "<table style=\"border-collapse:collapse; border: 1px solid black;\">";
-    printf "<tr>";
-    foreach (qw(Index Descr Type Speed AdminStatus OperStatus Duration Available)) {
-      printf "<th style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
-    }
-    printf "</tr>";
+    my @titles = qw(Index Descr Type Speed AdminStatus OperStatus Duration Available);
+    my @rows;
+
     my $unique = {};
+    # determine if ifDescr is unique
     foreach (@{$self->{interfaces}}) {
       if (exists $unique->{$_->{ifDescr}}) {
         $unique->{$_->{ifDescr}}++;
@@ -91,56 +87,47 @@ sub check {
         $unique->{$_->{ifDescr}} = 0;
       }
     }
+
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
+      my %trh;
       if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
+        $_->{ifDescr} = sprintf('%s %d', $_->{ifDescr}, $_->{ifIndex});
       }
-      printf "<tr>";
-      printf "<tr style=\"border: 1px solid black;\">";
+      my $ifAlias = "";
+      if ( defined $_->{ifAlias} && $_->{ifAlias} ne $_->{ifDescr} && $_->{ifAlias} ne 'noSuchObject' && $_->{ifAlias} ne 'noSuchInstance' ) {
+        $ifAlias = sprintf(" (alias %s)", $_->{ifAlias});
+      }
+      my $full_descr = sprintf("%s%s", $_->{ifDescr}, $ifAlias);
+      if ($_->{ifAvailable} eq "true") {
+        $trh{style} = "border: 1px solid black; text-align: right; padding-left: 4px; padding-right: 6px; background-color: Lime;";
+      } else {
+        $trh{style} = "border: 1px solid black; text-align: right; padding-left: 4px; padding-right: 6px;";
+      }
+      my @row;
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
-        if ($_->{ifAvailable} eq "false") {
-          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</td>", $_->{$attr};
+        my %tdh;
+        if ( $attr eq 'ifDescr' ) {
+          $tdh{content} = $full_descr;
         } else {
-          printf "<td style=\"text-align: right; padding-left: 4px; padding-right: 6px; background-color: #00ff33;\">%s</td>", $_->{$attr};
+          $tdh{content} = $_->{$attr};
         }
+        push(@row, \%tdh);
       }
-      printf "</tr>";
+      $trh{content} = [ @row ];
+      push(@rows, { %trh });
     }
-    printf "</table>\n";
-    printf "<!--\nASCII_NOTIFICATION_START\n";
-    my $column_length = {};
-    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable ifSpeedText ifStatusDuration)) {
-      $column_length->{$_} = length($_);
+
+    if ($self->opts->report eq "html") {
+      my $summary = sprintf("%d interfaces, %d up, %d available",
+          $num_interfaces, $up_interfaces, $available_interfaces);
+      printf "%s - %s%s\n", $self->status_code($self->check_messages()),
+          $summary, $self->perfdata_string() ? " | ".$self->perfdata_string() : "";
+      $self->suppress_messages();
+      print $self->table_html(\@rows, \@titles, $summary);
+    } else {
+      $self->add_info($self->table_ascii(\@rows, \@titles));
+      $self->add_message(OK);
     }
-    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-      if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
-      }
-      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
-        if (length($_->{$attr}) > $column_length->{$attr}) {
-          $column_length->{$attr} = length($_->{$attr});
-        }
-      }
-    }
-    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifStatusDuration ifAvailable ifSpeedText)) {
-      $column_length->{$_} = "%".($column_length->{$_} + 3)."s|";
-    }
-    $column_length->{ifSpeed} = $column_length->{ifSpeedText};
-    $column_length->{Duration} = $column_length->{ifStatusDuration};
-    foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifAvailable)) {
-      printf $column_length->{$_}, $_;
-    }
-    printf "\n";
-    foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-      if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
-      }
-      foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
-        printf $column_length->{$attr}, $_->{$attr};
-      }
-      printf "\n";
-    }
-    printf "ASCII_NOTIFICATION_END\n-->\n";
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
@@ -160,7 +147,25 @@ sub check {
       }
       if ($self->opts->report eq "short") {
         $self->clear_ok();
-        $self->add_ok('no problems') if ! $self->check_messages();
+      }
+      my $crit = $Monitoring::GLPlugin::plugin->{messages}->{critical};
+      my $warn = $Monitoring::GLPlugin::plugin->{messages}->{warning};
+      if ( scalar @{$crit} > 0 ) {
+        $self->add_message_beginning("critical", sprintf('%d interface%s checked, %d problem%s found',
+          scalar @{$self->{interfaces}},
+          scalar @{$self->{interfaces}} == 1 ? '' : 's',
+          scalar @{$crit},
+          scalar @{$crit} == 1 ? '' : 's'));
+      } elsif ( scalar @{$warn} > 0 ) {
+        $self->add_message_beginning("warning", sprintf('%d interface%s checked, %d problem%s found',
+          scalar @{$self->{interfaces}},
+          scalar @{$self->{interfaces}} == 1 ? '' : 's',
+          scalar @{$warn},
+          scalar @{$warn} == 1 ? '' : 's'));
+      } else {
+        $self->add_message_beginning("ok", sprintf('%d interface%s checked, no problems found',
+          scalar @{$self->{interfaces}},
+          scalar @{$self->{interfaces}} == 1 ? '' : 's'));
       }
     }
   }
@@ -419,6 +424,11 @@ sub init {
     }
     $Monitoring::GLPlugin::mode = "device::interfaces::complete";
   } elsif ($self->mode =~ /device::interfaces::usage/) {
+    foreach my $tmp qw(ifInOctets ifOutOctets ifInErrors ifOutErrors ifInDiscards ifOutDiscards) {
+      unless ( defined $self->{$tmp} ) {
+        $self->{$tmp} = 0;
+      }
+    }
     $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInOctets ifOutOctets));
     $self->{delta_ifInBits} = $self->{delta_ifInOctets} * 8;
     $self->{delta_ifOutBits} = $self->{delta_ifOutOctets} * 8;
@@ -494,7 +504,7 @@ sub init {
     my $gb = 1000 * 1000 * 1000;
     my $mb = 1000 * 1000;
     my $kb = 1000;
-    my $speed = $self->{ifHighSpeed} ? 
+    my $speed = ( $self->{ifHighSpeed} && $self->{ifHighSpeed} ne 'noSuchObject' ) ?
         ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
     if ($speed >= $gb) {
       $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
@@ -516,6 +526,7 @@ sub check {
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
           " (alias ".$self->{ifAlias}.")" : "";
+  my $label = (defined($self->{ifName}) && length($self->{ifName}) > 0 ) ? $self->{ifName} : $self->{ifDescr};
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -537,45 +548,45 @@ sub check {
         sprintf("%.2f%s/s", $self->{outputRate}, $self->opts->units),
         $self->{ifOperStatus} eq 'down' ? ' (down)' : '');
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $label.'_usage_in',
         warning => 80,
         critical => 90
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $label.'_usage_in',
         value => $self->{inputUtilization}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $label.'_usage_out',
         warning => 80,
         critical => 90
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $label.'_usage_out',
         value => $self->{outputUtilization}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_in',
+        label => $label.'_usage_in',
         value => $self->{inputUtilization},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_out',
+        label => $label.'_usage_out',
         value => $self->{outputUtilization},
         uom => '%',
     );
     my ($inwarning, $incritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $label.'_usage_in',
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_in',
+        metric => $label.'_traffic_in',
         warning => $self->{maxInputRate} / 100 * $inwarning,
         critical => $self->{maxInputRate} / 100 * $incritical
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_in',
+        label => $label.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -583,15 +594,15 @@ sub check {
         max => $self->{maxInputRate},
     );
     my ($outwarning, $outcritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $label.'_usage_out',
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_out',
+        metric => $label.'_traffic_out',
         warning => $self->{maxOutputRate} / 100 * $outwarning,
         critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_out',
+        label => $label.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -603,31 +614,31 @@ sub check {
         $full_descr,
         $self->{inputErrorRate} , $self->{outputErrorRate});
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_errors_in',
+        metric => $label.'_errors_in',
         warning => 1,
         critical => 10
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_errors_in',
+        metric => $label.'_errors_in',
         value => $self->{inputErrorRate}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_errors_out',
+        metric => $label.'_errors_out',
         warning => 1,
         critical => 10
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_errors_out',
+        metric => $label.'_errors_out',
         value => $self->{outputErrorRate}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_in',
+        label => $label.'_errors_in',
         value => $self->{inputErrorRate},
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_out',
+        label => $label.'_errors_out',
         value => $self->{outputErrorRate},
     );
   } elsif ($self->mode =~ /device::interfaces::discards/) {
@@ -635,31 +646,31 @@ sub check {
         $full_descr,
         $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_discards_in',
+        metric => $label.'_discards_in',
         warning => 1,
         critical => 10
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_discards_in',
+        metric => $label.'_discards_in',
         value => $self->{inputDiscardRate}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_discards_out',
+        metric => $label.'_discards_out',
         warning => 1,
         critical => 10
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_discards_out',
+        metric => $label.'_discards_out',
         value => $self->{outputDiscardRate}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_in',
+        label => $label.'_discards_in',
         value => $self->{inputDiscardRate},
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_out',
+        label => $label.'_discards_out',
         value => $self->{outputDiscardRate},
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
@@ -683,22 +694,35 @@ sub check {
 #    if ($self->{ifOperStatus} ne 'up') {
 #      }
 #    } 
-    $self->add_info(sprintf '%s is %s/%s',
-        $full_descr,
-        $self->{ifOperStatus}, $self->{ifAdminStatus});
-    $self->add_ok();
+    my $iface_info = sprintf('%s (%s) is oper(%s)/admin(%s)',
+      $full_descr,
+      $self->{ifType},
+      $self->{ifOperStatus},
+      $self->{ifAdminStatus}
+    );
+    my $blacklist_id;
+    my $class = ref($self);
+    $class =~ s/^.*:://;
+    if (exists $self->{flat_indices}) {
+      $blacklist_id = sprintf "%s:%s", uc $class, $self->{flat_indices};
+    } else {
+      $blacklist_id = sprintf "%s", uc $class;
+    }
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
-      $self->add_critical(
-          sprintf 'fault condition is presumed to exist on %s',
-          $full_descr);
+      # do not check for virtual (VLAN) interfaces
+      if ( $self->{ifType} ne 'propVirtual' ) {
+        $self->add_warning_mitigation(sprintf '%-16s: fault presumed for: %s', $blacklist_id, $iface_info);
+      }
+    } else {
+      $self->add_ok();
     }
-    if ($self->{ifAdminStatus} eq 'down') {
-      $self->add_message(
-          defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
-          sprintf '%s is admin down', $full_descr);
-    }
+    #if ($self->{ifAdminStatus} eq 'down') {
+    #  $self->add_message(
+    #      defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
+    #      sprintf '%s is admin down', $full_descr);
+    #}
   } elsif ($self->mode =~ /device::interfaces::availability/) {
-    $self->{ifStatusDuration} = 
+    $self->{ifStatusDuration} =
         $self->human_timeticks($self->{ifStatusDuration});
     $self->add_info(sprintf '%s is %savailable (%s/%s, since %s)',
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),

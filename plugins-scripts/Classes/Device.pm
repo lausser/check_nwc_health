@@ -40,7 +40,7 @@ sub classify {
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
     if (! $self->check_messages()) {
-      if ($self->opts->verbose && $self->opts->verbose) {
+      if ($self->opts->verbose && $self->opts->verbose > 1) {
         printf "I am a %s\n", $self->{productname};
       }
       if ($self->opts->mode =~ /^my-/) {

@@ -15,8 +15,9 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'disk %s is %s',
+  $self->add_info(sprintf 'disk %s (%s) has array status %s',
       $self->{sysPhysicalDiskName},
+      $self->{sysPhysicalDiskSerialNumber},
       $self->{sysPhysicalDiskArrayStatus});
   if ($self->{sysPhysicalDiskArrayStatus} eq 'failed' && $self->{sysPhysicalDiskIsArrayMember} eq 'false') {
     $self->add_critical();
