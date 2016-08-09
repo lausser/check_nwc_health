@@ -1,5 +1,6 @@
 libexec_SCRIPTS=check_nwc_health
 GL_MODULES=\
+  ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Extraopts.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Getopt.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin.pm \
