@@ -271,6 +271,7 @@ sub get_interface_indices {
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
+    # Check ifDescr (using --name)
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
@@ -288,6 +289,19 @@ sub get_interface_indices {
           }
         }
       }
+    # Check ifAlias (using --name3)
+    } elsif ($self->opts->name3} {
+      if ($self->opts->regexp) {
+        my $pattern = $self->opts->name3;
+        if ($ifAlias =~ /$pattern/i) {
+          push(@indices, [$ifIndex]);
+        }
+      } else {
+        if (lc $ifAlias eq lc $self->opts->name3) {
+          push(@indices, [$ifIndex]);
+        }
+      }
+    # take all interfaces
     } else {
       push(@indices, [$ifIndex]);
     }
