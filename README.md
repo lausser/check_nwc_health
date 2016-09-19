@@ -2,6 +2,8 @@ Description
 ============
 The plugin check_nwc_health was developed with the aim of having a single tool for all aspects of monitoring of network components.
 
+<a href="http://wiki.kaninken.de"><img src="https://labs.consol.de/assets/images/kiel-banner.gif"></a>
+
 Motivation
 ==========
 Instead of installing a variety of plug-ins for monitoring of interfaces, hardware, bandwidth, sessions, pools, etc. and possibly more than one for each brand, with check_nwc_health you need only one a single plugin.

@@ -114,10 +114,13 @@ sub analyze_cpu_subsystem {
   if ($html =~ /uiSubmitLogin/) {
     $self->add_critical("wrong login");
     $self->{cpu_usage} = 0;
-  } else {
+  } elsif ($html =~ /StatCPU/) {
     my $cpu = (grep /StatCPU/, split(/\n/, $html))[0];
     my @cpu = ($cpu =~ /= "(.*?)"/ && split(/,/, $1));
     $self->{cpu_usage} = $cpu[0];
+  } elsif ($html =~ /uiViewCpu/) {
+    $html =~ /Query1 = "(.*?)"/;
+    $self->{cpu_usage} = (split(",", $1))[0];
   }
 }
 
@@ -127,7 +130,7 @@ sub analyze_mem_subsystem {
   if ($html =~ /uiSubmitLogin/) {
     $self->add_critical("wrong login");
     $self->{ram_used} = 0;
-  } else {
+  } elsif ($html =~ /StatRAMCacheUsed/) {
     my $ramcacheused = (grep /StatRAMCacheUsed/, split(/\n/, $html))[0];
     my @ramcacheused = ($ramcacheused =~ /= "(.*?)"/ && split(/,/, $1));
     $self->{ram_cache_used} = $ramcacheused[0];
@@ -138,6 +141,14 @@ sub analyze_mem_subsystem {
     my @ramstrictlyused = ($ramstrictlyused =~ /= "(.*?)"/ && split(/,/, $1));
     $self->{ram_strictly_used} = $ramstrictlyused[0];
     $self->{ram_used} = $self->{ram_strictly_used} + $self->{ram_cache_used};
+  } elsif ($html =~ /uiViewRamValue/) {
+    $html =~ /Query1 ="(.*?)"/;
+    $self->{ram_free} = (split(",", $1))[0];
+    $html =~ /Query2 ="(.*?)"/;
+    $self->{ram_dynamic} = (split(",", $1))[0];
+    $html =~ /Query3 ="(.*?)"/;
+    $self->{ram_fix} = (split(",", $1))[0];
+    $self->{ram_used} = $self->{ram_fix} + $self->{ram_dynamic};
   }
 }
 
