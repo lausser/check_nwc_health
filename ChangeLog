@@ -1,3 +1,7 @@
+* 2016-09-19 5.8
+  update ucd-diskio, cumulus
+* 2016-08-12 5.7.1.4
+  update GLPlugin/Extraopts
 * 2016-07-07 5.7.1.3
   remove trailing Nul from Bintec memories
 * 2016-07-07 5.7.1.2

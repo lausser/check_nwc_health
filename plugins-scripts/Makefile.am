@@ -1,5 +1,6 @@
 libexec_SCRIPTS=check_nwc_health
 GL_MODULES=\
+  ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Extraopts.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline/Getopt.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/Commandline.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin.pm \
@@ -86,6 +87,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDDISKIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
