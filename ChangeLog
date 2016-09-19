@@ -1,3 +1,5 @@
+* 2016-09-19 5.8.0.1
+  fix pull request #107 (this was the last pull request i will accept for this plugin. sorry, if you are not able to test your contributions, go away)
 * 2016-09-19 5.8
   update ucd-diskio, cumulus
 * 2016-08-12 5.7.1.4

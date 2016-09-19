@@ -290,7 +290,7 @@ sub get_interface_indices {
         }
       }
     # Check ifAlias (using --name3)
-    } elsif ($self->opts->name3} {
+    } elsif ($self->opts->name3) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name3;
         if ($ifAlias =~ /$pattern/i) {
