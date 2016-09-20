@@ -123,7 +123,7 @@ sub check {
       }
     }
     foreach (qw(ifIndex ifDescr ifType ifSpeed ifAdminStatus ifOperStatus Duration ifStatusDuration ifAvailable ifSpeedText)) {
-      $column_length->{$_} = "%".($column_length->{$_} + 3)."s|";
+      $column_length->{$_} = "%".($column_length->{$_} + 3)."s I";
     }
     $column_length->{ifSpeed} = $column_length->{ifSpeedText};
     $column_length->{Duration} = $column_length->{ifStatusDuration};
