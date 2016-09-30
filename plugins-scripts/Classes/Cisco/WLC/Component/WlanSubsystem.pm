@@ -4,24 +4,45 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
-  $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-      ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
-      ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],
-      ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
-  ]);
-  $self->assign_loads_to_ifs();
-  $self->assign_ifs_to_aps();
+  if ($self->mode =~ /device::wlan::aps::clients/) {
+    $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
+        ['mobilestations', 'bsnMobileStationTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::MobileStation', sub { return $self->filter_name(shift->{bsnMobileStationSsid}) } ],
+    ]);
+  } else {
+    $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
+    $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
+        ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
+        ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],
+        ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
+    ]);
+    $self->assign_loads_to_ifs();
+    $self->assign_ifs_to_aps();
+  }
 }
 
 sub check {
   my $self = shift;
   $self->add_info('checking access points');
-  $self->{numOfAPs} = scalar (@{$self->{aps}});
-  $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
-  if (scalar (@{$self->{aps}}) == 0) {
-    $self->add_unknown('no access points found');
+  if ($self->mode =~ /device::wlan::aps::clients/) {
+    my $ssids = {};
+    map { $ssids->{$_->{bsnMobileStationSsid}} += 1 } @{$self->{mobilestations}};
+    foreach my $ssid (sort keys %{$ssids}) {
+      $self->set_thresholds(metric => $ssid.'_clients',
+          warning => '0:', critical => ':0');
+      $self->add_message($self->check_thresholds(metric => $ssid.'_clients',
+          value => $ssids->{$ssid}),
+          sprintf 'SSID %s has %d clients',
+          $ssid, $ssids->{$ssid});
+      $self->add_perfdata(label => $ssid.'_clients',
+          value => $ssids->{$ssid});
+    }
   } else {
+    $self->{numOfAPs} = scalar (@{$self->{aps}});
+    $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
+    if (scalar (@{$self->{aps}}) == 0) {
+      $self->add_unknown('no access points found');
+      return;
+    }
     foreach (@{$self->{aps}}) {
       $_->check();
     }
@@ -137,3 +158,12 @@ sub check {
   }
 }
 
+package Classes::Cisco::WLC::Component::WlanSubsystem::MobileStation;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub finish {
+  my $self = shift;
+  $self->{bsnMobileStationMacAddress} = 
+      $self->unhex_mac($self->{bsnMobileStationMacAddress});
+}

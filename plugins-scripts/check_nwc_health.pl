@@ -360,6 +360,12 @@ $plugin->add_mode(
     help => 'Check if access points appear and disappear (use --lookup)',
 );
 $plugin->add_mode(
+    internal => 'device::wlan::aps::clients',
+    spec => 'count-accesspoint-clients',
+    alias => undef,
+    help => 'Check if the number of access point clients is within a certain range',
+);
+$plugin->add_mode(
     internal => 'device::wlan::aps::list',
     spec => 'list-accesspoints',
     alias => undef,

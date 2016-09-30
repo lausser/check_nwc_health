@@ -1,3 +1,5 @@
+* 2016-09-30 5.8.1
+  add mode count-accesspoint-clients for cisco wlc
 * 2016-09-20 5.8.0.2
   don't use | in interface-availability ascii output for notifications
 * 2016-09-19 5.8.0.1
