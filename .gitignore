@@ -47,5 +47,5 @@ smidump.exe.stackdump
 rfc*.trc
 dev_rfc
 dev_rfc.trc
-*.pm
+./*.pm
 plugins-scripts/check_*_health.ptkdb

@@ -181,9 +181,12 @@ sub classify {
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.9\./) {
         bless $self, 'Classes::Cisco';
         $self->debug('using Classes::Cisco');
+      } elsif ($self->{productname} =~ /Arista.*EOS.*/) {
+        bless $self, 'Classes::Arista';
+        $self->debug('using Classes::Arista');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.272\./) {
         bless $self, 'Classes::Bintec::Bibo';
-        $self->debug('using Classes::Cisco');
+        $self->debug('using Classes::Bintec::Bibo');
       } elsif ($self->{productname} =~ /^Linux/i) {
         bless $self, 'Classes::Server::Linux';
         $self->debug('using Classes::Server::Linux');

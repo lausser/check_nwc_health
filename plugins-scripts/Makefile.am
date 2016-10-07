@@ -334,6 +334,8 @@ EXTRA_MODULES=\
   Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
+  Classes/Arista/Component/EnvironmentalSubsystem.pm \
+  Classes/Arista.pm \
   Classes/Device.pm
 
 SED=/bin/sed
