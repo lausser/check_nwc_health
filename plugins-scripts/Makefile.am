@@ -39,6 +39,9 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOL2L3INTERFACECONFIGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOMEMORYPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPROCESSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBHWENVIROMENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBRNDMNGMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBTUNINGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
@@ -164,6 +167,10 @@ EXTRA_MODULES=\
   Classes/Cisco/AsyncOS/Component/RaidSubsystem.pm \
   Classes/Cisco/AsyncOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/AsyncOS.pm \
+  Classes/Cisco/SB/Component/MemSubsystem.pm \
+  Classes/Cisco/SB/Component/CpuSubsystem.pm \
+  Classes/Cisco/SB/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/SB.pm \
   Classes/Cisco.pm \
   Classes/OneOS/Component/EnvironmentalSubsystem.pm \
   Classes/OneOS/Component/CpuSubsystem.pm \

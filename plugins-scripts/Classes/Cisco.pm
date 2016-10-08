@@ -60,9 +60,14 @@ sub init {
   } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.746') {
     bless $self, 'Classes::Cisco::CCM';
     $self->debug('using Classes::Cisco::CCM');
+  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) =~ /.1.3.6.1.4.1.9.6.1.83/) {
+    bless $self, 'Classes::Cisco::SB';
+    $self->debug('using Classes::Cisco::SB');
   }
   if (ref($self) ne "Classes::Cisco") {
     $self->init();
+  } else {
+    $self->no_such_mode();
   }
 }
 
