@@ -70,6 +70,9 @@ use strict;
 
 sub finish {
   my $self = shift;
+  if ($self->{entPhySensorPrecision} && $self->{entPhySensorValue}) {
+    $self->{entPhySensorValue} /= 10 ** $self->{entPhySensorPrecision};
+  }
   if ($self->{entPhySensorType} eq 'rpm') {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
   } elsif ($self->{entPhySensorType} eq 'celsius') {
