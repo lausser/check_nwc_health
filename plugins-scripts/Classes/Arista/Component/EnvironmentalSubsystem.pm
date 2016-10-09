@@ -5,34 +5,11 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['chassis', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Chassis',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'chassis' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['containers', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Container',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'container' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['modules', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Module',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'module' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['fans', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Fan',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'fan' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['powersupplies', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Powersupply',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'powerSupply' },
-       ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['ports', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Port',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'port' },
-       ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['sensors', 'entPhysicalTable',
-        'Classes::Arista::Component::EnvironmentalSubsystem::Sensor',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'sensor' },
-       ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
+    ['entities', 'entPhysicalTable',
+      'Classes::Arista::Component::EnvironmentalSubsystem::Entity',
+      undef,
+      ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']
+    ],
   ]);
   $self->get_snmp_tables('ENTITY-SENSOR-MIB', [
     ['sensorvalues', 'entPhySensorTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
@@ -43,150 +20,145 @@ sub init {
   $self->get_snmp_tables('ARISTA-ENTITY-SENSOR-MIB', [
     ['sensorthresholds', 'aristaEntSensorThresholdTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
-  $self->merge_tables("sensors", "sensorvalues", "sensorthresholds");
+  $self->merge_tables("entities", "sensorvalues", "sensorstates", "sensorthresholds");
+  foreach (@{$self->{entities}}) {
+    $_->rebless();
+    $_->finish() if $_->can('finish');
+  }
+}
+
+package Classes::Arista::Component::EnvironmentalSubsystem::Entity;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+
+sub rebless {
+  my $self = shift;
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Chassis' if
+      $self->{entPhysicalClass} eq 'chassis';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Container' if
+      $self->{entPhysicalClass} eq 'container';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Fan' if
+      $self->{entPhysicalClass} eq 'fan';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Module' if
+      $self->{entPhysicalClass} eq 'module';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Port' if
+      $self->{entPhysicalClass} eq 'port';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Powersupply' if
+      $self->{entPhysicalClass} eq 'powerSupply';
+  bless $self,
+      'Classes::Arista::Component::EnvironmentalSubsystem::Sensor' if
+      $self->{entPhysicalClass} eq 'sensor';
+}
+
+sub check_state {
+  my $self = shift;
+  $self->add_info(sprintf "%s is %s (admin %s, oper %s)",
+      $self->{entPhysicalDescr}, $self->{entStateUsage},
+      $self->{entStateAdmin}, $self->{entStateOper});
+  if ($self->{entStateAdmin} eq "unlocked") {
+    if ($self->{entStateOper} eq "enabled") {
+      if ($self->{entStateUsage} eq "idle") {
+        $self->add_ok();
+      } elsif ($self->{entStateUsage} eq "active") {
+        $self->add_ok();
+      } elsif ($self->{entStateUsage} eq "busy") {
+        $self->add_warning();
+      } else {
+        $self->add_unknown();
+      }
+    } elsif ($self->{entStateOper} eq "disabled") {
+      $self->add_critical();
+    } else {
+      $self->add_unknown();
+    }
+  } else {
+    $self->add_ok(); # admin disabled, ignore
+  }
 }
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Chassis;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Container;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Fan;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
+sub check {
+  my $self = shift;
+  $self->check_state();
+}
+
 package Classes::Arista::Component::EnvironmentalSubsystem::Module;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Port;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Powersupply;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
+
+sub check {
+  my $self = shift;
+  $self->check_state();
+}
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Sensor;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
+sub finish {
+  my $self = shift;
+  
+  foreach (qw(entPhySensorValue
+      aristaEntSensorThresholdLowWarning aristaEntSensorThresholdHighWarning
+      aristaEntSensorThresholdLowCritical aristaEntSensorThresholdHighCritical)) {
+    delete $self->{$_} if 
+        ($self->{$_} == -1000000000 || $self->{$_} == 1000000000);
+    if ($self->{entPhySensorPrecision} && $self->{$_}) {
+      $self->{$_} /= 10 ** $self->{entPhySensorPrecision};
+    }
+  }
+}
+
+sub check {
+  my $self = shift;
+  $self->check_state();
+  my ($warn, $crit) = (undef, undef);
+  if ($self->{aristaEntSensorStatusDescr} =~ /no thresholds/i) {
+  } else {
+    $warn =
+        ($self->{aristaEntSensorThresholdLowWarning} ?
+        $self->{aristaEntSensorThresholdLowWarning} : '').':'.
+        ($self->{aristaEntSensorThresholdHighWarning} ?
+        $self->{aristaEntSensorThresholdHighWarning} : '');
+    $crit =
+        ($self->{aristaEntSensorThresholdLowCritical} ?
+        $self->{aristaEntSensorThresholdLowCritical} : '').':'.
+        ($self->{aristaEntSensorThresholdHighCritical} ?
+        $self->{aristaEntSensorThresholdHighCritical} : '');
+  }
+  $self->add_thresholds(metric => $self->{entPhysicalDescr}.'_'.$self->{entPhySensorUnitsDisplay},
+      warning => $warn, critical => $crit);
+  $self->add_perfdata(
+      label => $self->{entPhysicalDescr}.'_'.$self->{entPhySensorUnitsDisplay},
+      value => $self->{entPhySensorValue},
+      warning => $warn, critical => $crit,
+  );
+}
 
 
-
-package Monitoring::GLPlugin::SNMP::MibsAndOids::ARISTAENTITYSENSORMIB;
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::origin->{'ARISTA-ENTITY-SENSOR-MIB'} = {
-  url => '',
-  name => 'ARISTA-ENTITY-SENSOR-MIB',
-};
-
-#$Monitoring::GLPlugin::SNMP::MibsAndOids::mib_ids->{'ARISTA-ENTITY-SENSOR-MIB'} =
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'ARISTA-ENTITY-SENSOR-MIB'} = {
-  aristaEntSensorMIB => '1.3.6.1.4.1.30065.3.12',
-  aristaEntSensorMibNotifications => '1.3.6.1.4.1.30065.3.12.0',
-  aristaEntSensorMibObjects => '1.3.6.1.4.1.30065.3.12.1',
-  aristaEntSensorThresholdTable => '1.3.6.1.4.1.30065.3.12.1.1',
-  aristaEntSensorThresholdEntry => '1.3.6.1.4.1.30065.3.12.1.1.1',
-  aristaEntSensorThresholdLowWarning => '1.3.6.1.4.1.30065.3.12.1.1.1.1',
-  aristaEntSensorThresholdLowCritical => '1.3.6.1.4.1.30065.3.12.1.1.1.2',
-  aristaEntSensorThresholdHighWarning => '1.3.6.1.4.1.30065.3.12.1.1.1.3',
-  aristaEntSensorThresholdHighCritical => '1.3.6.1.4.1.30065.3.12.1.1.1.4',
-  aristaEntSensorStatusDescr => '1.3.6.1.4.1.30065.3.12.1.1.1.5',
-  aristaEntSensorMibConformance => '1.3.6.1.4.1.30065.3.12.2',
-  aristaEntSensorMibCompliances => '1.3.6.1.4.1.30065.3.12.2.1',
-  aristaEntSensorMibGroups => '1.3.6.1.4.1.30065.3.12.2.2',
-};
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'ARISTA-ENTITY-SENSOR-MIB'} = {
-};
-
-package Monitoring::GLPlugin::SNMP::MibsAndOids::ENTITYSTATEMIB;
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::origin->{'ENTITY-STATE-MIB'} = {
-  url => '',
-  name => 'ENTITY-STATE-MIB',
-};
-
-#$Monitoring::GLPlugin::SNMP::MibsAndOids::mib_ids->{'ENTITY-STATE-MIB'} = 
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'ENTITY-STATE-MIB'} = {
-  entityStateMIB => '1.3.6.1.2.1.131',
-  entStateNotifications => '1.3.6.1.2.1.131.0',
-  entStateObjects => '1.3.6.1.2.1.131.1',
-  entStateTable => '1.3.6.1.2.1.131.1.1',
-  entStateEntry => '1.3.6.1.2.1.131.1.1.1',
-  entStateLastChanged => '1.3.6.1.2.1.131.1.1.1.1',
-  entStateAdmin => '1.3.6.1.2.1.131.1.1.1.2',
-  entStateAdminDefinition => 'ENTITY-STATE-TC-MIB::EntityAdminState',
-  entStateOper => '1.3.6.1.2.1.131.1.1.1.3',
-  entStateOperDefinition => 'ENTITY-STATE-TC-MIB::EntityOperState',
-  entStateUsage => '1.3.6.1.2.1.131.1.1.1.4',
-  entStateUsageDefinition => 'ENTITY-STATE-TC-MIB::EntityUsageState',
-  entStateAlarm => '1.3.6.1.2.1.131.1.1.1.5',
-  entStateAlarmDefinition => 'ENTITY-STATE-TC-MIB::EntityAlarmStatus',
-  entStateStandby => '1.3.6.1.2.1.131.1.1.1.6',
-  entStateStandbyDefinition => 'ENTITY-STATE-TC-MIB::EntityStandbyStatus',
-  entStateConformance => '1.3.6.1.2.1.131.2',
-  entStateCompliances => '1.3.6.1.2.1.131.2.1',
-  entStateGroups => '1.3.6.1.2.1.131.2.2',
-};
-
-$Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'ENTITY-STATE-TC-MIB'} = {
-  EntityAdminState => {
-    1 => 'unknown',
-    2 => 'locked',
-    3 => 'shuttingDown',
-    4 => 'unlocked',
-  },
-  EntityOperState => {
-    1 => 'unknown',
-    2 => 'disabled',
-    3 => 'enabled',
-    4 => 'testing',
-  },
-  EntityUsageState => {
-    1 => 'unknown',
-    2 => 'idle',
-    3 => 'enabled',
-    4 => 'busy',
-  },
-  EntityAlarmStatus => sub {
-    my $val = shift;
-    my $dec = unpack("B*", $val);
-printf "decimal it is %d\n", $dec;
-exit 1;
-    return {
-    0 => 'unknown',
-    1 => 'underRepair',
-    2 => 'critical',
-    3 => 'major',
-    4 => 'minor',
-    5 => 'warning',
-    6 => 'indeterminate',
-    }->{$dec};
-  },
-  EntityStandbyStatus => {
-    1 => 'unknown',
-    2 => 'hotStandby',
-    3 => 'coldStandby',
-    4 => 'providingService',
-  },
-};
-
-
-my $dok = <<EOEO;
-
-entPhysicalClass: chassis
-entPhysicalClass: container
-entPhysicalClass: fan
-entPhysicalClass: module
-entPhysicalClass: other
-entPhysicalClass: port
-entPhysicalClass: powerSupply
-entPhysicalClass: sensor
-EOEO

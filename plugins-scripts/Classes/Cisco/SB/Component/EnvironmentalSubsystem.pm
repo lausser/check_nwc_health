@@ -8,6 +8,10 @@ sub init {
       ['fans', 'rlEnvMonFanStatusTable', 'Classes::Cisco::SB::Component::EnvironmentalSubsystem::Fan'],
       ['powersupplies', 'rlEnvMonSupplyStatusTable', 'Classes::Cisco::SB::Component::EnvironmentalSubsystem::Powersupply'],
   ]);
+  $self->get_snmp_tables('ENTITY-MIB', [
+    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+  ]);
+
 }
 
 

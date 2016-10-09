@@ -13,7 +13,8 @@ sub init {
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::SB::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
-    $self->analyze_and_check_environmental_subsystem("Classes::Cisco::SB::Component::MemSubsystem");
+    $self->no_such_mode();
+    #$self->analyze_and_check_environmental_subsystem("Classes::Cisco::SB::Component::MemSubsystem");
   } else {
     $self->no_such_mode();
   }
