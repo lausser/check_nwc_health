@@ -25,6 +25,9 @@ sub init {
     $_->rebless();
     $_->finish() if $_->can('finish');
   }
+  @{$self->{entities}} = grep {
+    ! exists $_->{valid} || $_->{valid};
+  } @{$self->{entities}};
 }
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Entity;
@@ -124,10 +127,12 @@ use strict;
 sub finish {
   my $self = shift;
   
+  $self->{valid} = ($self->{entPhySensorValue} == -1000000000 || $self->{entPhySensorValue} == 1000000000)
+      ? 0 : 1;
   foreach (qw(entPhySensorValue
       aristaEntSensorThresholdLowWarning aristaEntSensorThresholdHighWarning
       aristaEntSensorThresholdLowCritical aristaEntSensorThresholdHighCritical)) {
-    delete $self->{$_} if 
+    delete $self->{$_} if defined $self->{$_} && $_ ne 'entPhySensorValue' &&
         ($self->{$_} == -1000000000 || $self->{$_} == 1000000000);
     if ($self->{entPhySensorPrecision} && $self->{$_}) {
       $self->{$_} /= 10 ** $self->{entPhySensorPrecision};

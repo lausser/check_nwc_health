@@ -5,6 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::hardware::health/) {
+    $self->mult_snmp_max_msg_size(10);
     $self->analyze_and_check_environmental_subsystem("Classes::Arista::Component::EnvironmentalSubsystem");
     if (! $self->check_messages()) {
       $self->clear_messages(0);
