@@ -1,3 +1,5 @@
+* 2016-10-29 5.10
+  add smart-home-device-temperature, add Comet DECT
 * 2016-10-19 5.9.0.1
   fix memory-usage for Catalyst L3 (which have empty CISCO-ENHANCED-MEMPOOL-MIB)
 * 2016-10-10 5.9

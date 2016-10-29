@@ -393,7 +393,7 @@ $plugin->add_mode(
     internal => 'device::smarthome::device::status',
     spec => 'smart-home-device-status',
     alias => undef,
-    help => 'Check if a Fritz!DECT 200 plug is on',
+    help => 'Check if a Fritz!DECT 200 plug is on (or Comet DECT)',
 );
 $plugin->add_mode(
     internal => 'device::smarthome::device::energy',
@@ -406,6 +406,12 @@ $plugin->add_mode(
     spec => 'smart-home-device-consumption',
     alias => undef,
     help => 'Show the cumulated power consumption of a Fritz!DECT 200 plug',
+);
+$plugin->add_mode(
+    internal => 'device::smarthome::device::temperature',
+    spec => 'smart-home-device-temperature',
+    alias => undef,
+    help => 'Show the temperature measured by a Fritz! compatible device',
 );
 $plugin->add_snmp_modes();
 $plugin->add_snmp_args();
