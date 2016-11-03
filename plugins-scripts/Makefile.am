@@ -194,6 +194,7 @@ EXTRA_MODULES=\
   Classes/Juniper/IVE/Component/DiskSubsystem.pm \
   Classes/Juniper/IVE/Component/UserSubsystem.pm \
   Classes/Juniper/IVE.pm \
+  Classes/Juniper/SRX.pm \
   Classes/Juniper.pm \
   Classes/AlliedTelesyn.pm \
   Classes/Fortigate/Component/MemSubsystem.pm \

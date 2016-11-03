@@ -113,6 +113,9 @@ sub classify {
         # Juniper Networks,Inc,MAG-SMx60,7.4R8
         bless $self, 'Classes::Juniper::IVE';
         $self->debug('using Classes::Juniper::IVE');
+      } elsif ($self->implements_mib('JUNIPER-MIB')) {
+        bless $self, 'Classes::Juniper::SRX';
+        $self->debug('using Classes::Juniper::SRX');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
