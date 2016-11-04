@@ -445,6 +445,14 @@ $plugin->add_arg(
     required => 0,
 );
 $plugin->add_arg(
+    spec => 'iflabel=s',
+    help => "--iflabel
+   Interface Label for perfdata. Can be any combination of ifDescr, ifName or ifAlias seperated by Comma.
+   Example: ifName,ifAlias
+   Default: ifDescr",
+    required => 0,
+);
+$plugin->add_arg(
     spec => 'role=s',
     help => "--role
    The role of this device in a hsrp group (active/standby/listen)",

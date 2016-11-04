@@ -530,6 +530,16 @@ sub check {
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
           " (alias ".$self->{ifAlias}.")" : "";
+
+  my @label;
+  if (defined $self->opts->iflabel) {
+    foreach (split ",", $self->opts->iflabel) {
+      next if ($_ !~ m/^(ifName|ifAlias|ifDescr)$/);
+      push @label, $self->{$_} if defined($self->{$_});
+    }
+  }
+  my $iflabel = (scalar @label > 0) ? join("_", @label) : $self->{ifDescr};
+
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -551,45 +561,45 @@ sub check {
         sprintf("%.2f%s/s", $self->{outputRate}, $self->opts->units),
         $self->{ifOperStatus} eq 'down' ? ' (down)' : '');
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $iflabel.'_usage_in',
         warning => 80,
         critical => 90
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $iflabel.'_usage_in',
         value => $self->{inputUtilization}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $iflabel.'_usage_out',
         warning => 80,
         critical => 90
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $iflabel.'_usage_out',
         value => $self->{outputUtilization}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_in',
+        label => $iflabel.'_usage_in',
         value => $self->{inputUtilization},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_out',
+        label => $iflabel.'_usage_out',
         value => $self->{outputUtilization},
         uom => '%',
     );
     my ($inwarning, $incritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
+        metric => $iflabel.'_usage_in',
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_in',
+        metric => $iflabel.'_traffic_in',
         warning => $self->{maxInputRate} / 100 * $inwarning,
         critical => $self->{maxInputRate} / 100 * $incritical
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_in',
+        label => $iflabel.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -597,15 +607,15 @@ sub check {
         max => $self->{maxInputRate},
     );
     my ($outwarning, $outcritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
+        metric => $iflabel.'_usage_out',
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_out',
+        metric => $iflabel.'_traffic_out',
         warning => $self->{maxOutputRate} / 100 * $outwarning,
         critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_out',
+        label => $iflabel.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -617,31 +627,31 @@ sub check {
         $full_descr,
         $self->{inputErrorRate} , $self->{outputErrorRate});
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_errors_in',
+        metric => $iflabel.'_errors_in',
         warning => 1,
         critical => 10
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_errors_in',
+        metric => $iflabel.'_errors_in',
         value => $self->{inputErrorRate}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_errors_out',
+        metric => $iflabel.'_errors_out',
         warning => 1,
         critical => 10
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_errors_out',
+        metric => $iflabel.'_errors_out',
         value => $self->{outputErrorRate}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_in',
+        label => $iflabel.'_errors_in',
         value => $self->{inputErrorRate},
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_out',
+        label => $iflabel.'_errors_out',
         value => $self->{outputErrorRate},
     );
   } elsif ($self->mode =~ /device::interfaces::discards/) {
@@ -649,31 +659,31 @@ sub check {
         $full_descr,
         $self->{inputDiscardRate} , $self->{outputDiscardRate});
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_discards_in',
+        metric => $iflabel.'_discards_in',
         warning => 1,
         critical => 10
     );
     my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_discards_in',
+        metric => $iflabel.'_discards_in',
         value => $self->{inputDiscardRate}
     );
     $self->set_thresholds(
-        metric => $self->{ifDescr}.'_discards_out',
+        metric => $iflabel.'_discards_out',
         warning => 1,
         critical => 10
     );
     my $out = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_discards_out',
+        metric => $iflabel.'_discards_out',
         value => $self->{outputDiscardRate}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_in',
+        label => $iflabel.'_discards_in',
         value => $self->{inputDiscardRate},
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_out',
+        label => $iflabel.'_discards_out',
         value => $self->{outputDiscardRate},
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
