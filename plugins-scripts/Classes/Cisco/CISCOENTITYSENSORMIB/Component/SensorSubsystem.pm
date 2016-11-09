@@ -63,6 +63,15 @@ sub check {
   my $label = sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex});
   my $warningx = ($self->get_thresholds(metric => $label))[0];
   my $criticalx = ($self->get_thresholds(metric => $label))[1];
+  if (scalar(@{$self->{thresholds}} == 4)) {
+    # sowos gits aa.
+    # an entSensorType: voltsAC mied 3249milli, der wou 4 thresholds hod.
+    # owa: entSensorThresholdEvaluation: unknown_0,
+    # entSensorThresholdSeverity: other
+    # entSensorThresholdValue: 3630, entSensorThresholdRelation: lessThan
+    # und de andern: entSensorThresholdValue: 3465, 2970, 3135
+    # wos wuellsd ejtz do mocha? i dou jednfalls nix. es kinnts me.
+  }
   if (scalar(@{$self->{thresholds}} == 2)) {
     # reparaturlauf
     foreach my $idx (0..1) {
@@ -115,7 +124,7 @@ sub check {
         warning => defined($warningx) ? $warningx : $warning,
         critical => defined($criticalx) ? $criticalx : $critical,
     );
-  } elsif ($self->{entSensorValue}) {
+  } elsif (defined $self->{entSensorValue}) {
     if ((defined($criticalx) && 
         $self->check_thresholds(metric => $label, value => $self->{entSensorValue}) == CRITICAL) ||
        (defined($warningx) && 
@@ -158,6 +167,11 @@ sub check {
           label => $label,
           value => $self->{entSensorValue},
           warning => $self->{ciscoEnvMonSensorThreshold},
+      );
+    } else {
+      $self->add_perfdata(
+          label => $label,
+          value => $self->{entSensorValue},
       );
     }
   } elsif (scalar(grep { $_->{entSensorThresholdEvaluation} eq "true" }
