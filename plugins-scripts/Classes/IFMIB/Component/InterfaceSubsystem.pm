@@ -33,7 +33,6 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
-printf "the indices are %s\n", Data::Dumper::Dumper(\@indices);
     my @etherpatterns = map {
         '('.$_.')';
     } map {
@@ -43,7 +42,6 @@ printf "the indices are %s\n", Data::Dumper::Dumper(\@indices);
     } map {
         $_->[0];
     } @indices;
-printf "the indices are %s\n", Data::Dumper::Dumper(\@etherpatterns);
     if (scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices)) {
@@ -55,15 +53,19 @@ printf "the indices are %s\n", Data::Dumper::Dumper(\@etherpatterns);
         $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
         $self->override_opt('regexp', 1);
 printf "rex %s\n", $self->opts->name;
+        # key=etherStatsDataSource-//-index, value=index
         $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
         # Value von etherStatsDataSource ist ifIndex              
-#$self->get_snmp_tables('RMON-MIB', [
-#  ['etherstats', 'etherStatsTable', 'Classes::IFMIB::Component::InterfaceSubsystem::EtherStat', undef, ['etherStatsDataSource']],
-#]);
-        foreach ($self->get_snmp_table_objects_with_cache(
+        foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
             'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource')) {
-          push(@{$self->{etherstats}},
-              Classes::IFMIB::Component::InterfaceSubsystem::EtherStat->new(%{$_}));
+          foreach my $interface (@{$self->{interfaces}}) {
+            if ('.1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
+              foreach my $key (grep /^ether/, keys %{$etherstat}) {
+                $interface->{$key} = $etherstat->{$key};
+              }
+              last;
+            }
+          }
         }
       }
     }
