@@ -5,6 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   $self->{interfaces} = [];
+  $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
@@ -22,7 +23,9 @@ sub init {
               flat_indices => $ifIndex,
           ));
     }
-  } else {
+    my @indices = $self->get_interface_indices();
+    # die sind mit etherStatsDataSource verknuepft
+  } elsif ($self->mode =~ /device::interfaces/) {
     $self->update_interface_cache(0);
     #next if $self->opts->can('name') && $self->opts->name && 
     #    $self->opts->name ne $_->{ifDescr};
@@ -30,11 +33,38 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
+printf "the indices are %s\n", Data::Dumper::Dumper(\@indices);
+    my @etherpatterns = map {
+        '('.$_.')';
+    } map {
+        s/\./\\./g; $_;
+    } map {
+        '.1.3.6.1.2.1.2.2.1.1.'.$_;
+    } map {
+        $_->[0];
+    } @indices;
+printf "the indices are %s\n", Data::Dumper::Dumper(\@etherpatterns);
     if (scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices)) {
         push(@{$self->{interfaces}},
             Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
+      }
+      if ($self->mode =~ /device::interfaces::etherstats/) {
+
+        $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
+        $self->override_opt('regexp', 1);
+printf "rex %s\n", $self->opts->name;
+        $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
+        # Value von etherStatsDataSource ist ifIndex              
+#$self->get_snmp_tables('RMON-MIB', [
+#  ['etherstats', 'etherStatsTable', 'Classes::IFMIB::Component::InterfaceSubsystem::EtherStat', undef, ['etherStatsDataSource']],
+#]);
+        foreach ($self->get_snmp_table_objects_with_cache(
+            'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource')) {
+          push(@{$self->{etherstats}},
+              Classes::IFMIB::Component::InterfaceSubsystem::EtherStat->new(%{$_}));
+        }
       }
     }
   }
@@ -309,6 +339,15 @@ sub get_interface_indices {
   return @indices;
 }
 
+
+package Classes::IFMIB::Component::InterfaceSubsystem::EtherStat;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub finish {
+  my ($self) = @_;
+  #printf "%s\n", Data::Dumper::Dumper($self);
+}
 
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);

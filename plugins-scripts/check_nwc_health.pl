@@ -119,6 +119,12 @@ $plugin->add_mode(
     help => 'Check the percentage of up interfaces in a link aggregation',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::etherstats',
+    spec => 'interface-etherstats',
+    alias => undef,
+    help => 'Check the ethernet statistics of interfaces',
+);
+$plugin->add_mode(
     internal => 'device::routes::list',
     spec => 'list-routes',
     alias => undef,
