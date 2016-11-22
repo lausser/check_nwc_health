@@ -1,3 +1,5 @@
+* 2016-11-09 5.10.0.1
+  fix nexus sensor perfdata, metrics without thresh. were not shown (Thanks Dennis Knecht)
 * 2016-10-29 5.10
   add smart-home-device-temperature, add Comet DECT
 * 2016-10-19 5.9.0.1
