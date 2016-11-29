@@ -1,3 +1,7 @@
+* 2016-11-29 5.11
+  reverse usage/free in hostresourcemib memory-usage, so the same thresholds can be use for every kind of device
+  mv juniper-mib to glplugin
+  add etherstats
 * 2016-11-09 5.10.0.1
   fix nexus sensor perfdata, metrics without thresh. were not shown (Thanks Dennis Knecht)
 * 2016-10-29 5.10
