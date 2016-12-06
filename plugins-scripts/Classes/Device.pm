@@ -119,6 +119,10 @@ sub classify {
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
+      } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
+        # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
+        bless $self, 'Classes::Juniper::IVE';
+        $self->debug('using Classes::Juniper::IVE');
       } elsif ($self->implements_mib('NETGEAR-MIB')) {
         $self->debug('using Classes::Netgear');
         bless $self, 'Classes::Netgear';
