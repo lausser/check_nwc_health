@@ -6,7 +6,8 @@ sub init {
   my $self = shift;
   if ($self->implements_mib('CISCO-ENHANCED-MEMPOOL-MIB')) {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOENHANCEDMEMPOOLMIB::Component::MemSubsystem");
-    if (! exists $self->{mems} || scalar(@{$self->{mems}}) == 0) {
+    if (! exists $self->{components}->{mem_subsystem} ||
+        scalar(@{$self->{components}->{mem_subsystem}->{mems}}) == 0) {
       # satz mix x....
       # der hier: Cisco IOS Software, IOS-XE Software, Catalyst L3 Switch Software (CAT3K_CAA-UNIVERSALK9-M), Version 03.03.02SE RELEASE SOFTWARE (fc2)
       # hat nicht mehr zu bieten als eine einzige oid
