@@ -16,7 +16,7 @@ $self->get_snmp_tables('JUNIPER-MIB', [
 ]);
     #$self->analyze_and_check_environmental_subsystem("Classes::Juniper::SRX::Component::EnvironmentalSubsystem");
     $self->analyze_and_check_cpu_subsystem("Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem");
-    $self->dump();
+#    $self->dump();
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::Juniper::SRX::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {

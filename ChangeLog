@@ -1,3 +1,8 @@
+* 2016-12-12 5.11.2.1
+  add JUNIPER-MIB
+* 2016-12-12 5.11.2
+  fix in cisco asr lsmpi memory
+  skip thresholds for dev filesystem in HOSTRESOURCESMIB
 * 2016-12-06 5.11.1
   detect juniper pulse secure
 * 2016-11-29 5.11
