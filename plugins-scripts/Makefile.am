@@ -66,6 +66,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPFORWARDMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERIVEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LARAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
@@ -195,6 +196,7 @@ EXTRA_MODULES=\
   Classes/Juniper/IVE/Component/DiskSubsystem.pm \
   Classes/Juniper/IVE/Component/UserSubsystem.pm \
   Classes/Juniper/IVE.pm \
+  Classes/Juniper/SRX/Component/EnvironmentalSubsystem.pm \
   Classes/Juniper/SRX/Component/CpuSubsystem.pm \
   Classes/Juniper/SRX/Component/MemSubsystem.pm \
   Classes/Juniper/SRX.pm \

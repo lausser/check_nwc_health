@@ -6,7 +6,8 @@ sub init {
   my $self = shift;
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
-    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem2'],
+# siehe memory
+#    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem2'],
   ]);
 }
 
