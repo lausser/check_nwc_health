@@ -1,5 +1,6 @@
 * 2016-12-06 5.11.1
   detect juniper pulse secure
+  juniper srx temperatures and leds
 * 2016-11-29 5.11
   reverse usage/free in hostresourcemib memory-usage, so the same thresholds can be use for every kind of device
   mv juniper-mib to glplugin

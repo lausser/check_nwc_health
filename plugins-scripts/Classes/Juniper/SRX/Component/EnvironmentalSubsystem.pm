@@ -11,7 +11,13 @@ sub init {
     ['fru', 'jnxFruTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Fru'],
     ['redun', 'jnxRedundancyTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Redundancy'],
     ['contents', 'jnxContentsTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Content'],
+    ['filled', 'jnxFilledTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Fille'],
   ]);
+  $self->merge_tables("operatins", "filled", "fru", "contents");
+  if (! $self->check_messages()) {
+    $self->clear_ok();
+    $self->add_ok("environmental hardware working fine");
+  }
 }
 
 package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Led;
@@ -27,11 +33,10 @@ sub check {
     $self->add_critical();
   } elsif ($self->{jnxLEDState} eq 'amber') {
     $self->add_critical();
+  } elsif ($self->{jnxLEDState} eq 'green') {
+    $self->add_ok();
   }
 }
-
-package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Operating;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Container;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
@@ -45,37 +50,35 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Content;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
+package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Fille;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 
-package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::OperatingItem;
+
+package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Operating;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+
+sub finish {
+  my $self = shift;
+  if ($self->{jnxOperatingDescr} =~ /Routing Engine$/) {
+    bless $self, "Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Engine";
+  }
+}
+
+package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Engine;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf '%s cpu usage is %.2f%%',
-      $self->{jnxOperatingDescr}, $self->{jnxOperatingCPU});
-  my $label = 'cpu_'.$self->{jnxOperatingDescr}.'_usage';
-  $self->set_thresholds(metric => $label, warning => 50, critical => 90);
+  $self->add_info(sprintf '%s temperature is %.2f',
+      $self->{jnxOperatingDescr}, $self->{jnxOperatingTemp});
+  my $label = 'temp_'.$self->{jnxOperatingDescr};
+  $self->set_thresholds(metric => $label, warning => 50, critical => 60);
   $self->add_message($self->check_thresholds(metric => $label, 
-      value => $self->{jnxOperatingCPU}));
+      value => $self->{jnxOperatingTemp}));
   $self->add_perfdata(
       label => $label,
-      value => $self->{jnxOperatingCPU},
-      uom => '%',
+      value => $self->{jnxOperatingTemp},
   );
 }
 
-package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::OperatingItem2;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
-
-sub check {
-  my $self = shift;
-  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{jnxJsSPUMonitoringCPUUsage});
-  $self->set_thresholds(warning => 50, critical => 90);
-  $self->add_message($self->check_thresholds($self->{jnxJsSPUMonitoringCPUUsage}));
-  $self->add_perfdata(
-      label => 'cpu_usage',
-      value => $self->{jnxJsSPUMonitoringCPUUsage},
-      uom => '%',
-  );
-}
