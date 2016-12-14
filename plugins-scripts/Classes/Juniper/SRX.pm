@@ -8,8 +8,8 @@ sub init {
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Juniper::SRX::Component::EnvironmentalSubsystem");
     $self->analyze_and_check_hostresource_subsystem("Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem");
+    $self->clear_ok();
     if (! $self->check_messages()) {
-      $self->clear_ok();
       $self->add_ok("environmental hardware working fine");
     }
   } elsif ($self->mode =~ /device::hardware::load/) {

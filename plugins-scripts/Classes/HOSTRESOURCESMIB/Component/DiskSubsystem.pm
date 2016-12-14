@@ -15,8 +15,8 @@ use strict;
 
 sub finish {
   my $self = shift;
-  if ($self->{hrStorageDescr} =~ /mounted on:\s+(.*)/) {
-    $self->{name} = $1;
+  if ($self->{hrStorageDescr} =~ /(.*?),*\s+mounted on:\s+(.*)/) {
+    $self->{name} = $1.'_'.$2;
   } else {
     $self->{name} = $self->{hrStorageDescr};
   }
