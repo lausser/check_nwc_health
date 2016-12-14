@@ -14,10 +14,6 @@ sub init {
     ['filled', 'jnxFilledTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Fille'],
   ]);
   $self->merge_tables("operatins", "filled", "fru", "contents");
-  if (! $self->check_messages()) {
-    $self->clear_ok();
-    $self->add_ok("environmental hardware working fine");
-  }
 }
 
 package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Led;
