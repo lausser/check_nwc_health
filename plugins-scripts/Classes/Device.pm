@@ -39,7 +39,9 @@ sub classify {
       $self->{productname} = 'clavister' if $self->opts->servertype eq 'clavister';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
-    if (! $self->check_messages()) {
+    if ($self->opts->mode eq "uptime") {
+      return $self;
+    } elsif (! $self->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};
       }
