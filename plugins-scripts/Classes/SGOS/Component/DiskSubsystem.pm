@@ -40,20 +40,24 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'disk %s usage is %.2f%%',
+  $self->add_info(sprintf 'disk %s usage is %.2f%% (internal status is %s)',
       $self->{deviceUsageIndex},
-      $self->{deviceUsagePercent});
-  if ($self->{deviceUsageStatus} ne "ok") {
-    $self->add_critical();
-  } else {
-    $self->add_ok();
-  }
+      $self->{deviceUsagePercent},
+      $self->{deviceUsageStatus}
+  );
+  $self->set_thresholds(
+      metric => 'disk_'.$self->{deviceUsageIndex}.'_usage',
+      warning => $self->{deviceUsageHigh},
+      critical => $self->{deviceUsageHigh},
+  );
+  $self->add_message($self->check_thresholds(
+      metric => 'disk_'.$self->{deviceUsageIndex}.'_usage',
+      value => $self->{deviceUsagePercent},),
+  );
   $self->add_perfdata(
       label => 'disk_'.$self->{deviceUsageIndex}.'_usage',
       value => $self->{deviceUsagePercent},
       uom => '%',
-      warning => $self->{deviceUsageHigh},
-      critical => $self->{deviceUsageHigh}
   );
 }
 
