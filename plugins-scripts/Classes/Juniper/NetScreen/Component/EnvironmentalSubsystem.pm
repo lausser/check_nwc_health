@@ -59,6 +59,11 @@ package Classes::Juniper::NetScreen::Component::EnvironmentalSubsystem::Slot;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
+sub finish {
+  my $self = shift;
+  $self->{nsSlotSN} =~ s/^\s+//g;
+}
+
 sub check {
   my $self = shift;
   $self->add_info(sprintf "%s slot %s (%s) is %s",
@@ -77,7 +82,7 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf "temperature %s is %sC",
+  $self->add_info(sprintf "temperature %s (%s) is %sC",
       $self->{nsTemperatureId}, $self->{nsTemperatureDesc}, $self->{nsTemperatureCur});
   $self->add_ok();
   $self->add_perfdata(
