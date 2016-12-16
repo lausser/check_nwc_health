@@ -4,11 +4,32 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->get_snmp_objects('JUNIPER-MIB', qw(jnxBoxKernelMemoryUsedPercent));
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
-    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem2'],
+# nearly no documentytion exists for this
+#    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem2'],
   ]);
 }
+
+sub check {
+  my $self = shift;
+  $self->SUPER::check();
+  if (exists $self->{jnxBoxKernelMemoryUsedPercent}) {
+    $self->add_info(sprintf 'kernel memory usage is %.2f%%',
+        $self->{jnxBoxKernelMemoryUsedPercent});
+    $self->set_thresholds(metric => 'kernel_memory_usage',
+        warning => 90, critical => 95);
+    $self->add_message($self->check_thresholds(metric => 'kernel_memory_usage', 
+        value => $self->{jnxBoxKernelMemoryUsedPercent}));
+    $self->add_perfdata(
+        label => 'kernel_memory_usage',
+        value => $self->{jnxBoxKernelMemoryUsedPercent},
+        uom => '%',
+    );
+  }
+}
+
 
 package Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);

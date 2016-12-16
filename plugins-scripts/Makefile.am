@@ -196,6 +196,7 @@ EXTRA_MODULES=\
   Classes/Juniper/IVE/Component/DiskSubsystem.pm \
   Classes/Juniper/IVE/Component/UserSubsystem.pm \
   Classes/Juniper/IVE.pm \
+  Classes/Juniper/SRX/Component/EnvironmentalSubsystem.pm \
   Classes/Juniper/SRX/Component/CpuSubsystem.pm \
   Classes/Juniper/SRX/Component/MemSubsystem.pm \
   Classes/Juniper/SRX.pm \
