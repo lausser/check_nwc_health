@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->bulk_is_baeh();
   $self->get_snmp_tables('SW-MIB', [
       ['sensors', 'swSensorTable', 'Classes::FabOS::Component::SensorSubsystem::Sensor'],
   ]);
