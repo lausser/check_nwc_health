@@ -4,15 +4,17 @@ use strict;
 
 sub init {
   my $self = shift;
-  foreach ($self->get_snmp_table_objects(
-      'ENTITY-MIB', 'entPhysicalTable')) {
-    if ($_->{entPhysicalDescr} =~ /Brocade/) {
-      $self->{productname} = "FabOS";
+  if ($self->mode !~ /device::uptime/) {
+    foreach ($self->get_snmp_table_objects(
+        'ENTITY-MIB', 'entPhysicalTable', undef, ['entPhysicalDescr'])) {
+      if ($_->{entPhysicalDescr} =~ /Brocade/) {
+        $self->{productname} = "FabOS";
+      }
     }
-  }
-  my $swFirmwareVersion = $self->get_snmp_object('SW-MIB', 'swFirmwareVersion');
-  if ($swFirmwareVersion && $swFirmwareVersion =~ /^v6/) {
-    $self->{productname} = "FabOS"
+    my $swFirmwareVersion = $self->get_snmp_object('SW-MIB', 'swFirmwareVersion');
+    if ($swFirmwareVersion && $swFirmwareVersion =~ /^v6/) {
+      $self->{productname} = "FabOS"
+    }
   }
   if ($self->{productname} =~ /EMC\s*DS.*4700M/i) {
     bless $self, 'Classes::MEOS';
