@@ -19,8 +19,12 @@ sub finish {
     my ($dev, $mnt) = ($1, $2);
     if ($dev =~ /^dev/) {
       $self->{name} = 'devfs_'.$mnt;
+      $self->{device} = 'devfs';
+      $self->{mountpoint} = $mnt;
     } else {
       $self->{name} = $dev.'_'.$mnt;
+      $self->{device} = $dev;
+      $self->{mountpoint} = $mnt;
     }
   } else {
     $self->{name} = $self->{hrStorageDescr};
