@@ -1,3 +1,5 @@
+* 2016-12-19 5.11.2.4
+  fix performance labels for HOSTRESOURCESMIB dev filesystems
 * 2016-12-14 5.11.2.3
   optimize uptime, no bulk for brocade sensors
 * 2016-12-12 5.11.2.2

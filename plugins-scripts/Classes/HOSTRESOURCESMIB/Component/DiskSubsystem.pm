@@ -16,7 +16,12 @@ use strict;
 sub finish {
   my $self = shift;
   if ($self->{hrStorageDescr} =~ /(.*?),*\s+mounted on:\s+(.*)/) {
-    $self->{name} = $1.'_'.$2;
+    my ($dev, $mnt) = ($1, $2);
+    if ($dev =~ /^dev/) {
+      $self->{name} = 'devfs_'.$mnt;
+    } else {
+      $self->{name} = $dev.'_'.$mnt;
+    }
   } else {
     $self->{name} = $self->{hrStorageDescr};
   }
