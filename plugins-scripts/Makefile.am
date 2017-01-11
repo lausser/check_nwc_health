@@ -296,6 +296,7 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1.pm \
   Classes/CheckPoint/VSX/Component/FwSubsystem.pm \
   Classes/CheckPoint/VSX.pm \
+  Classes/CheckPoint/Gaia.pm \
   Classes/CheckPoint.pm \
   Classes/Clavister/Firewall1/Component/EnvironmentalSubsystem.pm \
   Classes/Clavister/Firewall1/Component/CpuSubsystem.pm \

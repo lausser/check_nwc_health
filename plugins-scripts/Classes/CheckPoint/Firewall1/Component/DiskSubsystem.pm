@@ -10,6 +10,7 @@ sub init {
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['volumes', 'raidVolumeTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Volume'],
       ['disks', 'raidDiskTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::Disk'],
+      ['multidisks', 'multiDiskTable', 'Classes::CheckPoint::Firewall1::Component::DiskSubsystem::MultiDisk'],
   ]);
   $self->get_snmp_objects('CHECKPOINT-MIB', (qw(diskPercent)));
 }
@@ -17,7 +18,15 @@ sub init {
 sub check {
   my $self = shift;
   $self->add_info('checking disks');
-  if (scalar (@{$self->{storages}}) == 0) {
+  if (@{$self->{multidisks}}) {
+    foreach (@{$self->{multidisks}}) {
+      $_->check();
+    }
+  } elsif (@{$self->{storages}}) {
+    foreach (@{$self->{storages}}) {
+      $_->check();
+    }
+  } else {
     my $free = 100 - $self->{diskPercent};
     $self->add_info(sprintf 'disk has %.2f%% free space left', $free);
     $self->set_thresholds(warning => '10:', critical => '5:');
@@ -27,10 +36,6 @@ sub check {
         value => $free,
         uom => '%',
     );
-  } else {
-    foreach (@{$self->{storages}}) {
-      $_->check();
-    }
   }
   foreach (@{$self->{volumes}}) {
     $_->check();
@@ -73,5 +78,25 @@ sub check {
       $self->{raidDiskVolumeID},
       $self->{raidDiskState});
   # warning/critical comes from the volume
+}
+
+package Classes::CheckPoint::Firewall1::Component::DiskSubsystem::MultiDisk;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
+  my $label = sprintf 'disk_%s_free', $self->{multiDiskName};
+  $self->add_info(sprintf 'disk %s (%s) has %.2f%% free space',
+      $self->{multiDiskIndex},
+      $self->{multiDiskName},
+      $self->{multiDiskFreeTotalPercent});
+    $self->set_thresholds(metric => $label, warning => '10:', critical => '5:');
+    $self->add_message($self->check_thresholds(metric => $label, value => $self->{multiDiskFreeTotalPercent}));
+    $self->add_perfdata(
+        label => $label,
+        value => $self->{multiDiskFreeTotalPercent},
+        uom => '%',
+    );
 }
 

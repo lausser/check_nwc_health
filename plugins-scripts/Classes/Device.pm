@@ -149,10 +149,12 @@ sub classify {
       } elsif ($self->{productname} =~ /(Huawei)/i) {
         bless $self, 'Classes::Huawei';
         $self->debug('using Classes::Huawei');
-      } elsif ($self->{productname} =~ /Procurve/i) {
-        bless $self, 'Classes::HP';
-        $self->debug('using Classes::HP');
-      } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i) {
+      } elsif ($self->{productname} =~ /Procurve/i ||
+          ($self->implements_mib('HP-ICF-CHASSIS-MIB') &&
+          $self->implements_mib('NETSWITCH-MIB'))) {
+        bless $self, 'Classes::HP::Procurve';
+        $self->debug('using Classes::HP::Procurve');
+      } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i || $self->implements_mib('CHECKPOINT-MIB')) {
         bless $self, 'Classes::CheckPoint';
         $self->debug('using Classes::CheckPoint');
       } elsif ($self->{productname} =~ /Clavister/i) {

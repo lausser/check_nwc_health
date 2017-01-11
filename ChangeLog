@@ -1,3 +1,7 @@
+* 2017-01-11 5.12
+  detect checkpoint gaia
+* 2016-12-28 5.11.3
+  detect more hp procurve switches (J9624A etc. may need new firmware revision RA.16.02.0012, ROM RA.15.13)
 * 2016-12-19 5.11.2.5
   /dev/md on Juniper srx is considered as procfs
 * 2016-12-19 5.11.2.4
