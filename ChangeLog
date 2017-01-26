@@ -1,3 +1,7 @@
+* 2017-01-26 5.12.0.2
+  detect more cisco wireless controllers
+* 2017-01-18 5.12.0.1
+  update GLPlugin (uptime)
 * 2017-01-11 5.12
   detect checkpoint gaia
 * 2016-12-28 5.11.3
