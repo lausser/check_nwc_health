@@ -141,11 +141,14 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
-      $self->{bsnAPName}, $self->{bsnAPOperationStatus},
+  $self->add_info(sprintf 'access point %s is %s/%s (%d interfaces with %d clients)',
+      $self->{bsnAPName}, $self->{bsnAPAdminStatus},
+      $self->{bsnAPOperationStatus},
       scalar(@{$self->{interfaces}}), $self->{NumOfClients});
   if ($self->mode =~ /device::wlan::aps::status/) {
-    if ($self->{bsnAPOperationStatus} eq 'disassociating') {
+    if ($self->{bsnAPAdminStatus} eq 'disable') {
+      $self->add_ok();
+    } elsif ($self->{bsnAPOperationStatus} eq 'disassociating') {
       $self->add_critical();
     } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
       # das verschwindet hoffentlich noch vor dem HARD-state
