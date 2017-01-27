@@ -34,8 +34,9 @@ sub init {
     bless $self, 'Classes::Cisco::NXOS';
     $self->debug('using Classes::Cisco::NXOS');
   } elsif ($self->{productname} =~ /Cisco Controller/i ||
-      $self->implements_mib('AIRESPACE-WIRELESS-MIB') ||
       $self->implements_mib('AIRESPACE-SWITCHING-MIB')) {
+    # die AIRESPACE-WIRELESS-MIB haben manchmal auch stinknormale Switche,
+    # das hat also nichts zu sagen. SWITCHING ist entscheidend.
     bless $self, 'Classes::Cisco::WLC';
     $self->debug('using Classes::Cisco::WLC');
   } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {

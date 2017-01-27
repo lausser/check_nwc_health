@@ -1,3 +1,7 @@
+* 2017-01-27 5.12.0.4
+  fallback to ios if cisco wlc has no cpu/mem oids
+  bugfix in chassis-hardware-health delta of ports
+  bugfix in chassis-hardware-health duplicate fan output
 * 2017-01-27 5.12.0.3
   fix cisco wlc ap admin status
 * 2017-01-26 5.12.0.2

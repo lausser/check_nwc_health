@@ -65,12 +65,10 @@ sub check {
       $self->add_ok();
     }
   }
-  if ($self->{chassisFanStatus} ne 'ok') {
-    $self->add_critical();
-  }
   $self->add_info(sprintf 'chassis fan status is %s',
       $self->{chassisFanStatus});
-  if ($self->{chassisFanStatus} ne 'ok') {
+  if ($self->{chassisFanStatus} !~ /^(ok|other)$/) {
+    # other bedeutet wohl, daß kein fan verbaut wurde.
     $self->add_critical();
   }
   $self->add_info(sprintf 'chassis minor alarm is %s',
@@ -90,7 +88,8 @@ sub check {
   }
   for my $ps (1, 2, 3) {
     if (exists $self->{'chassisPs'.$ps.'Type'}) {
-      #next if $self->{'chassisPs'.$ps.'Status'} eq 'other';
+      # da wurde nix verbaut
+      next if $self->{'chassisPs'.$ps.'Status'} eq 'other';
       $self->add_info(sprintf 'power supply %d status is %s',
           $ps, $self->{'chassisPs'.$ps.'Status'});
       if ($self->{'chassisPs'.$ps.'Status'} eq 'minorFault') {
@@ -142,7 +141,9 @@ sub check {
       $self->{moduleIndex}, $self->{moduleSerialNumberString},
       $self->{moduleStatus}
   );
-  if ($self->{moduleStatus} ne 'ok') {
+  if ($self->{moduleStatus} eq 'minorFault') {
+    $self->add_warning();
+  } elsif ($self->{moduleStatus} ne 'ok') {
     $self->add_critical();
   }
 }

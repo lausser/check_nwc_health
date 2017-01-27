@@ -32,7 +32,7 @@ sub check {
   }
   $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
   $self->valdiff({name => 'stackwise', lastarray => 1},
-      qw(switchSerialList numSwitches));
+      qw(switchSerialList numSwitches numPorts));
   if (scalar(@{$self->{delta_found_switchSerialList}}) > 0) {
     $self->add_warning(sprintf '%d new switch(s) (%s)',
         scalar(@{$self->{delta_found_switchSerialList}}),
