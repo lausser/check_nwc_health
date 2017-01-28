@@ -8,7 +8,7 @@ sub init {
   $self->{sysProductVersion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
   $self->{sysPlatformInfoMarketingName} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysPlatformInfoMarketingName');
   if (! defined $self->{sysProductVersion} ||
-      $self->{sysProductVersion} !~ /^((9)|(10)|(11))/) {
+      $self->{sysProductVersion} !~ /^((9)|(10)|(11)|(12))/) {
     $self->{sysProductVersion} = "4";
   }
   if ($self->mode =~ /device::hardware::health/) {
