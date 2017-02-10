@@ -91,6 +91,7 @@ sub check {
     foreach (@{$self->{pools}}) {
       $_->check();
     }
+    $self->reduce_messages_short('pools are in good condition');
   }
 }
 
@@ -283,7 +284,7 @@ sub check {
     if ($self->{ltmPoolMinActiveMembers} > 0 &&
         $self->{ltmPoolActiveMemberCnt} < $self->{ltmPoolMinActiveMembers}) {
       $self->annotate_info(sprintf("not enough active members (%d, min is %d)",
-              $self->{ltmPoolName}, $self->{ltmPoolActiveMemberCnt},
+              $self->{ltmPoolActiveMemberCnt},
               $self->{ltmPoolMinActiveMembers}));
       $self->add_message(defined $self->opts->mitigation() ? $self->opts->mitigation() : CRITICAL);
     }
@@ -431,7 +432,7 @@ sub check {
     }
   }
   if ($self->mode =~ /device::lb::pool::co.*ctions/) {
-    my $label = $self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
+    my $label = 'pool_'.$self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
     $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
     $self->add_info(sprintf "member %s:%s has %d connections (from max %dM)",
         $self->{ltmPoolMemberNodeName},

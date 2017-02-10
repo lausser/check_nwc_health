@@ -10,6 +10,9 @@ sub init {
     ]);
   } else {
     $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
+    $self->get_snmp_objects('CISCO-LWAPP-HA-MIB', qw(
+        cLHaPrimaryUnit cLHaNetworkFailOver
+    ));
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
         ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
         ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],
@@ -40,7 +43,19 @@ sub check {
     $self->{numOfAPs} = scalar (@{$self->{aps}});
     $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
     if (scalar (@{$self->{aps}}) == 0) {
-      $self->add_unknown('no access points found');
+      if ($self->{cLHaNetworkFailOver} &&
+          $self->{cLHaNetworkFailOver} eq 'true' &&
+          $self->{cLHaPrimaryUnit} && 
+          $self->{cLHaPrimaryUnit} eq 'false') {
+        $self->add_ok('no access points found, this is a secondary unit');
+      } else {
+        $self->add_unknown('no access points found');
+        if ($self->{cLHaNetworkFailOver} &&
+            $self->{cLHaNetworkFailOver} eq 'true') {
+          $self->add_ok(sprintf 'failover setup: %s, primary: %s',
+              $self->{cLHaNetworkFailOver}, $self->{cLHaPrimaryUnit});
+        }
+      }
       return;
     }
     foreach (@{$self->{aps}}) {

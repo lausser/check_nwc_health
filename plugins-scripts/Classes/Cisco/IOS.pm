@@ -36,6 +36,8 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::NatSubsystem");
   } elsif ($self->mode =~ /device::bgp::prefix::count/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::BgpSubsystem");
+  } elsif ($self->mode =~ /device::wlan/ && $self->implements_mib('AIRESPACE-WIRELESS-MIB')) {
+      $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::WlanSubsystem");
   } else {
     $self->no_such_mode();
   }

@@ -1,3 +1,6 @@
+* 2017-02-10 5.13
+  bugfix in f5 output message
+  make f5 perfdata labels more consistent
 * 2017-01-28 5.12.0.5
   fix pool checks for big-ip 12.x (thanks abzeidler)
 * 2017-01-27 5.12.0.4

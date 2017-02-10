@@ -35,10 +35,10 @@ sub init {
     my @indices = $self->get_interface_indices();
     my @etherpatterns = map {
         '('.$_.')';
-    } map {
-        s/\./\\./g; $_;
-    } map {
-        '.1.3.6.1.2.1.2.2.1.1.'.$_;
+    #} map {
+    #    s/\./\\./g; $_;
+    #} map {
+    #    '.1.3.6.1.2.1.2.2.1.1.'.$_;
     } map {
         $_->[0];
     } @indices;
@@ -49,17 +49,16 @@ sub init {
             Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
       }
       if ($self->mode =~ /device::interfaces::etherstats/) {
-
         $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
         $self->override_opt('regexp', 1);
         # key=etherStatsDataSource-//-index, value=index
-        $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
-        # Value von etherStatsDataSource ist ifIndex              
+        $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
+        # Value von dot3StatsIndex ist ifIndex              
         foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-            'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource')) {
+            'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex')) {
           foreach my $interface (@{$self->{interfaces}}) {
-            if ('.1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
-              foreach my $key (grep /^ether/, keys %{$etherstat}) {
+            if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
+              foreach my $key (grep /^dot3/, keys %{$etherstat}) {
                 $interface->{$key} = $etherstat->{$key};
               }
               $interface->init_etherstats;
@@ -68,7 +67,7 @@ sub init {
           }
         }
         @{$self->{interfaces}} = grep {
-            exists $_->{etherStatsDataSource};
+            exists $_->{dot3StatsIndex};
         } @{$self->{interfaces}};
       }
     }
@@ -202,8 +201,7 @@ sub check {
 }
 
 sub update_interface_cache {
-  my ($self) = @_;
-  my $force = shift;
+  my ($self, $force) = @_;
   my $statefile = $self->create_interface_cache_file();
   $self->get_snmp_objects('IFMIB', qw(ifTableLastChange));
   # "The value of sysUpTime at the time of the last creation or
@@ -394,7 +392,8 @@ sub init {
     $self->init();
     if ($self->{ifOperStatus} eq "up") {
       foreach my $mode (qw(device::interfaces::usage
-          device::interfaces::errors device::interfaces::discards)) {
+          device::interfaces::errors device::interfaces::discards
+          device::interfaces::broadcasts)) {
         $Monitoring::GLPlugin::mode = $mode;
         $self->init();
       }
@@ -459,6 +458,18 @@ sub init {
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
         / $self->{delta_timestamp};
+  } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInUcastPkts
+        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+        ifOutMulticastPkts ifOutBroadcastPkts));
+    $self->{broadcastInPercent} = $self->{delta_ifInBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifInBroadcastPkts} /
+        ($self->{delta_ifInUcastPkts} + $self->{delta_ifInMulticastPkts} +
+        $self->{delta_ifInBroadcastPkts});
+    $self->{broadcastOutPercent} = $self->{delta_ifOutBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifOutBroadcastPkts} /
+        ($self->{delta_ifOutUcastPkts} + $self->{delta_ifOutMulticastPkts} +
+        $self->{delta_ifOutBroadcastPkts});
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
@@ -495,17 +506,31 @@ sub init {
 sub init_etherstats {
   my ($self) = @_;
   if ($self->mode =~ /device::interfaces::etherstats/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(etherStatsBroadcastPkts
-        etherStatsCRCAlignErrors etherStatsCollisions etherStatsDropEvents
-        etherStatsFragments etherStatsJabbers etherStatsMulticastPkts 
-        etherStatsOctets etherStatsOversizePkts etherStatsPkts
-        etherStatsUndersizePkts));
-    for my $stat (qw(etherStatsBroadcastPkts etherStatsCRCAlignErrors
-        etherStatsCollisions etherStatsDropEvents etherStatsFragments
-        etherStatsJabbers etherStatsMulticastPkts etherStatsOversizePkts
-        etherStatsUndersizePkts)) {
-      $self->{$stat.'Percent'} = $self->{delta_etherStatsPkts} ?
-          100 * $self->{'delta_'.$stat} / $self->{delta_etherStatsPkts} : 0;
+    $self->valdiff({name => $self->{ifDescr}}, qw(
+        ifInUcastPkts ifInMulticastPkts ifInBroadcastPkts
+        ifOutUcastPkts ifOutMulticastPkts ifOutBroadcastPkts
+        dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    ));
+    $self->{delta_InPkts} = $self->{delta_ifInUcastPkts} +
+        $self->{delta_ifInMulticastPkts} + $self->{delta_ifInBroadcastPkts};
+    $self->{delta_OutPkts} = $self->{delta_ifOutUcastPkts} +
+        $self->{delta_ifOutMulticastPkts} + $self->{delta_ifOutBroadcastPkts};
+    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    )) {
+      continue if ! defined $self->{'delta_'.$stat};
+      $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
+          100 * $self->{'delta_'.$stat} /
+          ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
     }
   }
   return $self;
@@ -523,7 +548,8 @@ sub check {
     $self->check();
     if ($self->{ifOperStatus} eq "up") {
       foreach my $mode (qw(device::interfaces::usage
-          device::interfaces::errors device::interfaces::discards)) {
+          device::interfaces::errors device::interfaces::discards
+          device::interfaces::broadcast)) {
         $Monitoring::GLPlugin::mode = $mode;
         $self->check();
       }
@@ -663,6 +689,40 @@ sub check {
         label => $self->{ifDescr}.'_discards_out',
         value => $self->{outputDiscardRate},
     );
+  } elsif ($self->mode =~ /device::interfaces::broadcast/) {
+    $self->add_info(sprintf 'interface %s broadcast in:%.2f%% out:%.2f%% ',
+        $full_descr,
+        $self->{broadcastInPercent} , $self->{broadcastOutPercent});
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_in',
+        warning => 10,
+        critical => 20
+    );
+    my $in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_in',
+        value => $self->{broadcastInPercent}
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_out',
+        warning => 10,
+        critical => 20
+    );
+    my $out = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_out',
+        value => $self->{broadcastOutPercent}
+    );
+    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
+    $self->add_message($level);
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_in',
+        value => $self->{broadcastInPercent},
+        uom => '%',
+    );
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_out',
+        value => $self->{broadcastOutPercent},
+        uom => '%',
+    );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     #rfc2863
     #(1)   if ifAdminStatus is not down and ifOperStatus is down then a
@@ -706,12 +766,16 @@ sub check {
         $self->{ifOperStatus}, $self->{ifAdminStatus},
         $self->{ifStatusDuration});
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
-    for my $stat (qw(etherStatsBroadcastPkts etherStatsCRCAlignErrors
-        etherStatsCollisions etherStatsDropEvents etherStatsFragments
-        etherStatsJabbers etherStatsMulticastPkts etherStatsOversizePkts
-        etherStatsUndersizePkts)) {
+    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    )) {
+      continue if ! defined $self->{$stat.'Percent'};
       my $label = $stat.'Percent';
-      $label =~ s/^etherStats//g;
+      $label =~ s/^dot3Stats//g;
       $label =~ s/(?:\b|(?<=([a-z])))([A-Z][a-z]+)/(defined($1) ? "_" : "") . lc($2)/eg;
       $label = $self->{ifDescr}.'_'.$label;
       $self->add_info(sprintf 'interface %s %s is %.2f%%',
@@ -807,8 +871,53 @@ sub init {
       $self->{maxInputRate} = 0;
       $self->{maxOutputRate} = 0;
     }
+  } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    $self->valdiff({name => $self->{ifDescr}}, qw(
+        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts));
+    $self->{broadcastInPercent} = $self->{delta_ifHCInBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCInBroadcastPkts} /
+        ($self->{delta_ifHCInUcastPkts} + $self->{delta_ifHCInMulticastPkts} +
+        $self->{delta_ifHCInBroadcastPkts});
+    $self->{broadcastOutPercent} = $self->{delta_ifHCOutBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCOutBroadcastPkts} /
+        ($self->{delta_ifHCOutUcastPkts} + $self->{delta_ifHCOutMulticastPkts} +
+        $self->{delta_ifHCOutBroadcastPkts});
   } else {
     $self->SUPER::init();
+  }
+  return $self;
+}
+
+sub init_etherstats {
+  my ($self) = @_;
+  if ($self->mode =~ /device::interfaces::etherstats/) {
+    $self->valdiff({name => $self->{ifDescr}}, qw(
+        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts
+        dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    ));
+    $self->{delta_InPkts} = $self->{delta_ifHCInUcastPkts} +
+        $self->{delta_ifHCInMulticastPkts} + $self->{delta_ifHCInBroadcastPkts};
+    $self->{delta_OutPkts} = $self->{delta_ifHCOutUcastPkts} +
+        $self->{delta_ifHCOutMulticastPkts} + $self->{delta_ifHCOutBroadcastPkts};
+    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    )) {
+      continue if ! defined $self->{'delta_'.$stat};
+      $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
+          100 * $self->{'delta_'.$stat} / 
+          ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
+    }
   }
   return $self;
 }
