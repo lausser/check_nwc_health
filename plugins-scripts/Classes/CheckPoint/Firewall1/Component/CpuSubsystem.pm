@@ -4,8 +4,10 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
-      procUsage)));
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(procUsage procNum)));
+  $self->get_snmp_tables('CHECKPOINT-MIB', [
+      ['multiprocs', 'multiProcTable', 'Classes::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc'],
+  ]);
   $self->{procQueue} = $self->valid_response('CHECKPOINT-MIB', 'procQueue');
 }
 
@@ -27,5 +29,29 @@ sub check {
         thresholds => 0,
     );
   }
+  $self->add_info('checking cpu cores');
+  if (@{$self->{multiprocs}}) {
+    foreach (@{$self->{multiprocs}}) {
+      $_->check();
+    }
+  }
 }
 
+package Classes::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
+  my $label = sprintf 'cpu_core_%s_usage', $self->{multiProcIndex};
+  $self->add_info(sprintf 'cpu core %s usage is %.2f%%',
+      $self->{multiProcIndex},
+      $self->{multiProcUsage});
+    $self->set_thresholds(metric => $label, warning => 80, critical => 90);
+    $self->add_message($self->check_thresholds(metric => $label, value => $self->{multiProcUsage}));
+    $self->add_perfdata(
+        label => $label,
+        value => $self->{multiProcUsage},
+        uom => '%',
+    );
+}

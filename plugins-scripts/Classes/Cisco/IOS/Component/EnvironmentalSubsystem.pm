@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  my $has_envmon = 0;
   #
   # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
   # 
@@ -23,6 +24,21 @@ sub init {
         Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem->new();
     $self->{voltage_subsystem} =
         Classes::Cisco::CISCOENVMONMIB::Component::VoltageSubsystem->new();
+    $has_envmon = 1;
+  }
+  if ($has_envmon &&
+      ! scalar(@{$self->{fan_subsystem}->{fans}}) &&
+      ! scalar(@{$self->{temperature_subsystem}->{temperatures}}) &&
+      ! scalar(@{$self->{powersupply_subsystem}->{supplies}}) &&
+      ! scalar(@{$self->{voltage_subsystem}->{voltages}})) {
+    $has_envmon = 0;
+    for my $subsys (qw(fan_subsystem temperature_subsystem
+        powersupply_subsystem voltage_subsystem)) {
+      delete $self->{$subsys};
+    }
+    $has_envmon = 0;
+  }
+  if ($has_envmon) {
   } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
     $self->{fru_subsystem} =
         Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::EnvironmentalSubsystem->new();
@@ -35,41 +51,34 @@ sub init {
     $self->add_ok('soho device, hopefully too small to fail');
   } else {
     # last hope
-    $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOENTITYALARMMIB::Component::AlarmSubsystem");
+    $self->{alarm_subsystem} =
+        Classes::Cisco::CISCOENTITYALARMMIB::Component::AlarmSubsystem->new();
     #$self->no_such_mode();
   }
 }
 
 sub check {
   my $self = shift;
-  if ($self->{ciscoEnvMonPresent} &&
-      $self->{ciscoEnvMonPresent} ne 'oldAgs') {
-    $self->{fan_subsystem}->check();
-    $self->{temperature_subsystem}->check();
-    $self->{voltage_subsystem}->check();
-    $self->{powersupply_subsystem}->check();
-  } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
-    $self->{fru_subsystem}->check();
-  } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
-    $self->{sensor_subsystem}->check();
+  foreach my $subsys (qw(fan_subsystem temperature_subsystem
+      powersupply_subsystem voltage_subsystem fru_subsystem
+      sensor_subsystem alarm_subsystem)) {
+    if (exists $self->{$subsys}) {
+      $self->{$subsys}->check();
+    }
   }
   if (! $self->check_messages()) {
-    $self->add_ok("environmental hardware working fine");
+    $self->reduce_messages("environmental hardware working fine");
   }
 }
 
 sub dump {
   my $self = shift;
-  if ($self->{ciscoEnvMonPresent} &&
-      $self->{ciscoEnvMonPresent} ne 'oldAgs') {
-    $self->{fan_subsystem}->dump();
-    $self->{temperature_subsystem}->dump();
-    $self->{voltage_subsystem}->dump();
-    $self->{powersupply_subsystem}->dump();
-  } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
-    $self->{fru_subsystem}->dump();
-  } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
-    $self->{sensor_subsystem}->dump();
+  foreach my $subsys (qw(fan_subsystem temperature_subsystem
+      powersupply_subsystem voltage_subsystem fru_subsystem
+      sensor_subsystem alarm_subsystem)) {
+    if (exists $self->{$subsys}) {
+      $self->{$subsys}->dump();
+    }
   }
 }
 

@@ -234,6 +234,12 @@ $plugin->add_mode(
     help => 'Show OSPF neighbors',
 );
 $plugin->add_mode(
+    internal => 'device::ha::status',
+    spec => 'ha-status',
+    alias => undef,
+    help => 'Check the status of a clustered setup',
+);
+$plugin->add_mode(
     internal => 'device::ha::role',
     spec => 'ha-role',
     alias => undef,
@@ -298,6 +304,12 @@ $plugin->add_mode(
     spec => 'pool-complections',
     alias => undef,
     help => 'Check the members and connections of a load balancer pool',
+);
+$plugin->add_mode(
+    internal => 'device::wideip::status',
+    spec => 'wideip-status',
+    alias => undef,
+    help => 'Check the status of F5 Wide IPs',
 );
 $plugin->add_mode(
     internal => 'device::lb::pool::list',

@@ -33,6 +33,10 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
+    if (! $self->opts->name) {
+      # get_table erzwingen
+      @indices = ();
+    }
     my @etherpatterns = map {
         '('.$_.')';
     #} map {
@@ -42,15 +46,18 @@ sub init {
     } map {
         $_->[0];
     } @indices;
-    if (scalar(@indices) > 0) {
+    if (!$self->opts->name || scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices)) {
         push(@{$self->{interfaces}},
-            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
+            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_})
+);
       }
       if ($self->mode =~ /device::interfaces::etherstats/) {
-        $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
-        $self->override_opt('regexp', 1);
+        if ($self->opts->name) {
+          $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
+          $self->override_opt('regexp', 1);
+        }
         # key=etherStatsDataSource-//-index, value=index
         $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
         # Value von dot3StatsIndex ist ifIndex              
@@ -349,6 +356,11 @@ use strict;
 
 sub finish {
   my ($self) = @_;
+  foreach my $key (grep /^dot3/, keys %{$self}) {
+    if (! defined $self->{key}) {
+      $self->{key} = 0.1;
+    }
+  }
   #printf "%s\n", Data::Dumper::Dumper($self);
 }
 
@@ -459,6 +471,11 @@ sub init {
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    foreach my $key (qw(ifInUcastPkts
+        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+        ifOutMulticastPkts ifOutBroadcastPkts)) {
+      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+    }
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInUcastPkts
         ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
         ifOutMulticastPkts ifOutBroadcastPkts));
@@ -506,6 +523,9 @@ sub init {
 sub init_etherstats {
   my ($self) = @_;
   if ($self->mode =~ /device::interfaces::etherstats/) {
+    $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
+    $self->init();
+    $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
     $self->valdiff({name => $self->{ifDescr}}, qw(
         ifInUcastPkts ifInMulticastPkts ifInBroadcastPkts
         ifOutUcastPkts ifOutMulticastPkts ifOutBroadcastPkts
@@ -872,6 +892,11 @@ sub init {
       $self->{maxOutputRate} = 0;
     }
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    foreach my $key (qw(
+        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts)) {
+      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+    }
     $self->valdiff({name => $self->{ifDescr}}, qw(
         ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
         ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts));
@@ -892,6 +917,9 @@ sub init {
 sub init_etherstats {
   my ($self) = @_;
   if ($self->mode =~ /device::interfaces::etherstats/) {
+    $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
+    $self->init();
+    $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
     $self->valdiff({name => $self->{ifDescr}}, qw(
         ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
         ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts

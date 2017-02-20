@@ -143,6 +143,9 @@ sub classify {
       } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'Classes::F5';
         $self->debug('using Classes::F5');
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
+        bless $self, 'Classes::F5';
+        $self->debug('using Classes::F5');
       } elsif ($self->{productname} =~ /(H?H3C|HP Comware)/i) {
         bless $self, 'Classes::HH3C';
         $self->debug('using Classes::HH3C');

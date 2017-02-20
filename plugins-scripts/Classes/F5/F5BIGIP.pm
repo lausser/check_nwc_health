@@ -12,6 +12,12 @@ sub init {
     $self->{sysProductVersion} = "4";
   }
   if ($self->mode =~ /device::hardware::health/) {
+    if (! $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysChassisFanNumber') &&
+        ! $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysChassisPowerSupplyNumber')) {
+      $self->analyze_and_check_environmental_subsystem("Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem");
+    } else {
+      $self->analyze_and_check_environmental_subsystem("Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem");
+    }
     $self->analyze_and_check_environmental_subsystem("Classes::F5::F5BIGIP::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::F5::F5BIGIP::Component::CpuSubsystem");
@@ -19,6 +25,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::F5::F5BIGIP::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::lb/) {
     $self->analyze_and_check_ltm_subsystem();
+  } elsif ($self->mode =~ /device::wideip/) {
+    $self->analyze_and_check_mem_subsystem("Classes::F5::F5BIGIP::Component::GTMSubsystem");
   } else {
     $self->no_such_mode();
   }

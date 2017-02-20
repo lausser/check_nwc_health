@@ -7,6 +7,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/Item.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/TableItem.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/SysDescPrettify.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
@@ -56,6 +57,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSTATEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ETHERLIKEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPGLOBALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPLOCALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
@@ -77,6 +79,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MINIIFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETGEARMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENCHASSISMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENNSRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENPRODUCTSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENRESOURCEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSWITCHMIB.pm \
@@ -192,6 +195,7 @@ EXTRA_MODULES=\
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \
   Classes/Juniper/NetScreen/Component/EnvironmentalSubsystem.pm \
+  Classes/Juniper/NetScreen/Component/VsdSubsystem.pm \
   Classes/Juniper/NetScreen.pm \
   Classes/Juniper/IVE/Component/MemSubsystem.pm \
   Classes/Juniper/IVE/Component/CpuSubsystem.pm \
@@ -245,6 +249,7 @@ EXTRA_MODULES=\
   Classes/IPMIB.pm \
   Classes/VRRPMIB/Component/VRRPSubsystem.pm \
   Classes/VRRPMIB.pm \
+  Classes/HOSTRESOURCESMIB/Component/DeviceSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/CpuSubsystem.pm \
@@ -274,6 +279,7 @@ EXTRA_MODULES=\
   Classes/UCDMIB/Components/DiskSubsystem.pm \
   Classes/UCDMIB/Components/ProcessSubsystem.pm \
   Classes/UCDMIB.pm \
+  Classes/F5/F5BIGIP/Component/GTM.pm \
   Classes/F5/F5BIGIP/Component/LTM.pm \
   Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
