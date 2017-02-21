@@ -4,6 +4,8 @@ use strict;
 
 sub init {
   my $self = shift;
+  #$self->mult_snmp_max_msg_size(10);
+  $self->bulk_is_baeh(10);
   $self->{sensor_subsystem} =
       Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();
   if ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {

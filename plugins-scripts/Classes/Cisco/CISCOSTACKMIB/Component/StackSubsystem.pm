@@ -15,6 +15,7 @@ sub init {
       chassisMinorAlarm chassisMajorAlarm chassisTempAlarm
       chassisModel chassisSerialNumberString
   ));
+  $self->bulk_is_baeh(10);
   $self->get_snmp_tables("CISCO-STACK-MIB", [
       ['components', 'chassisComponentTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
       ['modules', 'moduleTable', 'Classes::Cisco::CISCOSTACKMIB::Component::StackSubsystem::Module'],

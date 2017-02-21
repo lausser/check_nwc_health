@@ -180,7 +180,8 @@ sub init {
     foreach my $auxmember (@auxpoolmemberstat) {
       if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMemberStatPoolName} &&
           $_->{ltmPoolMemberPort} eq $auxmember->{ltmPoolMemberStatPort} &&
-          $_->{ltmPoolMemberNodeName} eq $auxmember->{ltmPoolMemberStatNodeName}) {
+          $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMemberStatAddrType} &&
+          $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMemberStatAddr}) {
         foreach my $key (keys %{$auxmember}) {
           next if $key =~ /.*indices$/;
           $_->{$key} = $auxmember->{$key};
