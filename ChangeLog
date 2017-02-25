@@ -1,3 +1,16 @@
+* 2017-02-24 6.0
+  cisco chassis check snmp tuning
+  fix cisco-envmon-mib
+  nxos hardware check snmp tuning
+  fix cisco wlan no-ap clustercheck
+  detect more f5 models
+  add f5 wide ip check
+  improve host-resource-mib
+  speedup interface checks
+  add interface-etherstats
+  add ha-status for juniper vsd members
+  customer release #12.2a
+  add mode interface-stack-status
 * 2017-02-10 5.13
   bugfix in f5 output message
   make f5 perfdata labels more consistent

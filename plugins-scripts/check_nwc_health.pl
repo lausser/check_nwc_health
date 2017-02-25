@@ -119,6 +119,18 @@ $plugin->add_mode(
     help => 'Check the percentage of up interfaces in a link aggregation',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::ifstack::status',
+    spec => 'interface-stack-status',
+    alias => undef,
+    help => 'Check the status of interface sublayers (mostly layer 2)',
+);
+#$plugin->add_mode(
+#    internal => 'device::interfaces::ifstack::availability',
+#    spec => 'interface-stack-availability',
+#    alias => undef,
+#    help => 'Check the percentage of available sublayer interfaces',
+#);
+$plugin->add_mode(
     internal => 'device::interfaces::etherstats',
     spec => 'interface-etherstats',
     alias => undef,

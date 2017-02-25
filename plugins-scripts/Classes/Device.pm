@@ -236,6 +236,8 @@ sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
+  } elsif ($self->mode =~ /device::interfaces::ifstack/) {
+    $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::StackSubsystem");
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::routes/) {
