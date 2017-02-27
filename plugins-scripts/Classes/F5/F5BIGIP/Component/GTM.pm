@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->mult_snmp_max_msg_size(10);
   $self->get_snmp_tables('F5-BIGIP-GLOBAL-MIB', [
       ['wideips', 'gtmWideipStatusTable', 'Classes::F5::F5BIGIP::Component::GTMSubsystem::WideIP'],
   ]);
@@ -27,7 +28,7 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'wide IP %s has status %s, enabled %s',
+  $self->add_info(sprintf 'wide IP %s has status %s, is %s',
       $self->{gtmWideipStatusName},
       $self->{gtmWideipStatusAvailState},
       $self->{gtmWideipStatusEnabledState});

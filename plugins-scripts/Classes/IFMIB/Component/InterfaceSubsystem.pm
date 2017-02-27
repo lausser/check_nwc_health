@@ -9,7 +9,9 @@ sub init {
   #$self->session_translate(['-octetstring' => 1]);
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
-    foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    my @indices = $self->get_interface_indices();
+    #foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    foreach my $ifIndex (map { $_->[0] } @indices) {
       my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
       my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
       my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
@@ -23,7 +25,6 @@ sub init {
               flat_indices => $ifIndex,
           ));
     }
-    my @indices = $self->get_interface_indices();
     # die sind mit etherStatsDataSource verknuepft
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->update_interface_cache(0);

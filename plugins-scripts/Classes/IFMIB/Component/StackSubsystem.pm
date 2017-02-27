@@ -58,13 +58,22 @@ sub check {
   } else {
     foreach my $rel (@{$self->{stacks}}) {
       next if ! exists $higher_interfaces->{$rel->{ifStackHigherLayer}};
-      if ($rel->{ifStackLowerLayer} == 0 && $rel->{ifStackStatus} ne 'notInService') {
+      $lower_counter->{$rel->{ifStackHigherLayer}} = 0
+          if ! exists $lower_counter->{$rel->{ifStackHigherLayer}};
+      $lower_needed->{$rel->{ifStackHigherLayer}} = 0
+          if ! exists $lower_needed->{$rel->{ifStackHigherLayer}};
+      if ($rel->{ifStackLowerLayer} == 0 && $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAdminStatus} eq 'down') {
+        if ($self->mode =~ /device::interfaces::ifstack::status/) {
+          $self->add_ok(sprintf '%s (%s) is admin down',
+              $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
+              $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
+          );
+        }
+      } elsif ($rel->{ifStackLowerLayer} == 0 && $rel->{ifStackStatus} ne 'notInService') {
         if ($self->mode =~ /device::interfaces::ifstack::status/) {
           $self->add_warning(sprintf '%s (%s) has stack status %s but no sub-layer interfaces', $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
               $rel->{ifStackStatus});
-            $lower_counter->{$rel->{ifStackHigherLayer}} = 0;
-        } elsif ($self->mode =~ /device::interfaces::ifstack::availability/) {
         }
       } elsif ($rel->{ifStackStatus} ne 'notInService' &&
           $lower_interfaces->{$rel->{ifStackLowerLayer}}->{ifOperStatus} ne 'up' &&
@@ -75,10 +84,8 @@ sub check {
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
               $lower_interfaces->{$rel->{ifStackLowerLayer}}->{ifDescr},
               $lower_interfaces->{$rel->{ifStackLowerLayer}}->{ifOperStatus});
-        } elsif ($self->mode =~ /device::interfaces::ifstack::availability/) {
-          $lower_needed->{$rel->{ifStackHigherLayer}}++;
         }
-        $lower_counter->{$rel->{ifStackHigherLayer}}++;
+        $lower_needed->{$rel->{ifStackHigherLayer}}++;
       } elsif ($rel->{ifStackStatus} ne 'notInService' &&
           $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifOperStatus} eq 'lowerLayerDown') {
         if ($self->mode =~ /device::interfaces::ifstack::status/) {
@@ -86,10 +93,9 @@ sub check {
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifOperStatus});
-        } elsif ($self->mode =~ /device::interfaces::ifstack::availability/) {
-          $lower_needed->{$rel->{ifStackHigherLayer}}++;
         }
         $lower_counter->{$rel->{ifStackHigherLayer}}++;
+        $lower_needed->{$rel->{ifStackHigherLayer}}++;
       } else {
         $lower_counter->{$rel->{ifStackHigherLayer}}++;
         $lower_needed->{$rel->{ifStackHigherLayer}}++;
@@ -101,27 +107,29 @@ sub check {
             $higher_interfaces->{$index}->{ifDescr},
             $lower_counter->{$index});
       } elsif ($self->mode =~ /device::interfaces::ifstack::availability/) {
+        my $availability = $lower_needed->{$index} ?
+            (100 * $lower_counter->{$index} / $lower_needed->{$index}) : 0;
+        my $cavailability = $availability == int($availability) ?
+            $availability + 1: int($availability + 1.0);
+        $self->add_info(sprintf '%s has %d of %d running sub-layer interfaces, availability is %.2f%%',
+            $higher_interfaces->{$index}->{ifDescr},
+            $lower_counter->{$index},
+            $lower_needed->{$index},
+            $availability);
         $self->set_thresholds(
-            metric => $higher_interfaces->{$index}->{ifDescr}.'_availability');
-
-
-        my $cavailability = $self->{num_if} ? (100 * 1 / $self->{num_if}) : 0;
-    $cavailability = $cavailability == int($cavailability) ? $cavailability + 1: int($cavailability + 1.0);
-    $self->set_thresholds(
-        metric => 'aggr_'.$self->{name}.'_availability',
-        warning => '100:',
-        critical => $cavailability.':'
-    );
-    $self->add_message($self->check_thresholds(
-        metric => 'aggr_'.$self->{name}.'_availability',
-        value => $self->{availability}
-    ));
-    $self->add_perfdata(
-        label => 'aggr_'.$self->{name}.'_availability',
-        value => $self->{availability},
-        uom => '%',
-    );
-
+            metric => 'aggr_'.$higher_interfaces->{$index}->{ifDescr}.'_availability',
+            warning => '100:',
+            critical => $cavailability.':'
+        );
+        $self->add_message($self->check_thresholds(
+            metric => 'aggr_'.$higher_interfaces->{$index}->{ifDescr}.'_availability',
+            value => $availability,
+        ));
+        $self->add_perfdata(
+            label => 'aggr_'.$higher_interfaces->{$index}->{ifDescr}.'_availability',
+            value => $availability,
+            uom => '%',
+        );
       }
     }
     $self->reduce_messages_short(sprintf '%d portchannel%s working fine',

@@ -124,12 +124,12 @@ $plugin->add_mode(
     alias => undef,
     help => 'Check the status of interface sublayers (mostly layer 2)',
 );
-#$plugin->add_mode(
-#    internal => 'device::interfaces::ifstack::availability',
-#    spec => 'interface-stack-availability',
-#    alias => undef,
-#    help => 'Check the percentage of available sublayer interfaces',
-#);
+$plugin->add_mode(
+    internal => 'device::interfaces::ifstack::availability',
+    spec => 'interface-stack-availability',
+    alias => undef,
+    help => 'Check the percentage of available sublayer interfaces',
+);
 $plugin->add_mode(
     internal => 'device::interfaces::etherstats',
     spec => 'interface-etherstats',
@@ -496,7 +496,7 @@ if (! $plugin->check_messages()) {
 } elsif ($plugin->opts->snmpwalk && $plugin->opts->offline) {
   ;
 } else {
-  $plugin->add_critical('wrong device');
+  ;
 }
 my ($code, $message) = $plugin->opts->multiline ?
     $plugin->check_messages(join => "\n", join_all => ', ') :
