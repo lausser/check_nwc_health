@@ -4,6 +4,7 @@ use strict;
 
 sub init {
   my $self = shift;
+  $self->mult_snmp_max_msg_size(2);
   $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
       ['mems', 'ciscoMemoryPoolTable', 'Classes::Cisco::CISCOMEMORYPOOLMIB::Component::MemSubsystem::Mem'],
   ]);
