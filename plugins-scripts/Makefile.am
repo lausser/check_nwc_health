@@ -366,6 +366,7 @@ EXTRA_MODULES=\
   Classes/Lantronix/SLS.pm \
   Classes/Arista/Component/EnvironmentalSubsystem.pm \
   Classes/Arista.pm \
+  Classes/Riverbed.pm \
   Classes/Device.pm
 
 SED=/bin/sed
