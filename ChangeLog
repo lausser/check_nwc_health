@@ -11,6 +11,7 @@
   add ha-status for juniper vsd members
   customer release #12.2a
   add mode interface-stack-status
+  add riverbed steelhead
 * 2017-02-10 5.13
   bugfix in f5 output message
   make f5 perfdata labels more consistent

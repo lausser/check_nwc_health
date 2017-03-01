@@ -101,6 +101,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPV2TCV1MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STATISTICSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADEXMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
@@ -366,6 +367,9 @@ EXTRA_MODULES=\
   Classes/Lantronix/SLS.pm \
   Classes/Arista/Component/EnvironmentalSubsystem.pm \
   Classes/Arista.pm \
+  Classes/Riverbed/SteelheadEX/Component/EnvironmentalSubsystem.pm \
+  Classes/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \
+  Classes/Riverbed/Steelhead.pm \
   Classes/Riverbed.pm \
   Classes/Device.pm
 
@@ -403,7 +407,7 @@ AM_INSTALL_PROGRAM_FLAGS=@INSTALL_OPTS@
 
 $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "#! #PERL# -w" | $(AWK) -f ./subst > $@
-	$(ECHO) "# nagios: -epn" >> $@
+	$(ECHO) "# nagios: +epn" >> $@
 	$(ECHO) >> $@
 	if [ "${STANDALONE}" == "yes" ]; then \
 		$(ECHO) i am standalone; \

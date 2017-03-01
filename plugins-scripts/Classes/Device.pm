@@ -201,7 +201,7 @@ sub classify {
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.272\./) {
         bless $self, 'Classes::Bintec::Bibo';
         $self->debug('using Classes::Bintec::Bibo');
-      } elsif ($self->implements_mib('STEELHEAD-MIB')) {
+      } elsif ($self->implements_mib('STEELHEAD-MIB') || $self->implements_mib('STEELHEAD-EX-MIB')) {
         bless $self, 'Classes::Riverbed';
         $self->debug('using Classes::Riverbed');
       } elsif ($self->{productname} =~ /^Linux/i) {
