@@ -2,15 +2,6 @@ package Classes::Riverbed::Steelhead;
 our @ISA = qw(Classes::Device);
 use strict;
 
-$Monitoring::GLPlugin::SNMP::SysDescPrettify::vendor_rules->{'RiverbedSteelHead'} = {
-    vendor_pattern => '.*Linux AMDC.*',
-    prettifier_funcs => [
-      sub {
-        my ($sysdescr, $session) = @_;
-        return undef;
-      },
-    ],
-};
 
 sub init {
   my $self = shift;
