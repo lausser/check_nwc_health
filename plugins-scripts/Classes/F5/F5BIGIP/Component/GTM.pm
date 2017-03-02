@@ -40,6 +40,7 @@ sub check {
     $self->add_unknown();
   } else {
     $self->add_critical();
+    $self->add_critical('reason: '.$self->{gtmWideipStatusDetailReason});
   }
 }
 
