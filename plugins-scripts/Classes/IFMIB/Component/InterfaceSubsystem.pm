@@ -548,7 +548,7 @@ sub init_etherstats {
         dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
         dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
     )) {
-      continue if ! defined $self->{'delta_'.$stat};
+      next if ! defined $self->{'delta_'.$stat};
       $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
           100 * $self->{'delta_'.$stat} /
           ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
@@ -794,7 +794,7 @@ sub check {
         dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
         dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
     )) {
-      continue if ! defined $self->{$stat.'Percent'};
+      next if ! defined $self->{$stat.'Percent'};
       my $label = $stat.'Percent';
       $label =~ s/^dot3Stats//g;
       $label =~ s/(?:\b|(?<=([a-z])))([A-Z][a-z]+)/(defined($1) ? "_" : "") . lc($2)/eg;
@@ -942,7 +942,7 @@ sub init_etherstats {
         dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
         dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
     )) {
-      continue if ! defined $self->{'delta_'.$stat};
+      next if ! defined $self->{'delta_'.$stat};
       $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
           100 * $self->{'delta_'.$stat} / 
           ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
