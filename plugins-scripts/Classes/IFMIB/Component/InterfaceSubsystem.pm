@@ -391,6 +391,9 @@ sub finish {
     $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
+  if (! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets}) {
+    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
+  }
   if ($self->{ifPhysAddress}) {
     $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
   }
@@ -949,5 +952,22 @@ sub init_etherstats {
     }
   }
   return $self;
+}
+
+package Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub;
+our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
+use strict;
+
+sub check {
+  my ($self) = @_;
+  my $full_descr = sprintf "%s%s",
+      $self->{ifDescr},
+      $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
+          " (alias ".$self->{ifAlias}.")" : "";
+  if ($self->mode =~ /device::interfaces::operstatus/) {
+    $self->SUPER::check();
+  } else {
+    $self->add_ok(sprintf '%s has no traffic', $full_descr);
+  }
 }
 
