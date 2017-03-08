@@ -958,6 +958,10 @@ package Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 
+sub init {
+  my ($self) = @_;
+}
+
 sub check {
   my ($self) = @_;
   my $full_descr = sprintf "%s%s",
