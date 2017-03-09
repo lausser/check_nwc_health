@@ -30,7 +30,7 @@ sub check {
   );
   if ($self->{hrDeviceStatus} =~ /(warning|testing)/) {
     $self->add_warning();
-  } elsif ($self->{hrDeviceStatus} =~ /down/) {
+  } elsif ($self->{hrDeviceStatus} =~ /down/ && $self->{hrDeviceDescr} ne 'sysfs') {
     $self->add_critical();
   } elsif ($self->{hrDeviceStatus} =~ /unknown/) {
     $self->add_unknown();
