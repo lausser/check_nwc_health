@@ -15,14 +15,17 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'power supply %d status is %s', 
-      $self->{powerSupplyIndex},
-      $self->{powerSupplyStatus});
-  if ($self->{powerSupplyStatus} eq 'Up') {
-    $self->add_ok();
-  } elsif ($self->{powerSupplyStatus} eq 'Down') {
-    $self->add_critical();
-  } else {
-    $self->add_unknown();
+  #Ignore Dummy values
+  if ($self->{powerSupplyStatus} ne 'Dummy') {
+    $self->add_info(sprintf 'power supply %d status is %s', 
+        $self->{powerSupplyIndex},
+        $self->{powerSupplyStatus});
+    if ($self->{powerSupplyStatus} eq 'Up') {
+      $self->add_ok();
+    } elsif ($self->{powerSupplyStatus} eq 'Down') {
+      $self->add_critical();
+    } else {
+      $self->add_unknown();
+    }
   }
 }
