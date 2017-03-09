@@ -34,7 +34,7 @@ sub init {
     # name is a number -> get_table with extra param
     # name is a regexp -> list of names -> list of numbers
     my @indices = $self->get_interface_indices();
-    if (! $self->opts->name) {
+    if (! $self->opts->name && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
     }
