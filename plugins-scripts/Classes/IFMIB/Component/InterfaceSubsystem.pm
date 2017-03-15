@@ -309,6 +309,16 @@ sub load_interface_cache {
 sub get_interface_indices {
   my ($self) = @_;
   my @indices = ();
+  if ($self->opts->name && $self->opts->name eq '_adminup_') {
+    foreach my $interface ($self->get_snmp_table_objects(
+        'IFMIB', 'ifTable', undef, ['ifIndex', 'ifAdminStatus']
+    )) {
+      if ($interface->{ifAdminStatus} eq 'up') {
+        push(@indices, $interface->{ifIndex});
+      }
+    }
+    return @indices;
+  }
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
