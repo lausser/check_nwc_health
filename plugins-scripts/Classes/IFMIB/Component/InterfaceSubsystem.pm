@@ -7,6 +7,45 @@ sub init {
   $self->{interfaces} = [];
   $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
+  my @iftable_columns = qw(ifIndex ifDescr ifAlias);
+  if ($self->mode =~ /device::interfaces::list/) {
+  } elsif ($self->mode =~ /device::interfaces::complete/) {
+  } elsif ($self->mode =~ /device::interfaces::usage/) {
+    push(@iftable_columns, qw(
+        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifHCInOctets ifHCOutOctets
+    ));
+  } elsif ($self->mode =~ /device::interfaces::errors/) {
+    push(@iftable_columns, qw(
+        ifInErrors ifOutErrors
+    ));
+  } elsif ($self->mode =~ /device::interfaces::discards/) {
+    push(@iftable_columns, qw(
+        ifInDiscards ifOutDiscards
+    ));
+  } elsif ($self->mode =~ /device::interfaces::broadcast/) {
+    push(@iftable_columns, qw(
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
+  } elsif ($self->mode =~ /device::interfaces::operstatus/) {
+    push(@iftable_columns, qw(
+        ifOperStatus ifAdminStatus
+    ));
+  } elsif ($self->mode =~ /device::interfaces::availability/) {
+    push(@iftable_columns, qw(
+        ifAvailable ifIndex ifType ifOperStatus ifAdminStatus ifStatusDuration
+        ifLastChange ifHighSpeed ifSpeed
+    ));
+  } elsif ($self->mode =~ /device::interfaces::etherstats/) {
+    push(@iftable_columns, qw(
+        ifOperStatus ifAdminStatus
+    ));
+  }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     my @indices = $self->get_interface_indices();
@@ -28,33 +67,35 @@ sub init {
     # die sind mit etherStatsDataSource verknuepft
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->update_interface_cache(0);
-    #next if $self->opts->can('name') && $self->opts->name && 
-    #    $self->opts->name ne $_->{ifDescr};
-    # if limited search
-    # name is a number -> get_table with extra param
-    # name is a regexp -> list of names -> list of numbers
+    my $only_admin_up =
+        $self->opts->name && $self->opts->name eq '_adminup_' ? 1 : 0;
+    my $only_oper_up =
+        $self->opts->name && $self->opts->name eq '_operup_' ? 1 : 0;
+    if ($only_admin_up || $only_oper_up) {
+      $self->override_opt('name', undef);
+    }
     my @indices = $self->get_interface_indices();
     if (! $self->opts->name && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
     }
-    my @etherpatterns = map {
-        '('.$_.')';
-    #} map {
-    #    s/\./\\./g; $_;
-    #} map {
-    #    '.1.3.6.1.2.1.2.2.1.1.'.$_;
-    } map {
-        $_->[0];
-    } @indices;
     if (!$self->opts->name || scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
-          'IFMIB', 'ifTable+ifXTable', \@indices)) {
+          'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
+        continue if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
+        continue if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
         push(@{$self->{interfaces}},
-            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_})
-);
+            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
+        if ($only_admin_up || $only_oper_up) {
+          push(@indices, [$_->{ifIndex}]);
+        }
       }
       if ($self->mode =~ /device::interfaces::etherstats/) {
+        my @etherpatterns = map {
+            '('.$_.')';
+        } map {
+            $_->[0];
+        } @indices;
         if ($self->opts->name) {
           $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
           $self->override_opt('regexp', 1);
@@ -62,6 +103,9 @@ sub init {
         # key=etherStatsDataSource-//-index, value=index
         $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
         # Value von dot3StatsIndex ist ifIndex              
+#
+# ohne name -> get_table
+# mit name -> lauter einzelne indizierte walkportionen
         foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
             'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex')) {
           foreach my $interface (@{$self->{interfaces}}) {
@@ -309,16 +353,6 @@ sub load_interface_cache {
 sub get_interface_indices {
   my ($self) = @_;
   my @indices = ();
-  if ($self->opts->name && $self->opts->name eq '_adminup_') {
-    foreach my $interface ($self->get_snmp_table_objects(
-        'IFMIB', 'ifTable', undef, ['ifIndex', 'ifAdminStatus']
-    )) {
-      if ($interface->{ifAdminStatus} eq 'up') {
-        push(@indices, $interface->{ifIndex});
-      }
-    }
-    return @indices;
-  }
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
