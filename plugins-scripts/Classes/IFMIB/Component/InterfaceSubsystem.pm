@@ -8,6 +8,7 @@ sub init {
   $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
   my @iftable_columns = qw(ifIndex ifDescr ifAlias);
+  my @ethertable_columns = qw();
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
@@ -44,7 +45,34 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
     push(@iftable_columns, qw(
         ifOperStatus ifAdminStatus
+        ifInUcastPkts ifInMulticastPkts ifInBroadcastPkts
+        ifOutUcastPkts ifOutMulticastPkts ifOutBroadcastPkts
     ));
+    push(@iftable_columns, qw(
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
+    push(@ethertable_columns, qw(
+        dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    ));
+    if ($self->opts->report !~ /^(long|short|html)$/) {
+      my @reports = split(',', $self->opts->report);
+      @ethertable_columns = grep {
+        my $ec = $_;
+        grep {
+	  $ec eq $_;
+	} @reports;
+      } @ethertable_columns;
+    }
   }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
@@ -107,7 +135,7 @@ sub init {
 # ohne name -> get_table
 # mit name -> lauter einzelne indizierte walkportionen
         foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-            'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex')) {
+            'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex', \@ethertable_columns)) {
           foreach my $interface (@{$self->{interfaces}}) {
             if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
               foreach my $key (grep /^dot3/, keys %{$etherstat}) {
@@ -435,7 +463,8 @@ sub finish {
     $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
-  if (! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets}) {
+  if (! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
+      $self->mode !~ /device::interfaces::(usage|errors|discards|complete)/) {
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
   }
   if ($self->{ifPhysAddress}) {
