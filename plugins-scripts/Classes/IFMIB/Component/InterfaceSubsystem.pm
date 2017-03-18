@@ -7,10 +7,22 @@ sub init {
   $self->{interfaces} = [];
   $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
-  my @iftable_columns = qw(ifIndex ifDescr ifAlias);
+  my @iftable_columns = qw(ifIndex ifDescr ifAlias ifName);
   my @ethertable_columns = qw();
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
+    push(@iftable_columns, qw(
+        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifHCInOctets ifHCOutOctets
+        ifInErrors ifOutErrors
+        ifInDiscards ifOutDiscards
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     push(@iftable_columns, qw(
         ifInOctets ifOutOctets ifSpeed ifOperStatus
@@ -45,10 +57,6 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
     push(@iftable_columns, qw(
         ifOperStatus ifAdminStatus
-        ifInUcastPkts ifInMulticastPkts ifInBroadcastPkts
-        ifOutUcastPkts ifOutMulticastPkts ifOutBroadcastPkts
-    ));
-    push(@iftable_columns, qw(
         ifInMulticastPkts ifOutMulticastPkts
         ifInBroadcastPkts ifOutBroadcastPkts
         ifInUcastPkts ifOutUcastPkts
@@ -73,6 +81,9 @@ sub init {
 	} @reports;
       } @ethertable_columns;
     }
+    push(@ethertable_columns, qw(
+        dot3StatsIndex
+    ));
   }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
@@ -141,6 +152,7 @@ sub init {
               foreach my $key (grep /^dot3/, keys %{$etherstat}) {
                 $interface->{$key} = $etherstat->{$key};
               }
+              $interface->{columns} = [@iftable_columns , @ethertable_columns];
               $interface->init_etherstats;
               last;
             }
@@ -440,6 +452,7 @@ sub finish {
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
+use Digest::MD5 qw(md5_hex);
 
 sub finish {
   my ($self) = @_;
@@ -463,8 +476,14 @@ sub finish {
     $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
-  if (! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
-      $self->mode !~ /device::interfaces::(usage|errors|discards|complete)/) {
+  if ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
+      $self->mode =~ /device::interfaces::(usage|complete)/) ||
+      (! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
+      $self->mode =~ /device::interfaces::(errors|complete)/) ||
+      (! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
+      $self->mode =~ /device::interfaces::(discards|complete)/) ||
+      (! exists $self->{ifInBroadcastPkts} && ! exists $self->{ifOutBroadcastPkts} &&
+      $self->mode =~ /device::interfaces::(broadcast|complete)/)) {
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
   }
   if ($self->{ifPhysAddress}) {
@@ -603,16 +622,8 @@ sub init_etherstats {
     $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
     $self->init();
     $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
-    $self->valdiff({name => $self->{ifDescr}}, qw(
-        ifInUcastPkts ifInMulticastPkts ifInBroadcastPkts
-        ifOutUcastPkts ifOutMulticastPkts ifOutBroadcastPkts
-        dot3StatsAlignmentErrors dot3StatsFCSErrors
-        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
-        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
-        dot3StatsLateCollisions dot3StatsExcessiveCollisions
-        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
-        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
-    ));
+    my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
+    $self->valdiff({name => $ident}, @{$self->{columns}});
     $self->{delta_InPkts} = $self->{delta_ifInUcastPkts} +
         $self->{delta_ifInMulticastPkts} + $self->{delta_ifInBroadcastPkts};
     $self->{delta_OutPkts} = $self->{delta_ifOutUcastPkts} +
@@ -909,6 +920,7 @@ sub list {
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
+use Digest::MD5 qw(md5_hex);
 
 sub init {
   my ($self) = @_;
@@ -997,16 +1009,8 @@ sub init_etherstats {
     $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
     $self->init();
     $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
-    $self->valdiff({name => $self->{ifDescr}}, qw(
-        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
-        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts
-        dot3StatsAlignmentErrors dot3StatsFCSErrors
-        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
-        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
-        dot3StatsLateCollisions dot3StatsExcessiveCollisions
-        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
-        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
-    ));
+    my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
+    $self->valdiff({name => $ident}, @{$self->{columns}});
     $self->{delta_InPkts} = $self->{delta_ifHCInUcastPkts} +
         $self->{delta_ifHCInMulticastPkts} + $self->{delta_ifHCInBroadcastPkts};
     $self->{delta_OutPkts} = $self->{delta_ifHCOutUcastPkts} +
