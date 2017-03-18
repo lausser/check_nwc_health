@@ -12,7 +12,7 @@ sub init {
     @higher_indices = ();
   }
   $self->get_snmp_tables("IFMIB", [
-      ['stacks', 'ifStackTable', 'MyPortchannel::ECSubSys::Relationship'],
+      ['stacks', 'ifStackTable', 'Classes::IFMIB::Component::StackSubsystem::Relationship'],
   ]);
   my @lower_indices = ();
   foreach my $rel (@{$self->{stacks}}) {
@@ -139,7 +139,7 @@ sub check {
   }
 }
 
-package MyPortchannel::ECSubSys::Relationship;
+package Classes::IFMIB::Component::StackSubsystem::Relationship;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
