@@ -284,7 +284,7 @@ sub check {
         }
         $_->check();
       }
-      if ($self->opts->report eq "short") {
+      if ($self->opts->report =~ /^short/) {
         $self->clear_ok();
         $self->add_ok('no problems') if ! $self->check_messages();
       }
