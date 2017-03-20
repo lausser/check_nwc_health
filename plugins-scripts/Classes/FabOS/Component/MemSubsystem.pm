@@ -16,16 +16,19 @@ sub check {
   my $self = shift;
   $self->add_info('checking memory');
   if (defined $self->{swMemUsage}) {
+    my $maps = $self->{swMemUsageLimit1} == 0 && $self->{swMemUsageLimit3} == 0 ?
+        'enabled' : 'disabled';
+    $self->add_info(sprintf 'maps is %s', $maps);
     $self->add_info(sprintf 'memory usage is %.2f%%',
         $self->{swMemUsage});
     $self->set_thresholds(
         metric => 'memory_usage',
-        warning => $self->{swMemUsageLimit1},
-        critical => $self->{swMemUsageLimit3});
-    $self->add_message(
+        warning => $maps eq 'enabled' ? 80 : $self->{swMemUsageLimit1},
+        critical => $maps eq 'enabled' ? 90 : $self->{swMemUsageLimit3});
+    $self->add_message($self->check_thresholds(
         metric => 'memory_usage',
         value => $self->check_thresholds($self->{swMemUsage})
-    );
+    ));
     $self->add_perfdata(
         label => 'memory_usage',
         value => $self->{swMemUsage},

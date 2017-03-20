@@ -16,15 +16,18 @@ sub check {
   my $self = shift;
   $self->add_info('checking cpus');
   if (defined $self->{swCpuUsage}) {
+    my $maps = $self->{swCpuUsageLimit} == 0 ?
+        'enabled' : 'disabled';
+    $self->add_info(sprintf 'maps is %s', $maps);
     $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{swCpuUsage});
     $self->set_thresholds(
         metric => 'cpu_usage',
-        warning => $self->{swCpuUsageLimit},
-        critical => $self->{swCpuUsageLimit});
-    $self->add_message(
+        warning => $maps eq 'enabled' ? 80 : $self->{swCpuUsageLimit},
+        critical => $maps eq 'enabled' ? 90 : $self->{swCpuUsageLimit});
+    $self->add_message($self->check_thresholds(
         metric => 'cpu_usage',
         value => $self->check_thresholds($self->{swCpuUsage})
-    );
+    ));
     $self->add_perfdata(
         label => 'cpu_usage',
         value => $self->{swCpuUsage},
