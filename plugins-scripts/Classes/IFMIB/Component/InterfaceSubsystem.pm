@@ -121,8 +121,8 @@ sub init {
     if (!$self->opts->name || scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
-        continue if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
-        continue if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
+        next if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
+        next if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
         push(@{$self->{interfaces}},
             Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
         if ($only_admin_up || $only_oper_up) {

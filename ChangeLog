@@ -1,3 +1,5 @@
+* 2017-03-21 6.0.2.2
+  replace continue by next. failed on older distributions
 * 2017-03-20 6.0.2.1
   fix brocade fabos cpu/memory with MAPS installed
 * 2017-03-19 6.0.2
