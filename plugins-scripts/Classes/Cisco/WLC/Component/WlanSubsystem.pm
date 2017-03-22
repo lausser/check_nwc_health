@@ -46,17 +46,15 @@ sub check {
     $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
     if (scalar (@{$self->{aps}}) == 0) {
       if ($self->{cLHaNetworkFailOver} &&
-          $self->{cLHaNetworkFailOver} eq 'true' &&
-          $self->{cLHaPrimaryUnit} && 
-          $self->{cLHaPrimaryUnit} eq 'false') {
-        $self->add_ok('no access points found, this is a secondary unit');
+          $self->{cLHaNetworkFailOver} eq 'true') {
+        if($self->{cLHaPrimaryUnit} &&
+            $self->{cLHaPrimaryUnit} eq 'false') {
+          $self->add_ok('no access points found, this is a secondary unit in a failover setup');
+        } else {
+          $self->add_unknown('no access points found, this is a primary unit in a failover setup');
+        }
       } else {
         $self->add_unknown('no access points found');
-        if ($self->{cLHaNetworkFailOver} &&
-            $self->{cLHaNetworkFailOver} eq 'true') {
-          $self->add_ok(sprintf 'failover setup: %s, primary: %s',
-              $self->{cLHaNetworkFailOver}, $self->{cLHaPrimaryUnit});
-        }
       }
       return;
     }
