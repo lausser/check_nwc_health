@@ -121,8 +121,8 @@ sub init {
     if (!$self->opts->name || scalar(@indices) > 0) {
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
-        continue if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
-        continue if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
+        next if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
+        next if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
         push(@{$self->{interfaces}},
             Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
         if ($only_admin_up || $only_oper_up) {
@@ -622,6 +622,9 @@ sub init_etherstats {
     $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
     $self->init();
     $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
+    # in the beginning we start 32/64bit-unaware, so columns contain
+    # also ifHC-names, but there are no such attributes in the interface object
+    @{$self->{columns}} = grep { !/^ifHC/ } @{$self->{columns}};
     my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
     $self->valdiff({name => $ident}, @{$self->{columns}});
     $self->{delta_InPkts} = $self->{delta_ifInUcastPkts} +
