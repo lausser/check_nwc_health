@@ -141,8 +141,8 @@ sub init {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
-        next if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
-        next if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
+        next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
+        next if $only_oper_up && $_->{ifOperStatus} ne 'up';
         my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
@@ -531,7 +531,7 @@ sub finish {
       $self->mode =~ /device::interfaces::(errors|complete)/) ||
       (! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
       $self->mode =~ /device::interfaces::(discards|complete)/) ||
-      (! exists $self->{ifInBroadcastPkts} && ! exists $self->{ifOutBroadcastPkts} &&
+      (! exists $self->{ifInUcastPkts} && ! exists $self->{ifOutUcastPkts} &&
       $self->mode =~ /device::interfaces::(broadcast|complete)/)) {
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
   }
@@ -673,7 +673,12 @@ sub init_etherstats {
     $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
     # in the beginning we start 32/64bit-unaware, so columns contain
     # also ifHC-names, but there are no such attributes in the interface object
-    @{$self->{columns}} = grep { !/^ifHC/ } @{$self->{columns}};
+    @{$self->{columns}} = grep {
+      ! /^ifHC(In|Out).*castPkts$/
+    } grep {
+      ! /^(ifOperStatus|ifAdminStatus|ifIndex|ifDescr|ifAlias|ifName)$/
+    } @{$self->{columns}};
+    # z.b. Serial2/3/2 in Singapore, broadcastet nicht
     my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
     $self->valdiff({name => $ident}, @{$self->{columns}});
     $self->{delta_InPkts} = $self->{delta_ifInUcastPkts} +
@@ -1049,6 +1054,12 @@ sub init_etherstats {
     $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
     $self->init();
     $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
+    # 32bit-cast ausputzen. es gibt welche, die haben nur 64bit
+    @{$self->{columns}} = grep {
+      ! /^if(In|Out).*castPkts$/
+    } grep {
+      ! /^(ifOperStatus|ifAdminStatus|ifIndex|ifDescr|ifAlias|ifName)$/
+    } @{$self->{columns}};
     my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
     $self->valdiff({name => $ident}, @{$self->{columns}});
     $self->{delta_InPkts} = $self->{delta_ifHCInUcastPkts} +
@@ -1071,6 +1082,11 @@ use strict;
 
 sub init {
   my ($self) = @_;
+}
+
+sub init_etherstats {
+  my ($self) = @_;
+  # hat sowieso keine broadcastcounter, ist sinnlos
 }
 
 sub check {

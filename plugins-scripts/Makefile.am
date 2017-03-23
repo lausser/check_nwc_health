@@ -86,6 +86,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENRESOURCEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSWITCHMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDCISCOCPUMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDCISCOINTERFACESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDNETSWITCHMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDSTATISTICSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ONEACCESSSYSMIB.pm \
@@ -133,6 +134,7 @@ EXTRA_MODULES=\
   Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
   Classes/Bintec/Bibo.pm \
   Classes/Bintec.pm \
+  Classes/Cisco/OLDCISCOINTERFACESMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
