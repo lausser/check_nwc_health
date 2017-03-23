@@ -9,6 +9,7 @@ sub init {
   #$self->session_translate(['-octetstring' => 1]);
   my @iftable_columns = qw(ifIndex ifDescr ifAlias ifName);
   my @ethertable_columns = qw();
+  my @rmontable_columns = qw();
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
     push(@iftable_columns, qw(
@@ -72,6 +73,9 @@ sub init {
         dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
         dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
     ));
+    push(@rmontable_columns, qw(
+        etherStatsCRCAlignErrors
+    ));
     if ($self->opts->report !~ /^(long|short|html)$/) {
       my @reports = split(',', $self->opts->report);
       @ethertable_columns = grep {
@@ -80,10 +84,25 @@ sub init {
 	  $ec eq $_;
 	} @reports;
       } @ethertable_columns;
+      @rmontable_columns = grep {
+        my $ec = $_;
+        grep {
+	  $ec eq $_;
+	} @reports;
+      } @rmontable_columns;
     }
-    push(@ethertable_columns, qw(
-        dot3StatsIndex
-    ));
+    if (@ethertable_columns) {
+      # will ich ueberhaupt was von dem zeug?
+      push(@ethertable_columns, qw(
+          dot3StatsIndex
+      ));
+    }
+    if (@rmontable_columns) {
+      push(@rmontable_columns, qw(
+          etherStatsIndex
+          etherStatsDataSource
+      ));
+    }
   }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
@@ -119,48 +138,92 @@ sub init {
       @indices = ();
     }
     if (!$self->opts->name || scalar(@indices) > 0) {
+      my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
         next if $only_admin_up && ! $_->{ifAdminStatus} eq 'up';
         next if $only_oper_up && ! $_->{ifOperStatus} eq 'up';
-        push(@{$self->{interfaces}},
-            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
+        my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
+        $interface->{columns} = [@iftable_columns];
+        push(@{$self->{interfaces}}, $interface);
         if ($only_admin_up || $only_oper_up) {
           push(@indices, [$_->{ifIndex}]);
         }
       }
       if ($self->mode =~ /device::interfaces::etherstats/) {
+        @indices = @save_indices;
         my @etherpatterns = map {
             '('.$_.')';
         } map {
             $_->[0];
         } @indices;
-        if ($self->opts->name) {
-          $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
-          $self->override_opt('regexp', 1);
-        }
-        # key=etherStatsDataSource-//-index, value=index
-        $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
-        # Value von dot3StatsIndex ist ifIndex              
-#
-# ohne name -> get_table
-# mit name -> lauter einzelne indizierte walkportionen
-        foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-            'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex', \@ethertable_columns)) {
-          foreach my $interface (@{$self->{interfaces}}) {
-            if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
-              foreach my $key (grep /^dot3/, keys %{$etherstat}) {
-                $interface->{$key} = $etherstat->{$key};
+        my @rmonpatterns = map {
+            '([\.]*1.3.6.1.2.1.2.2.1.1.'.$_.')';
+        } map {
+            $_->[0];
+        } @indices;
+        if (@ethertable_columns) {
+          if ($self->opts->name) {
+            $self->override_opt('drecksptkdb', '^('.join('|', @etherpatterns).')$');
+            $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
+            $self->override_opt('regexp', 1);
+          }
+          # key=dot3StatsIndex-//-index, value=index
+          $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
+          #
+          # ohne name -> get_table
+          # mit name -> lauter einzelne indizierte walkportionen
+          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
+              'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex', \@ethertable_columns)) {
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
+                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @ethertable_columns);
+                last;
               }
-              $interface->{columns} = [@iftable_columns , @ethertable_columns];
-              $interface->init_etherstats;
-              last;
             }
           }
+          @{$self->{interfaces}} = grep {
+              exists $_->{dot3StatsIndex};
+          } @{$self->{interfaces}};
         }
-        @{$self->{interfaces}} = grep {
-            exists $_->{dot3StatsIndex};
-        } @{$self->{interfaces}};
+        if (@rmontable_columns) {
+          if ($self->opts->name) {
+            $self->override_opt('drecksptkdb', '^('.join('|', @rmonpatterns).')$');
+            $self->override_opt('name', '^('.join('|', @rmonpatterns).')$');
+            $self->override_opt('regexp', 1);
+          }
+          # key=etherStatsDataSource-//-index, value=index
+          $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
+          # Value von etherStatsDataSource entspricht ifIndex 1.3.6.1.2.1.2.2.1.1.idx
+          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
+              'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns)) {
+              $etherstat->{etherStatsDataSource} =~ s/^\.//g;
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
+                foreach my $key (grep /^etherStats/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @rmontable_columns);
+                last;
+              }
+            }
+          }
+          @{$self->{interfaces}} = grep {
+              exists $_->{etherStatsDataSource};
+          } @{$self->{interfaces}};
+        }
+        foreach my $interface (@{$self->{interfaces}}) {
+          delete $interface->{dot3StatsIndex};
+          delete $interface->{etherStatsIndex};
+          delete $interface->{etherStatsDataSource};
+          @{$interface->{columns}} = grep {
+              $_ !~ /^(dot3StatsIndex|etherStatsIndex|etherStatsDataSource)$/;
+          } @{$interface->{columns}};
+          $interface->init_etherstats;
+        }
       }
     }
   }
@@ -435,20 +498,6 @@ sub get_interface_indices {
 }
 
 
-package Classes::IFMIB::Component::InterfaceSubsystem::EtherStat;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
-use strict;
-
-sub finish {
-  my ($self) = @_;
-  foreach my $key (grep /^dot3/, keys %{$self}) {
-    if (! defined $self->{key}) {
-      $self->{key} = 0.1;
-    }
-  }
-  #printf "%s\n", Data::Dumper::Dumper($self);
-}
-
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
@@ -631,13 +680,7 @@ sub init_etherstats {
         $self->{delta_ifInMulticastPkts} + $self->{delta_ifInBroadcastPkts};
     $self->{delta_OutPkts} = $self->{delta_ifOutUcastPkts} +
         $self->{delta_ifOutMulticastPkts} + $self->{delta_ifOutBroadcastPkts};
-    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
-        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
-        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
-        dot3StatsLateCollisions dot3StatsExcessiveCollisions
-        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
-        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
-    )) {
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
       next if ! defined $self->{'delta_'.$stat};
       $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
           100 * $self->{'delta_'.$stat} /
@@ -877,16 +920,10 @@ sub check {
         $self->{ifOperStatus}, $self->{ifAdminStatus},
         $self->{ifStatusDuration});
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
-    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
-        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
-        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
-        dot3StatsLateCollisions dot3StatsExcessiveCollisions
-        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
-        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
-    )) {
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
       next if ! defined $self->{$stat.'Percent'};
       my $label = $stat.'Percent';
-      $label =~ s/^dot3Stats//g;
+      $label =~ s/^(dot3Stats|etherStats)//g;
       $label =~ s/(?:\b|(?<=([a-z])))([A-Z][a-z]+)/(defined($1) ? "_" : "") . lc($2)/eg;
       $label = $self->{ifDescr}.'_'.$label;
       $self->add_info(sprintf 'interface %s %s is %.2f%%',
@@ -1018,13 +1055,7 @@ sub init_etherstats {
         $self->{delta_ifHCInMulticastPkts} + $self->{delta_ifHCInBroadcastPkts};
     $self->{delta_OutPkts} = $self->{delta_ifHCOutUcastPkts} +
         $self->{delta_ifHCOutMulticastPkts} + $self->{delta_ifHCOutBroadcastPkts};
-    for my $stat (qw(dot3StatsAlignmentErrors dot3StatsFCSErrors
-        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
-        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
-        dot3StatsLateCollisions dot3StatsExcessiveCollisions
-        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
-        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
-    )) {
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
       next if ! defined $self->{'delta_'.$stat};
       $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
           100 * $self->{'delta_'.$stat} / 

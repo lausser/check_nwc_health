@@ -55,6 +55,8 @@ sub check {
   my $lower_counter = {};
   if (! scalar keys %{$higher_interfaces}) {
     $self->add_ok("no portchannels found");
+  } elsif (! scalar (@{$self->{stacks}})) {
+    $self->add_ok("no portchannels found, ifStackTable is empty or unreadable");
   } else {
     foreach my $rel (@{$self->{stacks}}) {
       next if ! exists $higher_interfaces->{$rel->{ifStackHigherLayer}};
