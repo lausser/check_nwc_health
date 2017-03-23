@@ -1,6 +1,7 @@
 * 2017-03-22 6.0.2.2
   bugfix in etherstats for 32bit
   better error message for no access points found
+  replace continue by next. failed on older distributions
 * 2017-03-20 6.0.2.1
   fix brocade fabos cpu/memory with MAPS installed
 * 2017-03-19 6.0.2

@@ -42,7 +42,15 @@ sub init {
     $self->debug('using Classes::Cisco::SB');
   }
   if (ref($self) ne "Classes::Cisco") {
-    $self->init();
+    if ($self->mode =~ /device::interfaces::etherstats/) {
+      if ($self->implements_mib('RMON-MIB')) {
+        $self->no_such_mode();
+      } else {
+        $self->analyze_and_check_interface_subsystem("Classes::Cisco::OLDCISCOINTERFACEMIB::Component::InterfaceSubsystem");
+      }
+    } else {
+      $self->init();
+    }
   } else {
     $self->no_such_mode();
   }
