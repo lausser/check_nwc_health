@@ -74,6 +74,7 @@ sub init {
     if (! $self->opts->name && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
+      $self->bulk_is_baeh(10);
     }
     if (!$self->opts->name || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
@@ -137,7 +138,7 @@ sub init {
           $self->update_entry_cache(0, 'OLD-CISCO-INTERFACES-MIB', 'lifTable', 'flat_indices');
           # Value von etherStatsDataSource entspricht ifIndex 1.3.6.1.2.1.2.2.1.1.idx
           foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-              'OLD-CISCO-INTERFACES-MIB', 'lifTable', 'locIfDescr', \@rmontable_columns)) {
+              'OLD-CISCO-INTERFACES-MIB', 'lifTable', 'flat_indices', \@rmontable_columns)) {
             foreach my $interface (@{$self->{interfaces}}) {
               if ($interface->{ifIndex} eq $etherstat->{flat_indices}) {
                 foreach my $key (grep /^locIf/, keys %{$etherstat}) {

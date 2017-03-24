@@ -224,6 +224,9 @@ sub init {
           } @{$interface->{columns}};
           $interface->init_etherstats;
         }
+        if (scalar(@{$self->{interfaces}}) == 0) {
+          $self->add_unknown('device probably has no RMON-MIB or ETHERLIKE-MIB');
+        }
       }
     }
   }
