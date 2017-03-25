@@ -149,9 +149,9 @@ use strict;
 sub check {
   my $self = shift;
   $self->SUPER::check();
-  my $label = $self->{entPhySensorEntityName};
+  my $label = 'power_'.$self->{entPhySensorEntityName};
   $self->add_perfdata(
-    label => 'power_'.$label,
+    label => $label,
     value => $self->{entPhySensorValue},
   );
 }
