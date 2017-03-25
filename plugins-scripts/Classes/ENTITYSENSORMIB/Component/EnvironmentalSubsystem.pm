@@ -5,7 +5,8 @@ use strict;
 sub init {
   my $self = shift;
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem', sub { my $o = shift; $o->{entPhysicalClass} eq 'sensor';}],
+    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem', sub { my $o = shift; $o->{entPhysicalClass} =~ /(sensor|fan|powerSupply)/;}],
+    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem']
   ]);
   $self->get_snmp_tables('ENTITY-SENSOR-MIB', [
     ['sensors', 'entPhySensorTable', 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor' ],
@@ -77,6 +78,8 @@ sub finish {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
   } elsif ($self->{entPhySensorType} eq 'celsius') {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Temperature';
+  } elsif ($self->{entPhySensorType} eq 'watts') {
+    bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Power';
   }
 }
 
@@ -139,4 +142,17 @@ sub check {
   );
 }
 
+package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Power;
+our @ISA = qw(Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor);
+use strict;
+
+sub check {
+  my $self = shift;
+  $self->SUPER::check();
+  my $label = $self->{entPhySensorEntityName};
+  $self->add_perfdata(
+    label => 'power_'.$label,
+    value => $self->{entPhySensorValue},
+  );
+}
 
