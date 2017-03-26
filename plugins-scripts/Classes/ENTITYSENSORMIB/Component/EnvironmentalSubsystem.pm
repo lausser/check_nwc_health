@@ -4,18 +4,58 @@ use strict;
 
 sub init {
   my $self = shift;
+  my $entity_indices = {};
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem', sub { my $o = shift; $o->{entPhysicalClass} =~ /(sensor|fan|powerSupply)/;}],
-    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem']
+    ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem'],
   ]);
   $self->get_snmp_tables('ENTITY-SENSOR-MIB', [
     ['sensors', 'entPhySensorTable', 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor' ],
+    ['thresholds', 'entSensorThresholdTable', 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Threshold' ],
   ]);
   if (! @{$self->{entities}}) {
     $self->fake_names();
   }
+  foreach (@{$self->{entities}}) {
+    $entity_indices->{$_->{flat_indices}} = $_;
+  }
+  my $billig = 0;
   foreach (@{$self->{sensors}}) {
-    $_->{entPhySensorEntityName} = shift(@{$self->{entities}})->{entPhysicalName} unless $_->{entPhySensorEntityName};;
+    $billig++ if ! exists $entity_indices->{$_->{flat_indices}};
+  }
+  if ($billig) {
+    my @fans = grep { $_->{entPhysicalClass} eq 'fan' } @{$self->{entities}};
+    my @pss = grep { $_->{entPhysicalClass} eq 'powerSupply' } @{$self->{entities}};
+    my @sensors = grep { $_->{entPhysicalClass} eq 'sensor' } @{$self->{entities}};
+    my @sfans = grep { $_->{entPhySensorType} eq 'rpm' } @{$self->{sensors}};
+    my @spss = grep { $_->{entPhySensorType} eq 'watts' } @{$self->{sensors}};
+    my @ssensors = grep { $_->{entPhySensorType} eq 'celsius' } @{$self->{sensors}};
+    foreach (@sfans) {
+      if (my $physpendant = shift @fans) {
+        $_->{entPhySensorEntityName} = $physpendant->{entPhysicalName};
+      } else {
+        $_->{entPhySensorEntityName} = 'some_fan';
+      }
+    }
+    foreach (@spss) {
+      if (my $physpendant = shift @pss) {
+        $_->{entPhySensorEntityName} = $physpendant->{entPhysicalName};
+      } else {
+        $_->{entPhySensorEntityName} = 'some_powersupply';
+      }
+    }
+    foreach (@ssensors) {
+      if (my $physpendant = shift @sensors) {
+        $_->{entPhySensorEntityName} = $physpendant->{entPhysicalName};
+      } else {
+        $_->{entPhySensorEntityName} = 'some_sensor';
+      }
+    }
+    @{$self->{sensors}} = (@sfans, @spss, @ssensors);
+  } else {
+    foreach (@{$self->{sensors}}) {
+      $_->{entPhySensorEntityName} =
+          $entity_indices->{$_->{flat_indices}}->{entPhysicalName};
+    }
   }
   delete $self->{entities};
 }
@@ -67,7 +107,6 @@ sub fake_names {
 package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
-
 
 sub finish {
   my $self = shift;
@@ -149,10 +188,16 @@ use strict;
 sub check {
   my $self = shift;
   $self->SUPER::check();
-  my $label = 'power_'.$self->{entPhySensorEntityName};
+  my $label = $self->{entPhySensorEntityName};
   $self->add_perfdata(
-    label => $label,
+    label => 'power_'.$label,
     value => $self->{entPhySensorValue},
   );
 }
+
+
+package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Threshold;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
 

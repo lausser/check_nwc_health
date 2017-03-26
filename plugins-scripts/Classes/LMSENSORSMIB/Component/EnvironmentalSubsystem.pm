@@ -12,11 +12,13 @@ sub init {
 
 sub check {
   my $self = shift;
+  $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
 }
 
 sub dump {
   my $self = shift;
+  $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
 }
 
