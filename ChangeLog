@@ -1,4 +1,6 @@
-* 2017-03- 6.1
+* 2017-03-27 6.1.0.1
+  pdate GLPlugin
+* 2017-03-25 6.1
   update entity-sensor-mib
 * 2017-03-24 6.0.2.3
   bugfixes in interface etherstats
