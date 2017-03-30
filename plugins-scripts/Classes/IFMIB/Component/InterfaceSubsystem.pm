@@ -27,7 +27,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     push(@iftable_columns, qw(
         ifInOctets ifOutOctets ifSpeed ifOperStatus
-        ifHCInOctets ifHCOutOctets
+        ifHCInOctets ifHCOutOctets ifHighSpeed
     ));
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     push(@iftable_columns, qw(
