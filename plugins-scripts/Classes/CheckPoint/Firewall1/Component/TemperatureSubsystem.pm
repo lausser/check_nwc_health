@@ -34,9 +34,11 @@ sub check {
   } else {
     $self->add_unknown();
   }
-  $self->set_thresholds(warning => 60, critical => 70);
+  $self->set_thresholds(warning => 0, critical => 0);
+  my $neatTemperatureSensorName = lc($self->{tempertureSensorName});
+  $neatTemperatureSensorName =~ s/ /_/;
   $self->add_perfdata(
-      label => 'temperature_'.$self->{tempertureSensorName},
+      label => 'temperature_'.$neatTemperatureSensorName,
       value => $self->{tempertureSensorValue},
   );
 }

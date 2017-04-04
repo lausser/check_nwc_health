@@ -33,9 +33,11 @@ sub check {
   } else {
     $self->add_unknown();
   }
-  $self->set_thresholds(warning => 60, critical => 70);
+  $self->set_thresholds(warning => 0, critical => 0);
+  my $neatFanSpeedSensorName = lc($self->{fanSpeedSensorName});
+  $neatFanSpeedSensorName =~ s/ /_/;
   $self->add_perfdata(
-      label => 'fan'.$self->{fanSpeedSensorName}.'_rpm',
+      label => 'fan_'.$neatFanSpeedSensorName,
       value => $self->{fanSpeedSensorValue},
   );
 }
