@@ -24,7 +24,7 @@ sub check {
       $self->{hrStorageDescr},
       $used);
   my $label = sprintf 'memory_%s_usage', $self->{hrStorageDescr};
-  $self->set_thresholds(metric => $label, warning => '10:', critical => '5:');
+  $self->set_thresholds(metric => $label, warning => '90', critical => '95');
   $self->add_message($self->check_thresholds(metric => $label,
       value => $used));
   $self->add_perfdata(
