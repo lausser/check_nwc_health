@@ -101,6 +101,11 @@ sub classify {
       } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
+      } elsif ($self->{productname} =~ /Brocade.*IronWare/i) {
+        # although there can be a 
+        # Brocade Communications Systems, Inc. FWS648, IronWare Version 07.1....
+        bless $self, 'Classes::Foundry';
+        $self->debug('using Classes::Foundry');
       } elsif ($self->{productname} =~ /Brocade/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
