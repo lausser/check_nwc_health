@@ -351,6 +351,7 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/PowersupplySubsystem.pm \
   Classes/Foundry/Component/FanSubsystem.pm \
   Classes/Foundry/Component/TemperatureSubsystem.pm \
+  Classes/Foundry/Component/ModuleSubsystem.pm \
   Classes/Foundry.pm \
   Classes/RAPIDCITYMIB/Component/EnvironmentalSubsystem.pm \
   Classes/RAPIDCITYMIB/Component/PowersupplySubsystem.pm \
