@@ -37,6 +37,13 @@ sub check {
     );
   }
   foreach(@{$self->{temperatures}}) {
+    if (defined $self->{snChasActualTemperature}) {
+      $_->set_thresholds(metric => $_->{label},
+          warning => $self->{snChasWarningTemperature},
+          critical => $self->{snChasShutdownTemperature});
+    } else {
+      $_->set_thresholds(metric => $_->{label}, warning => 60, critical => 70);
+    }
     $_->check();
   }
 }
@@ -50,24 +57,23 @@ sub finish {
   ($self->{snAgentTempSlotNum}, $self->{snAgentTempSensorId}) =
       @{$self->{indices}};
   $self->{snAgentTempValue} /= 2;
+  $self->{label} = sprintf 'temperature_%s:%s',
+      $self->{snAgentTempSensorId},
+      $self->{snAgentTempSlotNum};
 }
 
 sub check {
   my $self = shift;
-  my $label = sprintf 'temperature_%s:%s',
-      $self->{snAgentTempSensorId},
-      $self->{snAgentTempSlotNum};
   $self->add_info(sprintf 'temperature %s in slot %s is %.2fC', 
       $self->{snAgentTempSensorId},
       $self->{snAgentTempSlotNum}, $self->{snAgentTempValue});
-  $self->set_thresholds(metric => $label, warning => 60, critical => 70);
   $self->add_message($self->check_thresholds(
-      metric => $label,
+      metric => $self->{label},
       value => $self->{snAgentTempValue}
   ));
   $self->add_perfdata(
-      label => $label,
-      value => $self->{snAgent2TempValue},
+      label => $self->{label},
+      value => $self->{snAgentTempValue},
   );
 }
 
