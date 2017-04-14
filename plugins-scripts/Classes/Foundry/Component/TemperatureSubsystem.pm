@@ -32,3 +32,7 @@ sub check {
   );
 }
 
+# http://www.manualsdir.com/manuals/361633/brocade-unified-ip-mib-reference-supporting-fastiron-releases-07500-and-08010-unified-ip-mib-reference-supporting-multi-service-ironware-release-05600a.html?page=255
+# # snAgentTempThresholdTable
+#
+# http://www.oidview.com/mibs/11/FOUNDRY-SN-AGENT-MIB.html
