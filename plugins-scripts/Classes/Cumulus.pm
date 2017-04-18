@@ -10,10 +10,15 @@ sub init {
     #]);
     $self->override_opt('warningx', { 'temp_.*' => '68'});
     $self->analyze_and_check_environmental_subsystem("Classes::LMSENSORSMIB::Component::EnvironmentalSubsystem");
+$self->analyze_and_check_environmental_subsystem("Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem");
+
     $self->{components}->{environmental_subsystem} = Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem->new();
     @{$self->{components}->{environmental_subsystem}->{disk_subsystem}->{storages}} = grep {
       $_->{hrStorageDescr} ne '/mnt/root-ro';
     } @{$self->{components}->{environmental_subsystem}->{disk_subsystem}->{storages}} ;
+    @{$self->{components}->{environmental_subsystem}->{device_subsystem}->{devices}} = grep {
+      $_->{hrDeviceType} ne 'hrDeviceNetwork';
+    } @{$self->{components}->{environmental_subsystem}->{device_subsystem}->{devices}} ;
     $self->{components}->{environmental_subsystem}->check();
     $self->{components}->{environmental_subsystem}->dump()
         if $self->opts->verbose >= 2;

@@ -15,8 +15,7 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->{ciscoEnvMonFanStatusIndex} ||= 0;
-  $self->add_info(sprintf 'fan %d is %s',
+  $self->add_info(sprintf 'fan %s is %s',
       $self->{lmFanSensorsDevice},
       $self->{lmFanSensorsValue});
   $self->add_ok();

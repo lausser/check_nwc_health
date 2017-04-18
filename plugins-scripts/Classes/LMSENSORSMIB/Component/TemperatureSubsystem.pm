@@ -20,7 +20,6 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
   $self->add_info(sprintf 'temp %s is %.2fC',
       $self->{lmTempSensorsDevice},
       $self->{lmTempSensorsValue});

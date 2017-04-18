@@ -13,7 +13,9 @@ use constant trees => (
 
 sub init {
   my $self = shift;
-  if ($self->{productname} =~ /Procurve/i) {
+  if ($self->{productname} =~ /Procurve/i ||
+      ($self->implements_mib('HP-ICF-CHASSIS') &&
+      $self->implements_mib('NETSWITCH-MIB'))) {
     bless $self, 'Classes::HP::Procurve';
     $self->debug('using Classes::HP::Procurve');
   }

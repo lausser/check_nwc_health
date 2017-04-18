@@ -6,18 +6,20 @@ sub init {
   my $self = shift;
   $self->{disk_subsystem} =
       Classes::HOSTRESOURCESMIB::Component::DiskSubsystem->new();
+  $self->{device_subsystem} =
+      Classes::HOSTRESOURCESMIB::Component::DeviceSubsystem->new();
 }
 
 sub check {
   my $self = shift;
   $self->{disk_subsystem}->check();
-  if (! $self->check_messages()) {
-    $self->add_ok("environmental hardware working fine");
-  }
+  $self->{device_subsystem}->check();
+  $self->reduce_messages_short('environmental hardware working fine');
 }
 
 sub dump {
   my $self = shift;
   $self->{disk_subsystem}->dump();
+  $self->{device_subsystem}->dump();
 }
 

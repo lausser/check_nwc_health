@@ -3,12 +3,112 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{interfaces} = [];
+  $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
+  my @iftable_columns = qw(ifIndex ifDescr ifAlias ifName);
+  my @ethertable_columns = qw();
+  my @rmontable_columns = qw();
+  if ($self->mode =~ /device::interfaces::list/) {
+  } elsif ($self->mode =~ /device::interfaces::complete/) {
+    push(@iftable_columns, qw(
+        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifHCInOctets ifHCOutOctets
+        ifInErrors ifOutErrors
+        ifInDiscards ifOutDiscards
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
+  } elsif ($self->mode =~ /device::interfaces::usage/) {
+    push(@iftable_columns, qw(
+        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifHCInOctets ifHCOutOctets ifHighSpeed
+    ));
+  } elsif ($self->mode =~ /device::interfaces::errors/) {
+    push(@iftable_columns, qw(
+        ifInErrors ifOutErrors
+    ));
+  } elsif ($self->mode =~ /device::interfaces::discards/) {
+    push(@iftable_columns, qw(
+        ifInDiscards ifOutDiscards
+    ));
+  } elsif ($self->mode =~ /device::interfaces::broadcast/) {
+    push(@iftable_columns, qw(
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
+  } elsif ($self->mode =~ /device::interfaces::operstatus/) {
+    push(@iftable_columns, qw(
+        ifOperStatus ifAdminStatus
+    ));
+  } elsif ($self->mode =~ /device::interfaces::availability/) {
+    push(@iftable_columns, qw(
+        ifAvailable ifIndex ifType ifOperStatus ifAdminStatus ifStatusDuration
+        ifLastChange ifHighSpeed ifSpeed
+    ));
+  } elsif ($self->mode =~ /device::interfaces::etherstats/) {
+    push(@iftable_columns, qw(
+        ifOperStatus ifAdminStatus
+        ifInMulticastPkts ifOutMulticastPkts
+        ifInBroadcastPkts ifOutBroadcastPkts
+        ifInUcastPkts ifOutUcastPkts
+        ifHCInMulticastPkts ifHCOutMulticastPkts
+        ifHCInBroadcastPkts ifHCOutBroadcastPkts
+        ifHCInUcastPkts ifHCOutUcastPkts
+    ));
+    push(@ethertable_columns, qw(
+        dot3StatsAlignmentErrors dot3StatsFCSErrors
+        dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
+        dot3StatsSQETestErrors dot3StatsDeferredTransmissions
+        dot3StatsLateCollisions dot3StatsExcessiveCollisions
+        dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
+        dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
+    ));
+    push(@rmontable_columns, qw(
+        etherStatsCRCAlignErrors
+    ));
+    if ($self->opts->report !~ /^(long|short|html)$/) {
+      my @reports = split(',', $self->opts->report);
+      @ethertable_columns = grep {
+        my $ec = $_;
+        grep {
+	  $ec eq $_;
+	} @reports;
+      } @ethertable_columns;
+      @rmontable_columns = grep {
+        my $ec = $_;
+        grep {
+	  $ec eq $_;
+	} @reports;
+      } @rmontable_columns;
+    }
+    if (@ethertable_columns) {
+      # will ich ueberhaupt was von dem zeug?
+      push(@ethertable_columns, qw(
+          dot3StatsIndex
+      ));
+    }
+    if (@rmontable_columns) {
+      push(@rmontable_columns, qw(
+          etherStatsIndex
+          etherStatsDataSource
+      ));
+    }
+  }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
-    foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    my @indices = $self->get_interface_indices();
+    #foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    foreach my $ifIndex (map { $_->[0] } @indices) {
       my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
       my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
       my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
@@ -22,26 +122,118 @@ sub init {
               flat_indices => $ifIndex,
           ));
     }
-  } else {
+    # die sind mit etherStatsDataSource verknuepft
+  } elsif ($self->mode =~ /device::interfaces/) {
     $self->update_interface_cache(0);
-    #next if $self->opts->can('name') && $self->opts->name && 
-    #    $self->opts->name ne $_->{ifDescr};
-    # if limited search
-    # name is a number -> get_table with extra param
-    # name is a regexp -> list of names -> list of numbers
+    my $only_admin_up =
+        $self->opts->name && $self->opts->name eq '_adminup_' ? 1 : 0;
+    my $only_oper_up =
+        $self->opts->name && $self->opts->name eq '_operup_' ? 1 : 0;
+    if ($only_admin_up || $only_oper_up) {
+      $self->override_opt('name', undef);
+    }
     my @indices = $self->get_interface_indices();
-    if (scalar(@indices) > 0) {
+    if (! $self->opts->name && ! $self->opts->name3) {
+      # get_table erzwingen
+      @indices = ();
+    }
+    if (!$self->opts->name || scalar(@indices) > 0) {
+      my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       foreach ($self->get_snmp_table_objects(
-          'IFMIB', 'ifTable+ifXTable', \@indices)) {
-        push(@{$self->{interfaces}},
-            Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_}));
+          'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
+        next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
+        next if $only_oper_up && $_->{ifOperStatus} ne 'up';
+        my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
+        $interface->{columns} = [@iftable_columns];
+        push(@{$self->{interfaces}}, $interface);
+        if ($only_admin_up || $only_oper_up) {
+          push(@indices, [$_->{ifIndex}]);
+        }
+      }
+      if ($self->mode =~ /device::interfaces::etherstats/) {
+        @indices = @save_indices;
+        my @etherpatterns = map {
+            '('.$_.')';
+        } map {
+            $_->[0];
+        } @indices;
+        my @rmonpatterns = map {
+            '([\.]*1.3.6.1.2.1.2.2.1.1.'.$_.')';
+        } map {
+            $_->[0];
+        } @indices;
+        if (@ethertable_columns) {
+          if ($self->opts->name) {
+            $self->override_opt('drecksptkdb', '^('.join('|', @etherpatterns).')$');
+            $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
+            $self->override_opt('regexp', 1);
+          }
+          # key=dot3StatsIndex-//-index, value=index
+          $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
+          #
+          # ohne name -> get_table
+          # mit name -> lauter einzelne indizierte walkportionen
+          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
+              'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex', \@ethertable_columns)) {
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
+                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @ethertable_columns);
+                last;
+              }
+            }
+          }
+          @{$self->{interfaces}} = grep {
+              exists $_->{dot3StatsIndex};
+          } @{$self->{interfaces}};
+        }
+        if (@rmontable_columns) {
+          if ($self->opts->name) {
+            $self->override_opt('drecksptkdb', '^('.join('|', @rmonpatterns).')$');
+            $self->override_opt('name', '^('.join('|', @rmonpatterns).')$');
+            $self->override_opt('regexp', 1);
+          }
+          # key=etherStatsDataSource-//-index, value=index
+          $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
+          # Value von etherStatsDataSource entspricht ifIndex 1.3.6.1.2.1.2.2.1.1.idx
+          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
+              'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns)) {
+              $etherstat->{etherStatsDataSource} =~ s/^\.//g;
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
+                foreach my $key (grep /^etherStats/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @rmontable_columns);
+                last;
+              }
+            }
+          }
+          @{$self->{interfaces}} = grep {
+              exists $_->{etherStatsDataSource};
+          } @{$self->{interfaces}};
+        }
+        foreach my $interface (@{$self->{interfaces}}) {
+          delete $interface->{dot3StatsIndex};
+          delete $interface->{etherStatsIndex};
+          delete $interface->{etherStatsDataSource};
+          @{$interface->{columns}} = grep {
+              $_ !~ /^(dot3StatsIndex|etherStatsIndex|etherStatsDataSource)$/;
+          } @{$interface->{columns}};
+          $interface->init_etherstats;
+        }
+        if (scalar(@{$self->{interfaces}}) == 0) {
+          $self->add_unknown('device probably has no RMON-MIB or ETHERLIKE-MIB');
+        }
       }
     }
   }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking interfaces');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
@@ -158,7 +350,7 @@ sub check {
         }
         $_->check();
       }
-      if ($self->opts->report eq "short") {
+      if ($self->opts->report =~ /^short/) {
         $self->clear_ok();
         $self->add_ok('no problems') if ! $self->check_messages();
       }
@@ -167,8 +359,7 @@ sub check {
 }
 
 sub update_interface_cache {
-  my $self = shift;
-  my $force = shift;
+  my ($self, $force) = @_;
   my $statefile = $self->create_interface_cache_file();
   $self->get_snmp_objects('IFMIB', qw(ifTableLastChange));
   # "The value of sysUpTime at the time of the last creation or
@@ -223,7 +414,7 @@ sub update_interface_cache {
 }
 
 sub save_interface_cache {
-  my $self = shift;
+  my ($self) = @_;
   $self->create_statefilesdir();
   my $statefile = $self->create_interface_cache_file();
   my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
@@ -239,7 +430,7 @@ sub save_interface_cache {
 }
 
 sub load_interface_cache {
-  my $self = shift;
+  my ($self) = @_;
   my $statefile = $self->create_interface_cache_file();
   if ( -f $statefile) {
     our $VAR1;
@@ -266,7 +457,7 @@ sub load_interface_cache {
 }
 
 sub get_interface_indices {
-  my $self = shift;
+  my ($self) = @_;
   my @indices = ();
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
@@ -313,89 +504,14 @@ sub get_interface_indices {
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
-
-sub new_ {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    flat_indices => $params{flat_indices},
-    ifTable => $params{ifTable},
-    ifEntry => $params{ifEntry},
-    ifIndex => $params{ifIndex},
-    ifDescr => $params{ifDescr},
-    ifAlias => $params{ifAlias},
-    ifType => $params{ifType},
-    ifMtu => $params{ifMtu},
-    ifSpeed => $params{ifSpeed},
-    ifPhysAddress => $params{ifPhysAddress},
-    ifAdminStatus => $params{ifAdminStatus},
-    ifOperStatus => $params{ifOperStatus},
-    ifLastChange => $params{ifLastChange},
-    ifInOctets => $params{ifInOctets},
-    ifInUcastPkts => $params{ifInUcastPkts},
-    ifInNUcastPkts => $params{ifInNUcastPkts},
-    ifInDiscards => $params{ifInDiscards},
-    ifInErrors => $params{ifInErrors},
-    ifInUnknownProtos => $params{ifInUnknownProtos},
-    ifOutOctets => $params{ifOutOctets},
-    ifOutUcastPkts => $params{ifOutUcastPkts},
-    ifOutNUcastPkts => $params{ifOutNUcastPkts},
-    ifOutDiscards => $params{ifOutDiscards},
-    ifOutErrors => $params{ifOutErrors},
-    ifOutQLen => $params{ifOutQLen},
-    ifSpecific => $params{ifSpecific},
-    blacklisted => 0,
-    info => undef,
-    extendedinfo => undef,
-  };
-  foreach my $key (keys %{$self}) {
-    next if $key !~ /^if/;
-    $self->{$key} = 0 if ! defined $params{$key};
-  }
-  $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
-  bless $self, $class;
-  if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
-    if ($self->{ifDescr} =~ $self->opts->name2) {
-      $self->{ifDescr} = $1;
-    }
-  }
-  # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
-  # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
-  if ($params{ifName} && defined $params{ifHCInOctets} && 
-      defined $params{ifHCOutOctets} && $params{ifHCInOctets} ne "noSuchObject") {
-    my $self64 = {
-      ifName => $params{ifName},
-      ifInMulticastPkts => $params{ifInMulticastPkts},
-      ifInBroadcastPkts => $params{ifInBroadcastPkts},
-      ifOutMulticastPkts => $params{ifOutMulticastPkts},
-      ifOutBroadcastPkts => $params{ifOutBroadcastPkts},
-      ifHCInOctets => $params{ifHCInOctets},
-      ifHCInUcastPkts => $params{ifHCInUcastPkts},
-      ifHCInMulticastPkts => $params{ifHCInMulticastPkts},
-      ifHCInBroadcastPkts => $params{ifHCInBroadcastPkts},
-      ifHCOutOctets => $params{ifHCOutOctets},
-      ifHCOutUcastPkts => $params{ifHCOutUcastPkts},
-      ifHCOutMulticastPkts => $params{ifHCOutMulticastPkts},
-      ifHCOutBroadcastPkts => $params{ifHCOutBroadcastPkts},
-      ifLinkUpDownTrapEnable => $params{ifLinkUpDownTrapEnable},
-      ifHighSpeed => $params{ifHighSpeed},
-      ifPromiscuousMode => $params{ifPromiscuousMode},
-      ifConnectorPresent => $params{ifConnectorPresent},
-      ifAlias => $params{ifAlias} || $params{ifName}, # kommt vor bei linux lo
-      ifCounterDiscontinuityTime => $params{ifCounterDiscontinuityTime},
-    };
-    map { $self->{$_} = $self64->{$_} } keys %{$self64};
-    $self->{ifName} = unpack("Z*", $self->{ifName});
-    $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
-    $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
-    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
-  }
-  $self->init();
-  return $self;
-}
+use Digest::MD5 qw(md5_hex);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
+  foreach my $key (keys %{$self}) {
+    next if $key !~ /^if/;
+    $self->{$key} = 0 if ! defined $self->{$key};
+  }
   $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
   if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
     if ($self->{ifDescr} =~ $self->opts->name2) {
@@ -412,6 +528,16 @@ sub finish {
     $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
     bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
   }
+  if ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
+      $self->mode =~ /device::interfaces::(usage|complete)/) ||
+      (! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
+      $self->mode =~ /device::interfaces::(errors|complete)/) ||
+      (! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
+      $self->mode =~ /device::interfaces::(discards|complete)/) ||
+      (! exists $self->{ifInUcastPkts} && ! exists $self->{ifOutUcastPkts} &&
+      $self->mode =~ /device::interfaces::(broadcast|complete)/)) {
+    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
+  }
   if ($self->{ifPhysAddress}) {
     $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
   }
@@ -419,14 +545,15 @@ sub finish {
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
     $self->init();
     if ($self->{ifOperStatus} eq "up") {
       foreach my $mode (qw(device::interfaces::usage
-          device::interfaces::errors device::interfaces::discards)) {
+          device::interfaces::errors device::interfaces::discards
+          device::interfaces::broadcasts)) {
         $Monitoring::GLPlugin::mode = $mode;
         $self->init();
       }
@@ -491,6 +618,23 @@ sub init {
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
         / $self->{delta_timestamp};
+  } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    foreach my $key (qw(ifInUcastPkts
+        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+        ifOutMulticastPkts ifOutBroadcastPkts)) {
+      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+    }
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInUcastPkts
+        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+        ifOutMulticastPkts ifOutBroadcastPkts));
+    $self->{broadcastInPercent} = $self->{delta_ifInBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifInBroadcastPkts} /
+        ($self->{delta_ifInUcastPkts} + $self->{delta_ifInMulticastPkts} +
+        $self->{delta_ifInBroadcastPkts});
+    $self->{broadcastOutPercent} = $self->{delta_ifOutBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifOutBroadcastPkts} /
+        ($self->{delta_ifOutUcastPkts} + $self->{delta_ifOutMulticastPkts} +
+        $self->{delta_ifOutBroadcastPkts});
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
@@ -524,8 +668,38 @@ sub init {
   return $self;
 }
 
+sub init_etherstats {
+  my ($self) = @_;
+  if ($self->mode =~ /device::interfaces::etherstats/) {
+    $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
+    $self->init();
+    $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
+    # in the beginning we start 32/64bit-unaware, so columns contain
+    # also ifHC-names, but there are no such attributes in the interface object
+    @{$self->{columns}} = grep {
+      ! /^ifHC(In|Out).*castPkts$/
+    } grep {
+      ! /^(ifOperStatus|ifAdminStatus|ifIndex|ifDescr|ifAlias|ifName)$/
+    } @{$self->{columns}};
+    # z.b. Serial2/3/2 in Singapore, broadcastet nicht
+    my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
+    $self->valdiff({name => $ident}, @{$self->{columns}});
+    $self->{delta_InPkts} = $self->{delta_ifInUcastPkts} +
+        $self->{delta_ifInMulticastPkts} + $self->{delta_ifInBroadcastPkts};
+    $self->{delta_OutPkts} = $self->{delta_ifOutUcastPkts} +
+        $self->{delta_ifOutMulticastPkts} + $self->{delta_ifOutBroadcastPkts};
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
+      next if ! defined $self->{'delta_'.$stat};
+      $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
+          100 * $self->{'delta_'.$stat} /
+          ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
+    }
+  }
+  return $self;
+}
+
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $full_descr = sprintf "%s%s",
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
@@ -536,7 +710,8 @@ sub check {
     $self->check();
     if ($self->{ifOperStatus} eq "up") {
       foreach my $mode (qw(device::interfaces::usage
-          device::interfaces::errors device::interfaces::discards)) {
+          device::interfaces::errors device::interfaces::discards
+          device::interfaces::broadcast)) {
         $Monitoring::GLPlugin::mode = $mode;
         $self->check();
       }
@@ -676,6 +851,40 @@ sub check {
         label => $self->{ifDescr}.'_discards_out',
         value => $self->{outputDiscardRate},
     );
+  } elsif ($self->mode =~ /device::interfaces::broadcast/) {
+    $self->add_info(sprintf 'interface %s broadcast in:%.2f%% out:%.2f%% ',
+        $full_descr,
+        $self->{broadcastInPercent} , $self->{broadcastOutPercent});
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_in',
+        warning => 10,
+        critical => 20
+    );
+    my $in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_in',
+        value => $self->{broadcastInPercent}
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_out',
+        warning => 10,
+        critical => 20
+    );
+    my $out = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_out',
+        value => $self->{broadcastOutPercent}
+    );
+    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
+    $self->add_message($level);
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_in',
+        value => $self->{broadcastInPercent},
+        uom => '%',
+    );
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_out',
+        value => $self->{broadcastOutPercent},
+        uom => '%',
+    );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     #rfc2863
     #(1)   if ifAdminStatus is not down and ifOperStatus is down then a
@@ -718,11 +927,33 @@ sub check {
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
         $self->{ifOperStatus}, $self->{ifAdminStatus},
         $self->{ifStatusDuration});
+  } elsif ($self->mode =~ /device::interfaces::etherstats/) {
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
+      next if ! defined $self->{$stat.'Percent'};
+      my $label = $stat.'Percent';
+      $label =~ s/^(dot3Stats|etherStats)//g;
+      $label =~ s/(?:\b|(?<=([a-z])))([A-Z][a-z]+)/(defined($1) ? "_" : "") . lc($2)/eg;
+      $label = $self->{ifDescr}.'_'.$label;
+      $self->add_info(sprintf 'interface %s %s is %.2f%%',
+          $full_descr, $stat.'Percent', $self->{$stat.'Percent'});
+      $self->set_thresholds(
+          metric => $label,
+          warning => 1,
+          critical => 10
+      );
+      $self->add_message(
+          $self->check_thresholds(metric => $label, value => $self->{$stat.'Percent'}));
+      $self->add_perfdata(
+          label => $label,
+          value => $self->{$stat.'Percent'},
+          uom => '%',
+      );
+    }
   }
 }
 
 sub list {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::listdetail/) {
     my $cL2L3IfModeOper = $self->get_snmp_object('CISCO-L2L3-INTERFACE-CONFIG-MIB', 'cL2L3IfModeOper', $self->{ifIndex}) || "unknown";
     my $vlanTrunkPortDynamicStatus = $self->get_snmp_object('CISCO-VTP-MIB', 'vlanTrunkPortDynamicStatus', $self->{ifIndex}) || "unknown";
@@ -737,9 +968,10 @@ sub list {
 package Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
+use Digest::MD5 qw(md5_hex);
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::usage/) {
     $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifHCInOctets ifHCOutOctets));
     $self->{delta_ifInBits} = $self->{delta_ifHCInOctets} * 8;
@@ -796,9 +1028,80 @@ sub init {
       $self->{maxInputRate} = 0;
       $self->{maxOutputRate} = 0;
     }
+  } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
+    foreach my $key (qw(
+        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts)) {
+      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+    }
+    $self->valdiff({name => $self->{ifDescr}}, qw(
+        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts));
+    $self->{broadcastInPercent} = $self->{delta_ifHCInBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCInBroadcastPkts} /
+        ($self->{delta_ifHCInUcastPkts} + $self->{delta_ifHCInMulticastPkts} +
+        $self->{delta_ifHCInBroadcastPkts});
+    $self->{broadcastOutPercent} = $self->{delta_ifHCOutBroadcastPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCOutBroadcastPkts} /
+        ($self->{delta_ifHCOutUcastPkts} + $self->{delta_ifHCOutMulticastPkts} +
+        $self->{delta_ifHCOutBroadcastPkts});
   } else {
     $self->SUPER::init();
   }
   return $self;
+}
+
+sub init_etherstats {
+  my ($self) = @_;
+  if ($self->mode =~ /device::interfaces::etherstats/) {
+    $Monitoring::GLPlugin::mode = "device::interfaces::broadcasts";
+    $self->init();
+    $Monitoring::GLPlugin::mode = "device::interfaces::etherstats";
+    # 32bit-cast ausputzen. es gibt welche, die haben nur 64bit
+    @{$self->{columns}} = grep {
+      ! /^if(In|Out).*castPkts$/
+    } grep {
+      ! /^(ifOperStatus|ifAdminStatus|ifIndex|ifDescr|ifAlias|ifName)$/
+    } @{$self->{columns}};
+    my $ident = $self->{ifDescr}.md5_hex(join('_', @{$self->{columns}}));
+    $self->valdiff({name => $ident}, @{$self->{columns}});
+    $self->{delta_InPkts} = $self->{delta_ifHCInUcastPkts} +
+        $self->{delta_ifHCInMulticastPkts} + $self->{delta_ifHCInBroadcastPkts};
+    $self->{delta_OutPkts} = $self->{delta_ifHCOutUcastPkts} +
+        $self->{delta_ifHCOutMulticastPkts} + $self->{delta_ifHCOutBroadcastPkts};
+    for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
+      next if ! defined $self->{'delta_'.$stat};
+      $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
+          100 * $self->{'delta_'.$stat} / 
+          ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
+    }
+  }
+  return $self;
+}
+
+package Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub;
+our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
+use strict;
+
+sub init {
+  my ($self) = @_;
+}
+
+sub init_etherstats {
+  my ($self) = @_;
+  # hat sowieso keine broadcastcounter, ist sinnlos
+}
+
+sub check {
+  my ($self) = @_;
+  my $full_descr = sprintf "%s%s",
+      $self->{ifDescr},
+      $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
+          " (alias ".$self->{ifAlias}.")" : "";
+  if ($self->mode =~ /device::interfaces::operstatus/) {
+    $self->SUPER::check();
+  } else {
+    $self->add_ok(sprintf '%s has no traffic', $full_descr);
+  }
 }
 

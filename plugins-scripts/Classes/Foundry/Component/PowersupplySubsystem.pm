@@ -16,10 +16,14 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'powersupply %d is %s',
-      $self->{snChasPwrSupplyIndex},
-      $self->{snChasPwrSupplyOperStatus});
-  if ($self->{snChasPwrSupplyOperStatus} eq 'failure') {
+  $self->add_info(sprintf '%s oper status %s',
+      $self->{snChasPwrSupplyDescription},
+      $self->{snChasPwrSupplyOperStatus}
+  );
+  if ($self->{snChasPwrSupplyOperStatus} eq 'failure' &&
+      $self->{snChasPwrSupplyDescription} !~ /not present/) {
+    # snChasPwrSupplyDescription: "Power supply 2 not present
+    # snChasPwrSupplyOperStatus: failure
     $self->add_critical();
   }
 }

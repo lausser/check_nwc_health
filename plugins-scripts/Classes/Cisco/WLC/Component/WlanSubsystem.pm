@@ -10,6 +10,11 @@ sub init {
     ]);
   } else {
     $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
+    $self->get_snmp_objects('CISCO-LWAPP-HA-MIB', qw(
+        cLHaPrimaryUnit cLHaNetworkFailOver cLHaPeerIpAddress
+        cLHaRedundancyIpAddress 
+    ));
+    $self->mult_snmp_max_msg_size(4);
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
         ['aps', 'bsnAPTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
         ['ifs', 'bsnAPIfTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::AP' ],
@@ -40,7 +45,17 @@ sub check {
     $self->{numOfAPs} = scalar (@{$self->{aps}});
     $self->{apNameList} = [map { $_->{bsnAPName} } @{$self->{aps}}];
     if (scalar (@{$self->{aps}}) == 0) {
-      $self->add_unknown('no access points found');
+      if ($self->{cLHaNetworkFailOver} &&
+          $self->{cLHaNetworkFailOver} eq 'true') {
+        if($self->{cLHaPrimaryUnit} &&
+            $self->{cLHaPrimaryUnit} eq 'false') {
+          $self->add_ok('no access points found, this is a secondary unit in a failover setup');
+        } else {
+          $self->add_unknown('no access points found, this is a primary unit in a failover setup');
+        }
+      } else {
+        $self->add_unknown('no access points found');
+      }
       return;
     }
     foreach (@{$self->{aps}}) {
@@ -141,11 +156,14 @@ sub finish {
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf 'access point %s is %s (%d interfaces with %d clients)',
-      $self->{bsnAPName}, $self->{bsnAPOperationStatus},
+  $self->add_info(sprintf 'access point %s is %s/%s (%d interfaces with %d clients)',
+      $self->{bsnAPName}, $self->{bsnAPAdminStatus},
+      $self->{bsnAPOperationStatus},
       scalar(@{$self->{interfaces}}), $self->{NumOfClients});
   if ($self->mode =~ /device::wlan::aps::status/) {
-    if ($self->{bsnAPOperationStatus} eq 'disassociating') {
+    if ($self->{bsnAPAdminStatus} eq 'disable') {
+      $self->add_ok();
+    } elsif ($self->{bsnAPOperationStatus} eq 'disassociating') {
       $self->add_critical();
     } elsif ($self->{bsnAPOperationStatus} eq 'downloading') {
       # das verschwindet hoffentlich noch vor dem HARD-state

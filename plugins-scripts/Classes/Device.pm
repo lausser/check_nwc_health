@@ -40,7 +40,9 @@ sub classify {
       $self->{productname} = 'clavister' if $self->opts->servertype eq 'clavister';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
     }
-    if (! $self->check_messages()) {
+    if ($self->opts->mode eq "uptime") {
+      return $self;
+    } elsif (! $self->check_messages()) {
       if ($self->opts->verbose && $self->opts->verbose) {
         printf "I am a %s\n", $self->{productname};
       }
@@ -85,7 +87,7 @@ sub classify {
       } elsif ($self->{productname} =~ /Allied Telesyn Ethernet Switch/i) {
         bless $self, 'Classes::AlliedTelesyn';
         $self->debug('using Classes::AlliedTelesyn');
-      } elsif ($self->{productname} =~ /Linux cumulus/i) {
+      } elsif ($self->{productname} =~ /(Linux cumulus)|(Cumulus Linux)/i) {
         bless $self, 'Classes::Cumulus';
         $self->debug('using Classes::Cumulus');
       } elsif ($self->{productname} =~ /DS_4100/i) {
@@ -100,6 +102,11 @@ sub classify {
       } elsif ($self->{productname} =~ /EMC\s*DS-24M2/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
+      } elsif ($self->{productname} =~ /Brocade.*IronWare/i) {
+        # although there can be a 
+        # Brocade Communications Systems, Inc. FWS648, IronWare Version 07.1....
+        bless $self, 'Classes::Foundry';
+        $self->debug('using Classes::Foundry');
       } elsif ($self->{productname} =~ /Brocade/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
@@ -114,12 +121,19 @@ sub classify {
         # Juniper Networks,Inc,MAG-SMx60,7.4R8
         bless $self, 'Classes::Juniper::IVE';
         $self->debug('using Classes::Juniper::IVE');
+      } elsif ($self->implements_mib('JUNIPER-MIB')) {
+        bless $self, 'Classes::Juniper::SRX';
+        $self->debug('using Classes::Juniper::SRX');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
       } elsif ($self->{productname} =~ /JunOS/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
+      } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
+        # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
+        bless $self, 'Classes::Juniper::IVE';
+        $self->debug('using Classes::Juniper::IVE');
       } elsif ($self->implements_mib('NETGEAR-MIB')) {
         $self->debug('using Classes::Netgear');
         bless $self, 'Classes::Netgear';
@@ -138,16 +152,21 @@ sub classify {
       } elsif ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i) {
         bless $self, 'Classes::F5';
         $self->debug('using Classes::F5');
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
+        bless $self, 'Classes::F5';
+        $self->debug('using Classes::F5');
       } elsif ($self->{productname} =~ /(H?H3C|HP Comware)/i) {
         bless $self, 'Classes::HH3C';
         $self->debug('using Classes::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {
         bless $self, 'Classes::Huawei';
         $self->debug('using Classes::Huawei');
-      } elsif ($self->{productname} =~ /Procurve/i) {
-        bless $self, 'Classes::HP';
-        $self->debug('using Classes::HP');
-      } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i) {
+      } elsif ($self->{productname} =~ /Procurve/i ||
+          ($self->implements_mib('HP-ICF-CHASSIS-MIB') &&
+          $self->implements_mib('NETSWITCH-MIB'))) {
+        bless $self, 'Classes::HP::Procurve';
+        $self->debug('using Classes::HP::Procurve');
+      } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i || $self->implements_mib('CHECKPOINT-MIB')) {
         bless $self, 'Classes::CheckPoint';
         $self->debug('using Classes::CheckPoint');
       } elsif ($self->{productname} =~ /Clavister/i) {
@@ -191,6 +210,9 @@ sub classify {
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.272\./) {
         bless $self, 'Classes::Bintec::Bibo';
         $self->debug('using Classes::Bintec::Bibo');
+      } elsif ($self->implements_mib('STEELHEAD-MIB') || $self->implements_mib('STEELHEAD-EX-MIB')) {
+        bless $self, 'Classes::Riverbed';
+        $self->debug('using Classes::Riverbed');
       } elsif ($self->{productname} =~ /^Linux/i) {
         bless $self, 'Classes::Server::Linux';
         $self->debug('using Classes::Server::Linux');
@@ -226,6 +248,8 @@ sub init {
   my $self = shift;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
+  } elsif ($self->mode =~ /device::interfaces::ifstack/) {
+    $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::StackSubsystem");
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem("Classes::IFMIB::Component::InterfaceSubsystem");
   } elsif ($self->mode =~ /device::routes/) {

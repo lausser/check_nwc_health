@@ -1,3 +1,93 @@
+* 2017-04-15 6.1.1
+  support Brocade Ironport and enhance FOUNDRY-SN-AGENT-MIB
+* 2017-04-13 6.1.0.3
+  reverse hrStorage mem thresholds
+* 2017-03-30 6.1.0.2
+  fix a bug in 64bit interface-usage (Thanks Julian)
+* 2017-03-27 6.1.0.1
+  pdate GLPlugin
+* 2017-03-25 6.1
+  update entity-sensor-mib
+* 2017-03-24 6.0.2.3
+  bugfixes in interface etherstats
+* 2017-03-22 6.0.2.2
+  bugfix in etherstats for 32bit
+  better error message for no access points found
+  replace continue by next. failed on older distributions
+* 2017-03-20 6.0.2.1
+  fix brocade fabos cpu/memory with MAPS installed
+* 2017-03-19 6.0.2
+  improve interface-etherstats
+* 2017-03-10 6.0.1.4
+  update GLPlugin
+* 2017-03-03 6.0.1.3
+  fix uninitialized-bug
+* 2017-03-03 6.0.1.2
+  special treatment for counterless StackSub interfaces
+* 2017-03-03 6.0.1.1
+  Merge pull request #126 from ciscoqid/patch-1
+* 2017-03-02 6.0.1
+  remove steelhead prettyprint
+* 2017-02-24 6.0
+  cisco chassis check snmp tuning
+  fix cisco-envmon-mib
+  nxos hardware check snmp tuning
+  fix cisco wlan no-ap clustercheck
+  detect more f5 models
+  add f5 wide ip check
+  improve host-resource-mib
+  speedup interface checks
+  add interface-etherstats
+  add ha-status for juniper vsd members
+  customer release #12.2a
+  add mode interface-stack-status
+  add riverbed steelhead
+* 2017-02-10 5.13
+  bugfix in f5 output message
+  make f5 perfdata labels more consistent
+  checkpoint multicore. Thanks Peter Hanraets
+* 2017-01-28 5.12.0.5
+  fix pool checks for big-ip 12.x (thanks abzeidler)
+* 2017-01-27 5.12.0.4
+  fallback to ios if cisco wlc has no cpu/mem oids
+  bugfix in chassis-hardware-health delta of ports
+  bugfix in chassis-hardware-health duplicate fan output
+* 2017-01-27 5.12.0.3
+  fix cisco wlc ap admin status
+* 2017-01-26 5.12.0.2
+  detect more cisco wireless controllers
+* 2017-01-18 5.12.0.1
+  update GLPlugin (uptime)
+* 2017-01-11 5.12
+  detect checkpoint gaia
+* 2016-12-28 5.11.3
+  detect more hp procurve switches (J9624A etc. may need new firmware revision RA.16.02.0012, ROM RA.15.13)
+* 2016-12-19 5.11.2.5
+  /dev/md on Juniper srx is considered as procfs
+* 2016-12-19 5.11.2.4
+  fix performance labels for HOSTRESOURCESMIB dev filesystems
+* 2016-12-14 5.11.2.3
+  optimize uptime, no bulk for brocade sensors
+* 2016-12-12 5.11.2.2
+  bluecoat disk usage can be overridden with own thresholds
+* 2016-12-12 5.11.2.1
+  add JUNIPER-MIB
+* 2016-12-12 5.11.2
+  fix in cisco asr lsmpi memory
+  skip thresholds for dev filesystem in HOSTRESOURCESMIB
+* 2016-12-06 5.11.1
+  detect juniper pulse secure
+  juniper srx temperatures and leds
+* 2016-11-29 5.11
+  reverse usage/free in hostresourcemib memory-usage, so the same thresholds can be use for every kind of device
+  mv juniper-mib to glplugin
+  add etherstats
+* 2016-11-09 5.10.0.1
+  fix nexus sensor perfdata, metrics without thresh. were not shown (Thanks Dennis Knecht)
+* 2016-10-29 5.10
+  add smart-home-device-temperature, add Comet DECT
+* 2016-10-19 5.9.0.1
+  fix memory-usage for Catalyst L3 (which have empty CISCO-ENHANCED-MEMPOOL-MIB)
 * 2016-10-10 5.9
   add arista
   add cisco small business

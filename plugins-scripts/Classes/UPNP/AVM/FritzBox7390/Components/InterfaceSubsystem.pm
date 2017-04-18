@@ -126,7 +126,7 @@ sub check {
         warning => $self->{maxInputRate} / 100 * $inwarning,
         critical => $self->{maxInputRate} / 100 * $incritical
     );
-    $self->ade_perfdata(
+    $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,

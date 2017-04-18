@@ -5,7 +5,7 @@ use strict;
 sub init {
   my $self = shift;
   if ($self->mode =~ /device::hardware::health/) {
-    $self->mult_snmp_max_msg_size(10);
+    #$self->mult_snmp_max_msg_size(10);
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::NXOS::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::cisco::fex::watch/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::NXOS::Component::FexSubsystem");

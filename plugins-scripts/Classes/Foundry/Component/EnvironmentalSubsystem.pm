@@ -10,6 +10,8 @@ sub init {
       Classes::Foundry::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
       Classes::Foundry::Component::TemperatureSubsystem->new();
+  $self->{module_subsystem} =
+      Classes::Foundry::Component::ModuleSubsystem->new();
 }
 
 sub check {
@@ -17,9 +19,8 @@ sub check {
   $self->{powersupply_subsystem}->check();
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
-  if (! $self->check_messages()) {
-    $self->add_ok("environmental hardware working fine");
-  }
+  $self->{module_subsystem}->check();
+  $self->reduce_messages("hardware working fine");
 }
 
 sub dump {
@@ -27,6 +28,7 @@ sub dump {
   $self->{powersupply_subsystem}->dump();
   $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
+  $self->{module_subsystem}->dump();
 }
 
 1;
