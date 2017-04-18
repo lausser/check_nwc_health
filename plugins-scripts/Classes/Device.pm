@@ -32,6 +32,7 @@ sub classify {
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
       $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
       $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
+      $self->{productname} = 'junos' if $self->opts->servertype eq 'junos';
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
       $self->{productname} = 'procurve' if $self->opts->servertype eq 'procurve';
       $self->{productname} = 'bluecoat' if $self->opts->servertype eq 'bluecoat';
@@ -124,6 +125,9 @@ sub classify {
         bless $self, 'Classes::Juniper::SRX';
         $self->debug('using Classes::Juniper::SRX');
       } elsif ($self->{productname} =~ /NetScreen/i) {
+        bless $self, 'Classes::Juniper';
+        $self->debug('using Classes::Juniper');
+      } elsif ($self->{productname} =~ /JunOS/i) {
         bless $self, 'Classes::Juniper';
         $self->debug('using Classes::Juniper');
       } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
@@ -254,7 +258,7 @@ sub init {
     } else {
       $self->analyze_and_check_interface_subsystem("Classes::IPMIB::Component::RoutingSubsystem");
     }
-  } elsif ($self->mode =~ /device::bgp/) {
+  } elsif ($self->mode =~ /device::bgp/ && $self->{productname} !~ /JunOS/i) {
     $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
   } elsif ($self->mode =~ /device::ospf/) {
     bless $self, "Classes::OSPF";

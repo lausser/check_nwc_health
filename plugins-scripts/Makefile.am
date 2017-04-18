@@ -75,6 +75,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERIVEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNOSBGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LARAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LOADBALSYSTEMMIB.pm \
@@ -198,6 +199,8 @@ EXTRA_MODULES=\
   Classes/Nortel/S5/Component/MemSubsystem.pm \
   Classes/Nortel/S5.pm \
   Classes/Nortel.pm \
+  Classes/Juniper/JunOS/Component/BgpSubsystem.pm \
+  Classes/Juniper/JunOS.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \
   Classes/Juniper/NetScreen/Component/EnvironmentalSubsystem.pm \
