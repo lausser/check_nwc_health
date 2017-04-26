@@ -30,26 +30,20 @@ sub init {
         Server::LinuxLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
   } else {
+    my $max_speed = 0;
     foreach (glob "/sys/class/net/*") {
       my $name = $_;
       $name =~ s/.*\///g;
-      if ($self->opts->name) {
-        if ($self->opts->regexp) {
-          my $pattern = $self->opts->name;
-          if ($name !~ /$pattern/i) {
-            next;
-          }
-        } elsif (lc $name ne lc $self->opts->name) {
-          next;
-        }
-      }
+      my $tmp_speed = (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x; } : undef);
+      $max_speed = $tmp_speed if defined $tmp_speed && $tmp_speed > $max_speed;
+      next if ! $self->filter_name($name);
       *SAVEERR = *STDERR;
       open ERR ,'>/dev/null';
       *STDERR = *ERR;
       my $tmpif = {
         ifDescr => $name,
         ifIndex => $name,
-        ifSpeed => (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x; } : undef),
+        ifSpeed => $tmp_speed,
         ifInOctets => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_bytes"; my $x = <>; close ARGV; $x; },
         ifInDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_dropped"; my $x = <>; close ARGV; $x; },
         ifInErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/rx_errors"; my $x = <>; close ARGV; $x; },
@@ -57,26 +51,28 @@ sub init {
         ifOutDiscards => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_dropped"; my $x = <>; close ARGV; $x; },
         ifOutErrors => do { local (@ARGV, $/) = "/sys/class/net/$name/statistics/tx_errors"; my $x = <>; close ARGV; $x; },
         ifOperStatus => do { local (@ARGV, $/) = "/sys/class/net/$name/operstate"; my $x = <>; close ARGV; $x; },
+        ifInUcastPkts => 0, # sonst wird in IFMIB... ein StackSub draus
+        ifOutUcastPkts => 0,
+        ifCarrier => do { local (@ARGV, $/) = "/sys/class/net/$name/carrier"; my $x = <>; close ARGV; $x; },
       };
       *STDERR = *SAVEERR;
       map {
-          chomp $tmpif->{$_} if defined $tmpif->{$_}; 
+          chomp $tmpif->{$_} if defined $tmpif->{$_};
           $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_};
       } keys %{$tmpif};
-      $tmpif->{ifOperStatus} = 'down' if $tmpif->{ifOperStatus} ne 'up';
+      if ($tmpif->{ifOperStatus} eq 'unknown') {
+        $tmpif->{ifOperStatus} = $tmpif->{ifCarrier} ? 'up' : 'down';
+      }
       $tmpif->{ifAdminStatus} = $tmpif->{ifOperStatus};
       if (defined $self->opts->ifspeed) {
         $tmpif->{ifSpeed} = $self->opts->ifspeed * 1024*1024;
       } else {
         $tmpif->{ifSpeed} *= 1024*1024 if defined $tmpif->{ifSpeed};
       }
-      if (! defined $tmpif->{ifSpeed}) {
-        $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $name);
-      } else {
-        push(@{$self->{interfaces}},
-          Server::LinuxLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
-      }
+      push(@{$self->{interfaces}},
+        Server::LinuxLocal::Component::InterfaceSubsystem::Interface->new(%{$tmpif}));
     }
+    map { $_->{sysMaxSpeed} = $max_speed; chomp $_->{sysMaxSpeed}; } @{$self->{interfaces}};
   }
 }
 
@@ -103,4 +99,33 @@ package Server::LinuxLocal::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 
+sub finish {
+  my $self = shift;
+  if (! defined $self->{ifSpeed} && $self->mode =~ /device::interfaces::(complete|usage)/) {
+    bless $self, 'Server::LinuxLocal::Component::InterfaceSubsystem::Interface::Virt';
+  }
+  $self->SUPER::finish();
+}
+
+package Server::LinuxLocal::Component::InterfaceSubsystem::Interface::Virt;
+our @ISA = qw(Server::LinuxLocal::Component::InterfaceSubsystem::Interface);
+use strict;
+
+sub check {
+  my $self = shift;
+  if (! defined $self->{ifSpeed}) {
+    if (defined $self->opts->mitigation && $self->opts->mitigation eq 'ok') {
+      $self->{ifSpeed} = $self->{sysMaxSpeed};
+      # virtuelles zeug bekommt die geschw. des schnellsten verbauten interf.
+      # wird schon passen.
+      $self->SUPER::check();
+    } elsif ($self->mode =~ /evice::interfaces::(complete|usage)/) {
+      $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $self->{ifDescr});
+    } else {
+      $self->SUPER::check();
+    }
+  } else {
+    $self->SUPER::check();
+  }
+}
 

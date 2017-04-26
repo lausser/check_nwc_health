@@ -1,3 +1,9 @@
+* 2017-04-26 6.2.0.1
+  use carrier if operstatus is unknown for linuxlocal interfaces
+  add dummy speed to linux virtio interfaces
+* 2017-04-18 6.2.0
+  add support for junox bgp with ipv6, thanks dupondje
+  fix a bug in bluecoat, allow warningx now
 * 2017-04-15 6.1.1
   support Brocade Ironport and enhance FOUNDRY-SN-AGENT-MIB
 * 2017-04-13 6.1.0.3

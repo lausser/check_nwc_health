@@ -129,6 +129,8 @@ $self->debug("finish");
         ifOutDiscards => $member->{PacketsOutboundDiscarded},
         ifOutErrors => $member->{PacketsOutboundErrors},
         ifOperStatus => 'up', # found no way to get interface status
+        ifInUcastPkts => 0, # sonst wird in IFMIB... ein StackSub draus
+        ifOutUcastPkts => 0,
       };
       *STDERR = *SAVEERR;
       map { 
