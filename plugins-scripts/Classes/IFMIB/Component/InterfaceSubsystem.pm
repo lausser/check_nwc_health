@@ -14,7 +14,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
     push(@iftable_columns, qw(
         ifInOctets ifOutOctets ifSpeed ifOperStatus
-        ifHCInOctets ifHCOutOctets
+        ifHCInOctets ifHCOutOctets ifHighSpeed
         ifInErrors ifOutErrors
         ifInDiscards ifOutDiscards
         ifInMulticastPkts ifOutMulticastPkts
@@ -985,19 +985,19 @@ sub init {
       $self->{maxInputRate} = 0;
       $self->{maxOutputRate} = 0;
     } elsif ($self->{ifSpeed} == 4294967295) {
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->{ifHighSpeed} * 1000000);
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->{ifHighSpeed} * 1000000);
       $self->{maxInputRate} = $self->{ifHighSpeed} * 1000000;
       $self->{maxOutputRate} = $self->{ifHighSpeed} * 1000000;
-    } else {
       $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->{ifSpeed});
+          ($self->{delta_timestamp} * $self->{maxInputRate});
       $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->{ifSpeed});
+          ($self->{delta_timestamp} * $self->{maxOutputRate});
+    } else {
       $self->{maxInputRate} = $self->{ifSpeed};
       $self->{maxOutputRate} = $self->{ifSpeed};
+      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+          ($self->{delta_timestamp} * $self->{maxInputRate});
+      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+          ($self->{delta_timestamp} * $self->{maxOutputRate});
     }
     if (defined $self->opts->ifspeed) {
       $self->override_opt('ifspeedin', $self->opts->ifspeed);

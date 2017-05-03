@@ -1,3 +1,5 @@
+* 2017-05-03 6.2.0.2
+  fix a bug in interface-health and 10GE ports.
 * 2017-04-26 6.2.0.1
   use carrier if operstatus is unknown for linuxlocal interfaces
   add dummy speed to linux virtio interfaces
