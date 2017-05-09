@@ -103,6 +103,31 @@ sub check {
         $lower_needed->{$rel->{ifStackHigherLayer}}++;
       }
     }
+    foreach my $interface (@{$self->{interfaces}}) {
+      # gibt diese:
+      # IF-MIB::ifStackStatus.0.1000201 = INTEGER: active(1)
+      # IF-MIB::ifStackStatus.1000201.3 = INTEGER: active(1)
+      # und diese
+      # IF-MIB::ifStackStatus.0.1000501 = INTEGER: active(1)
+      # der braeuchte eigentlich ein
+      # IF-MIB::ifStackStatus.1000501.0 = INTEGER: active(1)
+      # hat er aber nicht. deshalb waere $lower_counter/lower_needed
+      # uninitialized, wenn nicht wieder mal der Lausser den 
+      # Drecksmurkssnmpimplementierungen hinterherraeumen wuerde.
+      if (! exists $lower_counter->{$interface->{ifIndex}}) {
+        $lower_counter->{$interface->{ifIndex}} = 0;
+      }
+      if (! exists $lower_needed->{$interface->{ifIndex}}) {
+        $lower_needed->{$interface->{ifIndex}} = 0;
+      }
+      # und gleich nochmal. 
+      # IF-MIB::ifStackStatus.0.1000027 = INTEGER: active(1)
+      # IF-MIB::ifStackStatus.1000027.0 = INTEGER: active(1)
+      # IF-MIB::ifStackStatus.0.1000051 = INTEGER: active(1)
+      # IF-MIB::ifStackStatus.1000051.35 = INTEGER: active(1)
+      # IF-MIB::ifStackStatus.0.1000052 = INTEGER: active(1)
+      # Schammts eich, Cisco. Pfui Deifl!
+    }
     foreach my $index (keys %{$higher_interfaces}) {
       if ($self->mode =~ /device::interfaces::ifstack::status/) {
         $self->add_ok(sprintf 'interface %s has %d sub-layers',

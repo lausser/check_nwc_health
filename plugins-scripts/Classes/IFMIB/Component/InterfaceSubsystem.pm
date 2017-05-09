@@ -7,8 +7,9 @@ sub init {
   $self->{interfaces} = [];
   $self->{etherstats} = [];
   #$self->session_translate(['-octetstring' => 1]);
-  my @iftable_columns = qw(ifIndex ifDescr ifAlias ifName);
+  my @iftable_columns = qw(ifDescr ifAlias ifName);
   my @ethertable_columns = qw();
+  my @ethertablehc_columns = qw();
   my @rmontable_columns = qw();
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
@@ -52,7 +53,7 @@ sub init {
     ));
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     push(@iftable_columns, qw(
-        ifAvailable ifIndex ifType ifOperStatus ifAdminStatus ifStatusDuration
+        ifAvailable ifType ifOperStatus ifAdminStatus ifStatusDuration
         ifLastChange ifHighSpeed ifSpeed
     ));
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
@@ -73,6 +74,9 @@ sub init {
         dot3StatsInternalMacTransmitErrors dot3StatsCarrierSenseErrors
         dot3StatsFrameTooLongs dot3StatsInternalMacReceiveErrors
     ));
+    push(@ethertablehc_columns, qw(
+        dot3HCStatsFCSErrors
+    ));
     push(@rmontable_columns, qw(
         etherStatsCRCAlignErrors
     ));
@@ -84,6 +88,12 @@ sub init {
 	  $ec eq $_;
 	} @reports;
       } @ethertable_columns;
+      @ethertablehc_columns = grep {
+        my $ec = $_;
+        grep {
+	  $ec eq $_;
+	} @reports;
+      } @ethertablehc_columns;
       @rmontable_columns = grep {
         my $ec = $_;
         grep {
@@ -91,10 +101,10 @@ sub init {
 	} @reports;
       } @rmontable_columns;
     }
-    if (@ethertable_columns) {
-      # will ich ueberhaupt was von dem zeug?
-      push(@ethertable_columns, qw(
-          dot3StatsIndex
+    if (grep /dot3HCStatsFCSErrors/, @ethertablehc_columns) {
+      # wenn ifSpeed == 4294967295, dann 10GBit, dann dot3HCStatsFCSErrors
+      push(@iftable_columns, qw(
+          ifSpeed
       ));
     }
     if (@rmontable_columns) {
@@ -124,20 +134,23 @@ sub init {
     }
     # die sind mit etherStatsDataSource verknuepft
   } elsif ($self->mode =~ /device::interfaces/) {
-    $self->update_interface_cache(0);
+    my $if_has_changed = $self->update_interface_cache(0);
     my $only_admin_up =
         $self->opts->name && $self->opts->name eq '_adminup_' ? 1 : 0;
     my $only_oper_up =
         $self->opts->name && $self->opts->name eq '_operup_' ? 1 : 0;
     if ($only_admin_up || $only_oper_up) {
       $self->override_opt('name', undef);
+      $self->override_opt('drecksptkdb', undef);
     }
     my @indices = $self->get_interface_indices();
+    my @all_indices = @indices;
+    my @selected_indices = ();
     if (! $self->opts->name && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
     }
-    if (!$self->opts->name || scalar(@indices) > 0) {
+    if (! $self->opts->name || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
@@ -146,37 +159,56 @@ sub init {
         my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
-        if ($only_admin_up || $only_oper_up) {
-          push(@indices, [$_->{ifIndex}]);
-        }
       }
       if ($self->mode =~ /device::interfaces::etherstats/) {
         @indices = @save_indices;
-        my @etherpatterns = map {
-            '('.$_.')';
-        } map {
-            $_->[0];
-        } @indices;
+        my @etherindices = ();
+        my @etherhcindices = ();
+        foreach my $interface (@{$self->{interfaces}}) {
+          push(@selected_indices, [$interface->{ifIndex}]);
+          if (@ethertablehc_columns && $interface->{ifSpeed} == 4294967295) {
+            push(@etherhcindices, [$interface->{ifIndex}]);
+          }
+          push(@etherindices, [$interface->{ifIndex}]);
+        }
+        $self->debug(
+            sprintf 'all_interfaces %d, selected %d, ether %d, etherhc %d',
+                scalar(@all_indices), scalar(@selected_indices),
+                scalar(@etherindices), scalar(@etherhcindices));
         my @rmonpatterns = map {
             '([\.]*1.3.6.1.2.1.2.2.1.1.'.$_.')';
         } map {
             $_->[0];
-        } @indices;
-        if (@ethertable_columns) {
-          if ($self->opts->name) {
-            $self->override_opt('drecksptkdb', '^('.join('|', @etherpatterns).')$');
-            $self->override_opt('name', '^('.join('|', @etherpatterns).')$');
-            $self->override_opt('regexp', 1);
+        } @selected_indices;
+        if ($only_admin_up || $only_oper_up) {
+          if (scalar(@etherindices) > scalar(@all_indices) * 0.70) {
+            $self->bulk_is_baeh(20);
+            @etherindices = ();
           }
-          # key=dot3StatsIndex-//-index, value=index
-          $self->update_entry_cache(0, 'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex');
-          #
-          # ohne name -> get_table
-          # mit name -> lauter einzelne indizierte walkportionen
-          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-              'ETHERLIKE-MIB', 'dot3StatsTable', 'dot3StatsIndex', \@ethertable_columns)) {
+          if (scalar(@etherhcindices) > scalar(@all_indices) * 0.70) {
+            $self->bulk_is_baeh(20);
+            @etherhcindices = ();
+          }
+          if (scalar(@rmonpatterns) > scalar(@all_indices) * 0.70) {
+            $self->bulk_is_baeh(20);
+            @rmonpatterns = ();
+          }
+        } elsif (! @indices) {
+            $self->bulk_is_baeh(20);
+          @etherindices = ();
+          if (scalar(@etherhcindices) > scalar(@all_indices) * 0.70) {
+            @etherhcindices = ();
+          }
+          @rmonpatterns = ();
+        }
+
+        if (@ethertable_columns) {
+          # es gibt interfaces mit ifSpeed == 4294967295
+          # aber nix in dot3HCStatsTable. also dann dot3StatsTable fuer alle
+          foreach my $etherstat ($self->get_snmp_table_objects(
+              'ETHERLIKE-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
             foreach my $interface (@{$self->{interfaces}}) {
-              if ($interface->{ifIndex} == $etherstat->{dot3StatsIndex}) {
+              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
                 foreach my $key (grep /^dot3/, keys %{$etherstat}) {
                   $interface->{$key} = $etherstat->{$key};
                 }
@@ -185,9 +217,25 @@ sub init {
               }
             }
           }
-          @{$self->{interfaces}} = grep {
-              exists $_->{dot3StatsIndex};
-          } @{$self->{interfaces}};
+        }
+        if (@ethertablehc_columns && scalar(@etherhcindices)) {
+          foreach my $etherstat ($self->get_snmp_table_objects(
+              'ETHERLIKE-MIB', 'dot3HCStatsTable', \@etherhcindices, \@ethertablehc_columns)) {
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
+                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @ethertablehc_columns);
+                if (grep /^dot3HCStatsFCSErrors/, @{$interface->{columns}}) {
+                  @{$interface->{columns}} = grep {
+                    $_ if $_ ne 'dot3StatsFCSErrors';
+                  } @{$interface->{columns}};
+                }
+                last;
+              }
+            }
+          }
         }
         if (@rmontable_columns) {
           if ($self->opts->name) {
@@ -195,11 +243,9 @@ sub init {
             $self->override_opt('name', '^('.join('|', @rmonpatterns).')$');
             $self->override_opt('regexp', 1);
           }
-          # key=etherStatsDataSource-//-index, value=index
-          $self->update_entry_cache(0, 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource');
           # Value von etherStatsDataSource entspricht ifIndex 1.3.6.1.2.1.2.2.1.1.idx
           foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-              'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns)) {
+              'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns, $if_has_changed ? 1 : -1)) {
               $etherstat->{etherStatsDataSource} =~ s/^\.//g;
             foreach my $interface (@{$self->{interfaces}}) {
               if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
@@ -211,10 +257,19 @@ sub init {
               }
             }
           }
-          @{$self->{interfaces}} = grep {
-              exists $_->{etherStatsDataSource};
-          } @{$self->{interfaces}};
         }
+        # @{$self->{interfaces}} haben ein ->{columns}
+        # alle ausfiltern, die _keine_ der gewuenschten oids haben
+        @{$self->{interfaces}} = grep {
+            # check (@ethertable_columns, @rmontable_columns)
+            my $found = undef;
+            foreach my $oid (@ethertable_columns, @rmontable_columns) {
+              if (grep { $oid eq $_ } @{$_->{columns}}) {
+                $found = 1;
+              }
+            }
+            $found;
+        } @{$self->{interfaces}};
         foreach my $interface (@{$self->{interfaces}}) {
           delete $interface->{dot3StatsIndex};
           delete $interface->{etherStatsIndex};
@@ -370,7 +425,10 @@ sub update_interface_cache {
   $self->{ifTableLastChange} ||= 0;
   $self->{ifCacheLastChange} = -f $statefile ? (stat $statefile)[9] : 0;
   $self->{bootTime} = time - $self->uptime();
+  $self->debug(sprintf 'boot time was %s', scalar localtime $self->{bootTime});
+  $self->debug(sprintf 'if last change is %s', scalar localtime $self->{ifTableLastChange});
   $self->{ifTableLastChange} = $self->{bootTime} + $self->timeticks($self->{ifTableLastChange});
+  $self->debug(sprintf 'if last change is %s', scalar localtime $self->{ifTableLastChange});
   my $update_deadline = time - 3600;
   my $must_update = 0;
   if ($self->{ifCacheLastChange} < $update_deadline) {
@@ -382,7 +440,7 @@ sub update_interface_cache {
   if ($self->{ifTableLastChange} >= $self->{ifCacheLastChange}) {
     $must_update = 1;
     $self->debug(sprintf 'interface table changes newer than cache file (%s >= %s)',
-        scalar localtime $self->{ifCacheLastChange}, scalar localtime $self->{ifCacheLastChange});
+        scalar localtime $self->{ifTableLastChange}, scalar localtime $self->{ifCacheLastChange});
   }
   if ($force) {
     $must_update = 1;
@@ -404,13 +462,14 @@ sub update_interface_cache {
           $_->{ifDescr} = $1;
         }
       }
-      $self->{interface_cache}->{$_->{ifIndex}}->{ifDescr} = unpack("Z*", $_->{ifDescr});
-      $self->{interface_cache}->{$_->{ifIndex}}->{ifName} = unpack("Z*", $_->{ifName}) if exists $_->{ifName};
-      $self->{interface_cache}->{$_->{ifIndex}}->{ifAlias} = unpack("Z*", $_->{ifAlias}) if exists $_->{ifAlias};
+      $self->{interface_cache}->{$_->{flat_indices}}->{ifDescr} = unpack("Z*", $_->{ifDescr});
+      $self->{interface_cache}->{$_->{flat_indices}}->{ifName} = unpack("Z*", $_->{ifName}) if exists $_->{ifName};
+      $self->{interface_cache}->{$_->{flat_indices}}->{ifAlias} = unpack("Z*", $_->{ifAlias}) if exists $_->{ifAlias};
     }
     $self->save_interface_cache();
   }
   $self->load_interface_cache();
+  return $must_update;
 }
 
 sub save_interface_cache {
@@ -512,6 +571,9 @@ sub finish {
     next if $key !~ /^if/;
     $self->{$key} = 0 if ! defined $self->{$key};
   }
+  # Nexus 5k/6k - Memory leak in pfstat process causing hap reset CSCur11599
+  # Nexus 6.x crashen, wenn man ifIndex abfragt. Kein Kommentar
+  $self->{ifIndex} = $self->{flat_indices};
   $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
   if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
     if ($self->{ifDescr} =~ $self->opts->name2) {
