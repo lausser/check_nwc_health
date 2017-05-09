@@ -149,6 +149,7 @@ sub init {
     if (! $self->opts->name && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
+      $self->bulk_is_baeh(10);
     }
     if (! $self->opts->name || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
@@ -201,7 +202,6 @@ sub init {
           }
           @rmonpatterns = ();
         }
-
         if (@ethertable_columns) {
           # es gibt interfaces mit ifSpeed == 4294967295
           # aber nix in dot3HCStatsTable. also dann dot3StatsTable fuer alle

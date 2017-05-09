@@ -223,6 +223,7 @@ EXTRA_MODULES=\
   Classes/Juniper/SRX.pm \
   Classes/Juniper.pm \
   Classes/AlliedTelesyn.pm \
+  Classes/Fortigate/Component/DiskSubsystem.pm \
   Classes/Fortigate/Component/MemSubsystem.pm \
   Classes/Fortigate/Component/CpuSubsystem.pm \
   Classes/Fortigate/Component/EnvironmentalSubsystem.pm \
