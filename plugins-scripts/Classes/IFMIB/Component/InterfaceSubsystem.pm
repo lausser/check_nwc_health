@@ -14,7 +14,7 @@ sub init {
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
     push(@iftable_columns, qw(
-        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifInOctets ifOutOctets ifSpeed ifOperStatus ifAdminStatus
         ifHCInOctets ifHCOutOctets ifHighSpeed
         ifInErrors ifOutErrors
         ifInDiscards ifOutDiscards
