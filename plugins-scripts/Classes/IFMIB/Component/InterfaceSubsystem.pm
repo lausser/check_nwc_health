@@ -53,7 +53,7 @@ sub init {
     ));
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     push(@iftable_columns, qw(
-        ifAvailable ifType ifOperStatus ifAdminStatus ifStatusDuration
+        ifType ifOperStatus ifAdminStatus
         ifLastChange ifHighSpeed ifSpeed
     ));
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
