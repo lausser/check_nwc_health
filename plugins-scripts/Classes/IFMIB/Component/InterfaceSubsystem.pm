@@ -507,6 +507,8 @@ sub get_interface_indices {
   my ($self) = @_;
   my @indices = ();
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
+    $self->{interface_cache}->{$ifIndex}->{flat_indices} = $ifIndex;
+    $self->make_ifdescr_unique($self->{interface_cache}->{$ifIndex});
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
