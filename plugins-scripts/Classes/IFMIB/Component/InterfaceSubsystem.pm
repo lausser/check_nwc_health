@@ -117,8 +117,9 @@ sub init {
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
     my @indices = $self->get_interface_indices();
-    #foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     foreach my $ifIndex (map { $_->[0] } @indices) {
+      $self->{interface_cache}->{$ifIndex}->{flat_indices} = $ifIndex;
+      $self->make_ifdescr_unique($self->{interface_cache}->{$ifIndex});
       my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
       my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
       my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
@@ -157,6 +158,7 @@ sub init {
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
+        $self->make_ifdescr_unique($_);
         my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
@@ -330,18 +332,7 @@ sub check {
       printf "<th style=\"text-align: right; padding-left: 4px; padding-right: 6px;\">%s</th>", $_;
     }
     printf "</tr>";
-    my $unique = {};
-    foreach (@{$self->{interfaces}}) {
-      if (exists $unique->{$_->{ifDescr}}) {
-        $unique->{$_->{ifDescr}}++;
-      } else {
-        $unique->{$_->{ifDescr}} = 0;
-      }
-    }
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-      if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
-      }
       printf "<tr>";
       printf "<tr style=\"border: 1px solid black;\">";
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
@@ -360,9 +351,6 @@ sub check {
       $column_length->{$_} = length($_);
     }
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-      if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
-      }
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
         if (length($_->{$attr}) > $column_length->{$attr}) {
           $column_length->{$attr} = length($_->{$attr});
@@ -379,9 +367,6 @@ sub check {
     }
     printf "\n";
     foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-      if ($unique->{$_->{ifDescr}}) {
-        $_->{ifDescr} .= ' '.$_->{ifIndex};
-      }
       foreach my $attr (qw(ifIndex ifDescr ifType ifSpeedText ifAdminStatus ifOperStatus ifStatusDuration ifAvailable)) {
         printf $column_length->{$attr}, $_->{$attr};
       }
@@ -391,18 +376,7 @@ sub check {
   } else {
     if (scalar (@{$self->{interfaces}}) == 0) {
     } else {
-      my $unique = {};
-      foreach (@{$self->{interfaces}}) {
-        if (exists $unique->{$_->{ifDescr}}) {
-          $unique->{$_->{ifDescr}}++;
-        } else {
-          $unique->{$_->{ifDescr}} = 0;
-        }
-      }
       foreach (sort {$a->{ifIndex} <=> $b->{ifIndex}} @{$self->{interfaces}}) {
-        if ($unique->{$_->{ifDescr}}) {
-          $_->{ifDescr} .= ' '.$_->{ifIndex};
-        }
         $_->check();
       }
       if ($self->opts->report =~ /^short/) {
@@ -469,6 +443,15 @@ sub update_interface_cache {
     $self->save_interface_cache();
   }
   $self->load_interface_cache();
+  $self->{duplicates} = {};
+  foreach my $index (keys %{$self->{interface_cache}}) {
+    my $ifDescr = $self->{interface_cache}->{$index}->{ifDescr};
+    if (! exists $self->{duplicates}->{$ifDescr}) {
+      $self->{duplicates}->{$ifDescr} = 1;
+    } else {
+      $self->{duplicates}->{$ifDescr}++;
+    }
+  }
   return $must_update;
 }
 
@@ -515,11 +498,17 @@ sub load_interface_cache {
   }
 }
 
+sub make_ifdescr_unique {
+  my ($self, $if) = @_;
+  $if->{ifDescr} = $if->{ifDescr}.' '.$if->{flat_indices} if $self->{duplicates}->{$if->{ifDescr}} > 1;
+}
+
 sub get_interface_indices {
   my ($self) = @_;
   my @indices = ();
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
+    my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
     # Check ifDescr (using --name)
     if ($self->opts->name) {
