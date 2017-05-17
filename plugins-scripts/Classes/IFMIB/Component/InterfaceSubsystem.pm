@@ -118,8 +118,6 @@ sub init {
     $self->update_interface_cache(1);
     my @indices = $self->get_interface_indices();
     foreach my $ifIndex (map { $_->[0] } @indices) {
-      $self->{interface_cache}->{$ifIndex}->{flat_indices} = $ifIndex;
-      $self->make_ifdescr_unique($self->{interface_cache}->{$ifIndex});
       my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
       my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
       my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
@@ -452,6 +450,10 @@ sub update_interface_cache {
       $self->{duplicates}->{$ifDescr}++;
     }
   }
+  foreach my $index (keys %{$self->{interface_cache}}) {
+    $self->{interface_cache}->{$index}->{flat_indices} = $index;
+    $self->make_ifdescr_unique($self->{interface_cache}->{$index});
+  }
   return $must_update;
 }
 
@@ -507,8 +509,6 @@ sub get_interface_indices {
   my ($self) = @_;
   my @indices = ();
   foreach my $ifIndex (keys %{$self->{interface_cache}}) {
-    $self->{interface_cache}->{$ifIndex}->{flat_indices} = $ifIndex;
-    $self->make_ifdescr_unique($self->{interface_cache}->{$ifIndex});
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
