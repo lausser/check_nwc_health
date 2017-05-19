@@ -50,6 +50,14 @@ sub init {
       }
     } else {
       $self->init();
+      if ($self->mode =~ /device::interfaces::ifstack::status/ &&
+          $self->{productname} =~ /IOS.*((12.0\(25\)SX3)|(12.0S)|(12.1E)|(12.2)|(12.2S)|(12.3))/) {
+        # known bug in this ios release. CSCed67708
+        my ($code, $msg) = $self->check_messages(join => ', ', join_all => ', ');
+        if ($code == 1 && $msg =~ /^(([^,]+? has stack status active but no sub-layer interfaces(, )*)+)$/) {
+          $self->override_opt('negate', {'warning' => 'ok'});
+        }
+      }
     }
   } else {
     $self->no_such_mode();
