@@ -660,7 +660,7 @@ sub init {
       $self->{maxOutputRate} = 0;
     }
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
+    $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInErrors ifOutErrors));
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
         / $self->{delta_timestamp};
     $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
