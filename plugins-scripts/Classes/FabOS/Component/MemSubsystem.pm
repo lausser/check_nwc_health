@@ -27,7 +27,7 @@ sub check {
         critical => $maps eq 'enabled' ? 90 : $self->{swMemUsageLimit3});
     $self->add_message($self->check_thresholds(
         metric => 'memory_usage',
-        value => $self->check_thresholds($self->{swMemUsage})
+        value => $self->{swMemUsage},
     ));
     $self->add_perfdata(
         label => 'memory_usage',

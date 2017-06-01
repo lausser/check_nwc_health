@@ -78,6 +78,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERIVEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNOSBGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LARAMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LCOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LOADBALSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MINIIFMIB.pm \
@@ -383,6 +384,10 @@ EXTRA_MODULES=\
   Classes/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \
   Classes/Riverbed/Steelhead.pm \
   Classes/Riverbed.pm \
+  Classes/Lancom/Component/CpuSubsystem.pm \
+  Classes/Lancom/Component/EnvironmentalSubsystem.pm \
+  Classes/Lancom/Component/MemSubsystem.pm \
+  Classes/Lancom.pm \
   Classes/Device.pm
 
 SED=/bin/sed

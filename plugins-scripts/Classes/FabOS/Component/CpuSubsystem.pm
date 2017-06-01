@@ -26,7 +26,7 @@ sub check {
         critical => $maps eq 'enabled' ? 90 : $self->{swCpuUsageLimit});
     $self->add_message($self->check_thresholds(
         metric => 'cpu_usage',
-        value => $self->check_thresholds($self->{swCpuUsage})
+        value => $self->{swCpuUsage},
     ));
     $self->add_perfdata(
         label => 'cpu_usage',

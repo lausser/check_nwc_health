@@ -213,6 +213,9 @@ sub classify {
       } elsif ($self->implements_mib('STEELHEAD-MIB') || $self->implements_mib('STEELHEAD-EX-MIB')) {
         bless $self, 'Classes::Riverbed';
         $self->debug('using Classes::Riverbed');
+      } elsif ($self->implements_mib('LCOS-MIB')) {
+        bless $self, 'Classes::Lancom';
+        $self->debug('using Classes::Brocade');
       } elsif ($self->{productname} =~ /^Linux/i) {
         bless $self, 'Classes::Server::Linux';
         $self->debug('using Classes::Server::Linux');
