@@ -5,6 +5,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  my @iftable_columns = qw(ifDescr ifAlias ifOperStatus ifAdminStatus);
   $self->update_interface_cache(0);
   my @higher_indices = $self->get_interface_indices();
   if (! $self->opts->name) {
@@ -36,7 +37,7 @@ sub init {
   if (! $self->opts->name || scalar(@higher_indices) > 0) {
     my $indices = {};
     foreach ($self->get_snmp_table_objects(
-        'IFMIB', 'ifTable+ifXTable', \@indices)) {
+        'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
       my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
       $higher_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_->[0] } @higher_indices;
       $lower_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_->[0] } @lower_indices;

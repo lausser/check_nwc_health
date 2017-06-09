@@ -421,7 +421,8 @@ sub update_interface_cache {
   if ($must_update) {
     $self->debug('update of interface cache');
     $self->{interface_cache} = {};
-    foreach ($self->get_snmp_table_objects('MINI-IFMIB', 'ifTable+ifXTable', [-1])) {
+    foreach ($self->get_snmp_table_objects('MINI-IFMIB', 'ifTable+ifXTable', [-1], ['ifDescr', 'ifName', 'ifAlias'])) {
+      # auch hier explizit ifIndex vermeiden, sonst fliegen dem Rattabratha Singh die Nexus um die Ohren
       # neuerdings index+descr, weil die drecksscheiss allied telesyn ports
       # alle gleich heissen
       # und noch so ein hirnbrand: --mode list-interfaces
@@ -564,7 +565,7 @@ sub finish {
   }
   # Nexus 5k/6k - Memory leak in pfstat process causing hap reset CSCur11599
   # Nexus 6.x crashen, wenn man ifIndex abfragt. Kein Kommentar
-  $self->{ifIndex} = $self->{flat_indices};
+  $self->{ifIndex} = $self->{flat_indices} if ! exists $self->{ifIndex};
   $self->{ifDescr} = unpack("Z*", $self->{ifDescr}); # windows has trailing nulls
   if ($self->opts->name2 && $self->opts->name2 =~ /\(\.\*\?*\)/) {
     if ($self->{ifDescr} =~ $self->opts->name2) {
