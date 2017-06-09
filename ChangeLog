@@ -1,3 +1,6 @@
+* 2017-06-09 6.3.0.2
+  fix a bug in f5 member connections (Thanks Yannick Charton)
+  skip ifIndex in interface-stack-status (makes nexus crash)
 * 2017-06-07 6.3.0.1
   update glplugin
 * 2017-06-01 6.3
