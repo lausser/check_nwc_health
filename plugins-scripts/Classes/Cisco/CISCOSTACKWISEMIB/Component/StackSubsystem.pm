@@ -27,7 +27,7 @@ sub check {
   }
   $self->add_info(sprintf 'ring is %sredundant',
       $self->{cswRingRedundant} ne 'true' ? 'not ' : '');
-  if ($self->{cswRingRedundant} ne 'true') {
+  if ($self->{cswRingRedundant} ne 'true' && $self->{numSwitches} > 1) {
       $self->add_warning();
   }
   $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
