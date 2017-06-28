@@ -72,6 +72,16 @@ sub check {
               $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
           );
         }
+      } elsif ($rel->{ifStackLowerLayer} == 0 && $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifOperStatus} eq 'lowerLayerDown' && defined $self->opts->mitigation()) {
+        if ($self->mode =~ /device::interfaces::ifstack::status/) {
+          # Port-channel members are supposed to be down, for example
+          # in a firewall cluster setup.
+          # So this _could_ be a desired state. In order to allow this
+          # state, it must be mitigated.
+          $self->add_ok(sprintf '%s (%s) has stack status %s but upper interface has lowerLayerDown and no sublayer interfaces', $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
+              $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
+              $rel->{ifStackStatus});
+        }
       } elsif ($rel->{ifStackLowerLayer} == 0 && $rel->{ifStackStatus} ne 'notInService') {
         if ($self->mode =~ /device::interfaces::ifstack::status/) {
           $self->add_warning(sprintf '%s (%s) has stack status %s but no sub-layer interfaces', $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
