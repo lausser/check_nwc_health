@@ -246,7 +246,7 @@ sub check {
     # jnxBgpM2PeerRemoteAsName is "", bgpPeerAdminStatus is "start",
     # jnxBgpM2PeerState is "active"
     $self->add_message($self->{jnxBgpM2PeerRemoteAsImportant} ? CRITICAL : OK,
-        sprintf "peer %s (AS%s) state is %s (last error: %s)",
+        sprintf "peer %s (AS%s) state is %s (last error received: %s, last error sent: %s)",
         $self->{jnxBgpM2PeerRemoteAddr},
         $self->{jnxBgpM2PeerRemoteAs}.$self->{jnxBgpM2PeerRemoteAsName},
         $self->{jnxBgpM2PeerState},
