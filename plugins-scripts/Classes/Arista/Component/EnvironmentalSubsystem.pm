@@ -156,6 +156,8 @@ sub check {
         $self->{aristaEntSensorThresholdLowCritical} : '').':'.
         ($self->{aristaEntSensorThresholdHighCritical} ?
         $self->{aristaEntSensorThresholdHighCritical} : '');
+    $warn = undef if $warn eq ':';
+    $crit = undef if $crit eq ':';
   }
   $self->add_thresholds(metric => $self->{entPhysicalDescr}.'_'.$self->{entPhySensorUnitsDisplay},
       warning => $warn, critical => $crit);
