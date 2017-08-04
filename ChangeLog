@@ -1,3 +1,6 @@
+* 2017-07-17 6.3.0.6
+  fix false positives in cisco ethernet service modules SM-ES3G-24-P
+  allow mitigation of cisco disabled catalyst power supplies
 * 2017-06-28 6.3.0.5
   allow mitigation of a subLayerDown stack
 * 2017-06-20 6.3.0.4

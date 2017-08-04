@@ -36,7 +36,9 @@ sub check {
       exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.')' : '',
       $self->{cefcModuleAdminStatus},
       $self->{cefcModuleOperStatus});
-  if ($self->{cefcModuleOperStatus} eq "unknown") {
+  if ($self->{cefcModuleAdminStatus} ne 'enabled' && defined $self->opts->mitigation() && $self->opts->mitigation() == 0) {
+    $self->add_ok();
+  } if ($self->{cefcModuleOperStatus} eq "unknown") {
     $self->add_unknown();
   } elsif (grep $_ eq $self->{cefcModuleOperStatus}, @criticals) {
     $self->add_critical();

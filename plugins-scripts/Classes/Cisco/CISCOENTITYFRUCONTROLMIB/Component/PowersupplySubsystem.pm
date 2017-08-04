@@ -34,7 +34,9 @@ sub check {
       exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.' )' : '',
       $self->{cefcFRUPowerAdminStatus},
       $self->{cefcFRUPowerOperStatus});
-  if ($self->{cefcFRUPowerOperStatus} eq "on") {
+  if ($self->{cefcFRUPowerAdminStatus} eq 'off' && defined $self->opts->mitigation() && $self->opts->mitigation() == 0) {
+    $self->add_ok();
+  } elsif ($self->{cefcFRUPowerOperStatus} eq "on") {
   } elsif ($self->{cefcFRUPowerOperStatus} eq "unknown") {
     $self->add_unknown();
   } elsif ($self->{cefcFRUPowerOperStatus} eq "onButFanFail") {
