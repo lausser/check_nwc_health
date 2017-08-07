@@ -1,3 +1,5 @@
+* 2017-08-07 6.3.0.8
+  fix C3750 redundant power supplies
 * 2017-08-04 6.3.0.7
   fix undefined thresholds in arista sensors
 * 2017-07-17 6.3.0.6

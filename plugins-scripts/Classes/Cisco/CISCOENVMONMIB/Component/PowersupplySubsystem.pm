@@ -23,6 +23,16 @@ sub check {
   if ($self->{ciscoEnvMonSupplyState} eq 'notPresent') {
   } elsif ($self->{ciscoEnvMonSupplyState} eq 'warning') {
     $self->add_warning();
+  } elsif ($self->{ciscoEnvMonSupplyState} eq 'critical' &&
+      $self->{ciscoEnvMonSupplyStatusDescr} =~
+      /Sw\d+, PS\d+ Critical, RPS Normal/) {
+    # 4.8.2017:
+    # Der Netzwerktechniker on site sagt mir, dass das aber so normal ist,
+    # weil die Netzteile nicht angeschlossen sind, und der switch
+    # nur ueber "RPS" seinen Saft bezieht. Gut ich kenn mich mit dem Geraffel
+    # nicht aus, also glaube ich ihm das mal.
+    # Gruesse, aus dem gerade extrem heissen Athen.
+    $self->add_ok();
   } elsif ($self->{ciscoEnvMonSupplyState} ne 'normal') {
     $self->add_critical();
   }
