@@ -45,8 +45,13 @@ use strict;
 
 sub check {
   my $self = shift;
-  $self->add_info(sprintf "power supply %s (%s) is %s",
+  if ($self->{nsPowerDesc}) {
+    $self->add_info(sprintf "power supply %s (%s) is %s",
       $self->{nsPowerId}, $self->{nsPowerDesc}, $self->{nsPowerStatus});
+  } else {
+    $self->add_info(sprintf "power supply %s is %s",
+      $self->{nsPowerId}, $self->{nsPowerStatus});
+  }
   if ($self->{nsPowerStatus} eq "good") {
     $self->add_ok();
   } elsif ($self->{nsPowerStatus} eq "fail") {
