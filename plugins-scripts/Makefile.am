@@ -54,6 +54,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ELTEXMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSTATEMIB.pm \
@@ -375,6 +376,13 @@ EXTRA_MODULES=\
   Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
   Classes/Cumulus.pm \
+  Classes/Eltex/Access/Component/EnvironmentalSubsystem.pm \
+  Classes/Eltex/Access.pm \
+  Classes/Eltex/Aggregation/Component/EnvironmentalSubsystem.pm \
+  Classes/Eltex/Aggregation.pm \
+  Classes/Eltex/MES/Component/CpuSubsystem.pm \
+  Classes/Eltex/MES/Component/HaSubsystem.pm \
+  Classes/Eltex.pm \
   Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
@@ -438,4 +446,3 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "package main;" >> $@
 	$(CAT) $(libexec_SCRIPTS).pl | $(AWK) -f ./subst >> $@
 	chmod +x $@
-

@@ -31,6 +31,7 @@ sub classify {
       $self->{productname} = 'hh3c' if $self->opts->servertype eq 'hh3c';
       $self->{productname} = 'hp' if $self->opts->servertype eq 'hp';
       $self->{productname} = 'brocade' if $self->opts->servertype eq 'brocade';
+      $self->{productname} = 'eltex' if $self->opts->servertype eq 'eltex';
       $self->{productname} = 'netscreen' if $self->opts->servertype eq 'netscreen';
       $self->{productname} = 'junos' if $self->opts->servertype eq 'junos';
       $self->{productname} = 'linuxlocal' if $self->opts->servertype eq 'linuxlocal';
@@ -90,6 +91,9 @@ sub classify {
       } elsif ($self->{productname} =~ /(Linux cumulus)|(Cumulus Linux)/i) {
         bless $self, 'Classes::Cumulus';
         $self->debug('using Classes::Cumulus');
+      } elsif ($self->{productname} =~ /MES/i) {
+        bless $self, 'Classes::Eltex';
+        $self->debug('using Classes::Eltex');
       } elsif ($self->{productname} =~ /DS_4100/i) {
         bless $self, 'Classes::Brocade';
         $self->debug('using Classes::Brocade');
@@ -179,7 +183,7 @@ sub classify {
         bless $self, 'Classes::Foundry';
         $self->debug('using Classes::Foundry');
       } elsif ($self->{productname} =~ /IronWare/i) {
-        # although there can be a 
+        # although there can be a
         # Brocade Communications Systems, Inc. FWS648, IronWare Version 07.1....
         bless $self, 'Classes::Foundry';
         $self->debug('using Classes::Foundry');
@@ -274,4 +278,3 @@ sub init {
     $self->no_such_mode();
   }
 }
-
