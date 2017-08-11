@@ -1,3 +1,7 @@
+* 2017-08-11 6.4
+  implement eltex gear (pull request #144)
+  fix a perl-undef in Juniper BGP (pull request #143)
+  nsPowerDesc can be null (pullrequest #134)
 * 2017-08-07 6.3.0.8
   fix C3750 redundant power supplies
 * 2017-08-04 6.3.0.7
