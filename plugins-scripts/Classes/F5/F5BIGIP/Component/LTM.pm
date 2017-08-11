@@ -432,7 +432,7 @@ sub check {
     }
   }
   if ($self->mode =~ /device::lb::pool::co.*ctions/) {
-    my $label = 'pool_'.$self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
+    my $label = 'member_'.$self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
     $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
     $self->add_info(sprintf "member %s:%s has %d connections (from max %dM)",
         $self->{ltmPoolMemberNodeName},
