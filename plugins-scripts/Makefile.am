@@ -64,6 +64,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCMGMTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETFORTIGATEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNAGENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
@@ -235,6 +236,7 @@ EXTRA_MODULES=\
   Classes/FabOS/Component/CpuSubsystem.pm \
   Classes/FabOS/Component/EnvironmentalSubsystem.pm \
   Classes/FabOS/Component/SensorSubsystem.pm \
+  Classes/FabOS/Component/FCInterfaceSubsystem.pm \
   Classes/FabOS.pm \
   Classes/HH3C/Component/EntitySubsystem.pm \
   Classes/HH3C/Component/EnvironmentalSubsystem.pm \

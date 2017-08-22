@@ -162,6 +162,42 @@ $plugin->add_mode(
     help => 'Check the status of vpns (up/down)',
 );
 $plugin->add_mode(
+    internal => 'device::fcinterfaces::usage',
+    spec => 'fc-interface-usage',
+    alias => undef,
+    help => 'Check the utilization of fibrechannel interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::errors',
+    spec => 'fc-interface-errors',
+    alias => undef,
+    help => 'Check the error-rate of fibrechannel interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::discards',
+    spec => 'fc-interface-discards',
+    alias => undef,
+    help => 'Check the discard-rate of interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::operstatus',
+    spec => 'fc-interface-status',
+    alias => undef,
+    help => 'Check the status of interfaces (oper/admin)',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::complete',
+    spec => 'fc-interface-health',
+    alias => undef,
+    help => 'Check everything interface',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::list',
+    spec => 'fc-list-interfaces',
+    alias => undef,
+    help => 'Show the fcal interfaces of the device and update the name cache',
+);
+$plugin->add_mode(
     internal => 'device::shinken::interface',
     spec => 'create-shinken-service',
     alias => undef,

@@ -157,6 +157,9 @@ sub init {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
         $self->make_ifdescr_unique($_);
+if (exists $self->{interface_enhancements}) {
+ printf "i enhance my interface\n";
+}
         my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
