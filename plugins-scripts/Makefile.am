@@ -236,7 +236,7 @@ EXTRA_MODULES=\
   Classes/FabOS/Component/CpuSubsystem.pm \
   Classes/FabOS/Component/EnvironmentalSubsystem.pm \
   Classes/FabOS/Component/SensorSubsystem.pm \
-  Classes/FabOS/Component/FCInterfaceSubsystem.pm \
+  Classes/FabOS/Component/InterfaceSubsystem.pm \
   Classes/FabOS.pm \
   Classes/HH3C/Component/EntitySubsystem.pm \
   Classes/HH3C/Component/EnvironmentalSubsystem.pm \

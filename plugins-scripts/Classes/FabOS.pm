@@ -11,8 +11,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("Classes::FabOS::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::FabOS::Component::MemSubsystem");
-  } elsif ($self->mode =~ /device::fcinterfaces/) {
-    $self->analyze_and_check_fcinterface_subsystem("Classes::FabOS::Component::FCInterfaceSubsystem");
+  } elsif ($self->mode =~ /device::interfaces/) {
+    $self->analyze_and_check_interface_subsystem("Classes::FabOS::Component::InterfaceSubsystem");
   } else {
     $self->no_such_mode();
   }

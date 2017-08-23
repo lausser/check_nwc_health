@@ -1,4 +1,4 @@
-package Classes::FabOS::Component::FCInterfaceSubsystem;
+package Classes::FabOS::Component::InterfaceSubsystem;
 our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem);
 
 sub init {
