@@ -1,3 +1,5 @@
+* 2017-08-24 6.4.0.2
+  update glplugin, sw-mib fix
 * 2017-08-24 6.4.0.1
   replace empty ifAlias with swFCPortName for FabOS (Brocade) devices
   merge pr #147, thanks arigaud. skip undef temperatured of foundry devices
