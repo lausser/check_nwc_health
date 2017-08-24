@@ -56,7 +56,7 @@ sub finish {
   my $self = shift;
   ($self->{snAgentTempSlotNum}, $self->{snAgentTempSensorId}) =
       @{$self->{indices}};
-  $self->{snAgentTempValue} /= 2;
+  $self->{snAgentTempValue} /= 2 if ($self->{snAgentTempValue});
   $self->{label} = sprintf 'temperature_%s:%s',
       $self->{snAgentTempSensorId},
       $self->{snAgentTempSlotNum};
@@ -64,6 +64,7 @@ sub finish {
 
 sub check {
   my $self = shift;
+  return if (!$self->{snAgentTempValue});
   $self->add_info(sprintf 'temperature %s in slot %s is %.2fC', 
       $self->{snAgentTempSensorId},
       $self->{snAgentTempSlotNum}, $self->{snAgentTempValue});
