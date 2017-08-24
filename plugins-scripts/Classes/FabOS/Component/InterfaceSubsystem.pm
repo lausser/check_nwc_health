@@ -41,7 +41,7 @@ sub enrich_interface_attributes {
             $self->{interface_cache}->{$index}->{swFCPortName};
         $interface->{swFCPortIndex} =
             $self->{interface_cache}->{$index}->{swFCPortIndex};
-        if (! $interface->{ifAlias}) {
+        if (! $interface->{ifAlias} || $interface->{ifAlias} eq '________') {
           $interface->{ifAlias} = $interface->{swFCPortName};
         }
       }
