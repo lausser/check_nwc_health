@@ -121,15 +121,17 @@ sub init {
       my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
       my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName} || '________';
       my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
-      push(@{$self->{interfaces}},
-          Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(
-              ifIndex => $ifIndex,
-              ifDescr => $ifDescr,
-              ifName => $ifName,
-              ifAlias => $ifAlias,
-              indices => [$ifIndex],
-              flat_indices => $ifIndex,
-          ));
+      my $interface_class = ref($self)."::Interface";
+      my $interface = $interface_class->new(
+          ifIndex => $ifIndex,
+          ifDescr => $ifDescr,
+          ifName => $ifName,
+          ifAlias => $ifAlias,
+          indices => [$ifIndex],
+          flat_indices => $ifIndex,
+      );
+      $self->enrich_interface_attributes($interface);
+      push(@{$self->{interfaces}}, $interface);
     }
     # die sind mit etherStatsDataSource verknuepft
   } elsif ($self->mode =~ /device::interfaces/) {
@@ -157,10 +159,9 @@ sub init {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
         $self->make_ifdescr_unique($_);
-if (exists $self->{interface_enhancements}) {
- printf "i enhance my interface\n";
-}
-        my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
+        $self->enrich_interface_attributes($_);
+        my $interface_class = ref($self)."::Interface";
+        my $interface = $interface_class->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
       }
@@ -442,6 +443,7 @@ sub update_interface_cache {
       $self->{interface_cache}->{$_->{flat_indices}}->{ifName} = unpack("Z*", $_->{ifName}) if exists $_->{ifName};
       $self->{interface_cache}->{$_->{flat_indices}}->{ifAlias} = unpack("Z*", $_->{ifAlias}) if exists $_->{ifAlias};
     }
+    $self->enrich_interface_cache();
     $self->save_interface_cache();
   }
   $self->load_interface_cache();
@@ -459,6 +461,13 @@ sub update_interface_cache {
     $self->make_ifdescr_unique($self->{interface_cache}->{$index});
   }
   return $must_update;
+}
+
+sub enrich_interface_cache {
+  my ($self) = @_;
+  # a dummy method. it can be used in Classes::XY::Component::InterfaceSubsystem
+  # to add for example vendor-specific port names to the interface cache
+  # which has been collected by get_snmp_tables(vendor-mib, tablexy, xyPortName
 }
 
 sub save_interface_cache {
@@ -552,6 +561,12 @@ sub get_interface_indices {
     }
   }
   return @indices;
+}
+
+sub enrich_interface_attributes {
+  my ($self, $interface) = @_;
+  # can be used by vendor-specific InterfaceSubsystem to add extra
+  # attributes
 }
 
 
