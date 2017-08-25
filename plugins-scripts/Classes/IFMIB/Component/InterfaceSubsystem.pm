@@ -113,6 +113,8 @@ sub init {
           etherStatsDataSource
       ));
     }
+  } else {
+    @iftable_columns = ();
   }
   if ($self->mode =~ /device::interfaces::list/) {
     $self->update_interface_cache(1);
