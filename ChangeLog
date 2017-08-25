@@ -1,3 +1,5 @@
+* 2017-08-25 6.4.1
+  add vpn-status for checkpoint
 * 2017-08-25 6.4.0.4
   fix brocade aliasing in interface-status
 * 2017-08-24 6.4.0.3
