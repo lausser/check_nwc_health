@@ -19,6 +19,8 @@ sub init {
   } elsif ($self->mode =~ /device::mngmt::/) {
     # not sure if this works fa25239716cb74c672f8dd390430dc4056caffa7
     $self->analyze_and_check_mngmt_subsystem("Classes::CheckPoint::Firewall1::Component::MngmtSubsystem");
+  } elsif ($self->mode =~ /device::vpn::status/) {
+    $self->analyze_and_check_config_subsystem("Classes::CheckPoint::Firewall1::Component::VpnSubsystem");
   } else {
     $self->no_such_mode();
   }
