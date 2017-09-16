@@ -1,3 +1,5 @@
+* 2017-09-16 6.4.1.2
+  workaround for CSCuv18572
 * 2017-09-13 6.4.1.1
   fix hostresourcemib, interface sit0 can be down by default
   (is disabled in Cisco UC)
