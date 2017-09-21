@@ -46,6 +46,26 @@ sub init {
   }
   $self->{higher_interfaces} = $higher_interfaces;
   $self->{lower_interfaces} = $lower_interfaces;
+  $self->arista_schlamperei();
+}
+
+sub arista_schlamperei {
+  my ($self) = @_;
+  # sowas hier. 
+  # IF-MIB::ifStackStatus.0.1000004 = INTEGER: active(1)
+  # IF-MIB::ifStackStatus.1000004.0 = INTEGER: active(1)
+  # IF-MIB::ifStackStatus.1000004.50 = INTEGER: active(1)
+  my @liars = map {
+    $_->{ifStackHigherLayer}
+  } grep {
+    exists $self->{higher_interfaces}->{$_->{ifStackHigherLayer}}
+  } grep {
+    $_->{ifStackLowerLayer} == 0
+  } @{$self->{stacks}};
+  @{$self->{stacks}} = grep {
+      my $ref = $_;
+      ! ($ref->{ifStackLowerLayer} == 0 && grep /^$ref->{ifStackHigherLayer}$/, @liars)
+  } @{$self->{stacks}};
 }
 
 sub check {
