@@ -4,10 +4,15 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->establish_snmp_secondary_session();
   $self->get_snmp_tables('OSPF-MIB', [
     ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', , sub { my $o = shift; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
   ]);
+  if ($self->establish_snmp_secondary_session()) {
+    $self->clear_table_cache('OSPF-MIB', 'ospfNbrTable');
+    $self->get_snmp_tables('OSPF-MIB', [
+      ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', , sub { my $o = shift; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+    ]);
+  }
   if (! @{$self->{nbr}}) {
     $self->add_unknown("no neighbors found");
   }
