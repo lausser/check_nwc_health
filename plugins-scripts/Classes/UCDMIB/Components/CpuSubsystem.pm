@@ -4,13 +4,44 @@ use strict;
 
 sub init {
   my $self = shift;
-  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
-      ssCpuUser ssCpuSystem ssCpuIdle ssCpuRawUser ssCpuRawSystem ssCpuRawIdle
-      ssCpuRawNice ssCpuRawWait ssCpuRawKernel ssCpuRawInterrupt)));
-  $self->valdiff({name => 'cpu'}, qw(
-      ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice ssCpuRawWait
-      ssCpuRawKernel ssCpuRawInterrupt));
+  my %params = @_;
+  my $type = 0;
+  $self->get_snmp_tables('UCD-SNMP-MIB', [
+      ['stats', 'systemStats', 'Classes::UCDMIB::Component::CpuSubsystem::Stats'],
+  ]);
+}
+
+sub check {
+  my $self = shift;
+  $self->add_info('checking system stats');
+  foreach (@{$self->{stats}}) {
+    $_->check();
+  }
+}
+
+sub dump {
+  my $self = shift;
+  foreach (@{$self->{stats}}) {
+    $_->dump();
+  }
+}
+
+package Classes::UCDMIB::Component::CpuSubsystem::Stats;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub check {
+  my $self = shift;
+
+  # check which attribute exists otherwise valdiff will throw undefined errors
+  my @deltas;
+  foreach (qw(ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice ssCpuRawWait
+      ssCpuRawKernel ssCpuRawInterrupt)) {
+    push @deltas, $_ if defined($self->{$_});
+  }
+  $self->valdiff({name => 'cpu'}, @deltas);
   my $cpu_total = 0;
+
   # not every kernel/snmpd supports every counters
   foreach (qw(delta_ssCpuRawUser delta_ssCpuRawSystem delta_ssCpuRawIdle
     delta_ssCpuRawNice delta_ssCpuRawWait delta_ssCpuRawKernel
@@ -47,11 +78,8 @@ sub init {
     $self->{interrupt_usage} =
         $cpu_total == 0 ? 0 : ($self->{delta_ssCpuRawInterrupt} / $cpu_total) * 100;
   }
-}
 
-sub check {
-  my $self = shift;
-  $self->add_info('checking cpus');
+  # add message/thresholds/perfdata
   foreach (qw(cpu user system nice wait kernel interrupt)) {
     my $key = $_ . '_usage';
     if (defined($self->{$key})) {
