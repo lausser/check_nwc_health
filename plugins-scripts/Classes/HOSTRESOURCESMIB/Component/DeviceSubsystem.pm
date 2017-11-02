@@ -32,6 +32,8 @@ sub check {
     $self->add_warning();
   } elsif ($self->{hrDeviceStatus} =~ /down/ && ! (
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sysfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sunrpc' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /CDROM/ ||
       $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'sit0'
     )) {
     $self->add_critical();
