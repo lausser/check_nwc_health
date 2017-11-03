@@ -24,9 +24,13 @@ sub init {
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::F5::F5BIGIP::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::lb/) {
-    $self->analyze_and_check_ltm_subsystem();
+    if ($self->opts->role && $self->opts->role eq "gtm") {
+      $self->analyze_and_check_gtm_subsystem("Classes::F5::F5BIGIP::Component::GTMSubsystem");
+    } else {
+      $self->analyze_and_check_ltm_subsystem();
+    }
   } elsif ($self->mode =~ /device::wideip/) {
-    $self->analyze_and_check_mem_subsystem("Classes::F5::F5BIGIP::Component::GTMSubsystem");
+    $self->analyze_and_check_gtm_subsystem("Classes::F5::F5BIGIP::Component::GTMSubsystem");
   } else {
     $self->no_such_mode();
   }
