@@ -92,7 +92,7 @@ sub load_device_cache {
       require $statefile;
     };
     if($@) {
-      printf "rumms\n";
+      printf "FATAL: Could not load cache!\n";
     }
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{device_cache} = $VAR1;
