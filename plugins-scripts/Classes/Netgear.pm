@@ -9,3 +9,9 @@ sub init {
   $self->no_such_mode();
 }
 
+sub pretty_sysdesc {
+  my ($self, $sysDescr) = @_;
+  if ($sysDescr =~ /GS\d+TP/) {
+    return 'Netgear '.$sysDescr;
+  }
+}

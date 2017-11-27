@@ -22,3 +22,9 @@ sub init {
   }
 }
 
+sub pretty_sysdesc {
+  my ($self, $sysDescr) = @_;
+  if ($sysDescr =~ /(Cisco NX-OS.*? n\d+),.*(Version .*), RELEASE SOFTWARE/) {
+    return $1.' '.$2;
+  }
+}
