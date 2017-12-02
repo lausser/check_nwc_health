@@ -497,7 +497,7 @@ sub load_interface_cache {
       require $statefile;
     };
     if($@) {
-      printf "rumms\n";
+      printf "FATAL: Could not load cache!\n";
     }
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{interface_cache} = $VAR1;
