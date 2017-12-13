@@ -13,6 +13,9 @@ sub init {
   } elsif ($self->{productname} =~ /6490/) {
     bless $self, 'Classes::UPNP::AVM::FritzBox7390';
     $self->debug('using Classes::UPNP::AVM::FritzBox7390');
+  } elsif ($self->{productname} =~ /7412/) {
+    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
+    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
   } else {
     $self->no_such_model();
   }
