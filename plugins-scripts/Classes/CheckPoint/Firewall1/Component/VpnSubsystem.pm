@@ -29,6 +29,9 @@ sub finish {
   $self->{flat_indices} =~ /^(\d+\.\d+\.\d+\.\d+)/;
   $self->{tunnelPeerIpAddr} ||= $1;
   $self->{tunnelPeerObjName} ||= $self->{tunnelPeerIpAddr};
+  if (! defined $self->{tunnelState}) {
+    $self->{tunnelState} = $self->get_snmp_object('CHECKPOINT-MIB', 'tunnelState', $self->{tunnelPeerIpAddr});
+  }
 }
 
 sub check {
@@ -51,6 +54,9 @@ sub finish {
   $self->{flat_indices} =~ /^(\d+\.\d+\.\d+\.\d+)/;
   $self->{permanentTunnelPeerIpAddr} ||= $1;
   $self->{permanentTunnelPeerObjName} ||= $self->{permanentTunnelPeerIpAddr};
+  if (! defined $self->{permanentTunnelState}) {
+    $self->{permanentTunnelState} = $self->get_snmp_object('CHECKPOINT-MIB', 'permanentTunnelState', $self->{permanentTunnelPeerIpAddr});
+  }
 }
 
 sub check {
