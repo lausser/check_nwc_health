@@ -4,18 +4,21 @@ use strict;
 
 sub init {
   my $self = shift;
+  my @all_cpu_metrics = qw(
+      ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice
+      ssCpuRawWait ssCpuRawKernel ssCpuRawInterrupt
+  );
   $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
       ssCpuUser ssCpuSystem ssCpuIdle ssCpuRawUser ssCpuRawSystem ssCpuRawIdle
       ssCpuRawNice ssCpuRawWait ssCpuRawKernel ssCpuRawInterrupt)));
-  $self->valdiff({name => 'cpu'}, qw(
-      ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice ssCpuRawWait
-      ssCpuRawKernel ssCpuRawInterrupt));
+  @all_cpu_metrics = grep {
+    # not every kernel/snmpd supports every counter
+    defined $self->{$_};
+  } @all_cpu_metrics;
+  $self->valdiff({name => 'cpu'}, @all_cpu_metrics);
   my $cpu_total = 0;
-  # not every kernel/snmpd supports every counters
-  foreach (qw(delta_ssCpuRawUser delta_ssCpuRawSystem delta_ssCpuRawIdle
-    delta_ssCpuRawNice delta_ssCpuRawWait delta_ssCpuRawKernel
-    delta_ssCpuRawInterrupt)) {
-    $cpu_total += $self->{$_} if defined($self->{$_});
+  foreach (@all_cpu_metrics) {
+    $cpu_total += $self->{'delta_'.$_};
   }
 
   # main cpu usage (total - idle)
@@ -54,7 +57,7 @@ sub check {
   $self->add_info('checking cpus');
   foreach (qw(cpu user system nice wait kernel interrupt)) {
     my $key = $_ . '_usage';
-    if (defined($self->{$key})) {
+    if (exists $self->{$key}) {
       $self->add_info(sprintf '%s: %.2f%%',
           $_ . ($_ eq 'cpu' ? ' (total)' : ''),
 	  $self->{$key});
