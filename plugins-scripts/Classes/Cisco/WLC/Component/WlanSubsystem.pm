@@ -21,6 +21,7 @@ sub init {
         ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
     ]);
     $self->assign_loads_to_ifs();
+    $self->dummy_loads_to_ifs();
     $self->assign_ifs_to_aps();
   }
 }
@@ -126,6 +127,12 @@ sub assign_loads_to_ifs {
       if ($load->{flat_indices} eq $if->{flat_indices}) {
         map { $if->{$_} = $load->{$_} } grep { $_ !~ /indices/ } keys %{$load};
       }
+    }
+    if (! exists $if->{bsnAPIfLoadNumOfClients}) {
+      # sometimes there is no corresponding load entry for an interface
+      $if->{bsnAPIfLoadNumOfClients} = 0;
+      $if->{bsnAPIfLoadTxUtilization} = 0;
+      $if->{bsnAPIfLoadRxUtilization} = 0;
     }
   }
 }
