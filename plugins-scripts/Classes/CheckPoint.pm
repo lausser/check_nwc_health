@@ -8,7 +8,8 @@ use constant trees => (
 
 sub init {
   my $self = shift;
-  if (defined $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled')) {
+  if (defined $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled') &&
+    $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled') != 0) {
     bless $self, 'Classes::CheckPoint::VSX';
     $self->debug('using Classes::CheckPoint::VSX');
   #} elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'fwProduct') || $self->{productname} =~ /(FireWall\-1\s)|(cpx86_64)|(Linux.*\dcp )/i) {
