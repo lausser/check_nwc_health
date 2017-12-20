@@ -113,6 +113,13 @@ sub init {
           etherStatsDataSource
       ));
     }
+  } elsif ($self->mode =~ /device::interfaces::duplex/) {
+    push(@iftable_columns, qw(
+        ifType ifSpeed ifOperStatus ifAdminStatus ifHighSpeed
+    ));
+    push(@ethertable_columns, qw(
+        dot3StatsDuplexStatus
+    ));
   } else {
     @iftable_columns = ();
   }
@@ -212,7 +219,7 @@ sub init {
           # es gibt interfaces mit ifSpeed == 4294967295
           # aber nix in dot3HCStatsTable. also dann dot3StatsTable fuer alle
           foreach my $etherstat ($self->get_snmp_table_objects(
-              'ETHERLIKE-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
+              'EtherLike-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
             foreach my $interface (@{$self->{interfaces}}) {
               if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
                 foreach my $key (grep /^dot3/, keys %{$etherstat}) {
@@ -226,7 +233,7 @@ sub init {
         }
         if (@ethertablehc_columns && scalar(@etherhcindices)) {
           foreach my $etherstat ($self->get_snmp_table_objects(
-              'ETHERLIKE-MIB', 'dot3HCStatsTable', \@etherhcindices, \@ethertablehc_columns)) {
+              'EtherLike-MIB', 'dot3HCStatsTable', \@etherhcindices, \@ethertablehc_columns)) {
             foreach my $interface (@{$self->{interfaces}}) {
               if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
                 foreach my $key (grep /^dot3/, keys %{$etherstat}) {
@@ -286,7 +293,36 @@ sub init {
           $interface->init_etherstats;
         }
         if (scalar(@{$self->{interfaces}}) == 0) {
-          $self->add_unknown('device probably has no RMON-MIB or ETHERLIKE-MIB');
+          $self->add_unknown('device probably has no RMON-MIB or EtherLike-MIB');
+        }
+      } elsif ($self->mode =~ /device::interfaces::duplex/) {
+        @indices = @save_indices;
+        my @etherindices = ();
+        my @etherhcindices = ();
+        foreach my $interface (@{$self->{interfaces}}) {
+          push(@selected_indices, [$interface->{ifIndex}]);
+          if (@ethertablehc_columns && $interface->{ifSpeed} == 4294967295) {
+            push(@etherhcindices, [$interface->{ifIndex}]);
+          }
+          push(@etherindices, [$interface->{ifIndex}]);
+        }
+        $self->debug(
+            sprintf 'all_interfaces %d, selected %d, ether %d, etherhc %d',
+                scalar(@all_indices), scalar(@selected_indices),
+                scalar(@etherindices), scalar(@etherhcindices));
+        if (@ethertable_columns) {
+          foreach my $etherstat ($self->get_snmp_table_objects(
+              'EtherLike-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
+            foreach my $interface (@{$self->{interfaces}}) {
+              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
+                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                  $interface->{$key} = $etherstat->{$key};
+                }
+                push(@{$interface->{columns}}, @ethertable_columns);
+                last;
+              }
+            }
+          }
         }
       }
     }
@@ -592,28 +628,31 @@ sub finish {
       $self->{ifDescr} = $1;
     }
   }
-  # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
-  # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
-  if ($self->{ifName} && defined $self->{ifHCInOctets} && 
-      defined $self->{ifHCOutOctets} && $self->{ifHCInOctets} ne "noSuchObject") {
-    $self->{ifAlias} ||= $self->{ifName};
-    $self->{ifName} = unpack("Z*", $self->{ifName});
-    $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
-    $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
-    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
-  }
-  if ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
-      $self->mode =~ /device::interfaces::(usage|complete)/) ||
-      (! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
-      $self->mode =~ /device::interfaces::(errors|complete)/) ||
-      (! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
-      $self->mode =~ /device::interfaces::(discards|complete)/) ||
-      (! exists $self->{ifInUcastPkts} && ! exists $self->{ifOutUcastPkts} &&
-      $self->mode =~ /device::interfaces::(broadcast|complete)/)) {
-    bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
-  }
-  if ($self->{ifPhysAddress}) {
-    $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
+  if ($self->mode =~ /device::interfaces::duplex/) {
+  } else {
+    # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
+    # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
+    if ($self->{ifName} && defined $self->{ifHCInOctets} && 
+        defined $self->{ifHCOutOctets} && $self->{ifHCInOctets} ne "noSuchObject") {
+      $self->{ifAlias} ||= $self->{ifName};
+      $self->{ifName} = unpack("Z*", $self->{ifName});
+      $self->{ifAlias} = unpack("Z*", $self->{ifAlias});
+      $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
+      bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
+    }
+    if ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
+        $self->mode =~ /device::interfaces::(usage|complete)/) ||
+        (! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
+        $self->mode =~ /device::interfaces::(errors|complete)/) ||
+        (! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
+        $self->mode =~ /device::interfaces::(discards|complete)/) ||
+        (! exists $self->{ifInUcastPkts} && ! exists $self->{ifOutUcastPkts} &&
+        $self->mode =~ /device::interfaces::(broadcast|complete)/)) {
+      bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
+    }
+    if ($self->{ifPhysAddress}) {
+      $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
+    }
   }
   $self->init();
 }
@@ -768,6 +807,26 @@ sub init_etherstats {
           100 * $self->{'delta_'.$stat} /
           ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
     }
+  } elsif ($self->mode =~ /device::interfaces::duplex/) {
+printf "%s\n", Data::Dumper::Dumper($self);
+    if (! defined $self->{dot3StatsDuplexStatus} && $self->{ifType} !~ /ether/i) {
+printf "123\n";
+        $self->{dot3StatsDuplexStatus} = "notApplicable";
+    } elsif (! defined $self->{dot3StatsDuplexStatus} && $self->implements_mib('EtherLike-MIB')) {
+printf "11123\n";
+      if (defined $self->opts->mitigation() &&
+          $self->opts->mitigation() eq 'ok') {
+printf "a11123\n";
+        $self->{dot3StatsDuplexStatus} = "fullDuplex";
+      } else {
+printf "b11123\n";
+        $self->{dot3StatsDuplexStatus} = "unknown";
+      }
+    } else {
+printf "811123\n";
+      $self->{dot3StatsDuplexStatus} = "unknown";
+    }
+printf "after%s\n", Data::Dumper::Dumper($self);
   }
   return $self;
 }
@@ -1023,6 +1082,25 @@ sub check {
           uom => '%',
       );
     }
+  } elsif ($self->mode =~ /device::interfaces::duplex/) {
+    $self->add_info(sprintf "%s duplex status is %s",
+        $self->{ifDescr}, $self->{dot3StatsDuplexStatus}
+    );
+    if ($self->{ifOperStatus} ne "up") {
+      $self->annotate_info(sprintf "oper %s", $self->{ifOperStatus});
+      $self->add_ok();
+    } elsif ($self->{dot3StatsDuplexStatus} eq "notApplicable") {
+      $self->add_ok();
+    } else {
+      if ($self->{dot3StatsDuplexStatus} eq "unknown") {
+        $self->add_unknown();
+      } elsif ($self->{dot3StatsDuplexStatus} eq "fullDuplex") {
+        $self->add_ok();
+      } else {
+        # kein critical, weil so irgendwie funktionierts ja
+        $self->add_warning();
+      }
+    }
   }
 }
 
@@ -1173,6 +1251,8 @@ sub check {
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
           " (alias ".$self->{ifAlias}.")" : "";
   if ($self->mode =~ /device::interfaces::operstatus/) {
+    $self->SUPER::check();
+  } elsif ($self->mode =~ /device::interfaces::duplex/) {
     $self->SUPER::check();
   } else {
     $self->add_ok(sprintf '%s has no traffic', $full_descr);

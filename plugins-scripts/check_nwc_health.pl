@@ -77,6 +77,12 @@ $plugin->add_mode(
     help => 'Check the status of interfaces (oper/admin)',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::duplex',
+    spec => 'interface-duplex',
+    alias => undef,
+    help => 'Check if interfaces operate in duplex mode',
+);
+$plugin->add_mode(
     internal => 'device::interfaces::complete',
     spec => 'interface-health',
     alias => undef,
