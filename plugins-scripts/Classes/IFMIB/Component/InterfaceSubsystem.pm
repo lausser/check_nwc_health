@@ -25,6 +25,9 @@ sub init {
         ifHCInBroadcastPkts ifHCOutBroadcastPkts
         ifHCInUcastPkts ifHCOutUcastPkts
     ));
+    # kostenpflichtiges feature # push(@ethertable_columns, qw(
+    #    dot3StatsDuplexStatus
+    #));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     push(@iftable_columns, qw(
         ifInOctets ifOutOctets ifSpeed ifOperStatus
@@ -174,7 +177,8 @@ sub init {
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
       }
-      if ($self->mode =~ /device::interfaces::etherstats/) {
+      # kostenpflichtiges feature # if ($self->mode =~ /device::interfaces::(duplex|etherstats|complete)/) {
+      if ($self->mode =~ /device::interfaces::(duplex|etherstats)/) {
         @indices = @save_indices;
         my @etherindices = ();
         my @etherhcindices = ();
@@ -224,8 +228,8 @@ sub init {
               if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
                 foreach my $key (grep /^dot3/, keys %{$etherstat}) {
                   $interface->{$key} = $etherstat->{$key};
+                  push(@{$interface->{columns}}, $key);
                 }
-                push(@{$interface->{columns}}, @ethertable_columns);
                 last;
               }
             }
@@ -238,8 +242,8 @@ sub init {
               if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
                 foreach my $key (grep /^dot3/, keys %{$etherstat}) {
                   $interface->{$key} = $etherstat->{$key};
+                  push(@{$interface->{columns}}, $key);
                 }
-                push(@{$interface->{columns}}, @ethertablehc_columns);
                 if (grep /^dot3HCStatsFCSErrors/, @{$interface->{columns}}) {
                   @{$interface->{columns}} = grep {
                     $_ if $_ ne 'dot3StatsFCSErrors';
@@ -264,8 +268,8 @@ sub init {
               if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
                 foreach my $key (grep /^etherStats/, keys %{$etherstat}) {
                   $interface->{$key} = $etherstat->{$key};
+                  push(@{$interface->{columns}}, $key);
                 }
-                push(@{$interface->{columns}}, @rmontable_columns);
                 last;
               }
             }
@@ -294,35 +298,6 @@ sub init {
         }
         if (scalar(@{$self->{interfaces}}) == 0) {
           $self->add_unknown('device probably has no RMON-MIB or EtherLike-MIB');
-        }
-      } elsif ($self->mode =~ /device::interfaces::duplex/) {
-        @indices = @save_indices;
-        my @etherindices = ();
-        my @etherhcindices = ();
-        foreach my $interface (@{$self->{interfaces}}) {
-          push(@selected_indices, [$interface->{ifIndex}]);
-          if (@ethertablehc_columns && $interface->{ifSpeed} == 4294967295) {
-            push(@etherhcindices, [$interface->{ifIndex}]);
-          }
-          push(@etherindices, [$interface->{ifIndex}]);
-        }
-        $self->debug(
-            sprintf 'all_interfaces %d, selected %d, ether %d, etherhc %d',
-                scalar(@all_indices), scalar(@selected_indices),
-                scalar(@etherindices), scalar(@etherhcindices));
-        if (@ethertable_columns) {
-          foreach my $etherstat ($self->get_snmp_table_objects(
-              'EtherLike-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
-            foreach my $interface (@{$self->{interfaces}}) {
-              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
-                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
-                  $interface->{$key} = $etherstat->{$key};
-                }
-                push(@{$interface->{columns}}, @ethertable_columns);
-                last;
-              }
-            }
-          }
         }
       }
     }
@@ -808,25 +783,19 @@ sub init_etherstats {
           ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
     }
   } elsif ($self->mode =~ /device::interfaces::duplex/) {
-printf "%s\n", Data::Dumper::Dumper($self);
-    if (! defined $self->{dot3StatsDuplexStatus} && $self->{ifType} !~ /ether/i) {
-printf "123\n";
+    if (defined $self->{dot3StatsDuplexStatus}) {
+    } elsif (! defined $self->{dot3StatsDuplexStatus} && $self->{ifType} !~ /ether/i) {
         $self->{dot3StatsDuplexStatus} = "notApplicable";
     } elsif (! defined $self->{dot3StatsDuplexStatus} && $self->implements_mib('EtherLike-MIB')) {
-printf "11123\n";
       if (defined $self->opts->mitigation() &&
           $self->opts->mitigation() eq 'ok') {
-printf "a11123\n";
         $self->{dot3StatsDuplexStatus} = "fullDuplex";
       } else {
-printf "b11123\n";
         $self->{dot3StatsDuplexStatus} = "unknown";
       }
     } else {
-printf "811123\n";
       $self->{dot3StatsDuplexStatus} = "unknown";
     }
-printf "after%s\n", Data::Dumper::Dumper($self);
   }
   return $self;
 }
@@ -842,6 +811,7 @@ sub check {
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
     $self->check();
     if ($self->{ifOperStatus} eq "up") {
+          # kostenpflichtiges feature # device::interfaces::duplex
       foreach my $mode (qw(device::interfaces::usage
           device::interfaces::errors device::interfaces::discards
           device::interfaces::broadcast)) {
