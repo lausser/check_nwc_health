@@ -13,21 +13,13 @@ package Classes::Cisco::CISCOENVMONMIB::Component::TemperatureSubsystem::Tempera
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  if ($self->{ciscoEnvMonTemperatureStatusValue}) {
-    bless $self, $class;
-  } else {
-    bless $self, $class.'::Simple';
+sub finish {
+  my $self = shift;
+  if (! exists $self->{ciscoEnvMonTemperatureStatusValue}) {
+    bless $self, ref($self).'::Simple';
   }
   $self->ensure_index('ciscoEnvMonTemperatureStatusIndex');
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
-  return $self;
 }
 
 sub check {
@@ -51,6 +43,7 @@ sub check {
         $self->{ciscoEnvMonTemperatureStatusDescr},
         $self->{ciscoEnvMonTemperatureStatusValue},
         $self->{ciscoEnvMonTemperatureThreshold});
+    $self->add_ok();
   }
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{ciscoEnvMonTemperatureStatusIndex}),
@@ -80,6 +73,7 @@ sub check {
       $self->add_critical();
     }
   } else {
+    $self->add_ok();
   }
 }
 

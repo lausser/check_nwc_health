@@ -5,33 +5,24 @@ use strict;
 sub init {
   my $self = shift;
   my $tempcnt = 0;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENVMON-MIB', 'ciscoEnvMonTemperatureStatusTable')) {
-    $_->{ciscoEnvMonTemperatureStatusIndex} = $tempcnt++ if (! exists $_->{ciscoEnvMonTemperatureStatusIndex});
-    push(@{$self->{temperatures}},
-        Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-ENVMON-MIB', [
+      ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature'],
+  ]);
 }
 
 package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
+sub finish {
+  my $self = shift;
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
-  if ($self->{ciscoEnvMonTemperatureStatusValue}) {
-    bless $self, $class;
-  } else {
-    bless $self, $class.'::Simple';
+  if (! exists $self->{ciscoEnvMonTemperatureStatusIndex}) {
+    $self->{ciscoEnvMonTemperatureStatusIndex} = $self->{flat_indices};
   }
-  return $self;
+  if (! exists $self->{ciscoEnvMonTemperatureStatusValue}) {
+    bless $self, 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature::Simple';
+  }
 }
 
 sub check {
@@ -69,18 +60,6 @@ sub check {
 package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature::Simple;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
-
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    ciscoEnvMonTemperatureStatusIndex => $params{ciscoEnvMonTemperatureStatusIndex} || 0,
-    ciscoEnvMonTemperatureStatusDescr => $params{ciscoEnvMonTemperatureStatusDescr},
-    ciscoEnvMonTemperatureState => $params{ciscoEnvMonTemperatureState},
-  };
-  bless $self, $class;
-  return $self;
-}
 
 sub check {
   my $self = shift;
