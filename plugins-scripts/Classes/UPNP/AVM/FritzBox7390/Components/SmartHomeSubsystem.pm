@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item Classes::UPNP::AVM::FritzBox7390)
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /smarthome::device::list/) {
     $self->update_device_cache(1);
     foreach my $ain (keys %{$self->{device_cache}}) {
@@ -26,14 +26,14 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{smart_home_devices}}) {
     $_->check();
   }
 }
 
 sub create_device_cache_file {
-  my $self = shift;
+  my ($self) = @_;
   my $extension = "";
   if ($self->opts->community) {
     $extension .= Digest::MD5::md5_hex($self->opts->community);
@@ -48,8 +48,7 @@ sub create_device_cache_file {
 }
 
 sub update_device_cache {
-  my $self = shift;
-  my $force = shift;
+  my ($self, $force) = @_;
   my $statefile = $self->create_device_cache_file();
   my $update = time - 3600;
   if ($force || ! -f $statefile || ((stat $statefile)[9]) < ($update)) {
@@ -69,7 +68,7 @@ sub update_device_cache {
 }
 
 sub save_device_cache {
-  my $self = shift;
+  my ($self) = @_;
   $self->create_statefilesdir();
   my $statefile = $self->create_device_cache_file();
   my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
@@ -84,7 +83,7 @@ sub save_device_cache {
 }
 
 sub load_device_cache {
-  my $self = shift;
+  my ($self) = @_;
   my $statefile = $self->create_device_cache_file();
   if ( -f $statefile) {
     our $VAR1;
@@ -111,7 +110,7 @@ sub load_device_cache {
 }
 
 sub get_device_indices {
-  my $self = shift;
+  my ($self) = @_;
   my @indices = ();
   foreach my $id (keys %{$self->{device_cache}}) {
     my $name = $self->{device_cache}->{$id}->{name};
@@ -145,7 +144,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem Classes::UPNP::AVM::FritzBox
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{cometdect} = ($self->{functionbitmask} & 0b000001000000) ? 1 : 0;
   $self->{energy} = ($self->{functionbitmask} & 0b000010000000) ? 1 : 0;
   $self->{temperature} = ($self->{functionbitmask} & 0b000100000000) ? 1 : 0;
@@ -175,7 +174,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = $self->{name};
   if ($self->mode =~ /smarthome::device::status/) {
     $self->add_info(sprintf "device %s is %sconnected and switched %s",

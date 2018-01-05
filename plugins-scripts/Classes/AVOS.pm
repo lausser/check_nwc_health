@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Bluecoat);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
   } elsif ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem("Classes::AVOS::Component::CpuSubsystem");

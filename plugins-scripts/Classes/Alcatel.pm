@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /AOS.*OAW/i) {
     bless $self, 'Classes::Alcatel::OmniAccess';
     $self->debug('using Classes::Alcatel::OmniAccess');

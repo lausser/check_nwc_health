@@ -55,7 +55,7 @@ our $errorcodes = {
 };
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{peers} = [];
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
@@ -70,7 +70,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   $self->add_info('checking bgp peers');
   if ($self->mode =~ /peer::list/) {
@@ -208,18 +208,12 @@ sub check {
 
 
 package Classes::BGP::Component::PeerSubsystem::Peer;
-our @ISA = qw(Classes::BGP::Component::PeerSubsystem);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach(keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  bless $self, $class;
+sub finish {
+  my ($self) = @_;
   $self->{bgpPeerLastError} |= "00 00";
   my $errorcode = 0;
   my $subcode = 0;
@@ -233,12 +227,10 @@ sub new {
   $self->{bgpPeerFaulty} = 0;
   my @parts = gmtime($self->{bgpPeerFsmEstablishedTime});
   $self->{bgpPeerFsmEstablishedTime} = sprintf ("%dd, %dh, %dm, %ds",@parts[7,2,1,0]);
-
-  return $self;
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->opts->name2) {
     foreach my $as (split(",", $self->opts->name2)) {
       if ($as =~ /(\d+)=(\w+)/) {

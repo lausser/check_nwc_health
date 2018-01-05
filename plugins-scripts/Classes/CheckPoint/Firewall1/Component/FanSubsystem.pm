@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['fans', 'fanSpeedSensorTable', 'Classes::CheckPoint::Firewall1::Component::FanSubsystem::Fan'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{fans}}) {
     $_->check();
   }
@@ -22,7 +22,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'fan %s is %s (%d %s)', 
       $self->{fanSpeedSensorName}, $self->{fanSpeedSensorStatus},
       $self->{fanSpeedSensorValue}, $self->{fanSpeedSensorUnit});

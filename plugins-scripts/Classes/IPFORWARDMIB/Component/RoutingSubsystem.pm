@@ -11,7 +11,7 @@ use strict;
 # inetCidrRouteTable	1.3.6.1.2.1.4.24.7
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{interfaces} = [];
   $self->get_snmp_tables('IP-FORWARD-MIB', [
       ['routes', 'inetCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute' ],
@@ -20,7 +20,7 @@ sub init {
     $self->get_snmp_tables('IP-FORWARD-MIB', [
         ['routes', 'ipCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute',
             sub {
-              my $o = shift;
+              my ($o) = @_;
               if ($o->opts->name && $o->opts->name =~ /\//) {
                 my ($dest, $cidr) = split(/\//, $o->opts->name);
                 my $bits = ( 2 ** (32 - $cidr) ) - 1;
@@ -51,7 +51,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking routes');
   if ($self->mode =~ /device::routes::list/) {
     foreach (@{$self->{routes}}) {
@@ -92,7 +92,7 @@ package Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute;
 our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if (! defined $self->{ipCidrRouteDest}) {
     # we can reconstruct a few attributes from the index
     # one customer only made ipCidrRouteStatus visible
@@ -106,7 +106,7 @@ sub finish {
 }
 
 sub list {
-  my $self = shift;
+  my ($self) = @_;
   printf "%16s %16s %16s %11s %7s\n", 
       $self->{ipCidrRouteDest}, $self->{ipCidrRouteMask},
       $self->{ipCidrRouteNextHop}, $self->{ipCidrRouteProto},
@@ -117,7 +117,7 @@ package Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute;
 our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   # http://www.mibdepot.com/cgi-bin/vendor_index.cgi?r=ietf_rfcs
   # INDEX { inetCidrRouteDestType, inetCidrRouteDest, inetCidrRoutePfxLen, inetCidrRoutePolicy, inetCidrRouteNextHopType, inetCidrRouteNextHop }
   $self->{inetCidrRouteDestType} = $self->mibs_and_oids_definition(

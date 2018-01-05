@@ -9,7 +9,7 @@ sub init {
   # There's two separate OIDs to obtain memory pressure value for AVOSV4 and AVOSV5;
   # AVOSV4:  memPressureValue - OIDs: 1.3.6.1.4.1.3417.2.8.2.3 (systemResourceMIB)
   # AVOSV5: sgProxyMemoryPressure - OIDs: 1.3.6.1.4.1.3417.2.11.2.3.4 (bluecoatSGProxyMIB)
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(
       sgProxyMemPressure sgProxyMemAvailable sgProxyMemCacheUsage sgProxyMemSysUsage)));
   if (! defined $self->{sgProxyMemPressure}) {
@@ -36,7 +36,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   $self->add_info('checking memory');
   $self->add_info(sprintf 'memory usage is %.2f%%',

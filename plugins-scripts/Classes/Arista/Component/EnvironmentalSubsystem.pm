@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable',
       'Classes::Arista::Component::EnvironmentalSubsystem::Entity',
@@ -36,7 +36,7 @@ use strict;
 
 
 sub rebless {
-  my $self = shift;
+  my ($self) = @_;
   bless $self,
       'Classes::Arista::Component::EnvironmentalSubsystem::Chassis' if
       $self->{entPhysicalClass} eq 'chassis';
@@ -61,7 +61,7 @@ sub rebless {
 }
 
 sub check_state {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "%s is %s (admin %s, oper %s)",
       $self->{entPhysicalDescr}, $self->{entStateUsage},
       $self->{entStateAdmin}, $self->{entStateOper});
@@ -99,7 +99,7 @@ our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->check_state();
 }
 
@@ -116,7 +116,7 @@ our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->check_state();
 }
 
@@ -125,7 +125,7 @@ our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   
   $self->{valid} = ($self->{entPhySensorValue} == -1000000000 || $self->{entPhySensorValue} == 1000000000)
       ? 0 : 1;
@@ -141,7 +141,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->check_state();
   my ($warn, $crit) = (undef, undef);
   if ($self->{aristaEntSensorStatusDescr} =~ /no thresholds/i) {

@@ -8,7 +8,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::bgp/) {
     $self->analyze_and_check_bgp_subsystem("Classes::Juniper::JunOS::Component::BgpSubsystem");
   } else {

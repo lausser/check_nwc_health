@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{powersupply_subsystem} =
       Classes::RAPIDCITYMIB::Component::PowersupplySubsystem->new();
   $self->{fan_subsystem} =
@@ -13,7 +13,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{powersupply_subsystem}->check();
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
@@ -23,7 +23,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{powersupply_subsystem}->dump();
   $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();

@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Huawei);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
 my $work_in_progress = {
 #$Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'HUAWEI-ENTITY-EXTENT-MIB'} = {
     hwEntityExtentMIB => '1.3.6.1.4.1.2011.5.25.31',

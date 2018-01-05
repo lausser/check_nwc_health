@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ALARM-MIB', [
       #['models', 'alarmModelTable', 'Classes::ALARMMIB::Component::AlarmSubsystem::AlarmModel'],
       #['variables', 'alarmActiveVariableTable', 'Classes::ALARMMIB::Component::AlarmSubsystem::AlarmVariable'],
@@ -26,7 +26,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ceAlarmTypes} = [];
   if ($self->{alarmActiveVariableValueType} eq 'octetString') {
     my $index = 0;
@@ -44,7 +44,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "there are %d active alarms",
       $self->{alarmActiveStatsActiveCurrent});
   if ($self->{alarmActiveStatsActiveCurrent}) {

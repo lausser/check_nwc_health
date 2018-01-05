@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['voltages', 'voltageSensorTable', 'Classes::CheckPoint::Firewall1::Component::VoltageSubsystem::Voltage'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{voltages}}) {
     $_->check();
   }
@@ -22,7 +22,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'voltage %s is %s (%.2f %s)', 
       $self->{voltageSensorName}, $self->{voltageSensorStatus},
       $self->{voltageSensorValue}, $self->{voltageSensorUnit});

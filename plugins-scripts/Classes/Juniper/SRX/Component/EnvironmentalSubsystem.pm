@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['leds', 'jnxLEDTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Led'],
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Operating'],
@@ -20,7 +20,7 @@ package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Led;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'led %s is %s', $self->{jnxLEDDescr},
       $self->{jnxLEDState});
   if ($self->{jnxLEDState} eq 'yellow') {
@@ -55,7 +55,7 @@ package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Operating;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{jnxOperatingDescr} =~ /Routing Engine$/) {
     bless $self, "Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Engine";
   }
@@ -65,7 +65,7 @@ package Classes::Juniper::SRX::Component::EnvironmentalSubsystem::Engine;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s temperature is %.2f',
       $self->{jnxOperatingDescr}, $self->{jnxOperatingTemp});
   my $label = 'temp_'.$self->{jnxOperatingDescr};

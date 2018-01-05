@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENHANCED-MEMPOOL-MIB', [
       ['mems', 'cempMemPoolTable', 'Classes::Cisco::CISCOENHANCEDMEMPOOLMIB::Component::MemSubsystem::EnhMem'],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if (defined $self->{cempMemPoolHCUsed}) {
     $self->{usage} = 100 * $self->{cempMemPoolHCUsed} /
         ($self->{cempMemPoolHCFree} + $self->{cempMemPoolHCUsed});
@@ -27,7 +27,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'mempool %s usage is %.2f%%',
       $self->{name}, $self->{usage});
   if ($self->{name} =~ /^lsmpi_io/ &&

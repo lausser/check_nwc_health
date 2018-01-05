@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->bulk_is_baeh();
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Lancom::Component::EnvironmentalSubsystem");

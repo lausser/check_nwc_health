@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Cisco);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Cisco::SB::Component::EnvironmentalSubsystem");
     if (! $self->check_messages()) {

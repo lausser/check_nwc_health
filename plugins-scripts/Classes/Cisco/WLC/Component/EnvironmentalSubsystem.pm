@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ps1_present} = $self->get_snmp_object(
       'AIRESPACE-SWITCHING-MIB', 'agentSwitchInfoPowerSupply1Present', 0);
   $self->{ps1_operational} = $self->get_snmp_object(
@@ -23,7 +23,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   #$self->blacklist('t', $self->{cpmCPUTotalPhysicalIndex});
   my $tinfo = sprintf 'temperature is %.2fC (%s env %s-%s)',
       $self->{temp_value}, $self->{temp_environment},
@@ -56,7 +56,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   printf "[TEMPERATURE]\n";
   foreach (qw(temp_environment temp_value temp_alarm_low temp_alarm_high)) {
     if (exists $self->{$_}) {

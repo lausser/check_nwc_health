@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
       ['powersupplies', 'sysChassisPowerSupplyTable', 'Classes::F5::F5BIGIP::Component::PowersupplySubsystem::Powersupply'],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'chassis powersupply %d is %s',
       $self->{sysChassisPowerSupplyIndex},
       $self->{sysChassisPowerSupplyStatus});

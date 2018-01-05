@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
       ['cpus', 'snAgentCpuUtilTable', 'Classes::Foundry::Component::CpuSubsystem::Cpu'],
   ]);
@@ -12,7 +12,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (scalar (@{$self->{cpus}}) == 0) {
     $self->overall_check();
   } else {
@@ -26,7 +26,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->overall_dump();
   foreach (@{$self->{cpus}}) {
     $_->dump();
@@ -34,7 +34,7 @@ sub dump {
 }
 
 sub overall_check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   $self->add_info('checking cpus');
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{snAgGblCpuUtil1MinAvg});
@@ -49,7 +49,7 @@ sub overall_check {
 }
 
 sub overall_dump {
-  my $self = shift;
+  my ($self) = @_;
   printf "[CPU]\n";
   foreach (qw(snAgGblCpuUtil1SecAvg snAgGblCpuUtil5SecAvg
       snAgGblCpuUtil1MinAvg)) {
@@ -63,7 +63,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   # newer mibs have snAgentCpuUtilPercent and snAgentCpuUtil100thPercent
   # snAgentCpuUtilValue is deprecated
   $self->{snAgentCpuUtilValue} = $self->{snAgentCpuUtil100thPercent} / 100

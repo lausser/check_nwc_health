@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my @all_cpu_metrics = qw(
       ssCpuRawUser ssCpuRawSystem ssCpuRawIdle ssCpuRawNice
       ssCpuRawWait ssCpuRawKernel ssCpuRawInterrupt
@@ -53,7 +53,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   foreach (qw(cpu user system nice wait kernel interrupt)) {
     my $key = $_ . '_usage';

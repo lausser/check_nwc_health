@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects("NETSCREEN-CHASSIS-MIB", (qw(
       sysBatteryStatus)));
   $self->get_snmp_tables("NETSCREEN-CHASSIS-MIB", [
@@ -15,7 +15,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{fans}}, @{$self->{power}}, @{$self->{slots}}, @{$self->{temperatures}}) {
     $_->check();
   }
@@ -27,7 +27,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "fan %s (%s) is %s",
       $self->{nsFanId}, $self->{nsFanDesc}, $self->{nsFanStatus});
   if ($self->{nsFanStatus} eq "notInstalled") {
@@ -44,7 +44,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{nsPowerDesc}) {
     $self->add_info(sprintf "power supply %s (%s) is %s",
       $self->{nsPowerId}, $self->{nsPowerDesc}, $self->{nsPowerStatus});
@@ -65,12 +65,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{nsSlotSN} =~ s/^\s+//g;
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "%s slot %s (%s) is %s",
       $self->{nsSlotType}, $self->{nsSlotId}, $self->{nsSlotSN}, $self->{nsSlotStatus});
   if ($self->{nsSlotStatus} eq "good") {
@@ -86,7 +86,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "temperature %s (%s) is %sC",
       $self->{nsTemperatureId}, $self->{nsTemperatureDesc}, $self->{nsTemperatureCur});
   $self->add_ok();

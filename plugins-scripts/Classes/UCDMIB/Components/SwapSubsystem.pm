@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
       memTotalSwap memAvailSwap memMinimumSwap
       memSwapError memSwapErrorMsg)));
@@ -15,7 +15,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (defined $self->{'swap_usage'}) {
     $self->add_info(sprintf 'swap usage is %.2f%%',
         $self->{swap_usage});

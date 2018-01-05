@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('NETSCREEN-RESOURCE-MIB', (qw(
       nsResMemAllocate nsResMemLeft nsResMemFrag)));
   my $mem_total = $self->{nsResMemAllocate} + $self->{nsResMemLeft};
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   if (defined $self->{mem_usage}) {
     $self->add_info(sprintf 'memory usage is %.2f%%', $self->{mem_usage});

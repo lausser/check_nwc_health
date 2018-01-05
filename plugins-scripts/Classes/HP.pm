@@ -12,7 +12,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /Procurve/i ||
       ($self->implements_mib('HP-ICF-CHASSIS') &&
       $self->implements_mib('NETSWITCH-MIB'))) {

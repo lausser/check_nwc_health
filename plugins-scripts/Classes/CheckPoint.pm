@@ -7,7 +7,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if (defined $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled') &&
     $self->get_snmp_object('CHECKPOINT-MIB', 'vsxVsInstalled') != 0) {
     bless $self, 'Classes::CheckPoint::VSX';

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('CHECKPOINT-MIB', (qw(procUsage procNum)));
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['multiprocs', 'multiProcTable', 'Classes::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc'],
@@ -12,7 +12,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{procUsage});
   $self->set_thresholds(warning => 80, critical => 90);
@@ -42,7 +42,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'cpu_core_%s_usage', $self->{multiProcIndex};
   $self->add_info(sprintf 'cpu core %s usage is %.2f%%',
       $self->{multiProcIndex},

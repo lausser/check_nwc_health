@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem} =
       Classes::Alcatel::OmniAccess::Component::FanSubsystem->new();
   $self->get_snmp_objects('WLSX-SYSTEMEXT-MIB', qw(
@@ -15,7 +15,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{powersupply_subsystem}->check();
   $self->{storage_subsystem}->check();
@@ -32,7 +32,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   printf "[%s]\n%s\n", uc "wlsxSysExtInternalTemparature", 
       $self->{wlsxSysExtInternalTemparature};
   $self->{fan_subsystem}->dump();

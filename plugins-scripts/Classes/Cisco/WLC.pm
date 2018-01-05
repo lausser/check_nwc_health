@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Cisco);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     if ($self->implements_mib('AIRESPACE-SWITCHING-MIB') &&
         $self->get_snmp_object('AIRESPACE-SWITCHING-MIB', 'agentSwitchInfoPowerSupply1Present')) {

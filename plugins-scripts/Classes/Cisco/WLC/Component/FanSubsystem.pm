@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['fans', 'ciscoEnvMonFanStatusTable', 'Classes::Cisco::IOS::Component::FanSubsystem::Fan'],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ciscoEnvMonFanStatusIndex} ||= 0;
   $self->add_info(sprintf 'fan %d (%s) is %s',
       $self->{ciscoEnvMonFanStatusIndex},

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->mult_snmp_max_msg_size(10);
   if ($self->mode =~ /device::wideip/) {
     $self->get_snmp_tables('F5-BIGIP-GLOBAL-MIB', [
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->SUPER::check();
   if ($self->mode =~ /device::wideip/) {
     if (scalar(@{$self->{wideips}}) == 0) {
@@ -39,7 +39,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'wide IP %s has status %s, is %s',
       $self->{gtmWideipStatusName},
       $self->{gtmWideipStatusAvailState},
@@ -66,7 +66,7 @@ use strict;
 #
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # ! merge gtmPoolStatus, gtmPoolMbrStatus, bec. gtmPoolAvailabilityState is deprecated
   if ($self->mode =~ /pool::list/) {
     $self->update_entry_cache(1, 'F5-BIGIP-GLOBAL-MIB', 'gtmPoolStatusTable', 'gtmPoolStatusName');
@@ -155,7 +155,7 @@ sub init {
 }
 
 sub assign_members_to_pools {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $pool (@{$self->{pools}}) {
     foreach my $poolmember (@{$self->{poolmembers}}) {
       if ($poolmember->{gtmPoolMbrPoolName} eq $pool->{gtmPoolName}) {
@@ -178,12 +178,12 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{members} = [];
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple/) {
     my $pool_info = sprintf "pool %s is %s, avail state is %s, active members: %d of %d",
         $self->{gtmPoolName},
@@ -225,7 +225,7 @@ sub check {
 }
 
 sub draw_html_table {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple/) {
     my @headers = qw(Node Port Enabled Avail Reason);
     my @columns = qw(gtmPoolMbrNodeName gtmPoolMbrPort gtmPoolMbrStatusEnabledState gtmPoolMbrStatusAvailState gtmPoolMbrStatusDetailReason);
@@ -284,7 +284,7 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple.*/) {
     if ($self->{gtmPoolMbrStatusEnabledState} eq "enabled") {
       if ($self->{gtmPoolMbrStatusAvailState} ne "green") {

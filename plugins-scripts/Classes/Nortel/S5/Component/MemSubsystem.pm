@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('S5-CHASSIS-MIB', [
     ['utils', 's5ChasUtilTable', 'Classes::Nortel::S5::Component::MemSubsystem::Mem' ],
   ]);
@@ -15,14 +15,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{s5ChasUtilMemoryUsage} = 100 - 
       ($self->{s5ChasUtilMemoryAvailableMB} /
       $self->{s5ChasUtilMemoryTotalMB} * 100);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'memory_%s_usage', $self->{flat_indices};
   $self->add_info(sprintf 'memory %s usage is %.2f%%',
       $self->{flat_indices},,

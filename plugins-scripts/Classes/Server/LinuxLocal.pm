@@ -4,7 +4,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem('Server::LinuxLocal::Component::InterfaceSubsystem');
   }
@@ -16,7 +16,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{interfaces} = [];
   if ($self->mode =~ /device::interfaces::list/) {
     foreach (glob "/sys/class/net/*") {
@@ -77,7 +77,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking interfaces');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
@@ -100,7 +100,7 @@ our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if (! defined $self->{ifSpeed} && $self->mode =~ /device::interfaces::(complete|usage)/) {
     bless $self, 'Server::LinuxLocal::Component::InterfaceSubsystem::Interface::Virt';
   }
@@ -112,7 +112,7 @@ our @ISA = qw(Server::LinuxLocal::Component::InterfaceSubsystem::Interface);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (! defined $self->{ifSpeed}) {
     if (defined $self->opts->mitigation && $self->opts->mitigation eq 'ok') {
       $self->{ifSpeed} = $self->{sysMaxSpeed};

@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode !~ /device::uptime/) {
     foreach ($self->get_snmp_table_objects(
         'ENTITY-MIB', 'entPhysicalTable', undef, ['entPhysicalDescr'])) {

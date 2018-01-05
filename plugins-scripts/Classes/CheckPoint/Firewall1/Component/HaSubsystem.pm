@@ -4,7 +4,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::ha::role/) {
     $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
         haStarted haState haStatShort haStatLong)));
@@ -21,7 +21,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::ha::role/) {
     chomp($self->{haState});
     $self->add_info('checking ha');
@@ -71,7 +71,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "%s has status %s",
       $self->{haProblemName}, $self->{haProblemStatus});
   if ($self->{haProblemStatus} ne "OK") {

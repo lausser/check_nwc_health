@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     $self->rebless('Classes::Cisco::NXOS');
   } elsif ($self->{productname} =~ /Cisco Controller/i ||

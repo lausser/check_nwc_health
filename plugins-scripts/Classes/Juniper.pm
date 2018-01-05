@@ -8,7 +8,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /NetScreen/i) {
     bless $self, 'Classes::Juniper::NetScreen';
     $self->debug('using Classes::Juniper::NetScreen');

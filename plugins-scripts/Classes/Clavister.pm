@@ -7,7 +7,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /Clavister/i) {
     bless $self, 'Classes::Clavister::Firewall1';
     $self->debug('using Classes::Clavister::Firewall1');

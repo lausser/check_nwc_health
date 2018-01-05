@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
       iveSSLConnections iveVPNTunnels 
       signedInWebUsers signedInMailUsers meetingUserCount
@@ -17,7 +17,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   $self->add_info(sprintf 'Users: sslconns=%d cluster=%d, node=%d, web=%d, mail=%d, meeting=%d',
       $self->{iveSSLConnections},

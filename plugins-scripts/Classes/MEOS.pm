@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Brocade);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_and_check_environmental_subsystem();
   } elsif ($self->mode =~ /device::hardware::load/) {
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub analyze_environmental_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   $self->{components}->{environmental_subsystem1} =
       Classes::FCMGMT::Component::EnvironmentalSubsystem->new();
   $self->{components}->{environmental_subsystem2} =
@@ -24,7 +24,7 @@ sub analyze_environmental_subsystem {
 }
 
 sub check_environmental_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   $self->{components}->{environmental_subsystem1}->check();
   $self->{components}->{environmental_subsystem2}->check();
   if ($self->check_messages()) {
