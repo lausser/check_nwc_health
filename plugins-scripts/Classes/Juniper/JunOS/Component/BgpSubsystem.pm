@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item Monitoring::GLPlugin::SNMP::Table
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{peers} = [];
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'JUNOS-BGP4V2-MIB', 'jnxBgpM2PeerTable', 'jnxBgpM2PeerRemoteAddr');
@@ -39,7 +39,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   if ($self->mode =~ /prefix::count/) {
     if (scalar(@{$self->{peers}}) == 0) {
@@ -188,8 +188,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub new {
-  my $class = shift;
-  my %params = @_;
+  my ($class, %params) = @_;
   my $self = {};
   foreach(keys %params) {
     $self->{$_} = $params{$_};
@@ -205,7 +204,7 @@ sub new {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->opts->name2) {
     foreach my $as (split(",", $self->opts->name2)) {
       if ($as =~ /(\d+)=(\w+)/) {

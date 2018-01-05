@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $entity_indices = {};
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Monitoring::GLPlugin::TableItem'],
@@ -61,7 +61,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{sensors}}) {
     $_->check();
   }
@@ -71,7 +71,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{sensors}}) {
     $_->dump();
   }
@@ -80,7 +80,7 @@ sub dump {
 sub fake_names {
   # das ist hoffentlich ein ausnahmefall. 
   # z.b. cisco asa hat keine entPhysicalTable, aber entPhySensorTable
-  my $self = shift;
+  my ($self) = @_;
   my $no_has_entities_names = {};
   foreach (@{$self->{sensors}}) {
     if (! exists $no_has_entities_names->{$_->{entPhySensorType}}) {
@@ -109,7 +109,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{entPhySensorPrecision} && $self->{entPhySensorValue}) {
     $self->{entPhySensorValue} /= 10 ** $self->{entPhySensorPrecision};
   }
@@ -123,7 +123,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{entPhySensorOperStatus} ne 'ok') {
     $self->add_info(sprintf '%s sensor %s has status %s',
         $self->{entPhySensorType},
@@ -151,11 +151,11 @@ our @ISA = qw(Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Senso
 use strict;
 
 sub rename {
-  my $self = shift;
+  my ($self) = @_;
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->SUPER::check();
   my $label = $self->{entPhySensorEntityName};
   $label =~ s/[Tt]emperature\s*@\s*(.*)/$1/;
@@ -170,7 +170,7 @@ our @ISA = qw(Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Senso
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->SUPER::check();
   my $label = $self->{entPhySensorEntityName};
   $label =~ s/ RPM$//g;
@@ -186,7 +186,7 @@ our @ISA = qw(Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Senso
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->SUPER::check();
   my $label = $self->{entPhySensorEntityName};
   $self->add_perfdata(

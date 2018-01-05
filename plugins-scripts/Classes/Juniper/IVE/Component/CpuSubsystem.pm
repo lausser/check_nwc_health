@@ -3,13 +3,13 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
       iveCpuUtil)));
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{iveCpuUtil});
   # http://www.juniper.net/techpubs/software/ive/guides/howtos/SA-IC-MAG-SNMP-Monitoring-Guide.pdf

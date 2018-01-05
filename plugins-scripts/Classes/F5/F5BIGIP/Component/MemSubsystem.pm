@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('F5-BIGIP-SYSTEM-MIB', (qw(
       sysStatMemoryTotal sysStatMemoryUsed sysHostMemoryTotal sysHostMemoryUsed)));
   $self->{stat_mem_usage} = ($self->{sysStatMemoryUsed} / $self->{sysStatMemoryTotal}) * 100;
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   $self->add_info(sprintf 'tmm memory usage is %.2f%%',
       $self->{stat_mem_usage});

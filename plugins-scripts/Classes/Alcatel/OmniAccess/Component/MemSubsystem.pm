@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('WLSX-SYSTEMEXT-MIB', [
       ['memories', 'wlsxSysExtMemoryTable', 'Classes::Alcatel::OmniAccess::Component::MemSubsystem::Memory'],
   ]);
@@ -15,12 +15,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{usage} = 100 * $self->{sysExtMemoryUsed} / $self->{sysExtMemorySize};
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'memory_%s_usage', $self->{flat_indices};
   $self->add_info(sprintf 'memory %s usage is %.2f%%',
       $self->{flat_indices}, $self->{usage});

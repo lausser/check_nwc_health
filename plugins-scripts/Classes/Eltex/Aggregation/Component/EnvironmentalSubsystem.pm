@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ELTEX-MIB', [
       ['fans', 'eltexFanTable', 'Classes::Eltex::Aggregation::Component::EnvironmentalSubsystem::Fan'],
       ['temperatures', 'eltexSensorTable', 'Classes::Eltex::Aggregation::Component::EnvironmentalSubsystem::Temperature'],
@@ -12,7 +12,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{fans}}, @{$self->{temperatures}}, @{$self->{power}}) {
     $_->check();
   }
@@ -23,7 +23,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s is %s',
     $self->{eltexFanDescription}, $self->{eltexFanStatus});
   if ($self->{eltexFanStatus} eq 'normal') {
@@ -38,7 +38,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'sensor %s is %s°C',
     $self->{eltexSensorDescription}, $self->{eltexSensorStatus});
   $self->set_thresholds(warning => 55, critical => 65);
@@ -55,7 +55,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s is %s',
     $self->{eltexPowerSupplyDescription}, $self->{eltexPowerSupplyStatus});
   if ($self->{eltexPowerSupplyStatus} eq 'normal') {

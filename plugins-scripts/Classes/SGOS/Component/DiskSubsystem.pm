@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('DISK-MIB', [
       ['disks', 'deviceDiskValueTable', 'Classes::SGOS::Component::DiskSubsystem::Disk'],
   ]);
@@ -22,7 +22,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'disk %s (%s %s) is %s',
       $self->{flat_indices},
       $self->{deviceDiskVendor},
@@ -39,7 +39,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'disk %s usage is %.2f%% (internal status is %s)',
       $self->{deviceUsageIndex},
       $self->{deviceUsagePercent},

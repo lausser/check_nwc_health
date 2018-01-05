@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   foreach (qw(swCpuUsage swCpuNoOfRetries swCpuUsageLimit swCpuPollingInterval
       swCpuAction)) {
     $self->{$_} = $self->valid_response('SW-MIB', $_, 0);
@@ -13,7 +13,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   if (defined $self->{swCpuUsage}) {
     my $maps = $self->{swCpuUsageLimit} == 0 ?

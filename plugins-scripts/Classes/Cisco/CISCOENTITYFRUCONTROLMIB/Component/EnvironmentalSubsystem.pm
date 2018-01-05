@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem} =
       Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem->new();
   $self->{powersupply_subsystem} =
@@ -13,7 +13,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{powersupply_subsystem}->check();
   $self->{module_subsystem}->check();
@@ -23,7 +23,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->dump();
   $self->{powersupply_subsystem}->dump();
   $self->{module_subsystem}->dump();

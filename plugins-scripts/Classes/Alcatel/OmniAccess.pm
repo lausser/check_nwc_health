@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Alcatel);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Alcatel::OmniAccess::Component::EnvironmentalSubsystem");
     # waere praktischer, aber in diesem fall muss alarmdreck ausgeputzt werden

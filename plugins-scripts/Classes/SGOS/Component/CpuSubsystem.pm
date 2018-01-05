@@ -3,8 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
-  my %params = @_;
+  my ($self) = @_;
   # With AVOS version 5.5.4.1, 5.4.6.1 and 6.1.2.1, the SNMP MIB has been extended to support multiple CPU cores.
   # The new OID is defined as a table 1.3.6.1.4.1.3417.2.11.2.4.1 in the BLUECOAT-SG-PROXY-MIB file with the following sub-OIDs.
   # https://kb.bluecoat.com/index?page=content&id=FAQ1244&actp=search&viewlocale=en_US&searchid=1360452047002
@@ -23,7 +22,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{sgProxyCpuCoreBusyPerCent});
   $self->set_thresholds(warning => 80, critical => 90);
@@ -41,7 +40,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu %s usage is %.2f%%',
       $self->{flat_indices}, $self->{deviceUsagePercent});
   $self->set_thresholds(warning => 80, critical => 90);

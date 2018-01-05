@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::svn::status/) {
     $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
         svnStatShortDescr svnStatLongDescr)));
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking svn');
   if ($self->mode =~ /device::svn::status/) {
     if ($self->{svnStatShortDescr} ne 'OK') {

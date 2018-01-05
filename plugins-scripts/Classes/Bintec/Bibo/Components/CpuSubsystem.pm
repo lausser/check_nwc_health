@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->bulk_is_baeh();
   $self->get_snmp_tables('BIANCA-BRICK-MIBRES-MIB', [
       ['cpus', 'cpuTable', 'Classes::Bintec::Bibo::Component::CpuSubsystem::Cpu'],
@@ -16,7 +16,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->valdiff({name => 'cpu'}, qw(cpuTotalIdle));
   $self->{cpuTotalUsage} = 100 - (100 * $self->{delta_cpuTotalIdle} / $self->{delta_timestamp});
   if ($self->{cpuTotalUsage} < 0 || $self->{cpuTotalUsage} > 100 || ! $self->{delta_cpuTotalIdle}) {
@@ -26,7 +26,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = 'cpu_'.$self->{cpuDescr};
   $self->add_info(sprintf 'cpu %d (%s) usage is %.2f%%',
       $self->{cpuNumber},

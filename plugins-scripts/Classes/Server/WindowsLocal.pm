@@ -4,7 +4,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem('Server::WindowsLocal::Component::InterfaceSubsystem');
   }
@@ -43,7 +43,7 @@ printf "dong\n";
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{interfaces} = [];
 # bits per second
   if ($self->mode =~ /device::interfaces::list/) {
@@ -166,7 +166,7 @@ $self->debug("finish");
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking interfaces');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
@@ -189,7 +189,7 @@ our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   # NetEnabled 1=admin up
   # NetConnectionStatus Disconnected (0)Connecting (1)Connected (2)Disconnecting (3)Hardware Not Present (4)Hardware Disabled (5)Hardware Malfunction (6)Media Disconnected (7)Authenticating (8)Authentication Succeeded (9)Authentication Failed (10)Invalid Address (11)Credentials Required (12)Other (13–65535)
   $self->SUPER::finish();

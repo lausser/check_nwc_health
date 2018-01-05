@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   #$self->mult_snmp_max_msg_size(10);
   $self->bulk_is_baeh(10);
   $self->{sensor_subsystem} =
@@ -32,7 +32,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{sensor_subsystem}->check();
   if (exists $self->{fru_subsystem}) {
     $self->{fru_subsystem}->check();
@@ -44,7 +44,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{sensor_subsystem}->dump();
   if (exists $self->{fru_subsystem}) {
     $self->{fru_subsystem}->dump();
@@ -52,7 +52,7 @@ sub dump {
 }
 
 sub check_l2_l3 {
-  my $self = shift;
+  my ($self) = @_;
   my @unrealistic_number_of_routes = ();
   for my $masklen (1..12) {
     push(@unrealistic_number_of_routes, 2 ** (32 - $masklen));

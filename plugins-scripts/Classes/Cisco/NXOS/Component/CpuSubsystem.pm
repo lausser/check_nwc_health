@@ -7,7 +7,7 @@ use strict;
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-PROCESS-MIB', [
       ['cpus', 'cpmCPUTotalTable', 'Classes::Cisco::NXOS::Component::CpuSubsystem::Cpu' ],
   ]);
@@ -44,7 +44,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{cpmCPUTotalIndex} = exists $self->{cpmCPUTotalIndex} ?
       $self->{cpmCPUTotalIndex} :
       $Classes::Cisco::NXOS::Component::CpuSubsystem::cpmCPUTotalIndex++;
@@ -82,7 +82,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
       $self->{name}, $self->{usage});
   $self->set_thresholds(warning => 80, critical => 90);

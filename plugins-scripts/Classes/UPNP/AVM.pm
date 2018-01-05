@@ -3,7 +3,7 @@ our @ISA = qw(Classes::UPNP);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /7390/) {
     bless $self, 'Classes::UPNP::AVM::FritzBox7390';
     $self->debug('using Classes::UPNP::AVM::FritzBox7390');

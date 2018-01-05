@@ -3,7 +3,7 @@ our @ISA = qw(Classes::CheckPoint);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::CheckPoint::Firewall1::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {

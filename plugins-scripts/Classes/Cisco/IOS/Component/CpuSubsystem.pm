@@ -11,7 +11,7 @@ use constant PHYS_DESCR => 4;
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-PROCESS-MIB', [
       ['cpus', 'cpmCPUTotalTable', 'Classes::Cisco::IOS::Component::CpuSubsystem::Cpu' ],
   ]);
@@ -57,7 +57,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{cpmCPUTotalIndex} = $self->{flat_indices};
   $self->{cpmCPUTotalPhysicalIndex} = exists $self->{cpmCPUTotalPhysicalIndex} ?
       $self->{cpmCPUTotalPhysicalIndex} : 0;
@@ -95,7 +95,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{label} = $self->{name};
   $self->add_info(sprintf 'cpu %s usage (5 min avg.) is %.2f%%',
       $self->{name}, $self->{usage});

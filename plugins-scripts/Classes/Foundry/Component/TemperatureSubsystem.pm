@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $temp = 0;
   $self->get_snmp_objects('FOUNDRY-SN-AGENT-MIB', (qw(
       snChasActualTemperature snChasWarningTemperature
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (defined $self->{snChasActualTemperature}) {
     $self->{snChasActualTemperature} /= 2;
     $self->{snChasWarningTemperature} /= 2;
@@ -53,7 +53,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   ($self->{snAgentTempSlotNum}, $self->{snAgentTempSensorId}) =
       @{$self->{indices}};
   $self->{snAgentTempValue} /= 2 if ($self->{snAgentTempValue});
@@ -63,7 +63,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   return if (!$self->{snAgentTempValue});
   $self->add_info(sprintf 'temperature %s in slot %s is %.2fC', 
       $self->{snAgentTempSensorId},

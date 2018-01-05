@@ -4,7 +4,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('CISCO-CONFIG-MAN-MIB', (qw(
       ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved
       ccmHistoryStartupLastChanged)));
@@ -18,7 +18,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $info;
   my $runningChangedMarginAfterReload = 300;
   $self->add_info('checking config');
@@ -64,7 +64,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   printf "[CONFIG]\n";
   foreach (qw(ccmHistoryRunningLastChanged ccmHistoryRunningLastSaved ccmHistoryStartupLastChanged)) {
     printf "%s: %s (%s)\n", $_, $self->{$_}, scalar localtime $self->{$_};

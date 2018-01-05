@@ -10,7 +10,7 @@ use strict;
 # MES2348: 1 PSU, 2 FAN
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::load/) {
     $self->analyze_and_check_cpu_subsystem('Classes::Eltex::MES::Component::CpuSubsystem');
   } elsif ($self->mode =~ /device::hardware::health/) {

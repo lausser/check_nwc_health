@@ -12,7 +12,7 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /Linux.*((el6.f5.x86_64)|(el5.1.0.f5app)) .*/i ||
       $self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
     bless $self, 'Classes::F5::F5BIGIP';

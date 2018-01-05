@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $tempcnt = 0;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature'],
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
   if (! exists $self->{ciscoEnvMonTemperatureStatusIndex}) {
     $self->{ciscoEnvMonTemperatureStatusIndex} = $self->{flat_indices};
@@ -26,7 +26,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{ciscoEnvMonTemperatureStatusValue} >
       $self->{ciscoEnvMonTemperatureThreshold}) {
     $self->add_info(sprintf 'temperature %d %s is too high (%d of %d max = %s)',
@@ -62,7 +62,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'temperature %d %s is %s',
       $self->{ciscoEnvMonTemperatureStatusIndex},
       $self->{ciscoEnvMonTemperatureStatusDescr},

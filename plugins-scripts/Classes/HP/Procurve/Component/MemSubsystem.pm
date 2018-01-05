@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('NETSWITCH-MIB', [
       ['mem', 'hpLocalMemTable', 'Classes::HP::Procurve::Component::MemSubsystem::Memory'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   if (scalar (@{$self->{mem}}) == 0) {
   } else {
@@ -26,7 +26,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{usage} = $self->{hpLocalMemAllocBytes} / 
       $self->{hpLocalMemTotalBytes} * 100;
   $self->add_info(sprintf 'memory %s usage is %.2f',

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('WLSX-WLAN-MIB', qw(wlsxWlanTotalNumAccessPoints));
   $self->get_snmp_tables('WLSX-WLAN-MIB', [
       ['aps', 'wlsxWlanAPTable', 'Classes::Alcatel::OmniAccess::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{wlanAPName}) } ],
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking access points');
   $self->{numOfAPs} = scalar (@{$self->{aps}});
   $self->{apNameList} = [map { $_->{wlanAPName} } @{$self->{aps}}];
@@ -78,7 +78,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{wlanAPMacAddress} && $self->{wlanAPMacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{wlanAPMacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   } elsif ($self->{wlanAPMacAddress} && unpack("H12", $self->{wlanAPMacAddress}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
@@ -87,7 +87,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'access point %s is %s',
       $self->{wlanAPName}, $self->{wlanAPStatus});
   if ($self->mode =~ /device::wlan::aps::status/) {

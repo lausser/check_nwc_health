@@ -7,12 +7,12 @@ use strict;
 }
 
 sub sid : lvalue {
-  my $self = shift;
+  my ($self) = @_;
   $Classes::UPNP::AVM::FritzBox7390::sid;
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $module (qw(HTML::TreeBuilder LWP::UserAgent Encode Digest::MD5 JSON)) {
     if (! eval "require $module") {
       $self->add_unknown("could not find $module module");
@@ -44,7 +44,7 @@ sub init {
 }
 
 sub login {
-  my $self = shift;
+  my ($self) = @_;
   my $ua = LWP::UserAgent->new;
   my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
   my $resp = $ua->get($loginurl);
@@ -71,7 +71,7 @@ sub login {
 }
 
 sub logout {
-  my $self = shift;
+  my ($self) = @_;
   return if ! $self->sid();
   my $ua = LWP::UserAgent->new;
   my $loginurl = sprintf "http://%s/login_sid.lua", $self->opts->hostname;
@@ -85,13 +85,12 @@ sub logout {
 }
 
 sub DESTROY {
-  my $self = shift;
+  my ($self) = @_;
   $self->logout();
 }
 
 sub http_get {
-  my $self = shift;
-  my $page = shift;
+  my ($self, $page) = @_;
   my $ua = LWP::UserAgent->new;
   if ($page =~ /\?/) {
     $page .= "&sid=".$self->sid();
@@ -109,7 +108,7 @@ sub http_get {
 }
 
 sub analyze_cpu_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   my $html = $self->http_get('system/ecostat.lua');
   if ($html =~ /uiSubmitLogin/) {
     $self->add_critical("wrong login");
@@ -125,7 +124,7 @@ sub analyze_cpu_subsystem {
 }
 
 sub analyze_mem_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   my $html = $self->http_get('system/ecostat.lua');
   if ($html =~ /uiSubmitLogin/) {
     $self->add_critical("wrong login");
@@ -153,7 +152,7 @@ sub analyze_mem_subsystem {
 }
 
 sub check_cpu_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{cpu_usage});
   $self->set_thresholds(warning => 40, critical => 60);
@@ -168,7 +167,7 @@ sub check_cpu_subsystem {
 }
 
 sub check_mem_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   $self->add_info(sprintf 'memory usage is %.2f%%', $self->{ram_used});
   $self->set_thresholds(warning => 80, critical => 90);

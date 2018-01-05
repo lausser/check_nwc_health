@@ -3,21 +3,17 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{groups} = [];
   if ($self->mode =~ /device::hsrp/) {
-    foreach ($self->get_snmp_table_objects(
-        'CISCO-HSRP-MIB', 'cHsrpGrpTable')) {
-      my $group = Classes::HSRP::Component::HSRPSubsystem::Group->new(%{$_});
-      if ($self->filter_name($group->{name})) {
-        push(@{$self->{groups}}, $group);
-      }
-    }
+    $self->get_snmp_tables('CISCO-HSRP-MIB', [
+      ['groups', 'cHsrpGrpTable', 'Classes::HSRP::Component::HSRPSubsystem::Group',  sub { my ($o) = @_; $self->filter_name($o->{name})}],
+    ]);
   }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking hsrp groups');
   if ($self->mode =~ /device::hsrp::list/) {
     foreach (@{$self->{groups}}) {
@@ -41,10 +37,9 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
-  my $self = shift;
-  my %params = @_;
-  $self->{ifIndex} = $params{indices}->[0];
-  $self->{cHsrpGrpNumber} = $params{indices}->[1];
+  my ($self) = @_;
+  $self->{ifIndex} = $self->{indices}->[0];
+  $self->{cHsrpGrpNumber} = $self->{indices}->[1];
   $self->{name} = $self->{cHsrpGrpNumber}.':'.$self->{ifIndex};
   if ($self->mode =~ /device::hsrp::state/) {
     if (! $self->opts->role()) {
@@ -55,7 +50,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hsrp::state/) {
     $self->add_info(sprintf 'hsrp group %s (interface %s) state is %s (active router is %s, standby router is %s)',
         $self->{cHsrpGrpNumber}, $self->{ifIndex},
@@ -109,7 +104,7 @@ sub check {
 }
 
 sub list {
-  my $self = shift;
+  my ($self) = @_;
   printf "%s %s %s %s\n", $self->{name}, $self->{cHsrpGrpVirtualIpAddr},
       $self->{cHsrpGrpActiveRouter}, $self->{cHsrpGrpStandbyRouter};
 }

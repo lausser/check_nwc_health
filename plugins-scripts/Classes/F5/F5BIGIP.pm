@@ -3,7 +3,7 @@ our @ISA = qw(Classes::F5);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # gets 11.* and 9.*
   $self->{sysProductVersion} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysProductVersion');
   $self->{sysPlatformInfoMarketingName} = $self->get_snmp_object('F5-BIGIP-SYSTEM-MIB', 'sysPlatformInfoMarketingName');
@@ -37,7 +37,7 @@ sub init {
 }
 
 sub analyze_ltm_subsystem {
-  my $self = shift;
+  my ($self) = @_;
   $self->{components}->{ltm_subsystem} =
       Classes::F5::F5BIGIP::Component::LTMSubsystem->new('sysProductVersion' => $self->{sysProductVersion}, sysPlatformInfoMarketingName => $self->{sysPlatformInfoMarketingName});
 }

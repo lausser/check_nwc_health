@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $hrSystemUptime = $self->get_snmp_object('HOST-RESOURCES-MIB', 'hrSystemUptime');
   $self->{uptime} = $self->timeticks($hrSystemUptime);
   $self->debug(sprintf 'uptime: %s', $self->{uptime});
@@ -12,7 +12,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'device is up since %s',
       $self->human_timeticks($self->{uptime}));
   $self->set_thresholds(warning => '15:', critical => '5:');

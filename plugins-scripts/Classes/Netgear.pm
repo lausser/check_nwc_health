@@ -4,7 +4,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # netgear does not publish mibs
   $self->no_such_mode();
 }

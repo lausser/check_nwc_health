@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{interfaces} = [];
   $self->get_snmp_tables('IP-MIB', [
       ['routes', 'ipRouteTable', 'Classes::IPMIB::Component::RoutingSubsystem::Route' ],
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking routes');
   if ($self->mode =~ /device::routes::list/) {
     foreach (@{$self->{routes}}) {

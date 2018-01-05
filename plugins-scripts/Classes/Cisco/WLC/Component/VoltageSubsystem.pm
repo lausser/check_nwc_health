@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $index = 0;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['voltages', 'ciscoEnvMonVoltageStatusTable', 'Classes::Cisco::IOS::Component::VoltageSubsystem::Voltage'],
@@ -18,7 +18,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'voltage %d (%s) is %s',
       $self->{ciscoEnvMonVoltageStatusIndex},
       $self->{ciscoEnvMonVoltageStatusDescr},

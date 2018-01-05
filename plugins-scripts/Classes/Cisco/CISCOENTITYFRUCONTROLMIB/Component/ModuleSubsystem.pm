@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
     ['modules', 'cefcModuleTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::ModuleSubsystem::Module'],
   ]);
@@ -25,7 +25,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my @criticals = qw(failed missing okButPowerOverCritical powerDenied);
   my @warnings = qw(mismatchWithParent mismatchConfig diagFailed
     outOfServiceAdmin outOfServiceEnvTemp powerDown okButPowerOverWarning

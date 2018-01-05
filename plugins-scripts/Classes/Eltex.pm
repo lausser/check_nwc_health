@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /(MES2324B)|(MES2324F)|(MES31)|(MES53)/i) {
     bless $self, 'Classes::Eltex::Aggregation';
     $self->debug('using Classes::Eltex::Aggregation');

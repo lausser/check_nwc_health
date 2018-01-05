@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub new {
-  my $class = shift;
+  my ($class) = @_;
   my $self = {};
   bless $self, $class;
   if ($self->mode =~ /load/) {
@@ -15,7 +15,7 @@ sub new {
 }
 
 sub overall_init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('F5-BIGIP-SYSTEM-MIB', (qw(
       sysStatTmTotalCycles sysStatTmIdleCycles sysStatTmSleepCycles)));
   $self->valdiff({name => 'cpu'}, qw(sysStatTmTotalCycles sysStatTmIdleCycles sysStatTmSleepCycles ));
@@ -26,14 +26,14 @@ sub overall_init {
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
       ['cpus', 'sysCpuTable', 'Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking cpus');
   if ($self->mode =~ /load/) {
     $self->add_info(sprintf 'tmm cpu usage is %.2f%%',
@@ -58,7 +58,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu %d has %dC (%drpm)',
       $self->{sysCpuIndex},
       $self->{sysCpuTemperature},

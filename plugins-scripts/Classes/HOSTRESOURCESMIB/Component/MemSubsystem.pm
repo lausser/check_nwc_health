@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
       ['storagesram', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::MemSubsystem::Ram', sub { return shift->{hrStorageType} eq 'hrStorageRam' } ],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $used = 100;
   eval {
      $used = 100 * $self->{hrStorageUsed} / $self->{hrStorageSize};

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP Monitoring::GLPlugin::UPNP);
 use strict;
 
 sub classify {
-  my $self = shift;
+  my ($self) = @_;
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
     $self->add_unknown('either specify a hostname or a snmpwalk file');
   } else {
@@ -124,7 +124,7 @@ sub classify {
         $self->rebless('Classes::F5');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
         $self->rebless('Classes::F5');
-      } elsif ($self->{productname} =~ /(H?H3C|HP Comware)/i) {
+      } elsif ($self->{productname} =~ /(H?H3C|HP Comware|HPE Comware)/i) {
         $self->rebless('Classes::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {
         $self->rebless('Classes::Huawei');
@@ -195,7 +195,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::aggregation::availability/) {
     $self->analyze_and_check_aggregation_subsystem("Classes::IFMIB::Component::LinkAggregation");
   } elsif ($self->mode =~ /device::interfaces::ifstack/) {

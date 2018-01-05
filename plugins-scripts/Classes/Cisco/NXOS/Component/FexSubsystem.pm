@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->mult_snmp_max_msg_size(10); # FEATURE-CONTROL
   $self->get_snmp_tables('CISCO-FEATURE-CONTROL-MIB', [
     ['features', 'cfcFeatureCtrlTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
@@ -43,14 +43,14 @@ sub init {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{fexes}}) {
     $_->dump();
   }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('counting fexes');
   if (! $self->{fex_feature}) {
     $self->add_ok('feature fex is not enabled');
@@ -94,7 +94,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{original_cefexConfigExtenderName} = $self->{cefexConfigExtenderName};
   if (exists $self->{entPhysicalClass}) {
     # stammt aus ENTITY-MIB

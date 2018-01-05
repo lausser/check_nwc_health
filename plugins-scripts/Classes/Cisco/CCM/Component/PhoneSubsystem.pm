@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('CISCO-CCM-MIB', (qw(
       ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)));
   if (! defined $self->{ccmRegisteredPhones}) {
@@ -14,7 +14,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (! defined $self->{ccmRegisteredPhones}) {
     foreach (qw(ccmRegisteredPhones ccmUnregisteredPhones ccmRejectedPhones)) {
       $self->{$_} = 0;

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem} =
       Classes::CheckPoint::Firewall1::Component::DiskSubsystem->new();
   $self->{temperature_subsystem} =
@@ -17,7 +17,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem}->check();
   $self->{temperature_subsystem}->check();
   $self->{fan_subsystem}->check();
@@ -30,7 +30,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
   $self->{fan_subsystem}->dump();

@@ -3,13 +3,13 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('BLUECOAT-AV-MIB', (qw(
       avVirusesDetected)));
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%d viruses detected',
       $self->{avVirusesDetected});
   $self->set_thresholds(warning => 1500, critical => 1500);

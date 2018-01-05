@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::nat::sessions::count/) { 
     $self->get_snmp_objects('CISCO-IETF-NAT-MIB', qw(
         cnatAddrBindNumberOfEntries cnatAddrPortBindNumberOfEntries
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::nat::sessions::count/) { 
     $self->add_info(sprintf '%d bind entries (%d addr, %d port)',
         $self->{cnatAddrBindNumberOfEntries} + $self->{cnatAddrPortBindNumberOfEntries},
@@ -48,7 +48,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{cnatProtocolStatsName} = $self->{flat_indices};
   $self->make_symbolic('CISCO-IETF-NAT-MIB', 'cnatProtocolStatsName', $self->{cnatProtocolStatsName});
   $self->valdiff({name => $self->{cnatProtocolStatsName}},
@@ -63,7 +63,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%.2f%% of all %s packets have been dropped/rejected',
       $self->{rejects}, $self->{cnatProtocolStatsName});
   $self->set_thresholds(warning => 30, critical => 50);

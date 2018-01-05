@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
       ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk'}],
   ]);
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking disks');
   if (@{$self->{multidisks}}) {
     foreach (@{$self->{multidisks}}) {
@@ -51,7 +51,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'volume %s with %d disks is %s',
       $self->{raidVolumeID},
       $self->{numOfDisksOnRaid},
@@ -72,7 +72,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'disk %s (vol %s) is %s',
       $self->{raidDiskIndex},
       $self->{raidDiskVolumeID},
@@ -85,7 +85,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'disk_%s_free', $self->{multiDiskName};
   $self->add_info(sprintf 'disk %s (%s) has %.2f%% free space',
       $self->{multiDiskIndex},

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENVMON-MIB', [
       ['supplies', 'ciscoEnvMonSupplyStatusTable', 'Classes::Cisco::CISCOENVMONMIB::Component::PowersupplySubsystem::Powersupply'],
   ]);
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->ensure_index('ciscoEnvMonSupplyStatusIndex');
   $self->add_info(sprintf 'powersupply %d (%s) is %s',
       $self->{ciscoEnvMonSupplyStatusIndex},

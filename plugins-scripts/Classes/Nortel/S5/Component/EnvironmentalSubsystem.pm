@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('S5-CHASSIS-MIB', [
     ['comps', 's5ChasComTable', 'Classes::Nortel::S5::Component::EnvironmentalSubsystem::Comp' ],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{comps}}) {
     $_->check();
   }
@@ -23,12 +23,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{s5ChasComShortDescr} = $self->{s5ChasComDescr};
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'component %s/%s status is %s (admin %s)',
       $self->{flat_indices}, $self->{s5ChasComShortDescr},
       $self->{s5ChasComOperState}, $self->{s5ChasComAdminState});
