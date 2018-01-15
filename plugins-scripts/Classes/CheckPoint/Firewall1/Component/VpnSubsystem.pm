@@ -6,7 +6,7 @@ sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['tunnels', 'tunnelTable', 'Classes::CheckPoint::Firewall1::Component::VpnSubsystem::Tunnel', sub { my ($o) = @_; $o->filter_name($o->{tunnelPeerIpAddr}) || $o->filter_name($o->{tunnelPeerObjName}) } ],
-      ['permanenttunnels', 'permanentTunnelTable', 'Classes::CheckPoint::Firewall1::Component::VpnSubsystem::PermanentTunnel, sub { my ($o) = @_; $o->filter_name($o->{permanentTunnelPeerIpAddr}) || $o->filter_name($o->{permanentTunnelPeerObjName}) }'],
+      ['permanenttunnels', 'permanentTunnelTable', 'Classes::CheckPoint::Firewall1::Component::VpnSubsystem::PermanentTunnel', sub { my ($o) = @_; $o->filter_name($o->{permanentTunnelPeerIpAddr}) || $o->filter_name($o->{permanentTunnelPeerObjName}) } ],
   ]);
 }
 

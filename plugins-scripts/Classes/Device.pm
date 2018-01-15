@@ -44,9 +44,7 @@ sub classify {
     if ($self->opts->mode eq "uptime" && $self->opts->mode eq "short") {
       return $self;
     } elsif (! $self->check_messages()) {
-      if ($self->opts->verbose && $self->opts->verbose) {
-        printf "I am a %s\n", $self->{productname};
-      }
+      $self->debug("I am a ".$self->{productname}."\n");
       if ($self->opts->mode =~ /^my-/) {
         $self->load_my_extension();
       } elsif ($self->{productname} =~ /upnp/i) {
