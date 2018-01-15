@@ -269,6 +269,7 @@ EXTRA_MODULES=\
   Classes/IPMIB.pm \
   Classes/VRRPMIB/Component/VRRPSubsystem.pm \
   Classes/VRRPMIB.pm \
+  Classes/HOSTRESOURCESMIB/Component/ClockSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/DeviceSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \

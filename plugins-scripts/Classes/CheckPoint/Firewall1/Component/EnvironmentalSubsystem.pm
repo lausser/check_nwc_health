@@ -14,6 +14,8 @@ sub init {
       Classes::CheckPoint::Firewall1::Component::VoltageSubsystem->new();
   $self->{powersupply_subsystem} =
       Classes::CheckPoint::Firewall1::Component::PowersupplySubsystem->new();
+  $self->{clock_subsystem} =
+      Classes::HOSTRESOURCESMIB::Component::ClockSubsystem->new();
 }
 
 sub check {
@@ -23,6 +25,7 @@ sub check {
   $self->{fan_subsystem}->check();
   $self->{voltage_subsystem}->check();
   $self->{powersupply_subsystem}->check();
+  $self->{clock_subsystem}->check() if ! $self->{clock_subsystem}->is_blacklisted();
   if (! $self->check_messages()) {
     $self->clear_ok(); # too much noise
     $self->add_ok("environmental hardware working fine");
@@ -36,5 +39,6 @@ sub dump {
   $self->{fan_subsystem}->dump();
   $self->{voltage_subsystem}->dump();
   $self->{powersupply_subsystem}->dump();
+  $self->{clock_subsystem}->dump();
 }
 
