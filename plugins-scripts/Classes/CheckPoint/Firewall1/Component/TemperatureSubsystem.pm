@@ -34,7 +34,6 @@ sub check {
   } else {
     $self->add_unknown();
   }
-  $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(
       label => 'temperature_'.$self->{tempertureSensorName},
       value => $self->{tempertureSensorValue},
