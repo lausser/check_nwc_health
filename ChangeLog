@@ -1,3 +1,5 @@
+* 2018-02-08 7.0.0.5
+  update glplugn, add modes encode/decode, rfc3986
 * 2018-01-23 7.0.0.4
   merge pull request #164 (simonmeggle)
   add bluecoat asg fix from Stefan Kublik

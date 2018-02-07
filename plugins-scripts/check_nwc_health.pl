@@ -485,6 +485,7 @@ $plugin->add_mode(
     alias => undef,
     help => 'Show the temperature measured by a Fritz! compatible device',
 );
+$plugin->add_default_modes();
 $plugin->add_snmp_modes();
 $plugin->add_snmp_args();
 $plugin->add_default_args();
