@@ -30,7 +30,8 @@ sub finish {
     $self->{name} = $self->{hrStorageDescr};
   }
   if ($self->{hrStorageDescr} eq "/dev" || $self->{hrStorageDescr} =~ /^devfs/ ||
-      $self->{hrStorageDescr} =~ /.*cdrom.*/ || $self->{hrStorageSize} == 0) {
+      $self->{hrStorageDescr} =~ /.*cdrom.*/ || $self->{hrStorageSize} == 0 ||
+      $self->{hrStorageDescr} =~ /.*iso$/) {
     $self->{special} = 1;
   } else {
     $self->{special} = 0;
