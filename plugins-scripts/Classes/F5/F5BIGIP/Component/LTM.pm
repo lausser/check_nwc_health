@@ -161,6 +161,8 @@ sub init {
     $_->{ltmPoolMemberStatAddr} = $self->unhex_ip($_->{ltmPoolMemberStatAddr});
     push(@auxpoolmemberstat, $_);
     # ltmPoolMemberStatAddr is deprecated, use ltmPoolMemberStatNodeName
+    # (but for older devices which have no ltmPoolMemberStatNodeName,
+    # check ltmPoolMemberStatAddr(Type) as well
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
@@ -178,8 +180,15 @@ sub init {
     }
     foreach my $auxmember (@auxpoolmemberstat) {
       if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMemberStatPoolName} &&
-          $_->{ltmPoolMemberPort} eq $auxmember->{ltmPoolMemberStatPort} &&
-          $_->{ltmPoolMemberNodeName} eq $auxmember->{ltmPoolMemberStatNodeName}) {
+          $_->{ltmPoolMemberPort} eq $auxmember->{ltmPoolMemberStatPort} && ((
+              $_->{ltmPoolMemberNodeName} && $auxmember->{ltmPoolMemberStatNodeName} &&
+              $_->{ltmPoolMemberNodeName} eq $auxmember->{ltmPoolMemberStatNodeName}
+          ) || (
+              $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMemberStatAddrType}
+ &&
+              $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMemberStatAddr}
+          ))
+      ) {
         foreach my $key (keys %{$auxmember}) {
           next if $key =~ /.*indices$/;
           $_->{$key} = $auxmember->{$key};

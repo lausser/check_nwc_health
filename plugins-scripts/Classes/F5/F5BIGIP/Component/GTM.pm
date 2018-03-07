@@ -81,7 +81,7 @@ sub init {
     push(@auxpools, $_);
   }
   if (! grep { $self->filter_name($_->{gtmPoolStatusName}) } @auxpools) {
-    #$self->add_unknown("did not find any pools");
+    $self->add_unknown("did not find any pools");
     $self->{pools} = [];
     return;
   }

@@ -31,6 +31,12 @@ sub init {
     }
   } elsif ($self->mode =~ /device::wideip/) {
     $self->analyze_and_check_gtm_subsystem("Classes::F5::F5BIGIP::Component::GTMSubsystem");
+  } elsif ($self->mode =~ /device::users/) {
+    $self->analyze_and_check_connection_subsystem("Classes::F5::F5BIGIP::Component::ConnectionSubsystem");
+  } elsif ($self->mode =~ /device::config/) {
+    $self->analyze_and_check_config_subsystem("Classes::F5::F5BIGIP::Component::ConfigSubsystem");
+  } elsif ($self->mode =~ /device::ha::/) {
+    $self->analyze_and_check_ha_subsystem("Classes::F5::F5BIGIP::Component::HaSubsystem");
   } else {
     $self->no_such_mode();
   }
