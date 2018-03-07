@@ -300,15 +300,18 @@ EXTRA_MODULES=\
   Classes/UCDMIB/Components/DiskSubsystem.pm \
   Classes/UCDMIB/Components/ProcessSubsystem.pm \
   Classes/UCDMIB.pm \
-  Classes/F5/F5BIGIP/Component/GTM.pm \
-  Classes/F5/F5BIGIP/Component/LTM.pm \
+  Classes/F5/F5BIGIP/Component/ConfigSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/ConnectionSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/CpuSubsystem.pm \
   Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/FanSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/GTM.pm \
+  Classes/F5/F5BIGIP/Component/HaSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/LTM.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
   Classes/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   Classes/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/CpuSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/FanSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
   Classes/F5/F5BIGIP.pm \
   Classes/F5.pm \
   Classes/CheckPoint/Firewall1/Component/EnvironmentalSubsystem.pm \
