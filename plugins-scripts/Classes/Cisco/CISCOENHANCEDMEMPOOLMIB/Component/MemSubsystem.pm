@@ -19,7 +19,11 @@ sub finish {
     $self->{usage} = 100 * $self->{cempMemPoolHCUsed} /
         ($self->{cempMemPoolHCFree} + $self->{cempMemPoolHCUsed});
   } else {
-    $self->{usage} = 100 * $self->{cempMemPoolUsed} /
+    # there was a posixMemory with used=0, free=0
+    # (= heap mem for posix-like processes in modular ios)
+    $self->{usage} =
+        ($self->{cempMemPoolFree} + $self->{cempMemPoolUsed}) == 0 ? 0 :
+	100 * $self->{cempMemPoolUsed} /
         ($self->{cempMemPoolFree} + $self->{cempMemPoolUsed});
   }
   $self->{type} = $self->{cempMemPoolType} ||= 0;
