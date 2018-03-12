@@ -1,3 +1,5 @@
+* 2018-03-13 7.0.1.1
+  fix a bug in cisco enhanced mempool mib and posixmem (thx sabedevops)
 * 2018-03-07 7.0.1
   improve f5, add ha-role, check-config, count-connections
 * 2018-03-01 7.0.0.7
