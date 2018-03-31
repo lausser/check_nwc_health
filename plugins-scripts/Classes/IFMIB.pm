@@ -1,4 +1,4 @@
 package Classes::IFMIB;
-our @ISA = qw(Classes::Device);
+our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
