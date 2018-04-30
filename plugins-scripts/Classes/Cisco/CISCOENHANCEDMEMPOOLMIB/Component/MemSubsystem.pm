@@ -42,6 +42,21 @@ sub check {
         warning => 100,
         critical => 100,
     );
+  } elsif ($self->{name} =~ /global.*shared/i) {
+    if ($self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0)
+        =~ /(asa|adaptive security appliance)/i) {
+      if ($self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /Version ([\d\.]+)/) {
+        $self->set_variable("version", $1);
+        if ($self->version_is_minimum("9.3.2")) {
+          # Cisco Adaptive Security Appliance Version 9.4(4)16
+          $self->force_thresholds(
+              metric => $self->{name}.'_usage',
+              warning => 100,
+              critical => 100,
+          );
+        }
+      }
+    }
   } elsif ($self->{name} =~ /^reserved/ &&
       $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XR/i) {
     # ASR9K "reserved" and "image" are always at 100%
