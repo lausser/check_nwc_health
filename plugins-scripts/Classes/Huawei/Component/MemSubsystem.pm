@@ -3,9 +3,9 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Classes::Huawei::Component::MemSubsystem::Mem', sub { my $o = shift; $o->{entPhysicalClass} eq 'module' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
+    ['entities', 'entPhysicalTable', 'Classes::Huawei::Component::MemSubsystem::Mem', sub { my ($o) = @_; $o->{entPhysicalClass} eq 'module' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
   ]);
   $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
     ['entitystates', 'hwEntityStateTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['hwEntityMemUsage', 'hwEntityMemUsageThreshold', 'hwEntityMemSizeMega']],
@@ -19,13 +19,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{name} = $self->{entPhysicalName};
 }
 
 sub check {
-  my $self = shift;
-  my $id = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'Memory %s usage is %s%% (of %dMB)',
       $self->{name}, $self->{hwEntityMemUsage}, $self->{hwEntityMemSizeMega});
   $self->set_thresholds(

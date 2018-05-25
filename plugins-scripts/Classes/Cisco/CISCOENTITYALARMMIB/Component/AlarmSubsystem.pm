@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $alarms = {};
   $self->get_snmp_tables('CISCO-ENTITY-ALARM-MIB', [
-    ['alarms', 'ceAlarmTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm', sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
+    ['alarms', 'ceAlarmTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::Alarm', sub { my ($o) = @_; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
     ['alarmdescriptionmappings', 'ceAlarmDescrMapTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescriptionMapping' ],
     ['alarmdescriptions', 'ceAlarmDescrTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDescription' ],
     ['alarmfilterprofiles', 'ceAlarmFilterProfileTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmFilterProfile' ],
-    ['alarmhistory', 'ceAlarmHistTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHistory', sub { my $o = shift; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
+    ['alarmhistory', 'ceAlarmHistTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHistory', sub { my ($o) = @_; $o->{parent} = $self; $self->filter_name($o->{entPhysicalIndex})}],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::PhysicalEntity'],
@@ -36,7 +36,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if (scalar(@{$self->{alarms}}) == 0) {
     $self->add_info('no alarms');
     $self->add_ok();
@@ -59,7 +59,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{entPhysicalIndex} = $self->{flat_indices};
   $self->{ceAlarmTypes} = [];
   if ($self->{ceAlarmList}) {
@@ -82,7 +82,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $location = exists $self->{entity} ?
       $self->{entity}->{entPhysicalDescr} : "unknown";
   if (length($self->{ceAlarmTypes})) {
@@ -129,7 +129,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{entPhysicalIndex} = $self->{flat_indices};
 }
 
@@ -137,7 +137,7 @@ package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDe
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ceAlarmDescrIndex} = $self->{indices}->[0];
   $self->{ceAlarmDescrAlarmType} = $self->{indices}->[1];
 }
@@ -147,7 +147,7 @@ package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmDe
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ceAlarmDescrIndex} = $self->{indices}->[0];
 }
 
@@ -158,13 +158,13 @@ package Classes::Cisco::CISCOENTITYSENSORMIB::Component::AlarmSubsystem::AlarmHi
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ceAlarmHistTimeStamp} = time - $self->uptime() + $self->timeticks($self->{ceAlarmHistTimeStamp});
   $self->{ceAlarmHistTimeStampLocal} = scalar localtime $self->{ceAlarmHistTimeStamp};
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $vendortype = "unknown";
   my @entities = grep {
     $_->{entPhysicalIndex} == $self->{ceAlarmHistEntPhysicalIndex};

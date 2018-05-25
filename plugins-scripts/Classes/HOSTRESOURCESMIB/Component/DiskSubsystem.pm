@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
       ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk' } ],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{hrStorageDescr} =~ /(.*?),*\s+mounted on:\s+(.*)/) {
     my ($dev, $mnt) = ($1, $2);
     if ($dev =~ /^dev/) {
@@ -30,7 +30,8 @@ sub finish {
     $self->{name} = $self->{hrStorageDescr};
   }
   if ($self->{hrStorageDescr} eq "/dev" || $self->{hrStorageDescr} =~ /^devfs/ ||
-      $self->{hrStorageDescr} =~ /.*cdrom.*/ || $self->{hrStorageSize} == 0) {
+      $self->{hrStorageDescr} =~ /.*cdrom.*/ || $self->{hrStorageSize} == 0 ||
+      $self->{hrStorageDescr} =~ /.*iso$/) {
     $self->{special} = 1;
   } else {
     $self->{special} = 0;
@@ -38,7 +39,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $free = 100;
   eval {
      $free = 100 - 100 * $self->{hrStorageUsed} / $self->{hrStorageSize};

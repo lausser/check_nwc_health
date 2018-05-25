@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('JUNIPER-MIB', qw(jnxBoxKernelMemoryUsedPercent));
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
@@ -13,7 +13,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->SUPER::check();
   if (exists $self->{jnxBoxKernelMemoryUsedPercent}) {
     $self->add_info(sprintf 'kernel memory usage is %.2f%%',
@@ -35,7 +35,7 @@ package Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s buffer usage is %.2f%%',
       $self->{jnxOperatingDescr}, $self->{jnxOperatingBuffer});
   my $label = 'buffer_'.$self->{jnxOperatingDescr}.'_usage';
@@ -53,7 +53,7 @@ package Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem2;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{jnxJsSPUMonitoringCPUUsage});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds($self->{jnxJsSPUMonitoringCPUUsage}));

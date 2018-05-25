@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::wlan::aps::clients/) {
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
         ['mobilestations', 'bsnMobileStationTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::MobileStation', sub { return $self->filter_name(shift->{bsnMobileStationSsid}) } ],
@@ -21,12 +21,13 @@ sub init {
         ['ifloads', 'bsnAPIfLoadParametersTable', 'Classes::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
     ]);
     $self->assign_loads_to_ifs();
+    $self->dummy_loads_to_ifs();
     $self->assign_ifs_to_aps();
   }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking access points');
   if ($self->mode =~ /device::wlan::aps::clients/) {
     my $ssids = {};
@@ -105,7 +106,7 @@ sub check {
 }
 
 sub assign_ifs_to_aps {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $ap (@{$self->{aps}}) {
     $ap->{interfaces} = [];
     foreach my $if (@{$self->{ifs}}) {
@@ -120,12 +121,18 @@ sub assign_ifs_to_aps {
 }
 
 sub assign_loads_to_ifs {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $if (@{$self->{ifs}}) {
     foreach my $load (@{$self->{ifloads}}) {
       if ($load->{flat_indices} eq $if->{flat_indices}) {
         map { $if->{$_} = $load->{$_} } grep { $_ !~ /indices/ } keys %{$load};
       }
+    }
+    if (! exists $if->{bsnAPIfLoadNumOfClients}) {
+      # sometimes there is no corresponding load entry for an interface
+      $if->{bsnAPIfLoadNumOfClients} = 0;
+      $if->{bsnAPIfLoadTxUtilization} = 0;
+      $if->{bsnAPIfLoadRxUtilization} = 0;
     }
   }
 }
@@ -146,7 +153,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   } elsif ($self->{bsnAPDot3MacAddress} && unpack("H12", $self->{bsnAPDot3MacAddress}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
@@ -155,7 +162,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'access point %s is %s/%s (%d interfaces with %d clients)',
       $self->{bsnAPName}, $self->{bsnAPAdminStatus},
       $self->{bsnAPOperationStatus},
@@ -181,7 +188,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{bsnMobileStationMacAddress} = 
       $self->unhex_mac($self->{bsnMobileStationMacAddress});
 }

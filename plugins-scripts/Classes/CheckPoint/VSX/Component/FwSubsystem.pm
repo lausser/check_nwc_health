@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('CHECKPOINT-MIB', (qw(
       fwModuleState fwPolicyName)));
   if ($self->mode =~ /device::fw::policy::installed/) {
@@ -28,7 +28,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking fw module');
   if ($self->{fwModuleState} ne 'Installed') {
     $self->add_critical(sprintf 'fw module is %s', $self->{fwPolicyName});
@@ -64,7 +64,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'vsx_%s_numconn', $self->{vsxStatusVsName};
   $self->set_thresholds(metric => $label,
       warning => 20000, critical => 23000);

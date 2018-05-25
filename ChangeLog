@@ -1,3 +1,133 @@
+* 2018-05-05 7.0.1.4
+  simplify the cisco memory exceptions
+* 2018-04-29 7.0.1.3
+  bugfix in cisco global shared memory > 9.3.2
+* 2018-03-31 7.0.1.2
+  fix a bug in link-aggregation-availability
+* 2018-03-13 7.0.1.1
+  fix a bug in cisco enhanced mempool mib and posixmem (thx sabedevops)
+* 2018-03-07 7.0.1
+  improve f5, add ha-role, check-config, count-connections
+* 2018-03-01 7.0.0.7
+  update GLPlugin
+* 2018-02-26 7.0.0.6
+  ignore free space of iso mounts in hostresource mib
+* 2018-02-06 7.0.0.5
+  fix a bug in hostresourcesmib memory calc. (arista eos)
+* 2018-02-08 7.0.0.5
+  update glplugn, add modes encode/decode, rfc3986
+* 2018-01-23 7.0.0.4
+  merge pull request #164 (simonmeggle)
+  add bluecoat asg fix from Stefan Kublik
+* 2018-01-12 7.0.0.3
+  check the clock of checkpoint fw
+* 2018-01-11 7.0.0.2
+  fix a bug in checkpoint vpn-status
+* 2018-01-08 7.0.0.1
+  update glplugin
+* 2018-01-05 7.0
+  code improvements, fix hh3c entities
+* 2017-12-27 6.4.4.1
+  fix f5 versions
+* 2017-12-21 6.4.4
+  add interface-duplex
+* 2017-12-15 6.4.3.3
+  fix a bug in vsx-firewall1-fork
+* 2017-12-14 6.4.3.2
+  update glplugin
+* 2017-12-14 6.4.3.1
+  update glplugin
+* 2017-12-12 6.4.3
+  add checkpoint ha-status, fix checkpoint vpn-status
+* 2017-11-27 6.4.2.3
+  rewrite pretty_sysdesc
+* 2017-11-23 6.4.2.2
+  updateGLPlugin (remove session timeout)
+* 2017-11-20 6.4.2.1
+  updateGLPlugin
+* 2017-11-03 6.4.2
+  implement pool-completeness for f5-gtm-pools (--role gtm)
+* 2017-09-29 6.4.1.7
+  ignore dummy filesystems in HOSTRESOURCEMIBS
+* 2017-09-23 6.4.1.6
+  get ospf table twice if a 2nd contect exists
+* 2017-09-22 6.4.1.5
+  update GLPlugin (use 2nd context for OSPF)
+* 2017-09-21 6.4.1.4
+  fix interface-stack-status, arista's ifStackTable was buggy
+* 2017-09-18 6.4.1.3
+  blacklist l3 routing card (and power supply) if a nexus is used as l2 switch
+* 2017-09-16 6.4.1.2
+  workaround for CSCuv18572
+* 2017-09-13 6.4.1.1
+  fix hostresourcemib, interface sit0 can be down by default
+  (is disabled in Cisco UC)
+* 2017-08-25 6.4.1
+  add vpn-status for checkpoint
+* 2017-08-25 6.4.0.4
+  fix brocade aliasing in interface-status
+* 2017-08-24 6.4.0.3
+  fix brocade alias aliasing
+* 2017-08-24 6.4.0.2
+  update glplugin, sw-mib fix
+* 2017-08-24 6.4.0.1
+  replace empty ifAlias with swFCPortName for FabOS (Brocade) devices
+  merge pr #147, thanks arigaud. skip undef temperatured of foundry devices
+  implement eltex gear (pull request #144)
+  fix a perl-undef in Juniper BGP (pull request #143)
+  nsPowerDesc can be null (pullrequest #134)
+* 2017-08-07 6.3.0.8
+  fix C3750 redundant power supplies
+* 2017-08-04 6.3.0.7
+  fix undefined thresholds in arista sensors
+* 2017-07-17 6.3.0.6
+  fix false positives in cisco ethernet service modules SM-ES3G-24-P
+  allow mitigation of cisco disabled catalyst power supplies
+* 2017-06-28 6.3.0.5
+  allow mitigation of a subLayerDown stack
+* 2017-06-20 6.3.0.4
+  update GLPlugin (lcos-mib)
+* 2017-06-19 6.3.0.3
+  ring redundancy is ok if the stack has only one member
+* 2017-06-09 6.3.0.2
+  fix a bug in f5 member connections (Thanks Yannick Charton)
+  skip ifIndex in interface-stack-status (makes nexus crash)
+* 2017-06-07 6.3.0.1
+  update glplugin
+* 2017-06-01 6.3
+  update glplugin
+  add Lancom
+* 2017-05-19 6.2.2.3
+  workaround for ios 12.x and buggy ifstacktable
+* 2017-05-17 6.2.2.2
+  and fix list-interfaces...
+* 2017-05-17 6.2.2.1
+  fix --name for non-uinique indices
+* 2017-05-17 6.2.2
+  add an index to ifDescr which have no unique names
+* 2017-05-15 6.2.1.5
+  GLPlugin update
+* 2017-05-12 6.2.1.4
+  GLPlugin update
+* 2017-05-12 6.2.1.3
+  fix a bug in interface-health
+* 2017-05-12 6.2.1.2
+  fix a bug in interface-availability
+* 2017-05-09 6.2.1.1
+  fix interface etherstats, stacks
+  add fortigate disks
+* 2017-05-03 6.2.0.2
+  fix a bug in interface-health and 10GE ports.
+* 2017-04-26 6.2.0.1
+  use carrier if operstatus is unknown for linuxlocal interfaces
+  add dummy speed to linux virtio interfaces
+* 2017-04-18 6.2.0
+  add support for junox bgp with ipv6, thanks dupondje
+  fix a bug in bluecoat, allow warningx now
+* 2017-04-15 6.1.1
+  support Brocade Ironport and enhance FOUNDRY-SN-AGENT-MIB
+* 2017-04-13 6.1.0.3
+  reverse hrStorage mem thresholds
 * 2017-03-30 6.1.0.2
   fix a bug in 64bit interface-usage (Thanks Julian)
 * 2017-03-27 6.1.0.1

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->bulk_is_baeh();
   # there is temperature/sensor information in these mibs
   # mib-sensor.mib mib-box.mib mib-sysped.mib mib-sysiny.mib mibsysx8.mib

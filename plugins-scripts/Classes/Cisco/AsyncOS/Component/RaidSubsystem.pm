@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('ASYNCOS-MAIL-MIB', (qw(
       raidEvents)));
   $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
@@ -16,7 +16,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'raid %d has status %s',
       $self->{raidIndex},
       $self->{raidStatus});

@@ -3,11 +3,11 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('UCD-SNMP-MIB', [
       ['processes', 'prTable', 'Classes::UCDMIB::Component::ProcessSubsystem::Process',
         sub {
-          my $self = shift;
+          my ($self) = @_;
           # limit process checks to specific names. could be improvied by
           # checking the names first and then request the table by indizes
           if ($self->opts->name) {
@@ -27,7 +27,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking processes');
   if (scalar(@{$self->{processes}}) == 0) {
     $self->add_unknown('no processes');
@@ -43,7 +43,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s: %d%s',
       $self->{prNames},
       $self->{prCount},

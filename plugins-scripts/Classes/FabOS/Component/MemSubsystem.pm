@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   foreach (qw(swMemUsage swMemUsageLimit1 swMemUsageLimit3 swMemPollingInterval
       swMemNoOfRetries swMemAction)) {
     $self->{$_} = $self->valid_response('SW-MIB', $_, 0);
@@ -13,7 +13,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   if (defined $self->{swMemUsage}) {
     my $maps = $self->{swMemUsageLimit1} == 0 && $self->{swMemUsageLimit3} == 0 ?
@@ -27,7 +27,7 @@ sub check {
         critical => $maps eq 'enabled' ? 90 : $self->{swMemUsageLimit3});
     $self->add_message($self->check_thresholds(
         metric => 'memory_usage',
-        value => $self->check_thresholds($self->{swMemUsage})
+        value => $self->{swMemUsage},
     ));
     $self->add_perfdata(
         label => 'memory_usage',

@@ -4,14 +4,14 @@ use strict;
 use Data::Dumper;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CLAVISTER-MIB', [
       ['sensor', 'clvHWSensorEntry', 'Classes::Clavister::Firewall1::Component::HWSensor'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{sensor}}) {
     $_->check();
   }
@@ -23,7 +23,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{clvHWSensorName} =~ /Fan/i) {
     $self->add_info(sprintf '%s is running (%d %s)', 
         $self->{clvHWSensorName}, $self->{clvHWSensorValue}, $self->{clvHWSensorUnit});

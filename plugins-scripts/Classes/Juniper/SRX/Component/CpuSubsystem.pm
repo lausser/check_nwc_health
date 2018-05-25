@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
 # siehe memory
@@ -15,7 +15,7 @@ package Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s cpu usage is %.2f%%',
       $self->{jnxOperatingDescr}, $self->{jnxOperatingCPU});
   my $label = 'cpu_'.$self->{jnxOperatingDescr}.'_usage';
@@ -33,7 +33,7 @@ package Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem2;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{jnxJsSPUMonitoringCPUUsage});
   $self->set_thresholds(warning => 50, critical => 90);
   $self->add_message($self->check_thresholds($self->{jnxJsSPUMonitoringCPUUsage}));

@@ -3,19 +3,19 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ENTITY-MIB', [
     ['modules', 'entPhysicalTable',
         'Classes::Huawei::Component::EnvironmentalSubsystem::Module',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'module' },
+        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'module' },
         ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
     ['fans', 'entPhysicalTable',
         'Classes::Huawei::Component::EnvironmentalSubsystem::Fan', 
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'fan' },
+        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'fan' },
         ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
     ['powersupplies', 'entPhysicalTable',
         'Classes::Huawei::Component::EnvironmentalSubsystem::Powersupply',
-        sub { my $o = shift; $o->{entPhysicalClass} eq 'powerSupply' },
+        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'powerSupply' },
        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
   ]);
   $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
@@ -29,8 +29,7 @@ sub init {
     $self->merge_tables($_, "entitystates");
   }
   $self->merge_tables_with_code("fans", "fanstates", sub {
-    my $fan = shift;
-    my $fanstate = shift;
+    my ($fan, $fanstate) = @_;
     return ($fan->{entPhysicalName} eq sprintf("FAN %d/%d",
         $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn})) ? 1 : 0;
   });
@@ -42,7 +41,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'fan %s is %s, state is %s, admin status is %s, oper status is %s',
       $self->{entPhysicalName}, $self->{hwEntityFanPresent},
       $self->{hwEntityFanState},
@@ -64,7 +63,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'powersupply %s has admin status is %s, oper status is %s',
       $self->{entPhysicalName},
       $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
@@ -79,13 +78,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{name} = $self->{entPhysicalName};
 }
 
 sub check {
-  my $self = shift;
-  #my $id = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'module %s admin status is %s, oper status is %s',
       $self->{name}, $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
   $self->add_info(sprintf 'module %s temperature is %.2f',

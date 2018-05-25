@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem} =
       Classes::LMSENSORSMIB::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
@@ -11,13 +11,13 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
 }

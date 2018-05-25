@@ -3,11 +3,11 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('UCD-SNMP-MIB', [
       ['disks', 'dskTable', 'Classes::UCDMIB::Component::DiskSubsystem::Disk',
           sub {
-            my $self = shift;
+            my ($self) = @_;
             # limit disk checks to specific disks. could be improvied by
             # checking the path first and then request the table by indizes
             if ($self->opts->name) {
@@ -28,7 +28,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking disks');
   if (scalar(@{$self->{disks}}) == 0) {
     $self->add_unknown('no disks');
@@ -44,7 +44,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
 
   # use 32bit counter first
   my $avail = $self->{dskAvail};

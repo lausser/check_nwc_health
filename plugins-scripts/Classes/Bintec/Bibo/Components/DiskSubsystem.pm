@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->bulk_is_baeh();
   $self->get_snmp_tables('BINTEC-FILESYS', [
       ['disks', 'fsDiskTable', 'Classes::Bintec::Bibo::Component::DiskSubsystem::Disk'],
@@ -16,12 +16,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{usage} = 100 - (100 * $self->{fsDiskFreeBlocks} / $self->{fsDiskBlocks});
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = 'disk_'.$self->{fsDiskDevName};
   $self->add_info(sprintf 'disk %s usage is %.2f%%',
       $self->{fsDiskDevName},

@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->mult_snmp_max_msg_size(10);
     $self->analyze_and_check_environmental_subsystem("Classes::Arista::Component::EnvironmentalSubsystem");

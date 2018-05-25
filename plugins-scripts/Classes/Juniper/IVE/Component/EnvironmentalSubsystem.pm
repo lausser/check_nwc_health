@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem} =
       Classes::Juniper::IVE::Component::DiskSubsystem->new();
   $self->get_snmp_objects('JUNIPER-IVE-MIB', (qw(
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem}->check();
   $self->add_info(sprintf "temperature is %.2f deg", $self->{iveTemperature});
   $self->set_thresholds(warning => 70, critical => 75);
@@ -37,7 +37,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{disk_subsystem}->dump();
 }
 

@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('HP-ICF-CHASSIS-MIB', [
       ['sensors', 'hpicfSensorTable', 'Classes::HP::Procurve::Component::SensorSubsystem::Sensor'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking sensors');
   if (scalar (@{$self->{sensors}}) == 0) {
     $self->add_ok('no sensors');
@@ -27,7 +27,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'sensor %s (%s) is %s',
       $self->{hpicfSensorIndex},
       $self->{hpicfSensorDescr},

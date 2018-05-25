@@ -3,16 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
-  my %params = @_;
-  my $type = 0;
+  my ($self) = @_;
   $self->get_snmp_tables('UCD-SNMP-MIB', [
       ['loads', 'laTable', 'Classes::UCDMIB::Component::LoadSubsystem::Load'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking loads');
   foreach (@{$self->{loads}}) {
     $_->check();
@@ -20,7 +18,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{loads}}) {
     $_->dump();
   }
@@ -33,7 +31,7 @@ use strict;
 use Data::Dumper;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   $self->set_thresholds(
       metric => lc $self->{laNames},

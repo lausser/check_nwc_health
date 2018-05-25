@@ -7,13 +7,12 @@ use strict;
 }
 
 sub max_l4_connections : lvalue {
-  my $self = shift;
+  my ($self) = @_;
   $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
 }
 
 sub new {
-  my $class = shift;
-  my %params = @_;
+  my ($class, %params) = @_;
   my $self = {
     sysProductVersion => $params{sysProductVersion},
     sysPlatformInfoMarketingName => $params{sysPlatformInfoMarketingName},
@@ -33,7 +32,7 @@ sub new {
 }
 
 sub set_max_l4_connections {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{sysPlatformInfoMarketingName} && 
       $self->{sysPlatformInfoMarketingName} =~ /BIG-IP\s*(\d+)/i) {
     if ($1 =~ /^(1500)$/) {
@@ -76,7 +75,7 @@ sub set_max_l4_connections {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking ltm pools');
   if (scalar(@{$self->{pools}}) == 0) {
     $self->add_unknown('no pools');
@@ -106,7 +105,7 @@ use strict;
 #
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # ! merge ltmPoolStatus, ltmPoolMemberStatus, bec. ltmPoolAvailabilityState is deprecated
   if ($self->mode =~ /pool::list/) {
     $self->update_entry_cache(1, 'F5-BIGIP-LOCAL-MIB', 'ltmPoolStatusTable', 'ltmPoolStatusName');
@@ -162,6 +161,8 @@ sub init {
     $_->{ltmPoolMemberStatAddr} = $self->unhex_ip($_->{ltmPoolMemberStatAddr});
     push(@auxpoolmemberstat, $_);
     # ltmPoolMemberStatAddr is deprecated, use ltmPoolMemberStatNodeName
+    # (but for older devices which have no ltmPoolMemberStatNodeName,
+    # check ltmPoolMemberStatAddr(Type) as well
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
@@ -179,9 +180,15 @@ sub init {
     }
     foreach my $auxmember (@auxpoolmemberstat) {
       if ($_->{ltmPoolMemberPoolName} eq $auxmember->{ltmPoolMemberStatPoolName} &&
-          $_->{ltmPoolMemberPort} eq $auxmember->{ltmPoolMemberStatPort} &&
-          $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMemberStatAddrType} &&
-          $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMemberStatAddr}) {
+          $_->{ltmPoolMemberPort} eq $auxmember->{ltmPoolMemberStatPort} && ((
+              $_->{ltmPoolMemberNodeName} && $auxmember->{ltmPoolMemberStatNodeName} &&
+              $_->{ltmPoolMemberNodeName} eq $auxmember->{ltmPoolMemberStatNodeName}
+          ) || (
+              $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMemberStatAddrType}
+ &&
+              $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMemberStatAddr}
+          ))
+      ) {
         foreach my $key (keys %{$auxmember}) {
           next if $key =~ /.*indices$/;
           $_->{$key} = $auxmember->{$key};
@@ -231,7 +238,7 @@ sub init {
 }
 
 sub assign_members_to_pools {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $pool (@{$self->{pools}}) {
     foreach my $poolmember (@{$self->{poolmembers}}) {
       if ($poolmember->{ltmPoolMemberPoolName} eq $pool->{ltmPoolName}) {
@@ -256,13 +263,13 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ltmPoolMemberMonitorRule} ||= $self->{ltmPoolMonitorRule};
   $self->{members} = [];
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple/) {
     my $pool_info = sprintf "pool %s is %s, avail state is %s, active members: %d of %d, connections: %d",
         $self->{ltmPoolName},
@@ -317,7 +324,7 @@ sub check {
 }
 
 sub draw_html_table {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple/) {
     my @headers = qw(Node Port Enabled Avail Reason);
     my @columns = qw(ltmPoolMemberNodeName ltmPoolMemberPort ltmPoolMbrStatusEnabledState ltmPoolMbrStatusAvailState ltmPoolMbrStatusDetailReason);
@@ -375,12 +382,12 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub max_l4_connections {
-  my $self = shift;
+  my ($self) = @_;
   $Classes::F5::F5BIGIP::Component::LTMSubsystem::max_l4_connections;
 }
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple/) {
     $self->{ltmPoolMemberNodeName} ||= $self->{ltmPoolMemberAddr};
   }
@@ -409,7 +416,7 @@ sub finish {
 }
 
 sub rename {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{ltmPoolMemberNodeName} eq $self->{ltmPoolMemberAddr} &&
       $self->{ltmNodeAddrStatusName}) {
     $self->{ltmPoolMemberNodeName} = $self->{ltmNodeAddrStatusName};
@@ -417,7 +424,7 @@ sub rename {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::lb::pool::comple.*/) {
     if ($self->{ltmPoolMbrStatusEnabledState} eq "enabled") {
       if ($self->{ltmPoolMbrStatusAvailState} ne "green") {
@@ -433,7 +440,7 @@ sub check {
     }
   }
   if ($self->mode =~ /device::lb::pool::co.*ctions/) {
-    my $label = 'pool_'.$self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
+    my $label = 'member_'.$self->{ltmPoolMemberNodeName}.'_'.$self->{ltmPoolMemberPort};
     $self->set_thresholds(metric => $label.'_connections_pct', warning => "85", critical => "95");
     $self->add_info(sprintf "member %s:%s has %d connections (from max %dM)",
         $self->{ltmPoolMemberNodeName},
@@ -460,7 +467,7 @@ our @ISA = qw(Classes::F5::F5BIGIP::Component::LTMSubsystem Monitoring::GLPlugin
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   foreach ($self->get_snmp_table_objects(
       'LOAD-BAL-SYSTEM-MIB', 'poolTable')) {
     if ($self->filter_name($_->{poolName})) {
@@ -479,7 +486,7 @@ sub init {
 }
 
 sub assign_members_to_pools {
-  my $self = shift;
+  my ($self) = @_;
   foreach my $pool (@{$self->{pools}}) {
     foreach my $poolmember (@{$self->{poolmembers}}) {
       if ($poolmember->{poolMemberPoolName} eq $pool->{poolName}) {
@@ -503,12 +510,12 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{members} = [];
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'pool %s active members: %d of %d', $self->{poolName},
       $self->{poolActiveMemberCount},
       $self->{poolMemberQty});

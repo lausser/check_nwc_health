@@ -8,10 +8,13 @@ use constant trees => (
 );
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{productname} =~ /NetScreen/i) {
     bless $self, 'Classes::Juniper::NetScreen';
     $self->debug('using Classes::Juniper::NetScreen');
+  } elsif ($self->{productname} =~ /JunOS/i) {
+    bless $self, 'Classes::Juniper::JunOS';
+    $self->debug('using Classes::Juniper::JunOS');
   } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
     # Juniper Networks,Inc,MAG-4610,7.2R10
     bless $self, 'Classes::Juniper::IVE';

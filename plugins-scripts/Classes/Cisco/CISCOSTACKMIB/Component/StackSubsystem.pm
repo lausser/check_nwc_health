@@ -142,7 +142,11 @@ sub check {
       $self->{moduleIndex}, $self->{moduleSerialNumberString},
       $self->{moduleStatus}
   );
-  if ($self->{moduleStatus} eq 'minorFault') {
+  if ($self->{moduleStatus} eq 'minorFault' && $self->{moduleTestResult} == 0) {
+    # make Deepak happy
+    $self->annotate_info('but all tests passed');
+    $self->add_ok();
+  } elsif ($self->{moduleStatus} eq 'minorFault') {
     $self->add_warning();
   } elsif ($self->{moduleStatus} ne 'ok') {
     $self->add_critical();

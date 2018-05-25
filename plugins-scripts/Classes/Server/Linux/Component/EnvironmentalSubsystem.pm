@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Server::Linux);
 use strict;
 
 sub new {
-  my $class = shift;
+  my ($class) = @_;
   my $self = {};
   bless $self, $class;
   $self->init();
@@ -11,7 +11,7 @@ sub new {
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem} =
       Classes::LMSENSORSMIB::Component::FanSubsystem->new();
   $self->{temperature_subsystem} =
@@ -19,7 +19,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
   if (! $self->check_messages()) {
@@ -28,7 +28,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
 }

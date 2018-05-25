@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->implements_mib('CISCO-ENHANCED-MEMPOOL-MIB')) {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOENHANCEDMEMPOOLMIB::Component::MemSubsystem");
     if (! exists $self->{components}->{mem_subsystem} ||

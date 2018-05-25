@@ -4,7 +4,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('BLUECOAT-SG-PROXY-MIB', (qw(sgProxyHttpResponseTimeAll
       sgProxyHttpResponseFirstByte
       sgProxyHttpResponseByteRate sgProxyHttpResponseSize
@@ -16,7 +16,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking connections');
   if ($self->mode =~ /device::connections::check/) {
     $self->add_info(sprintf 'average service time for http requests is %.5fs',
@@ -48,11 +48,14 @@ sub check {
       @selected = grep { $_->[0] eq $self->opts->name && $_->[1] eq $self->opts->name2 } @{$details};
     }
     foreach (@selected) {
+      my $label = $_->[0].'_connections_'.$_->[1];
       $self->add_info(sprintf '%d %s connections %s', $self->{$_->[2]}, $_->[0], $_->[1]);
-      $self->set_thresholds(warning => 5000, critical => 10000);
-      $self->add_message($self->check_thresholds($self->{$_->[2]}));
+      $self->set_thresholds(metric => $label,
+          warning => 5000, critical => 10000);
+      $self->add_message($self->check_thresholds(metric => $label,
+          value => $self->{$_->[2]}));
       $self->add_perfdata(
-          label => $_->[0].'_connections_'.$_->[1],
+          label => $label,
           value => $self->{$_->[2]},
       );
     }

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('S5-CHASSIS-MIB', [
     ['utils', 's5ChasUtilTable', 'Classes::Nortel::S5::Component::CpuSubsystem::Cpu' ],
   ]);
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf 'cpu_%s_usage', $self->{flat_indices};
   $self->add_info(sprintf 'cpu %s usage was %.2f%%(1min) %.2f%%(10min)',
       $self->{flat_indices},,

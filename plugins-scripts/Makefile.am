@@ -7,7 +7,6 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/Item.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/TableItem.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP.pm \
-  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/SysDescPrettify.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
@@ -54,6 +53,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ELTEXMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYSTATEMIB.pm \
@@ -63,19 +63,24 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCMGMTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETFORTIGATEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNAGENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/GENUAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CENTITYEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HOSTRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HPICFCHASSISMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IANAIFTYPEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IEEE8023LAGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPFORWARDMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERIVEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNOSBGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LARAMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LCOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LOADBALSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MINIIFMIB.pm \
@@ -90,6 +95,10 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDNETSWITCHMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDSTATISTICSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ONEACCESSSYSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDCARPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDMEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDPFMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDSENSORSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OSPFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANCOMMONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANPRODUCTSMIB.pm \
@@ -198,6 +207,8 @@ EXTRA_MODULES=\
   Classes/Nortel/S5/Component/MemSubsystem.pm \
   Classes/Nortel/S5.pm \
   Classes/Nortel.pm \
+  Classes/Juniper/JunOS/Component/BgpSubsystem.pm \
+  Classes/Juniper/JunOS.pm \
   Classes/Juniper/NetScreen/Component/CpuSubsystem.pm \
   Classes/Juniper/NetScreen/Component/MemSubsystem.pm \
   Classes/Juniper/NetScreen/Component/EnvironmentalSubsystem.pm \
@@ -215,6 +226,7 @@ EXTRA_MODULES=\
   Classes/Juniper/SRX.pm \
   Classes/Juniper.pm \
   Classes/AlliedTelesyn.pm \
+  Classes/Fortigate/Component/DiskSubsystem.pm \
   Classes/Fortigate/Component/MemSubsystem.pm \
   Classes/Fortigate/Component/CpuSubsystem.pm \
   Classes/Fortigate/Component/EnvironmentalSubsystem.pm \
@@ -224,6 +236,7 @@ EXTRA_MODULES=\
   Classes/FabOS/Component/CpuSubsystem.pm \
   Classes/FabOS/Component/EnvironmentalSubsystem.pm \
   Classes/FabOS/Component/SensorSubsystem.pm \
+  Classes/FabOS/Component/InterfaceSubsystem.pm \
   Classes/FabOS.pm \
   Classes/HH3C/Component/EntitySubsystem.pm \
   Classes/HH3C/Component/EnvironmentalSubsystem.pm \
@@ -256,6 +269,7 @@ EXTRA_MODULES=\
   Classes/IPMIB.pm \
   Classes/VRRPMIB/Component/VRRPSubsystem.pm \
   Classes/VRRPMIB.pm \
+  Classes/HOSTRESOURCESMIB/Component/ClockSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/DeviceSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/DiskSubsystem.pm \
   Classes/HOSTRESOURCESMIB/Component/EnvironmentalSubsystem.pm \
@@ -286,15 +300,18 @@ EXTRA_MODULES=\
   Classes/UCDMIB/Components/DiskSubsystem.pm \
   Classes/UCDMIB/Components/ProcessSubsystem.pm \
   Classes/UCDMIB.pm \
-  Classes/F5/F5BIGIP/Component/GTM.pm \
-  Classes/F5/F5BIGIP/Component/LTM.pm \
+  Classes/F5/F5BIGIP/Component/ConfigSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/ConnectionSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/CpuSubsystem.pm \
   Classes/F5/F5BIGIP/Component/DiskSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/FanSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/GTM.pm \
+  Classes/F5/F5BIGIP/Component/HaSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/LTM.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
   Classes/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   Classes/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/CpuSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/FanSubsystem.pm \
-  Classes/F5/F5BIGIP/Component/EnvironmentalSubsystem.pm \
   Classes/F5/F5BIGIP.pm \
   Classes/F5.pm \
   Classes/CheckPoint/Firewall1/Component/EnvironmentalSubsystem.pm \
@@ -309,6 +326,7 @@ EXTRA_MODULES=\
   Classes/CheckPoint/Firewall1/Component/HaSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/CpuSubsystem.pm \
   Classes/CheckPoint/Firewall1/Component/MemSubsystem.pm \
+  Classes/CheckPoint/Firewall1/Component/VpnSubsystem.pm \
   Classes/CheckPoint/Firewall1.pm \
   Classes/CheckPoint/VSX/Component/FwSubsystem.pm \
   Classes/CheckPoint/VSX.pm \
@@ -351,6 +369,7 @@ EXTRA_MODULES=\
   Classes/Foundry/Component/PowersupplySubsystem.pm \
   Classes/Foundry/Component/FanSubsystem.pm \
   Classes/Foundry/Component/TemperatureSubsystem.pm \
+  Classes/Foundry/Component/ModuleSubsystem.pm \
   Classes/Foundry.pm \
   Classes/RAPIDCITYMIB/Component/EnvironmentalSubsystem.pm \
   Classes/RAPIDCITYMIB/Component/PowersupplySubsystem.pm \
@@ -364,6 +383,13 @@ EXTRA_MODULES=\
   Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
   Classes/Cumulus.pm \
+  Classes/Eltex/Access/Component/EnvironmentalSubsystem.pm \
+  Classes/Eltex/Access.pm \
+  Classes/Eltex/Aggregation/Component/EnvironmentalSubsystem.pm \
+  Classes/Eltex/Aggregation.pm \
+  Classes/Eltex/MES/Component/CpuSubsystem.pm \
+  Classes/Eltex/MES/Component/HaSubsystem.pm \
+  Classes/Eltex.pm \
   Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
@@ -373,6 +399,10 @@ EXTRA_MODULES=\
   Classes/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \
   Classes/Riverbed/Steelhead.pm \
   Classes/Riverbed.pm \
+  Classes/Lancom/Component/CpuSubsystem.pm \
+  Classes/Lancom/Component/EnvironmentalSubsystem.pm \
+  Classes/Lancom/Component/MemSubsystem.pm \
+  Classes/Lancom.pm \
   Classes/Device.pm
 
 SED=/bin/sed
@@ -423,4 +453,3 @@ $(libexec_SCRIPTS) : $(EXTRA_DIST)
 	$(ECHO) "package main;" >> $@
 	$(CAT) $(libexec_SCRIPTS).pl | $(AWK) -f ./subst >> $@
 	chmod +x $@
-

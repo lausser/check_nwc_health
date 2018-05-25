@@ -4,7 +4,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem('Server::SolarisLocal::Component::InterfaceSubsystem');
   }
@@ -16,7 +16,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub packet_size {
-  my $stats = shift;
+  my ($stats) = @_;
   if (defined $stats->{opackets64} && $stats->{opackets64} != 0 && defined $stats->{obytes64}) {
     return int($stats->{obytes64} / $stats->{opackets64});
   } elsif (defined $stats->{ipackets64} && $stats->{ipackets64} != 0 && defined $stats->{rbytes64}) {
@@ -31,7 +31,7 @@ sub packet_size {
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{kstat} = Sun::Solaris::Kstat->new();
   $self->{interfaces} = [];
   $self->{kstat_interfaces} = {};
@@ -111,7 +111,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking interfaces');
   if (scalar(@{$self->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');
@@ -133,7 +133,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   foreach (qw(ifSpeed ifInOctets ifInDiscards ifInErrors ifOutOctets ifOutDiscards ifOutErrors ifSnapTime)) {
     $self->{$_} = 0 if ! defined $self->{$_};
   }
@@ -216,7 +216,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -337,7 +337,7 @@ sub check {
 }
 
 sub list {
-  my $self = shift;
+  my ($self) = @_;
   printf "%s\n", $self->{ifDescr};
 }
 

@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # https://kb.bluecoat.com/index?page=content&id=KB3069
   # Memory pressure simply is the percentage of physical memory less free and reclaimable memory, of total memory. So, for example, if there is no free or reclaimable memory in the system, then memory pressure is at 100%.
   # The event logs start reporting memory pressure when it is over 75%.
@@ -15,7 +15,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking memory');
   $self->add_info(sprintf 'memory usage is %.2f%%',
       $self->{sgProxyMemPressure});

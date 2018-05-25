@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CHECKPOINT-MIB', [
       ['temperatures', 'tempertureSensorTable', 'Classes::CheckPoint::Firewall1::Component::TemperatureSubsystem::Temperature'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{temperatures}}) {
     $_->check();
   }
@@ -23,7 +23,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'temperature %s is %s (%d %s)', 
       $self->{tempertureSensorName}, $self->{tempertureSensorStatus},
       $self->{tempertureSensorValue}, $self->{tempertureSensorUnit});

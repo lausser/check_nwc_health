@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Cisco);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::chassis::health/) {
     if ($self->implements_mib('CISCO-STACK-MIB')) {
       $self->analyze_and_check_environmental_subsystem("Classes::Cisco::CISCOSTACKMIB::Component::StackSubsystem");

@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('SENSOR-MIB', [
       ['sensors', 'deviceSensorValueTable', 'Classes::SGOS::Component::SensorSubsystem::Sensor'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $psus = {};
   foreach my $sensor (@{$self->{sensors}}) {
     if ($sensor->{deviceSensorName} =~ /^PSU\s+(\d+)\s+(.*)/) {
@@ -57,7 +57,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{deviceSensorScale}) {
     $self->{deviceSensorValue} *= 10 ** $self->{deviceSensorScale};
   }

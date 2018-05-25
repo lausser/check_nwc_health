@@ -3,10 +3,10 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $sensors = {};
   $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
-    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my $o = shift; $self->filter_name($o->{entPhysicalIndex})}],
+    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}],
     ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold'],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
@@ -33,7 +33,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{entPhysicalIndex} = $self->{flat_indices};
   # www.thaiadmin.org%2Fboard%2Findex.php%3Faction%3Ddlattach%3Btopic%3D45832.0%3Battach%3D23494&ei=kV9zT7GHJ87EsgbEvpX6DQ&usg=AFQjCNHuHiS2MR9TIpYtu7C8bvgzuqxgMQ&cad=rja
   # zu klaeren. entPhysicalIndex entspricht dem entPhysicalindex der ENTITY-MIB.
@@ -45,7 +45,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf '%s sensor %s%s is %s',
       $self->{entSensorType},
       $self->{entPhysicalIndex},
@@ -105,7 +105,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{entPhysicalIndex} = $self->{indices}->[0];
   $self->{entSensorThresholdIndex} = $self->{indices}->[1];
 }
@@ -116,7 +116,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{entPhysicalIndex} = $self->{flat_indices};
 }
 

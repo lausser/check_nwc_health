@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-CCM-MIB', [
       ['ccms', 'ccmTable', 'Classes::Cisco::CCM::Component::CmSubsystem::Cm'],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{ccms}}) {
     $_->check();
   }
@@ -28,7 +28,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'cm %s is %s',
       $self->{ccmName},
       $self->{ccmStatus});

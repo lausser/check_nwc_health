@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     # not sure if this works fa25239716cb74c672f8dd390430dc4056caffa7
     if ($self->implements_mib('FCMGMT-MIB')) {

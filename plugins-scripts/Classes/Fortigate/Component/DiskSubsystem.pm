@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('FORTINET-FORTIGATE-MIB', (qw(
       fgSysDiskUsage fgSysDiskCapacity)));
   $self->{usage} = $self->{fgSysDiskCapacity} ? 
@@ -11,7 +11,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking disks');
   if (! defined $self->{usage}) {
     $self->add_info(sprintf 'system has no disk');

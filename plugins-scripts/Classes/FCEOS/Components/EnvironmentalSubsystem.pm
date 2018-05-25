@@ -3,19 +3,19 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub overall_init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_objects('FCEOS-MIB', (qw(
       fcEosSysOperStatus)));
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fru_subsystem} =
       Classes::FCEOS::Component::FruSubsystem->new();
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fru_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_ok("environmental hardware working fine");

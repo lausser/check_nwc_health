@@ -4,7 +4,7 @@ use Data::Dumper;
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->{groups} = [];
   $self->{assoc} = ();
   if ($self->mode =~ /device::vrrp/) {
@@ -32,7 +32,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking vrrp groups');
   if ($self->mode =~ /device::vrrp::list/) {
     foreach (@{$self->{groups}}) {
@@ -56,10 +56,9 @@ use strict;
 use Data::Dumper;
 
 sub finish {
-  my $self = shift;
-  my %params = @_;
-  $self->{ifIndex} = $params{indices}->[0];
-  $self->{vrrpGrpNumber} = $params{indices}->[1];
+  my ($self) = @_;
+  $self->{ifIndex} = $self->{indices}->[0];
+  $self->{vrrpGrpNumber} = $self->{indices}->[1];
   $self->{name} = $self->{vrrpGrpNumber}.':'.$self->{ifIndex};
   if ($self->mode =~ /device::vrrp::state/) {
     if (! $self->opts->role()) {
@@ -70,7 +69,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::vrrp::state/) {
     $self->add_info(sprintf 'vrrp group %s (interface %s) state is %s (active router is %s)',
         $self->{vrrpGrpNumber}, $self->{ifIndex},
@@ -110,7 +109,7 @@ sub check {
   }
 }
 sub list {
-  my $self = shift;
+  my ($self) = @_;
   printf "name(grp:if)=%s state=%s/%s master=%s ips=%s\n",
       $self->{name}, $self->{vrrpOperState}, $self->{vrrpOperAdminState},
       $self->{vrrpOperMasterIpAddr},

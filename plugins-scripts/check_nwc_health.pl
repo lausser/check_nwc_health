@@ -77,6 +77,12 @@ $plugin->add_mode(
     help => 'Check the status of interfaces (oper/admin)',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::duplex',
+    spec => 'interface-duplex',
+    alias => undef,
+    help => 'Check if interfaces operate in duplex mode',
+);
+$plugin->add_mode(
     internal => 'device::interfaces::complete',
     spec => 'interface-health',
     alias => undef,
@@ -160,6 +166,42 @@ $plugin->add_mode(
     spec => 'vpn-status',
     alias => undef,
     help => 'Check the status of vpns (up/down)',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::usage',
+    spec => 'fc-interface-usage',
+    alias => undef,
+    help => 'Check the utilization of fibrechannel interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::errors',
+    spec => 'fc-interface-errors',
+    alias => undef,
+    help => 'Check the error-rate of fibrechannel interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::discards',
+    spec => 'fc-interface-discards',
+    alias => undef,
+    help => 'Check the discard-rate of interfaces',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::operstatus',
+    spec => 'fc-interface-status',
+    alias => undef,
+    help => 'Check the status of interfaces (oper/admin)',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::complete',
+    spec => 'fc-interface-health',
+    alias => undef,
+    help => 'Check everything interface',
+);
+$plugin->add_mode(
+    internal => 'device::fcinterfaces::list',
+    spec => 'fc-list-interfaces',
+    alias => undef,
+    help => 'Show the fcal interfaces of the device and update the name cache',
 );
 $plugin->add_mode(
     internal => 'device::shinken::interface',
@@ -443,6 +485,7 @@ $plugin->add_mode(
     alias => undef,
     help => 'Show the temperature measured by a Fritz! compatible device',
 );
+$plugin->add_default_modes();
 $plugin->add_snmp_modes();
 $plugin->add_snmp_args();
 $plugin->add_default_args();

@@ -4,7 +4,7 @@ use strict;
 
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Riverbed::Steelhead::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
@@ -28,7 +28,7 @@ our @ISA = qw(Classes::Riverbed::Steelhead);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::Riverbed::SteelheadEX::Component::EnvironmentalSubsystem");
   } else {

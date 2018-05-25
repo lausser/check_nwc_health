@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('WLSX-SYSTEMEXT-MIB', [
       ['memories', 'wlsxSysExtProcessorTable', 'Classes::Alcatel::OmniAccess::Component::CpuSubsystem::Cpu'],
   ]);
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $label = sprintf '%s_usage', lc $self->{sysExtProcessorDescr};
   $label =~ s/\s+/_/g;
   $self->add_info(sprintf '%s usage is %.2f%%',

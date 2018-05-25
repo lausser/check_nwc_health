@@ -3,39 +3,30 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $tempcnt = 0;
-  foreach ($self->get_snmp_table_objects(
-      'CISCO-ENVMON-MIB', 'ciscoEnvMonTemperatureStatusTable')) {
-    $_->{ciscoEnvMonTemperatureStatusIndex} = $tempcnt++ if (! exists $_->{ciscoEnvMonTemperatureStatusIndex});
-    push(@{$self->{temperatures}},
-        Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature->new(%{$_}));
-  }
+  $self->get_snmp_tables('CISCO-ENVMON-MIB', [
+      ['temperatures', 'ciscoEnvMonTemperatureStatusTable', 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature'],
+  ]);
 }
 
 package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {};
-  foreach (keys %params) {
-    $self->{$_} = $params{$_};
-  }
-  $self->{ciscoEnvMonTemperatureStatusIndex} ||= 0;
+sub finish {
+  my ($self) = @_;
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
-  if ($self->{ciscoEnvMonTemperatureStatusValue}) {
-    bless $self, $class;
-  } else {
-    bless $self, $class.'::Simple';
+  if (! exists $self->{ciscoEnvMonTemperatureStatusIndex}) {
+    $self->{ciscoEnvMonTemperatureStatusIndex} = $self->{flat_indices};
   }
-  return $self;
+  if (! exists $self->{ciscoEnvMonTemperatureStatusValue}) {
+    bless $self, 'Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature::Simple';
+  }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{ciscoEnvMonTemperatureStatusValue} >
       $self->{ciscoEnvMonTemperatureThreshold}) {
     $self->add_info(sprintf 'temperature %d %s is too high (%d of %d max = %s)',
@@ -70,20 +61,8 @@ package Classes::Cisco::IOS::Component::TemperatureSubsystem::Temperature::Simpl
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub new {
-  my $class = shift;
-  my %params = @_;
-  my $self = {
-    ciscoEnvMonTemperatureStatusIndex => $params{ciscoEnvMonTemperatureStatusIndex} || 0,
-    ciscoEnvMonTemperatureStatusDescr => $params{ciscoEnvMonTemperatureStatusDescr},
-    ciscoEnvMonTemperatureState => $params{ciscoEnvMonTemperatureState},
-  };
-  bless $self, $class;
-  return $self;
-}
-
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'temperature %d %s is %s',
       $self->{ciscoEnvMonTemperatureStatusIndex},
       $self->{ciscoEnvMonTemperatureStatusDescr},

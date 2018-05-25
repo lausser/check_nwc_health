@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
     ['powersupplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply'],
     ['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup'],
@@ -27,14 +27,16 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'power supply %s%s admin status is %s, oper status is %s',
       $self->{flat_indices},
       #exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.' idx '.$self->{entity}->{entPhysicalIndex}.' class '.$self->{entity}->{entPhysicalClass}.')' : '',
       exists $self->{entity} ? ' ('.$self->{entity}->{entPhysicalDescr}.' )' : '',
       $self->{cefcFRUPowerAdminStatus},
       $self->{cefcFRUPowerOperStatus});
-  if ($self->{cefcFRUPowerOperStatus} eq "on") {
+  if ($self->{cefcFRUPowerAdminStatus} eq 'off' && defined $self->opts->mitigation() && $self->opts->mitigation() == 0) {
+    $self->add_ok();
+  } elsif ($self->{cefcFRUPowerOperStatus} eq "on") {
   } elsif ($self->{cefcFRUPowerOperStatus} eq "unknown") {
     $self->add_unknown();
   } elsif ($self->{cefcFRUPowerOperStatus} eq "onButFanFail") {

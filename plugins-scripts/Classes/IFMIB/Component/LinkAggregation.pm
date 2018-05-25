@@ -3,16 +3,8 @@ our @ISA = qw(Classes::IFMIB);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
-sub new {
-  my $class = shift;
-  my $self = {};
-  bless $self, $class;
-  $self->init();
-  return $self;
-}
-
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->opts->name) {
     my @ifs = split(",", $self->opts->name);
     $self->{name} = shift @ifs;
@@ -39,7 +31,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking link aggregation');
   if (scalar(@{$self->{components}->{interface_subsystem}->{interfaces}}) == 0) {
     $self->add_unknown('no interfaces');

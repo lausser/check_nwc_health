@@ -3,10 +3,22 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
+  $self->mult_snmp_max_msg_size(10); # FEATURE-CONTROL
+  $self->get_snmp_tables('CISCO-FEATURE-CONTROL-MIB', [
+    ['features', 'cfcFeatureCtrlTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+  ]);
   $self->get_snmp_tables('CISCO-ETHERNET-FABRIC-EXTENDER-MIB', [
     ['fexes', 'cefexConfigTable', 'Classes::Cisco::NXOS::Component::FexSubsystem::Fex'],
   ]);
+  $self->{fex_feature} = 1;
+  foreach (@{$self->{features}}) {
+    if ($_->{cfcFeatureCtrlName} eq 'fex' &&
+        $_->{cfcFeatureCtrlOpStatusReason} =~ /feature never enabled/) {
+      $self->{fex_feature} = 0;
+      return;
+    }
+  }
   if (scalar (@{$self->{fexes}}) == 0) {
    # fallback
     $self->get_snmp_tables('ENTITY-MIB', [
@@ -31,15 +43,19 @@ sub init {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   foreach (@{$self->{fexes}}) {
     $_->dump();
   }
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('counting fexes');
+  if (! $self->{fex_feature}) {
+    $self->add_ok('feature fex is not enabled');
+    return;
+  }
   $self->{numOfFexes} = scalar (@{$self->{fexes}});
   $self->{fexNameList} = [map { $_->{cefexConfigExtenderName} } @{$self->{fexes}}];
   if (scalar (@{$self->{fexes}}) == 0) {
@@ -78,7 +94,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{original_cefexConfigExtenderName} = $self->{cefexConfigExtenderName};
   if (exists $self->{entPhysicalClass}) {
     # stammt aus ENTITY-MIB

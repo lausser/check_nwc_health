@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   my $type = 0;
   $self->get_snmp_objects('CISCOSB-RNDMNG', (qw(
       rlCpuUtilDuringLast5Minutes)));
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{rlCpuUtilDuringLast5Minutes} == 101) {
     $self->add_unknown('cpu measurement disabled');
     return;

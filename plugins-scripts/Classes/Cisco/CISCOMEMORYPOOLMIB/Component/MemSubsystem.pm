@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->mult_snmp_max_msg_size(2);
   $self->get_snmp_tables('CISCO-MEMORY-POOL-MIB', [
       ['mems', 'ciscoMemoryPoolTable', 'Classes::Cisco::CISCOMEMORYPOOLMIB::Component::MemSubsystem::Mem'],
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{usage} = 100 * $self->{ciscoMemoryPoolUsed} /
       ($self->{ciscoMemoryPoolFree} + $self->{ciscoMemoryPoolUsed});
   $self->{type} = $self->{ciscoMemoryPoolType} ||= 0;
@@ -23,7 +23,7 @@ sub finish {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'mempool %s usage is %.2f%%',
       $self->{name}, $self->{usage});
   if ($self->{name} =~ /^lsmpi_io/ &&

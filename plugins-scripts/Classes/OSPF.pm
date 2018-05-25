@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::ospf::neighbor/) {
     $self->analyze_and_check_neighbor_subsystem("Classes::OSPF::Component::NeighborSubsystem");
   } else {

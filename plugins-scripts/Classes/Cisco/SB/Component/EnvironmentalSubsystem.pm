@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('CISCOSB-HWENVIROMENT', [
       ['fans', 'rlEnvMonFanStatusTable', 'Classes::Cisco::SB::Component::EnvironmentalSubsystem::Fan'],
       ['powersupplies', 'rlEnvMonSupplyStatusTable', 'Classes::Cisco::SB::Component::EnvironmentalSubsystem::Powersupply'],
@@ -20,7 +20,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'status of fan %s is %s',
       $self->{flat_indices}, $self->{rlEnvMonFanState});
   if ($self->{rlEnvMonFanState} eq 'notPresent') {
@@ -38,7 +38,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'status of supply %s is %s',
       $self->{flat_indices}, $self->{rlEnvMonSupplyState});
   if ($self->{rlEnvMonSupplyState} eq 'notPresent') {

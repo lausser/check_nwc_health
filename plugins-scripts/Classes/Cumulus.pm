@@ -3,7 +3,7 @@ our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::hardware::health/) {
     #$self->get_snmp_tables("UCD-DISKIO-MIB", [
     #    ['diskios', 'diskIOTable', 'Monitoring::GLPlugin::SNMP::TableItem'],

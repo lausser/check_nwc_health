@@ -3,8 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub update_caches {
-  my $self = shift;
-  my $force = shift;
+  my ($self, $force) = @_;
   $self->update_entry_cache($force, 'FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4BindTable', 'snL4BindVirtualServerName');
   $self->update_entry_cache($force, 'FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4VirtualServerTable', 'snL4VirtualServerName');
   $self->update_entry_cache($force, 'FOUNDRY-SN-SW-L4-SWITCH-GROUP-MIB', 'snL4VirtualServerPortTable', 'snL4VirtualServerPortServerName');
@@ -13,7 +12,7 @@ sub update_caches {
 }
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   # opt->name can be servername:serverport
   my $original_name = $self->opts->name;
   if ($self->mode =~ /device::lb::session::usage/) {
@@ -154,7 +153,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking slb virtual servers');
   if ($self->mode =~ /device::lb::session::usage/) {
     $self->add_info('checking session usage');
@@ -197,13 +196,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ports} = [];
 }
 
 sub check {
-  my $self = shift;
-  my %params = @_;
+  my ($self) = @_;
   $self->add_info(sprintf "vis %s is %s", 
       $self->{snL4VirtualServerName},
       $self->{snL4VirtualServerAdminStatus});
@@ -228,7 +226,7 @@ sub check {
 }
 
 sub add_port {
-  my $self = shift;
+  my ($self) = @_;
   push(@{$self->{ports}}, shift);
 }
 
@@ -238,12 +236,12 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub finish {
-  my $self = shift;
+  my ($self) = @_;
   $self->{ports} = [];
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf "vpo %s:%d is %s (%d connections to %d real ports)",
       $self->{snL4VirtualServerPortServerName},
       $self->{snL4VirtualServerPortPort},
@@ -331,7 +329,7 @@ sub check {
 }
 
 sub add_port {
-  my $self = shift;
+  my ($self) = @_;
   push(@{$self->{ports}}, shift);
 }
 
@@ -341,7 +339,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->{slbPoolMbrStatusEnabledState} eq "enabled") {
     if ($self->{slbPoolMbrStatusAvailState} ne "green") {
       $self->add_critical(sprintf
@@ -361,8 +359,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub check {
-  my $self = shift;
-  my %params = @_;
+  my ($self) = @_;
   $self->add_info(sprintf "rpo %s:%d is %s",
       $self->{snL4RealServerPortStatusServerName},
       $self->{snL4RealServerPortStatusPort},

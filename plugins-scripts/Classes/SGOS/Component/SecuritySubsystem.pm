@@ -3,14 +3,14 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ATTACK-MIB', [
       ['attacks', 'deviceAttackTable', 'Classes::SGOS::Component::SecuritySubsystem::Attack' ],
   ]);
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   my $errorfound = 0;
   $self->add_info('checking attacks');
   if (scalar (@{$self->{attacks}}) == 0) {
@@ -32,7 +32,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{deviceAttackTime} = $self->timeticks(
       $self->{deviceAttackTime});
   $self->{count_me} = 0;

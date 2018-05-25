@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   #
   # 1.3.6.1.4.1.9.9.13.1.1.0 ciscoEnvMonPresent (irgendein typ of envmon)
   # 
@@ -18,7 +18,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
   $self->{powersupply_subsystem}->check();
@@ -29,7 +29,7 @@ sub check {
 }
 
 sub dump {
-  my $self = shift;
+  my ($self) = @_;
   $self->{fan_subsystem}->dump();
   $self->{temperature_subsystem}->dump();
   $self->{powersupply_subsystem}->dump();

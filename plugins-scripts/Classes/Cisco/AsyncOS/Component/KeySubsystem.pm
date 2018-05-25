@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('ASYNCOS-MAIL-MIB', [
       ['keys', 'keyExpirationTable', 'Classes::Cisco::AsyncOS::Component::KeySubsystem::Key'],
   ]);
@@ -14,7 +14,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->{keyDaysUntilExpire} = int($self->{keySecondsUntilExpire} / 86400);
   if ($self->{keyIsPerpetual} eq 'true') {
     $self->add_info(sprintf 'perpetual key %d (%s) never expires',

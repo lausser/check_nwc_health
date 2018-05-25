@@ -3,7 +3,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   $self->get_snmp_tables('FOUNDRY-SN-AGENT-MIB', [
       ['powersupplies', 'snChasPwrSupplyTable', 'Classes::RAPIDCITYMIB::Component::PowersupplySubsystem::Powersupply'],
   ]);
@@ -15,7 +15,7 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info(sprintf 'powersupply %d is %s',
       $self->{snChasPwrSupplyIndex},
       $self->{snChasPwrSupplyOperStatus});

@@ -4,7 +4,7 @@ use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
-  my $self = shift;
+  my ($self) = @_;
   if ($self->mode =~ /device::ha::role/) {
   $self->get_snmp_objects('PAN-COMMON-MIB', (qw(
       panSysHAMode panSysHAState panSysHAPeerState)));
@@ -15,7 +15,7 @@ sub init {
 }
 
 sub check {
-  my $self = shift;
+  my ($self) = @_;
   $self->add_info('checking ha');
   $self->add_info(sprintf 'ha mode is %s, state is %s, peer state is %s', 
       $self->{panSysHAMode},
