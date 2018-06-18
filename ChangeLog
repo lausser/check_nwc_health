@@ -1,3 +1,5 @@
+* 2018-06-18 7.0.1.5
+  update glplugin (get_snmp_table_objects waja fix)
 * 2018-05-05 7.0.1.4
   simplify the cisco memory exceptions
 * 2018-04-29 7.0.1.3
