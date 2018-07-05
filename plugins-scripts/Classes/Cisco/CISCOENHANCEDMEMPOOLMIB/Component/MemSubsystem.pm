@@ -56,6 +56,10 @@ sub check {
   } elsif ($self->{name} =~ /^image/ &&
       $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /IOS.*XR/i) {
     $used100 = 1;
+  } elsif ($self->{name} =~ /heapcache/i &&
+      $self->get_snmp_object('MIB-2-MIB', 'sysDescr', 0) =~ /adaptive/i) {
+    # MEMPOOL_HEAPCACHE_0. It's a cache, so usage >99% is fine imho
+    $used100 = 1;
   }
   if ($used100) {
     $self->force_thresholds(
