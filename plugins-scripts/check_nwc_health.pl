@@ -143,6 +143,12 @@ $plugin->add_mode(
     help => 'Check the ethernet statistics of interfaces',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::uptime',
+    spec => 'interface-uptime',
+    alias => undef,
+    help => 'Check state changes of interfaces',
+);
+$plugin->add_mode(
     internal => 'device::routes::list',
     spec => 'list-routes',
     alias => undef,

@@ -123,6 +123,10 @@ sub init {
     push(@ethertable_columns, qw(
         dot3StatsDuplexStatus
     ));
+  } elsif ($self->mode =~ /device::interfaces::uptime/) {
+    push(@iftable_columns, qw(
+        ifLastChange
+    ));
   } else {
     @iftable_columns = ();
   }
@@ -604,6 +608,9 @@ sub finish {
     }
   }
   if ($self->mode =~ /device::interfaces::duplex/) {
+  } elsif ($self->mode =~ /device::interfaces::uptime/) {
+    $self->{sysUptime} = $self->get_snmp_object('MIB-2-MIB', 'sysUpTime', 0) / 100;
+    $self->{sysUptime64} = $self->uptime();
   } else {
     # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
     # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
@@ -752,6 +759,18 @@ sub init {
       $self->{ifSpeedText} = sprintf "%.2fB", $speed;
     }
     $self->{ifSpeedText} =~ s/\.00//g;
+  } elsif ($self->mode =~ /device::interfaces::uptime/) {
+    $self->{ifLastChangeRaw} = $self->{ifLastChange} / 100;
+    # recalc ticks
+    $self->{ifLastChange} = time - $self->uptime() + $self->{ifLastChange} / 100;
+    $self->{ifLastChangeHuman} = scalar localtime $self->{ifLastChange};
+    $self->{ifDuration} = time - $self->{ifLastChange};
+    $self->{ifDurationMinutes} = $self->{ifDuration} / 60; # minutes
+    # wenn sysUptime ueberlaeuft, dann wird's schwammig. Denn dann kann
+    # ich nicht sagen, ob ein ifLastChange ganz am Anfang passiert ist,
+    # unmittelbar nach dem Booten, oder grad eben vor drei Minuten, als
+    # der Ueberlauf stattfand. Ergo ist dieser Mode nach einer Uptime von
+    # 497 Tagen nicht mehr brauchbar.
   }
   return $self;
 }
@@ -1071,6 +1090,18 @@ sub check {
         $self->add_warning();
       }
     }
+  } elsif ($self->mode =~ /device::interfaces::uptime/) {
+    $self->add_info(sprintf "%s was changed %s ago",
+        $full_descr, $self->human_timeticks($self->{ifDuration}));
+    $self->set_thresholds(metric => $self->{ifDescr}."_duration",
+        warning => "15:", critical => "5:");
+    $self->add_message($self->check_thresholds(
+        metric => $self->{ifDescr}."_duration",
+        value => $self->{ifDurationMinutes}));
+    $self->add_perfdata(
+        label => $self->{ifDescr}."_duration",
+        value => $self->{ifDurationMinutes},
+    );
   }
 }
 
