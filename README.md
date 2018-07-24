@@ -2,6 +2,7 @@ Description
 ============
 The plugin check_nwc_health was developed with the aim of having a single tool for all aspects of monitoring of network components.
 
+**Komm nach Braunschweig und triff die Leute, die sich mit genau dem selben Kram beschäftigen wie du!**
 <a href="https://monitors-2018.tu-braunschweig.de/dokuwiki/doku.php"><img src="https://labs.consol.de/assets/images/braunschweig-banner.gif"></a>
 
 Motivation
