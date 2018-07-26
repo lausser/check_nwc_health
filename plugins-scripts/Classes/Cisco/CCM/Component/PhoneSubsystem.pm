@@ -25,12 +25,29 @@ sub check {
       $self->add_unknown('unable to count phones');
     }
   }
+
   $self->add_info(sprintf 'phones: %d registered, %d unregistered, %d rejected',
       $self->{ccmRegisteredPhones},
       $self->{ccmUnregisteredPhones},
       $self->{ccmRejectedPhones});
-  $self->set_thresholds(warning => 10, critical => 20);
-  $self->add_message($self->check_thresholds($self->{ccmRejectedPhones}));
+
+  $self->set_thresholds(metric => 'registered',
+      warning => '0:', critical => '0:');
+  $self->set_level($self->check_thresholds(metric => 'registered',
+      value => $self->{ccmRegisteredPhones}));
+
+  $self->set_thresholds(metric => 'unregistered',
+      warning => 11, critical => 22);
+  $self->set_level($self->check_thresholds(metric => 'unregistered',
+      value => $self->{ccmUnregisteredPhones}));
+
+  $self->set_thresholds(metric => 'rejected',
+      warning => 110, critical => 120);
+  $self->set_level($self->check_thresholds(metric => 'rejected',
+      value => $self->{ccmRejectedPhones}));
+
+  $self->add_message($self->get_level());
+
   $self->add_perfdata(
       label => 'registered',
       value => $self->{ccmRegisteredPhones},
