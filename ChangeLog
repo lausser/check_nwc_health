@@ -1,5 +1,6 @@
 * 2018-07-26 7.1
   add custom thresholds for cisco ccm
+  detect fritzbox 7490
 * 2018-07-13 7.0.2
   add interface-uptime
  2018-07-05 7.0.1.6
