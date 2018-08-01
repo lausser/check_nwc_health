@@ -99,7 +99,7 @@ sub classify {
       } elsif ($self->{productname} =~ /Juniper.*MAG\-SM\d+/i) {
         # Juniper Networks,Inc,MAG-SMx60,7.4R8
         $self->rebless('Classes::Juniper::IVE');
-      } elsif ($self->implements_mib('JUNIPER-MIB')) {
+      } elsif ($self->implements_mib('JUNIPER-MIB') || $self->{productname} =~ /srx/i) {
         $self->rebless('Classes::Juniper::SRX');
       } elsif ($self->{productname} =~ /NetScreen/i) {
         $self->rebless('Classes::Juniper');

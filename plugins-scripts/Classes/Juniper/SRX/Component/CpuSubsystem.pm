@@ -6,20 +6,27 @@ sub init {
   my ($self) = @_;
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
-# siehe memory
-#    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem2'],
+  ]);
+  $self->get_snmp_tables('JUNIPER-SRX5000-SPU-MONITORING-MIB', [
+    ['monobjects', 'jnxJsSPUMonitoringObjectsTable', 'Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem2'],
   ]);
 }
 
 package Classes::Juniper::SRX::Component::CpuSubsystem::OperatingItem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
+sub finish  {
+  my ($self) = @_;
+  $self->{jnxOperatingRestartTimeHuman} =
+      scalar localtime($self->{jnxOperatingRestartTime});
+}
+
 sub check {
   my ($self) = @_;
   $self->add_info(sprintf '%s cpu usage is %.2f%%',
       $self->{jnxOperatingDescr}, $self->{jnxOperatingCPU});
   my $label = 'cpu_'.$self->{jnxOperatingDescr}.'_usage';
-  $self->set_thresholds(metric => $label, warning => 50, critical => 90);
+  $self->set_thresholds(metric => $label, warning => 85, critical => 95);
   $self->add_message($self->check_thresholds(metric => $label, 
       value => $self->{jnxOperatingCPU}));
   $self->add_perfdata(
@@ -34,12 +41,16 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{jnxJsSPUMonitoringCPUUsage});
-  $self->set_thresholds(warning => 50, critical => 90);
-  $self->add_message($self->check_thresholds($self->{jnxJsSPUMonitoringCPUUsage}));
+  $self->add_info(sprintf 'packet forwarding %s cpu usage is %.2f%%',
+      $self->{jnxJsSPUMonitoringNodeDescr}, $self->{jnxJsSPUMonitoringCPUUsage});
+  my $label = 'pf_cpu_'.$self->{jnxJsSPUMonitoringNodeDescr}.'_usage';
+  $self->set_thresholds(metric => $label, warning => 80, critical => 95);
+  $self->add_message($self->check_thresholds(metric => $label, 
+      value => $self->{jnxJsSPUMonitoringCPUUsage}));
   $self->add_perfdata(
-      label => 'cpu_usage',
+      label => $label,
       value => $self->{jnxJsSPUMonitoringCPUUsage},
       uom => '%',
   );
 }
+
