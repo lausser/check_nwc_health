@@ -1,3 +1,5 @@
+* 2018-08-10 7.2.0.1
+  bugfix in ios ha-status, ignore cable "failover" description
 * 2018-08-01 7.2
   add packet forwarding engine metrics for juniper standby nodes
 * 2018-07-26 7.1
