@@ -168,7 +168,7 @@ sub init {
       @indices = ();
       $self->bulk_is_baeh(10);
     }
-    if (! $self->opts->name || scalar(@indices) > 0) {
+    if ((! $self->opts->name && ! $self->opts->name3) || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
