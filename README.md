@@ -28,6 +28,7 @@ Modi
 |-------------------------------|------------------------------------------------------------------------|
 | hardware-health               | Check the status of environmental equipment (fans, temperatures, power) |
 | cpu-load                      | Check the CPU load of the device) |
+| multi-cpu-load                | Check the CPU load of each core of the device |
 | memory-usage                  | Check the memory usage of the device) |
 | interface-usage               | Check the utilization of interfaces) |
 | interface-errors              | Check the error-rate of interfaces  |

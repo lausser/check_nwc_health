@@ -41,6 +41,12 @@ $plugin->add_mode(
     help => 'Check the CPU load of the device',
 );
 $plugin->add_mode(
+    internal => 'device::hardware::multi-load',
+    spec => 'multi-cpu-load',
+    alias => undef,
+    help => 'Check the CPU load of each core of the device',
+);
+$plugin->add_mode(
     internal => 'device::hardware::memory',
     spec => 'memory-usage',
     alias => undef,
