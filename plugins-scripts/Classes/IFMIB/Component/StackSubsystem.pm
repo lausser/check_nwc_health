@@ -11,6 +11,10 @@ sub init {
   if (! $self->opts->name) {
     # get_table erzwingen
     @higher_indices = ();
+  } elsif (scalar(@higher_indices)) {
+    @higher_indices = map { $_->[0] } @higher_indices;
+  } else {
+    @higher_indices = ();
   }
   $self->get_snmp_tables("IFMIB", [
       ['stacks', 'ifStackTable', 'Classes::IFMIB::Component::StackSubsystem::Relationship'],
@@ -18,19 +22,19 @@ sub init {
   my @lower_indices = ();
   foreach my $rel (@{$self->{stacks}}) {
     if ($self->opts->name) {
-      if (grep { $rel->{ifStackHigherLayer} == $_ } map { $_->[0]; } @higher_indices) {
-        push(@lower_indices, [$rel->{ifStackLowerLayer}]);
+      if (grep { $rel->{ifStackHigherLayer} == $_ } @higher_indices) {
+        push(@lower_indices, $rel->{ifStackLowerLayer});
       }
     } else {
       if ($rel->{ifStackLowerLayer} && $rel->{ifStackHigherLayer}) {
-        push(@higher_indices, [$rel->{ifStackHigherLayer}]);
-        push(@lower_indices, [$rel->{ifStackLowerLayer}]);
+        push(@higher_indices, $rel->{ifStackHigherLayer});
+        push(@lower_indices, $rel->{ifStackLowerLayer});
       }
     }
   }
-  @higher_indices = map { [$_] } keys %{{map {($_->[0] => 1)} @higher_indices}};
-  @lower_indices = grep { $_->[0] != 0 } map { [$_] } keys %{{map {($_->[0] => 1)} @lower_indices}};
-  my @indices = map { [$_] } keys %{{map {($_->[0] => 1)} (@higher_indices, @lower_indices)}};
+  @higher_indices = keys %{{map {($_ => 1)} @higher_indices}};
+  @lower_indices = grep { $_ != 0 } keys %{{map {($_ => 1)} @lower_indices}};
+  my @indices = map { [$_] } keys %{{map {($_ => 1)} (@higher_indices, @lower_indices)}};
   my $higher_interfaces = {};
   my $lower_interfaces = {};
   $self->{interfaces} = [];
@@ -39,14 +43,43 @@ sub init {
     foreach ($self->get_snmp_table_objects(
         'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
       my $interface = Classes::IFMIB::Component::InterfaceSubsystem::Interface->new(%{$_});
-      $higher_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_->[0] } @higher_indices;
-      $lower_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_->[0] } @lower_indices;
+      $higher_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_ } @higher_indices;
+      $lower_interfaces->{$interface->{ifIndex}} = $interface if grep { $interface->{ifIndex} == $_ } @lower_indices;
       push(@{$self->{interfaces}}, $interface);
     }
   }
   $self->{higher_interfaces} = $higher_interfaces;
   $self->{lower_interfaces} = $lower_interfaces;
+  @{$self->{stacks}} = grep {
+    my $rel = $_;
+    grep { $rel->{ifStackHigherLayer} eq $_; } @higher_indices;
+  } @{$self->{stacks}};
   $self->arista_schlamperei();
+  $self->link_stack_to_interfaces();
+}
+
+sub link_stack_to_interfaces {
+  my ($self) = @_;
+  foreach my $rel (@{$self->{stacks}}) {
+    if ($rel->{ifStackHigherLayer} == 0) {
+      $rel->{ifStackHigherLayerInterface} = "-";
+    } elsif (exists $self->{higher_interfaces}->{$rel->{ifStackHigherLayer}}) {
+      $rel->{ifStackHigherLayerInterface} = $self->{higher_interfaces}->{$rel->{ifStackHigherLayer}}->{ifDescr};
+    } elsif (exists $self->{lower_interfaces}->{$rel->{ifStackHigherLayer}}) {
+      $rel->{ifStackHigherLayerInterface} = $self->{lower_interfaces}->{$rel->{ifStackHigherLayer}}->{ifDescr};
+    } else {
+      $rel->{ifStackHigherLayerInterface} = "?";
+    }
+    if ($rel->{ifStackLowerLayer} == 0) {
+      $rel->{ifStackLowerLayerInterface} = "-";
+    } elsif (exists $self->{higher_interfaces}->{$rel->{ifStackLowerLayer}}) {
+      $rel->{ifStackLowerLayerInterface} = $self->{higher_interfaces}->{$rel->{ifStackLowerLayer}}->{ifDescr};
+    } elsif (exists $self->{lower_interfaces}->{$rel->{ifStackLowerLayer}}) {
+      $rel->{ifStackLowerLayerInterface} = $self->{lower_interfaces}->{$rel->{ifStackLowerLayer}}->{ifDescr};
+    } else {
+      $rel->{ifStackLowerLayerInterface} = "?";
+    }
+  }
 }
 
 sub arista_schlamperei {
@@ -55,17 +88,21 @@ sub arista_schlamperei {
   # IF-MIB::ifStackStatus.0.1000004 = INTEGER: active(1)
   # IF-MIB::ifStackStatus.1000004.0 = INTEGER: active(1)
   # IF-MIB::ifStackStatus.1000004.50 = INTEGER: active(1)
-  my @liars = map {
+  my @have_lower = map {
     $_->{ifStackHigherLayer}
   } grep {
     exists $self->{higher_interfaces}->{$_->{ifStackHigherLayer}}
   } grep {
-    $_->{ifStackLowerLayer} == 0
+    $_->{ifStackLowerLayer} != 0
   } @{$self->{stacks}};
   @{$self->{stacks}} = grep {
       my $ref = $_;
-      ! ($ref->{ifStackLowerLayer} == 0 && grep /^$ref->{ifStackHigherLayer}$/, @liars)
+      ! ($ref->{ifStackLowerLayer} == 0 && grep /^$ref->{ifStackHigherLayer}$/, @have_lower)
   } @{$self->{stacks}};
+  # und noch so eine Besonderheit von Arista.
+  # Die IF-MIB::ifStackStatus.1000004.[>0] verschwinden einfach, wenn die lower
+  # Interfaces wegbrechen. Die Upper-Lower-Zuordnung ist dann nur noch
+  # in der Konsole sichtbar.
 }
 
 sub check {
@@ -104,9 +141,17 @@ sub check {
         }
       } elsif ($rel->{ifStackLowerLayer} == 0 && $rel->{ifStackStatus} ne 'notInService') {
         if ($self->mode =~ /device::interfaces::ifstack::status/) {
-          $self->add_warning(sprintf '%s (%s) has stack status %s but no sub-layer interfaces', $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
-              $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
-              $rel->{ifStackStatus});
+          if ($rel->{ifStackLowerLayer} == 0 && $rel->{ifStackStatus} ne 'notInService') {
+            $self->add_warning(sprintf '%s (%s) has stack status %s but no sub-layer interfaces. Oper status is %s',
+                $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
+                $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
+                $rel->{ifStackStatus},
+                $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifOperStatus});
+          } else {
+            $self->add_warning(sprintf '%s (%s) has stack status %s but no sub-layer interfaces', $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifDescr},
+                $higher_interfaces->{$rel->{ifStackHigherLayer}}->{ifAlias},
+                $rel->{ifStackStatus});
+          }
         }
       } elsif ($rel->{ifStackStatus} ne 'notInService' &&
           $lower_interfaces->{$rel->{ifStackLowerLayer}}->{ifOperStatus} ne 'up' &&
