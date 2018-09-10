@@ -40,6 +40,7 @@ sub classify {
       $self->{productname} = 'checkpoint' if $self->opts->servertype eq 'checkpoint';
       $self->{productname} = 'clavister' if $self->opts->servertype eq 'clavister';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
+      $self->{productname} = 'generic_hostresources' if $self->opts->servertype eq 'generic_hostresources';
     }
     if ($self->opts->mode eq "uptime" && $self->opts->mode eq "short") {
       return $self;
@@ -142,6 +143,8 @@ sub classify {
         # although there can be a
         # Brocade Communications Systems, Inc. FWS648, IronWare Version 07.1....
         $self->rebless('Classes::Foundry');
+      } elsif ($self->{productname} eq 'generic_hostresources') {
+        $self->rebless('Classes::HOSTRESOURCESMIB');
       } elsif ($self->{productname} =~ /Linux Stingray/i) {
         $self->rebless('Classes::HOSTRESOURCESMIB');
       } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
