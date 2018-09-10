@@ -38,6 +38,8 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::BgpSubsystem");
   } elsif ($self->mode =~ /device::wlan/ && $self->implements_mib('AIRESPACE-WIRELESS-MIB')) {
       $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::WlanSubsystem");
+  } elsif ($self->mode =~ /device::vpn::status/) {
+    $self->analyze_and_check_config_subsystem("Classes::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem");
   } else {
     $self->no_such_mode();
   }
