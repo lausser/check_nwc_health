@@ -39,7 +39,7 @@ hwPnpOperateTable
 hwPreDisposeConfigTable
 hwPreDisposeEntInfoTable)) {
     $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-#      [$ding, $ding, 'Monitoring::GLPlugin::SNMP::TableItem'],
+      [$ding, $ding, 'Monitoring::GLPlugin::SNMP::TableItem'],
     ]);
 }
 
