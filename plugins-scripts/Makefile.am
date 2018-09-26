@@ -74,6 +74,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IANAIFTYPEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IEEE8023LAGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IFMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/INETADDRESSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPFORWARDMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERALARMMIB.pm \

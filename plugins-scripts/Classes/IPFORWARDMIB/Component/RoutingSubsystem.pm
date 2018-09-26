@@ -1,7 +1,7 @@
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
-
+# plugins-scripts/check_nwc_health  --mode list-routes --snmpwalk walks/simon.snmpwalk
 # ipRouteTable		1.3.6.1.2.1.4.21 
 # replaced by
 # ipForwardTable	1.3.6.1.2.1.4.24.2
@@ -120,12 +120,17 @@ sub finish {
   my ($self) = @_;
   # http://www.mibdepot.com/cgi-bin/vendor_index.cgi?r=ietf_rfcs
   # INDEX { inetCidrRouteDestType, inetCidrRouteDest, inetCidrRoutePfxLen, inetCidrRoutePolicy, inetCidrRouteNextHopType, inetCidrRouteNextHop }
+  $self->{i_inetCidrRouteDestType} = $self->{indices}->[0];
+  $self->{i_inetCidrRouteDest} = $self->{indices}->[1];
+  $self->{i_inetCidrRoutePfxLen} = $self->{indices}->[2];
+  $self->{i_inetCidrRoutePolicy} = $self->{indices}->[3];
+  $self->{i_inetCidrRouteNextHopType} = $self->{indices}->[4];
+  $self->{i_inetCidrRouteNextHop} = $self->{indices}->[5];
   $self->{inetCidrRouteDestType} = $self->mibs_and_oids_definition(
-      'RFC4001-MIB', 'inetAddressType', $self->{indices}->[0]);
+      'INET-ADDRESS-MIB', 'InetAddressType', $self->{indices}->[0]);
   if ($self->{inetCidrRouteDestType} eq "ipv4") {
     $self->{inetCidrRouteDest} = $self->mibs_and_oids_definition(
-      'RFC4001-MIB', 'inetAddress', $self->{indices}->[1],
-      $self->{indices}->[2], $self->{indices}->[3], $self->{indices}->[4]);
+      'INET-ADDRESS-MIB', 'InetAddress', @{$self->{indices}});
   } elsif ($self->{inetCidrRouteDestType} eq "ipv4") {
     $self->{inetCidrRoutePfxLen} = $self->mibs_and_oids_definition(
       'RFC4001-MIB', 'inetAddress', $self->{indices}->[1],
@@ -134,3 +139,10 @@ sub finish {
   }
 }
 
+sub list {
+  my ($self) = @_;
+  printf "%16s %16s %16s %11s %7s\n",
+      $self->{ipCidrRouteDest}, $self->{ipCidrRouteMask},
+      $self->{ipCidrRouteNextHop}, $self->{ipCidrRouteProto},
+      $self->{ipCidrRouteType};
+}
