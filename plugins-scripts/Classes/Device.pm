@@ -127,6 +127,8 @@ sub classify {
         $self->rebless('Classes::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {
         $self->rebless('Classes::Huawei');
+      } elsif (($self->{productname} =~ /^S\d{4,}-/)) {
+        $self->rebless('Classes::Huawei');
       } elsif ($self->{productname} =~ /Procurve/i ||
           ($self->implements_mib('HP-ICF-CHASSIS-MIB') &&
           $self->implements_mib('NETSWITCH-MIB'))) {
