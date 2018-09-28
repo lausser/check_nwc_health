@@ -84,6 +84,10 @@ sub finish {
 
 sub check {
   my ($self) = @_;
+
+  # Does this module provide any meaningful data?
+  return if $self->{hwEntityFaultLight} eq 'notSupported';
+
   $self->add_info(sprintf 'module %s admin status is %s, oper status is %s',
       $self->{name}, $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
   $self->add_info(sprintf 'module %s temperature is %.2f',
