@@ -252,6 +252,8 @@ EXTRA_MODULES=\
   Classes/Huawei/Component/CpuSubsystem.pm \
   Classes/Huawei/Component/MemSubsystem.pm \
   Classes/Huawei/CloudEngine.pm \
+  Classes/Huawei/SSeries/CpuSubsystem.pm \
+  Classes/Huawei/SSeries/MemSubsystem.pm \
   Classes/Huawei/SSeries.pm \
   Classes/Huawei.pm \
   Classes/HP/Procurve/Component/MemSubsystem.pm \
