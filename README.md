@@ -27,23 +27,23 @@ Modi
 | Mode                          | Function                                                               |
 |-------------------------------|------------------------------------------------------------------------|
 | hardware-health               | Check the status of environmental equipment (fans, temperatures, power) |
-| cpu-load                      | Check the CPU load of the device) |
-| memory-usage                  | Check the memory usage of the device) |
-| interface-usage               | Check the utilization of interfaces) |
+| cpu-load                      | Check the CPU load of the device |
+| memory-usage                  | Check the memory usage of the device |
+| interface-usage               | Check the utilization of interfaces |
 | interface-errors              | Check the error-rate of interfaces  |
-| interface-discards            | Check the discard-rate of interfaces) |
+| interface-discards            | Check the discard-rate of interfaces |
 | interface-status              | Check the status of interfaces (oper/admin) |
-| interface-nat-count-sessions  | Count the number of nat sessions) |
+| interface-nat-count-sessions  | Count the number of nat sessions |
 | interface-nat-rejects         | Count the number of nat sessions rejected due to lack of resources) |
-| list-interfaces               | Show the interfaces of the device and update the name cache) |
-| list-interfaces-detail        | Show the interfaces of the device and some details) |
+| list-interfaces               | Show the interfaces of the device and update the name cache |
+| list-interfaces-detail        | Show the interfaces of the device and some details |
 | interface-availability        | Show the availability (oper != up of interfaces) |
-| link-aggregation-availability | Check the percentage of up interfaces in a link aggregation) |
-| list-routes                   | Check the percentage of up interfaces in a link aggregation) |
-| route-exists                  | Check if a route exists. --name is the dest, --name2 check also the next hop)) |
-| count-routes                  | Count the routes. --name is the dest, --name2 is the hop)) |
-| vpn-status                    | Check the status of vpns (up/down)) |
-| create-shinken-service        | Create a Shinken service definition) |
+| link-aggregation-availability | Check the percentage of up interfaces in a link aggregation |
+| list-routes                   | Check the percentage of up interfaces in a link aggregation |
+| route-exists                  | Check if a route exists. (--name is the dest, --name2 check also the next hop) |
+| count-routes                  | Count the routes. (--name is the dest, --name2 is the hop) |
+| vpn-status                    | Check the status of vpns (up/down) |
+| create-shinken-service        | Create a Shinken service definition |
 | hsrp-state                    | Check the state in a HSRP group) |
 | hsrp-failover                 | Check if a HSRP group's nodes have changed their roles |
 | list-hsrp-groups              | Show the HSRP groups configured on this device |
@@ -63,7 +63,7 @@ Modi
 | pool-complections             | Check the members and connections of a load balancer pool |
 | list-pools                    | List load balancer pools |
 | check-licenses                | Check the installed licences/keys |
-| count-users                   | Count the | connected) users/sessions |
+| count-users                   | Count the (connected) users/sessions |
 | check-config                  | Check the status of configs (cisco, unsaved config changes) |
 | check-connections             | Check the quality of connections |
 | count-connections             | Check the number of connections (-client, -server is possible) |
