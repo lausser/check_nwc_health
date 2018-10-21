@@ -1,3 +1,5 @@
+* 2018-10-21 7.3.0.4
+  update glplugin (for go-worker)
 * 2018-10-17 7.3.0.3
   update glplugin
   better fortigate detection
