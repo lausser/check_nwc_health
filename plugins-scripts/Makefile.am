@@ -64,6 +64,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCMGMTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETCOREMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETFORTIGATEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNAGENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
@@ -231,6 +232,7 @@ EXTRA_MODULES=\
   Classes/Juniper/SRX.pm \
   Classes/Juniper.pm \
   Classes/AlliedTelesyn.pm \
+  Classes/Fortigate/Component/HaSubsystem.pm \
   Classes/Fortigate/Component/DiskSubsystem.pm \
   Classes/Fortigate/Component/MemSubsystem.pm \
   Classes/Fortigate/Component/CpuSubsystem.pm \
