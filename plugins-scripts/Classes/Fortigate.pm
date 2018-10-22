@@ -1,5 +1,5 @@
 package Classes::Fortigate;
-our @ISA = qw(Classes::Brocade);
+our @ISA = qw(Classes::Device);
 use strict;
 
 sub init {
@@ -10,6 +10,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("Classes::Fortigate::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::Fortigate::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::ha::/) {
+    $self->analyze_and_check_mem_subsystem("Classes::Fortigate::Component::HaSubsystem");
   } else {
     $self->no_such_mode();
   }
