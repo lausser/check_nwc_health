@@ -387,6 +387,7 @@ EXTRA_MODULES=\
   Classes/PaloAlto/Component/CpuSubsystem.pm \
   Classes/PaloAlto/Component/EnvironmentalSubsystem.pm \
   Classes/PaloAlto/Component/HaSubsystem.pm \
+  Classes/PaloAlto/Component/DiskSubsystem.pm \
   Classes/PaloAlto.pm \
   Classes/Bluecoat.pm \
   Classes/Cumulus.pm \
