@@ -111,8 +111,9 @@ sub check {
       $self->{cfwHardwareStatusDetail});
   if ($self->{cfwHardwareStatusDetail} eq "Failover Off") {
     $self->add_ok();
-  } elsif ($self->{cfwHardwareStatusDetail} =~ /FAILOVER/) {
-    $self->add_warning_mitigation("cluster has switched");
+#  } elsif ($self->{cfwHardwareStatusDetail} =~ /FAILOVER/) {
+#    kommt verdaechtig oft vor und schaut so aus, als waere das normal
+#    $self->add_warning_mitigation("cluster has switched");
   } elsif ($self->{cfwHardwareStatusValue} eq "error") {
     $self->add_warning_mitigation("cluster has lost redundancy");
   } elsif ($self->{cfwHardwareStatusValue} ne "up") {

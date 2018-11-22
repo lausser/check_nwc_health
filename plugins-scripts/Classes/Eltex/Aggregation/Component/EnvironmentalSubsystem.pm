@@ -39,15 +39,22 @@ use strict;
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'sensor %s is %s°C',
-    $self->{eltexSensorDescription}, $self->{eltexSensorStatus});
-  $self->set_thresholds(warning => 55, critical => 65);
-  $self->add_message($self->check_thresholds($self->{eltexSensorStatus}));
-  $self->add_perfdata(
-    label => 'sensor_'.$self->{eltexSensorDescription}.'_temp',
-    value => $self->{eltexSensorStatus},
-    uom => '°C',
-  );
+  # Perform check only if this is temp sensor
+  if ($self->{eltexSensorType} eq '°C') {
+    $self->add_info(sprintf 'sensor %s is %s %s', $self->{eltexSensorDescription},
+      $self->{eltexSensorStatus}, $self->{eltexSensorType});
+    $self->set_thresholds(warning => 55, critical => 65);
+    $self->add_message($self->check_thresholds($self->{eltexSensorStatus}));
+    $self->add_perfdata(
+      label => 'sensor_'.$self->{eltexSensorDescription}.'_temp',
+      value => $self->{eltexSensorStatus},
+      uom => $self->{eltexSensorType},
+    );
+  }
+  # Avoid fan rpm
+  elsif ($self->{eltexSensorType} eq 'rpm') {
+    $self->blacklist();
+  }
 }
 
 package Classes::Eltex::Aggregation::Component::EnvironmentalSubsystem::Power;

@@ -7,8 +7,9 @@ sub init {
   $self->get_snmp_objects('JUNIPER-MIB', qw(jnxBoxKernelMemoryUsedPercent));
   $self->get_snmp_tables('JUNIPER-MIB', [
     ['operatins', 'jnxOperatingTable', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem', sub { shift->{jnxOperatingDescr} =~ /engine/i; }],
-# nearly no documentytion exists for this
-#    ['objects', 'jnxJsSPUMonitoringObjectsTable ', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem2'],
+  ]);
+  $self->get_snmp_tables('JUNIPER-SRX5000-SPU-MONITORING-MIB', [
+    ['objects', 'jnxJsSPUMonitoringObjectsTable', 'Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem2'],
   ]);
 }
 
@@ -34,12 +35,18 @@ sub check {
 package Classes::Juniper::SRX::Component::MemSubsystem::OperatingItem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
+sub finish  {
+  my ($self) = @_;
+  $self->{jnxOperatingRestartTimeHuman} =
+      scalar localtime($self->{jnxOperatingRestartTime});
+}
+
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf '%s buffer usage is %.2f%%',
+  $self->add_info(sprintf 'routing engine %s buffer usage is %.2f%%',
       $self->{jnxOperatingDescr}, $self->{jnxOperatingBuffer});
   my $label = 'buffer_'.$self->{jnxOperatingDescr}.'_usage';
-  $self->set_thresholds(metric => $label, warning => 90, critical => 95);
+  $self->set_thresholds(metric => $label, warning => 80, critical => 95);
   $self->add_message($self->check_thresholds(metric => $label, 
       value => $self->{jnxOperatingBuffer}));
   $self->add_perfdata(
@@ -54,12 +61,15 @@ our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'cpu usage is %.2f%%', $self->{jnxJsSPUMonitoringCPUUsage});
-  $self->set_thresholds(warning => 50, critical => 90);
-  $self->add_message($self->check_thresholds($self->{jnxJsSPUMonitoringCPUUsage}));
+  $self->add_info(sprintf 'packet forwarding %s memory usage is %.2f%%',
+      $self->{jnxJsSPUMonitoringNodeDescr}, $self->{jnxJsSPUMonitoringMemoryUsage});
+  my $label = 'pf_mem_'.$self->{jnxJsSPUMonitoringNodeDescr}.'_usage';
+  $self->set_thresholds(metric => $label, warning => 80, critical => 95);
+  $self->add_message($self->check_thresholds(metric => $label,
+      value => $self->{jnxJsSPUMonitoringMemoryUsage}));
   $self->add_perfdata(
-      label => 'cpu_usage',
-      value => $self->{jnxJsSPUMonitoringCPUUsage},
+      label => $label,
+      value => $self->{jnxJsSPUMonitoringMemoryUsage},
       uom => '%',
   );
 }

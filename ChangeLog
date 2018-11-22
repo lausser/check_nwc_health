@@ -1,3 +1,36 @@
+* 2018-10-22 7.3.1
+  add modes ha-status/role for fortigate
+* 2018-10-22 7.3.0.5
+  update glplugin (CISCO-STACKWISE-MIB)
+* 2018-10-21 7.3.0.4
+  update glplugin (for go-worker)
+* 2018-10-17 7.3.0.3
+  update glplugin
+  better fortigate detection
+* 2018-09-28 7.3.0.2
+  update glplugin
+* 2018-09-25 7.3.0.1
+  re-enable Huawei CloudEngine support
+* 2018-09-10 7.3
+  update stack-status
+  add servertype hostresource
+  update cisco vpn-status
+* 2018-08-13 7.2.0.2
+  bugfix in interface-modes where --name3 found no match
+* 2018-08-10 7.2.0.1
+  bugfix in ios ha-status, ignore cable "failover" description
+* 2018-08-01 7.2
+  add packet forwarding engine metrics for juniper standby nodes
+* 2018-07-26 7.1
+  add custom thresholds for cisco ccm
+  detect fritzbox 7490
+* 2018-07-13 7.0.2
+  add interface-uptime
+ 2018-07-05 7.0.1.6
+  fix a bug in non-map FabOS memory
+  set thresholds to 100% for cisco asa heapcache memory-usage
+* 2018-06-18 7.0.1.5
+  update glplugin (get_snmp_table_objects waja fix)
 * 2018-05-05 7.0.1.4
   simplify the cisco memory exceptions
 * 2018-04-29 7.0.1.3

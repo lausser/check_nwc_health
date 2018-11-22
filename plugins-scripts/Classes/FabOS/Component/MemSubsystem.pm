@@ -16,7 +16,8 @@ sub check {
   my ($self) = @_;
   $self->add_info('checking memory');
   if (defined $self->{swMemUsage}) {
-    my $maps = $self->{swMemUsageLimit1} == 0 && $self->{swMemUsageLimit3} == 0 ?
+    my $maps = (! defined $self->{swMemUsageLimit1} || $self->{swMemUsageLimit1} == 0) &&
+        (! defined $self->{swMemUsageLimit3} || $self->{swMemUsageLimit3} == 0) ?
         'enabled' : 'disabled';
     $self->add_info(sprintf 'maps is %s', $maps);
     $self->add_info(sprintf 'memory usage is %.2f%%',
