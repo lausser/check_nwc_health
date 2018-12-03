@@ -15,9 +15,32 @@ use strict;
 
 sub finish {
   my ($self) = @_;
+  my $class = ref($self);
+  my $newclass = $class."::".$self->{hrDeviceType};
+  {
+    no strict 'refs';
+    if (! scalar %{$newclass."::"}) {
+      *{ ${newclass}."::ISA" } = \@{ ${class}."::ISA" };
+      *{ ${newclass}."::check" } = \&{ ${class}."::check" };
+      if ($self->{hrDeviceType} eq "hrDeviceNetwork") {
+        *{ ${newclass}."::internal_name" } = sub {
+          my ($this) = (@_);
+          $this->{hrDeviceDescr} =~ /network interface (.*)/;
+          if ($1) {
+            return (uc $this->{hrDeviceType})."_".$1;
+          } else {
+            return $this->SUPER::internal_name();
+          }
+        };
+      }
+    }
+  }
+  bless $self, $newclass;
   if ($self->{hrDeviceDescr} =~ /Guessing/ && ! $self->{hrDeviceStatus}) {
     # found on an F5: Guessing that there's a floating point co-processor.
     # if you guess there's a device, then i guess it's running.
+    $self->{hrDeviceStatus} = 'running';
+  } elsif ($self->{hrDeviceType} eq 'hrDeviceDiskStorage' && ! $self->{hrDeviceStatus}) {
     $self->{hrDeviceStatus} = 'running';
   }
 }
@@ -43,4 +66,5 @@ sub check {
     $self->add_ok();
   }
 }
+
 
