@@ -14,6 +14,7 @@ sub check {
   my ($self) = @_;
   $self->{fan_subsystem}->check();
   $self->{temperature_subsystem}->check();
+  $self->reduce_messages_short('lmsensors are fine');
 }
 
 sub dump {
