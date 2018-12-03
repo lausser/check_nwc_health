@@ -7,14 +7,22 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 sub init {
   my ($self) = @_;
   $self->get_snmp_objects('CISCO-STACKWISE-MIB', qw(cswMaxSwitchNum
-      cswRingRedundant ciscoStackWiseMIBConform cswStackWiseMIBCompliances
+      cswRingRedundant cswStackBandWidth ciscoStackWiseMIBConform
+      cswStackWiseMIBCompliances
   ));
-  $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
-      ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
-      ['ports', 'cswStackPortInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Port'],
-      #['powers', 'cswStackPowerInfoTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
-      #['powerports', 'cswStackPowerPortInfoTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
-  ]);
+  # cswStackType is not uniqe enough depening of IOS-XE version.
+  # cswStackBandWidth exists only on distributed switches with SVL
+  if ($self->{cswStackBandWidth}) {
+    $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
+        ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
+        ['ports', 'cswDistrStackPhyPortInfoEntry', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::PhyPort'],
+    ]);
+  } else {
+    $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
+        ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
+        ['ports', 'cswStackPortInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Port'],
+    ]);
+  };
   $self->{numSwitches} = scalar(@{$self->{switches}});
   $self->{switchSerialList} = [map { $_->{flat_indices} } @{$self->{switches}}];
   $self->{numPorts} = scalar(@{$self->{ports}});
@@ -25,10 +33,16 @@ sub check {
   foreach (@{$self->{switches}}) {
     $_->check();
   }
-  $self->add_info(sprintf 'ring is %sredundant',
-      $self->{cswRingRedundant} ne 'true' ? 'not ' : '');
-  if ($self->{cswRingRedundant} ne 'true' && $self->{numSwitches} > 1) {
-      $self->add_warning();
+  if ($self->{cswStackBandWidth}) {
+    $self->add_info(sprintf
+        'this is a distributed stack with bandwidth %d Gbit/s',
+        $self->{cswStackBandWidth});
+  } else {
+    $self->add_info(sprintf 'ring is %sredundant',
+        $self->{cswRingRedundant} ne 'true' ? 'not ' : '');
+    if ($self->{cswRingRedundant} ne 'true' && $self->{numSwitches} > 1) {
+        $self->add_warning();
+    }
   }
   $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
   $self->valdiff({name => 'stackwise', lastarray => 1},
@@ -63,6 +77,16 @@ sub check {
   my ($self) = @_;
   $self->add_info(sprintf 'link to neighbor %s is %s',
       $self->{cswStackPortNeighbor}, $self->{cswStackPortOperStatus}
+  );
+}
+
+package Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::PhyPort;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+
+sub check {
+  my ($self) = @_;
+  $self->add_info(sprintf 'link to neighbor %s is %s',
+      $self->{cswDistrStackPhyPortNbr}, $self->{cswDistrStackPhyPortOperStatus}
   );
 }
 
