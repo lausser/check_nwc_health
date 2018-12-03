@@ -73,10 +73,8 @@ sub finish {
   $self->{cikeFailLocalValue} = $self->unhex_ip($self->{cikeFailLocalValue});
   $self->{cikeFailRemoteAddr} = $self->unhex_ip($self->{cikeFailRemoteAddr});
   $self->{cikeFailRemoteValue} = $self->unhex_ip($self->{cikeFailRemoteValue});
-  $self->{snmp_sysUptime} = $self->get_snmp_object('MIB-2-MIB', 'sysUpTime', 0);
-  $self->{snmp_sysUptime} /= 100;
   $self->{cikeFailTime} /= 100;
-  $self->{cikeFailTimeAgo} = $self->{snmp_sysUptime} - $self->{cikeFailTime};
+  $self->{cikeFailTimeAgo} = $self->ago_sysuptime($self->{cikeFailTime});
 }
 
 sub check {
@@ -106,10 +104,8 @@ sub finish {
   my ($self) = @_;
   $self->{cipSecFailPktDstAddr} = $self->unhex_ip($self->{cipSecFailPktDstAddr});
   $self->{cipSecFailPktSrcAddr} = $self->unhex_ip($self->{cipSecFailPktSrcAddr});
-  $self->{snmp_sysUptime} = $self->get_snmp_object('MIB-2-MIB', 'sysUpTime', 0);
-  $self->{snmp_sysUptime} /= 100;
   $self->{cipSecFailTime} /= 100;
-  $self->{cipSecFailTimeAgo} = $self->{snmp_sysUptime} - $self->{cipSecFailTime};
+  $self->{cipSecFailTimeAgo} = $self->ago_sysuptime($self->{cipSecFailTime});
 }
 
 sub check {
