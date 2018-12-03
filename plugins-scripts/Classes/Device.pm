@@ -41,6 +41,7 @@ sub classify {
       $self->{productname} = 'clavister' if $self->opts->servertype eq 'clavister';
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
       $self->{productname} = 'generic_hostresources' if $self->opts->servertype eq 'generic_hostresources';
+      $self->{productname} = 'generic_ucd' if $self->opts->servertype eq 'generic_ucd';
     }
     if ($self->opts->mode eq "uptime" && $self->opts->mode eq "short") {
       return $self;
@@ -145,6 +146,8 @@ sub classify {
         $self->rebless('Classes::Foundry');
       } elsif ($self->{productname} eq 'generic_hostresources') {
         $self->rebless('Classes::HOSTRESOURCESMIB');
+      } elsif ($self->{productname} eq 'generic_ucd') {
+        $self->rebless('Classes::UCDMIB');
       } elsif ($self->{productname} =~ /Linux Stingray/i) {
         $self->rebless('Classes::HOSTRESOURCESMIB');
       } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
