@@ -26,8 +26,9 @@ sub finish {
   } elsif ($self->{fgHwSensorEntName} =~ /(LM75)|(Temp)|(^(TD|TR)\d+)|(DTS\d+)/) {
     # thermal diode/resistor, dingsbums thermal sensor
     bless $self, "Classes::Fortigate::Component::SensorSubsystem::Temperature";
-  } elsif ($self->{fgHwSensorEntName} =~ /(VOUT)|(VIN)|(VCC)|(P\d+V\d+)|(_\d+V\d+_)|(DDR)|(VCORE)/) {
+  } elsif ($self->{fgHwSensorEntName} =~ /(VOUT)|(VIN)|(VCC)|(P\d+V\d+)|(_\d+V\d+_)|(DDR)|(VCORE)|(DVDD)/) {
     # VPP_DDR, VTT_DDR sind irgendwelche voltage regulatory devices
+    # DVDD irgendein Realtec digital voltage drecksdeil
     bless $self, "Classes::Fortigate::Component::SensorSubsystem::Voltage";
   } else {
 $self->{UNKNOWN} = 1;
