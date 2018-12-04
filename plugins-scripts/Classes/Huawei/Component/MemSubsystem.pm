@@ -25,8 +25,14 @@ sub finish {
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'Memory %s usage is %s%% (of %dMB)',
-      $self->{name}, $self->{hwEntityMemUsage}, $self->{hwEntityMemSizeMega});
+  if ($self->{hwEntityMemSizeMega}) {
+    $self->add_info(sprintf 'Memory %s usage is %s%% (of %dMB)',
+        $self->{name}, $self->{hwEntityMemUsage},
+        $self->{hwEntityMemSizeMega});
+  } else {
+    $self->add_info(sprintf 'Memory %s usage is %s%%',
+        $self->{name}, $self->{hwEntityMemUsage});
+  }
   $self->set_thresholds(
       metric => 'cpu_'.$self->{name},
       warning => $self->{hwEntityMemUsageThreshold},

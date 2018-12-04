@@ -33,6 +33,7 @@ sub init {
     foreach (@{$self->{fanstates}}) {
       bless $_, "Classes::Huawei::Component::EnvironmentalSubsystem::Fan";
       $_->{entPhysicalName} = $_->{flat_indices};
+      $_->finish();
     }
   } else {
     $self->merge_tables_with_code("fans", "fanstates", sub {
@@ -47,6 +48,13 @@ sub init {
 package Classes::Huawei::Component::EnvironmentalSubsystem::Fan;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
+
+sub finish {
+  my ($self) = @_;
+  # kommt auch vor, dass die nicht existieren. Im Zweifelsfall "up"
+  $self->{hwEntityAdminStatus} ||= "up";
+  $self->{hwEntityOperStatus} ||= "up";
+}
 
 sub check {
   my ($self) = @_;
