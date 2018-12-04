@@ -128,6 +128,8 @@ sub classify {
         $self->rebless('Classes::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {
         $self->rebless('Classes::Huawei');
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.2011\.2\./) {
+        $self->rebless('Classes::Huawei');
       } elsif ($self->{productname} =~ /Procurve/i ||
           ($self->implements_mib('HP-ICF-CHASSIS-MIB') &&
           $self->implements_mib('NETSWITCH-MIB'))) {

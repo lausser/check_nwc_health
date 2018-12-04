@@ -28,11 +28,19 @@ sub init {
     ]);
     $self->merge_tables($_, "entitystates");
   }
-  $self->merge_tables_with_code("fans", "fanstates", sub {
-    my ($fan, $fanstate) = @_;
-    return ($fan->{entPhysicalName} eq sprintf("FAN %d/%d",
-        $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn})) ? 1 : 0;
-  });
+  if (@{$self->{fanstates}} && ! @{$self->{fans}}) {
+    # gibts auch, d.h. retten, was zu retten ist
+    foreach (@{$self->{fanstates}}) {
+      bless $_, "Classes::Huawei::Component::EnvironmentalSubsystem::Fan";
+      $_->{entPhysicalName} = $_->{flat_indices};
+    }
+  } else {
+    $self->merge_tables_with_code("fans", "fanstates", sub {
+      my ($fan, $fanstate) = @_;
+      return ($fan->{entPhysicalName} eq sprintf("FAN %d/%d",
+          $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn})) ? 1 : 0;
+    });
+  }
 }
 
 
