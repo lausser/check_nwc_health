@@ -1,3 +1,6 @@
+* 2018-12-04 7.4.1.1
+  fix undefs for Huawei with older Mibs
+  fix fortigate sensors
 * 2018-12-04 7.4.1
   detect more Huawei devices
 * 2018-12-03 7.4
