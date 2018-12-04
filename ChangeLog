@@ -1,3 +1,5 @@
+* 2018-12-04 7.4.1
+  detect more Huawei devices
 * 2018-12-03 7.4
   use proprietary bgp mib for cisco (and add ipv6)
   make ospd v6-ready
