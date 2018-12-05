@@ -22,6 +22,10 @@ sub init {
           ['peers', 'cbgpPeerTable', 'Classes::Cisco::IOS::Component::BgpSubsystem::Peer', sub { return $self->filter_name(shift->{cbgpPeerRemoteAddr}) } ],
       ]);
     }
+    if (scalar(@{$self->{peers}}) == 0) {
+      bless $self, "Classes::BGP::Component::PeerSubsystem";
+      $self->init();
+    }
   }
 }
 

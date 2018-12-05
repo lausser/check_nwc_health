@@ -1,3 +1,5 @@
+* 2018-12-04 7.4.1.2
+  fix cisco bgp for routers which do not export the proptietary mib, but bgp4
 * 2018-12-04 7.4.1.1
   fix undefs for Huawei with older Mibs
   fix fortigate sensors
