@@ -27,6 +27,8 @@ sub init {
     }
   } elsif ($self->mode =~ /device::wlan/) {
     $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::WlanSubsystem");
+  } elsif ($self->mode =~ /device::ha::/) {
+    $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::HaSubsystem");
   } else {
     $self->no_such_mode();
   }
