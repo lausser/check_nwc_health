@@ -181,6 +181,7 @@ EXTRA_MODULES=\
   Classes/Cisco/NXOS/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/NXOS/Component/FexSubsystem.pm \
   Classes/Cisco/NXOS.pm \
+  Classes/Cisco/WLC/Component/HaSubsystem.pm \
   Classes/Cisco/WLC/Component/MemSubsystem.pm \
   Classes/Cisco/WLC/Component/CpuSubsystem.pm \
   Classes/Cisco/WLC/Component/EnvironmentalSubsystem.pm \
