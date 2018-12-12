@@ -5,13 +5,13 @@ use strict;
 sub init {
   my ($self) = @_;
   $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
-      memTotalSwap memAvailSwap memTotalReal memAvailReal memBuffer memCached
-      memMinimumSwap memSwapError memSwapErrorMsg)));
+      memTotalSwap memTotalReal memTotalFree memAvailReal
+      memBuffer memCached memShared)));
 
   # basically buffered memory can always be freed up (filesystem cache)
   # https://kc.mcafee.com/corporate/index?page=content&id=KB73175
   my $mem_available = $self->{memAvailReal};
-  foreach (qw(memBuffer memCached)) {
+  foreach (qw(memBuffer memCached memShared)) {
     $mem_available += $self->{$_} if defined($self->{$_});
   }
 
