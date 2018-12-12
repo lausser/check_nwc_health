@@ -12,6 +12,8 @@ sub init {
   eval {
     $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
   };
+  # exception if memTotalSwap = 0, which means that no swap partition/device
+  # was configured at all
 }
 
 sub check {
