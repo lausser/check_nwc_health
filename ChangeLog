@@ -1,3 +1,7 @@
+* 2018-12-12 7.4.2
+  start ha for cisco wlc
+  improve paloalto uptime model string
+  improve ucd memory
 * 2018-12-04 7.4.1.2
   fix cisco bgp for routers which do not export the proptietary mib, but bgp4
 * 2018-12-04 7.4.1.1
