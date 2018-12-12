@@ -24,3 +24,10 @@ sub init {
   }
 }
 
+sub pretty_sysdesc {
+  my ($self, $sysDescr) = @_;
+  my $sw_version = $self->get_snmp_object('PAN-COMMON-MIB', 'panSysSwVersion');
+  my $hw_version = $self->get_snmp_object('PAN-COMMON-MIB', 'panSysHwVersion');
+  return sprintf "%s, sw version %s, hw version: %s",
+      $sysDescr, $sw_version, $hw_version;
+}
