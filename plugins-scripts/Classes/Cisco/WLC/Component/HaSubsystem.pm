@@ -20,16 +20,24 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  $self->add_info('checking access points');
+  $self->add_info('checking ha config');
   if ($self->mode =~ /device::ha::status/) {
     if ($self->{cLHaNetworkFailOver} &&
           $self->{cLHaNetworkFailOver} eq 'true') {
+      $self->add_info(sprintf "this is a %s unit in a failover setup, bulk sync status is %s",
+          ($self->{cLHaPrimaryUnit} && $self->{cLHaPrimaryUnit} eq 'false') ?
+          "secondary" : "primary", $self->{cLHaBulkSyncStatus});
       if($self->{cLHaPrimaryUnit} &&
           $self->{cLHaPrimaryUnit} eq 'false') {
-        $self->add_ok('no access points found, this is a secondary unit in a failover setup');
+        $self->add_ok();
       } else {
-        $self->add_unknown('no access points found, this is a primary unit in a failover setup');
+        $self->add_ok();
       }
+      if ($self->{cLHaBulkSyncStatus} ne "Complete") {
+        $self->add_warning();
+      }
+    } else {
+      $self->add_critical_mitigation('ha failover is not configured');
     }
   }
 }

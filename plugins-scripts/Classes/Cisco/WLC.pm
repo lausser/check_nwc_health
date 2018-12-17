@@ -34,3 +34,10 @@ sub init {
   }
 }
 
+sub pretty_sysdesc {
+  my ($self, $sysDescr) = @_;
+  $self->get_snmp_objects('AIRESPACE-SWITCHING-MIB', qw(agentInventorySysDescription agentInventoryMachineModel));
+  if ($self->{agentInventorySysDescription} and $self->{agentInventoryMachineModel}) {
+    return $self->{agentInventorySysDescription}." ".$self->{agentInventoryMachineModel};
+  }
+}
