@@ -1,3 +1,5 @@
+* 2018-12-17 7.4.2.1
+  finish ha-status for cisco wlc
 * 2018-12-12 7.4.2
   start ha for cisco wlc
   improve paloalto uptime model string
