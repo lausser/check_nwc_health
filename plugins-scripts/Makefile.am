@@ -42,6 +42,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOLWAPPHAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOMEMORYPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPORTCHANNELMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPORTSECURITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPROCESSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBHWENVIROMENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBRNDMNGMIB.pm \
@@ -150,6 +151,7 @@ EXTRA_MODULES=\
   Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
   Classes/Bintec/Bibo.pm \
   Classes/Bintec.pm \
+  Classes/Cisco/CISCOPORTSECURITYMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/OLDCISCOINTERFACESMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
