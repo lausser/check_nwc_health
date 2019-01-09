@@ -149,6 +149,12 @@ $plugin->add_mode(
     help => 'Check state changes of interfaces',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::portsecurity',
+    spec => 'interface-security',
+    alias => undef,
+    help => 'Check interfaces for security violations',
+);
+$plugin->add_mode(
     internal => 'device::routes::list',
     spec => 'list-routes',
     alias => undef,

@@ -37,6 +37,12 @@ sub init {
       } else {
         $self->no_such_mode();
       }
+    } elsif ($self->mode =~ /device::interfaces::portsecurity/) {
+      if ($self->implements_mib('CISCO-PORT-SECURITY-MIB')) {
+        $self->analyze_and_check_interface_subsystem("Classes::Cisco::CISCOPORTSECURITYMIB::Component::InterfaceSubsystem");
+      } else {
+        $self->no_such_mode();
+      }
     } else {
       $self->init();
       if ($self->mode =~ /device::interfaces::ifstack::status/ &&
