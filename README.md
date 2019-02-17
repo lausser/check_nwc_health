@@ -1,3 +1,7 @@
+Meet me at...
+=============
+<div><a href="https://monitors2019.consol.de/wiki/doku.php?id=workshop:2019:start" target="_blank"><img src="https://labs.consol.de/assets/images/muenchen-banner.png" alt="Monitoring-Workshop 2019" style="height: auto !important;width: auto !important;" ></a></div>
+
 Description
 ============
 The plugin check_nwc_health was developed with the aim of having a single tool for all aspects of monitoring of network components.
