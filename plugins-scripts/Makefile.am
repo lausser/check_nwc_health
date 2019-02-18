@@ -414,6 +414,11 @@ EXTRA_MODULES=\
   Classes/Lancom/Component/EnvironmentalSubsystem.pm \
   Classes/Lancom/Component/MemSubsystem.pm \
   Classes/Lancom.pm \
+  Classes/DrayTek/Vigor/Component/CpuSubsystem.pm \
+  Classes/DrayTek/Vigor/Component/EnvironmentalSubsystem.pm \
+  Classes/DrayTek/Vigor/Component/MemSubsystem.pm \
+  Classes/DrayTek/Vigor.pm \
+  Classes/DrayTek.pm \
   Classes/Device.pm
 
 SED=/bin/sed

@@ -110,6 +110,8 @@ sub classify {
       } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
         # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
         $self->rebless('Classes::Juniper::IVE');
+      } elsif ($self->{productname} =~ /DrayTek.*Vigor/i) {
+        $self->rebless('Classes::DrayTek');
       } elsif ($self->implements_mib('NETGEAR-MIB')) {
         $self->rebless('Classes::Netgear');
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
