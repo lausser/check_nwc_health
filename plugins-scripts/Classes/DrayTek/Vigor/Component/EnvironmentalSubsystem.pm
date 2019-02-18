@@ -17,8 +17,10 @@ use strict;
 
 sub finish {
   my ($self) = @_;
-  chomp $self->{adslAturCurrStatus};
-  $self->{adslAturCurrStatus} =~ s/\x0+$//;
+  if ($self->{adslAturCurrStatus}) {
+    chomp $self->{adslAturCurrStatus};
+    $self->{adslAturCurrStatus} =~ s/\x00+$//;
+  }
 }
 
 sub check {
