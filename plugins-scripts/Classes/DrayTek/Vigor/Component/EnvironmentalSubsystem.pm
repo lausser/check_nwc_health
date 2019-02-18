@@ -25,7 +25,7 @@ sub finish {
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'adsl line %s has status _%s_', 
+  $self->add_info(sprintf 'adsl line %s has status %s', 
       $self->{flat_indices}, $self->{adslAturCurrStatus});
   if ($self->{adslAturCurrStatus} ne "SHOWTIME") {
     $self->add_critical();
