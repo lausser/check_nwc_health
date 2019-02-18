@@ -121,6 +121,15 @@ sub check {
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
+    # volalla: Add --sum Option
+    if ($self->opts->sum){
+      $self->interface_traffic_sum(
+        traffic_in => $self->{inputRate},
+        traffic_out => $self->{outputRate},
+        interface => $self->{ifDescr},
+        warning => $inwarning,
+        critical => $incritical);
+    }
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_traffic_in',
         warning => $self->{maxInputRate} / 100 * $inwarning,
@@ -152,7 +161,7 @@ sub check {
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     $self->add_info(sprintf 'interface %s%s status is %s',
-        $self->{ifDescr}, 
+        $self->{ifDescr},
         $self->{ExternalIPAddress} ? " (".$self->{ExternalIPAddress}.")" : "",
         $self->{ConnectionStatus});
     if ($self->{ConnectionStatus} eq "Connected") {
@@ -165,4 +174,3 @@ sub check {
     $self->add_ok("have fun");
   }
 }
-

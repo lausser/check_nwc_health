@@ -270,6 +270,15 @@ sub check {
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
+    # volalla: Add --sum Option
+    if ($self->opts->sum){
+      $self->interface_traffic_sum(
+        traffic_in => $self->{inputRate},
+        traffic_out => $self->{outputRate},
+        interface => $self->{ifDescr},
+        warning => $inwarning,
+        critical => $incritical);
+    }
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_traffic_in',
         warning => $self->{maxInputRate} / 100 * $inwarning,
@@ -340,4 +349,3 @@ sub list {
   my ($self) = @_;
   printf "%s\n", $self->{ifDescr};
 }
-
