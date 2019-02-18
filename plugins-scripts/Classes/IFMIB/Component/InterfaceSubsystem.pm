@@ -614,7 +614,7 @@ sub finish {
   } else {
     # Manche Stinkstiefel haben ifName, ifHighSpeed und z.b. ifInMulticastPkts,
     # aber keine ifHC*Octets. Gesehen bei Cisco Switch Interface Nul0 o.ae.
-    if ($self->{ifName} && defined $self->{ifHCInOctets} && 
+    if ($self->{ifName} && defined $self->{ifHCInOctets} &&
         defined $self->{ifHCOutOctets} && $self->{ifHCInOctets} ne "noSuchObject") {
       $self->{ifAlias} ||= $self->{ifName};
       $self->{ifName} = unpack("Z*", $self->{ifName});
@@ -633,7 +633,7 @@ sub finish {
       bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::StackSub';
     }
     if ($self->{ifPhysAddress}) {
-      $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress})); 
+      $self->{ifPhysAddress} = join(':', unpack('(H2)*', $self->{ifPhysAddress}));
     }
   }
   $self->init();
@@ -703,15 +703,15 @@ sub init {
     }
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
-    $self->{inputErrorRate} = $self->{delta_ifInErrors} 
+    $self->{inputErrorRate} = $self->{delta_ifInErrors}
         / $self->{delta_timestamp};
-    $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
+    $self->{outputErrorRate} = $self->{delta_ifOutErrors}
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::discards/) {
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
-    $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
+    $self->{inputDiscardRate} = $self->{delta_ifInDiscards}
         / $self->{delta_timestamp};
-    $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
+    $self->{outputDiscardRate} = $self->{delta_ifOutDiscards}
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
     foreach my $key (qw(ifInUcastPkts
@@ -732,7 +732,7 @@ sub init {
         $self->{delta_ifOutBroadcastPkts});
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
-    $self->{ifStatusDuration} = 
+    $self->{ifStatusDuration} =
         $self->uptime() - $self->timeticks($self->{ifLastChange});
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     if ($self->{ifAdminStatus} eq "down") {
@@ -747,7 +747,7 @@ sub init {
     my $gb = 1000 * 1000 * 1000;
     my $mb = 1000 * 1000;
     my $kb = 1000;
-    my $speed = $self->{ifHighSpeed} ? 
+    my $speed = $self->{ifHighSpeed} ?
         ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
     if ($speed >= $gb) {
       $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
@@ -842,7 +842,7 @@ sub check {
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     $self->add_info(sprintf 'interface %s usage is in:%.2f%% (%s) out:%.2f%% (%s)%s',
         $full_descr,
-        $self->{inputUtilization}, 
+        $self->{inputUtilization},
         sprintf("%.2f%s/s", $self->{inputRate}, $self->opts->units),
         $self->{outputUtilization},
         sprintf("%.2f%s/s", $self->{outputRate}, $self->opts->units),
@@ -880,6 +880,15 @@ sub check {
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
+    # volalla: Add --sum Option
+    if ($self->opts->sum){
+      $self->interface_traffic_sum(
+        traffic_in => $self->{inputRate},
+        traffic_out => $self->{outputRate},
+        interface => $self->{ifDescr},
+        warning => $inwarning,
+        critical => $incritical);
+    }
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_traffic_in',
         warning => $self->{maxInputRate} / 100 * $inwarning,
@@ -1016,7 +1025,7 @@ sub check {
     #     fault condition on the interface.
     # --warning onu,anu
     # Admin: admindown,admin
-    # Admin: --warning 
+    # Admin: --warning
     #        --critical admindown
     # !ad+od  ad+!(od*on)
     # warn & warnbitfield
@@ -1027,7 +1036,7 @@ sub check {
 #    }
 #    if ($self->{ifOperStatus} ne 'up') {
 #      }
-#    } 
+#    }
     $self->add_info(sprintf '%s is %s/%s',
         $full_descr,
         $self->{ifOperStatus}, $self->{ifAdminStatus});
@@ -1043,7 +1052,7 @@ sub check {
           sprintf '%s is admin down', $full_descr);
     }
   } elsif ($self->mode =~ /device::interfaces::availability/) {
-    $self->{ifStatusDuration} = 
+    $self->{ifStatusDuration} =
         $self->human_timeticks($self->{ifStatusDuration});
     $self->add_info(sprintf '%s is %savailable (%s/%s, since %s)',
         $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
@@ -1225,7 +1234,7 @@ sub init_etherstats {
     for my $stat (grep { /^(dot3|etherStats)/ } @{$self->{columns}}) {
       next if ! defined $self->{'delta_'.$stat};
       $self->{$stat.'Percent'} = $self->{delta_InPkts} + $self->{delta_OutPkts} ?
-          100 * $self->{'delta_'.$stat} / 
+          100 * $self->{'delta_'.$stat} /
           ($self->{delta_InPkts} + $self->{delta_OutPkts}) : 0;
     }
   }
@@ -1259,4 +1268,3 @@ sub check {
     $self->add_ok(sprintf '%s has no traffic', $full_descr);
   }
 }
-
