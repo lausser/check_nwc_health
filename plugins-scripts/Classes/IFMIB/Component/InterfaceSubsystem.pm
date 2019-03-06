@@ -974,38 +974,44 @@ sub check {
         value => $self->{outputDiscardRate},
     );
   } elsif ($self->mode =~ /device::interfaces::broadcast/) {
-    $self->add_info(sprintf 'interface %s broadcast in:%.2f%% out:%.2f%% ',
+    $self->add_info(sprintf 'interface %s broadcast in:%.2f out:%.2f ',
         $full_descr,
-        $self->{broadcastInPercent} , $self->{broadcastOutPercent});
+        $self->{broadcastInPercent} / 100 * $self->{inputRate} , $self->{broadcastOutPercent} / 100 * $self->{outputRate} );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_broadcast_in',
-        warning => 10,
-        critical => 20
+        warning => $self->{maxInputRate} / 100 * 10,
+        critical => $self->{maxInputRate} / 100 * 20,
     );
     my $in = $self->check_thresholds(
         metric => $self->{ifDescr}.'_broadcast_in',
-        value => $self->{broadcastInPercent}
+        value => $self->{broadcastInPercent} / 100 * $self->{inputRate},
     );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_broadcast_out',
-        warning => 10,
-        critical => 20
+        warning => $self->{maxOutputRate} / 100 * 10,
+        critical => $self->{maxOutputRate} / 100 * 20,
     );
     my $out = $self->check_thresholds(
         metric => $self->{ifDescr}.'_broadcast_out',
-        value => $self->{broadcastOutPercent}
+        value => $self->{broadcastOutPercent} / 100 * $self->{outputRate},
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_broadcast_in',
-        value => $self->{broadcastInPercent},
-        uom => '%',
+        value => $self->{broadcastInPercent} / 100 * $self->{inputRate},
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
+        places => 2,
+        min => 0,
+        max => $self->{maxInputRate},
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_broadcast_out',
-        value => $self->{broadcastOutPercent},
-        uom => '%',
+        value => $self->{broadcastOutPercent} / 100 * $self->{outputRate},
+        uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
+        places => 2,
+        min => 0,
+        max => $self->{maxOutputRate},
     );
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     #rfc2863
