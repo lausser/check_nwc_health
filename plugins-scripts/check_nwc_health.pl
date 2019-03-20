@@ -294,6 +294,12 @@ $plugin->add_mode(
     help => 'Check status of OSPF neighbors',
 );
 $plugin->add_mode(
+    internal => 'device::ospf::neighbor::watch',
+    spec => 'watch-ospf-neighbors',
+    alias => undef,
+    help => 'Watch OSPF neighbors appear and disappear',
+);
+$plugin->add_mode(
     internal => 'device::ospf::neighbor::list',
     spec => 'list-ospf-neighbors',
     alias => undef,
