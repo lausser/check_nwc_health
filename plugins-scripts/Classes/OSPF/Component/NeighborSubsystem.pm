@@ -79,7 +79,7 @@ sub check {
       }
     } else {
       if (scalar(@{$self->{delta_found_neighborNameList}}) > 0) {
-        $self->add_warning(sprintf '%d new ospf neighbors (%s)',
+        $self->add_warning_mitigation(sprintf '%d new ospf neighbors (%s)',
             scalar(@{$self->{delta_found_neighborNameList}}),
             join(", ", @{$self->{delta_found_neighborNameList}}));
         $problem = 1;
