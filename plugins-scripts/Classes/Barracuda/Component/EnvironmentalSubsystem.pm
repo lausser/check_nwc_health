@@ -121,21 +121,26 @@ package Classes::Barracuda::Component::EnvironmentalSubsystem::Partition;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
+sub finish {
+  my ($self) = @_;
+  $self->{label} = (lc $self->{partitionName})."_usage";
+}
+
 sub check {
   my ($self) = @_;
   $self->add_info(sprintf "partition %s usage is %.2f%%",
       $self->{partitionName},
       $self->{partitionUsedSpacePercent}
   );
-  $self->set_thresholds(metric => sprintf "%s_usage", $self->{partitionName},
+  $self->set_thresholds(metric => $self->{label},
       warning => 80, critical => 90
   );
   $self->add_message($self->check_thresholds(
-      metric => sprintf "%s_usage", $self->{partitionName},
+      metric => $self->{label},
       value => $self->{partitionUsedSpacePercent},
   ));
   $self->add_perfdata(
-      label => sprintf("%s_usage", $self->{partitionName}),
+      label => $self->{label},
       value => $self->{partitionUsedSpacePercent},
       uom => "%",
   );
