@@ -398,7 +398,6 @@ $plugin->add_mode(
 $plugin->add_mode(
     internal => 'device::users::count',
     spec => 'count-users',
-    alias => ['count-sessions', 'count-connections'],
     help => 'Count the (connected) users/sessions',
 );
 $plugin->add_mode(
@@ -416,8 +415,8 @@ $plugin->add_mode(
 $plugin->add_mode(
     internal => 'device::connections::count',
     spec => 'count-connections',
-    alias => ['count-connections-client', 'count-connections-server'],
-    help => 'Check the number of connections (-client, -server is possible)',
+    alias => ['count-connections-client', 'count-connections-server', 'count-sessions'],
+    help => 'Check the number of connections/sessions (-client, -server is possible)',
 );
 $plugin->add_mode(
     internal => 'device::cisco::fex::watch',
