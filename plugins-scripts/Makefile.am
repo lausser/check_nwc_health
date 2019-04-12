@@ -112,6 +112,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OSPFV3MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANCOMMONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANPRODUCTSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PHIONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PROXYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RAPIDCITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RESOURCEMIB.pm \
@@ -421,6 +422,8 @@ EXTRA_MODULES=\
   Classes/DrayTek/Vigor/Component/MemSubsystem.pm \
   Classes/DrayTek/Vigor.pm \
   Classes/DrayTek.pm \
+  Classes/Barracuda/Component/EnvironmentalSubsystem.pm \
+  Classes/Barracuda.pm \
   Classes/Device.pm
 
 SED=/bin/sed

@@ -176,6 +176,9 @@ sub classify {
         $self->rebless('Classes::Riverbed');
       } elsif ($self->implements_mib('LCOS-MIB')) {
         $self->rebless('Classes::Lancom');
+      } elsif ($self->implements_mib('PHION-MIB') ||
+          $self->{productname} =~ /Barracuda/) {
+        $self->rebless('Classes::Barracuda');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('Classes::Server::Linux');
       } else {
