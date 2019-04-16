@@ -19,6 +19,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::HOSTRESOURCESMIB::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_ha_subsystem("Classes::PaloAlto::Component::HaSubsystem");
+  } elsif ($self->mode =~ /device::disk::usage/) {
+    $self->analyze_and_check_disk_subsystem("Classes::PaloAlto::Component::DiskSubsystem");
   } else {
     $self->no_such_mode();
   }
