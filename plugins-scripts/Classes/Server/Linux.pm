@@ -14,7 +14,7 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::Server::Linux::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::process::status/) {
     $self->analyze_and_check_process_subsystem("Classes::UCDMIB::Component::ProcessSubsystem");
-  } elsif ($self->mode =~ /device::uptime/) {
+  } elsif ($self->mode =~ /device::uptime/ && $self->implements_mib("HOST-RESOURCES-MIB")) {
     $self->analyze_and_check_uptime_subsystem("Classes::HOSTRESOURCESMIB::Component::UptimeSubsystem");
   } else {
     $self->no_such_mode();
