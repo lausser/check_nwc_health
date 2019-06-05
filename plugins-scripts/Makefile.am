@@ -27,6 +27,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOBGP4MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOCCMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOCONFIGMANMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOEIGRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENHANCEDMEMPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYALARMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYFRUCONTROLMIB.pm \
@@ -77,6 +78,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HOSTRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HPICFCHASSISMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IANAIFTYPEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IANARTPROTOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IEEE8023LAGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/INETADDRESSMIB.pm \
@@ -154,6 +156,8 @@ EXTRA_MODULES=\
   Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
   Classes/Bintec/Bibo.pm \
   Classes/Bintec.pm \
+  Classes/Cisco/CISCOBGP4MIB/Components/PeerSubsystem.pm \
+  Classes/Cisco/CISCOEIGRPMIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOPORTSECURITYMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/OLDCISCOINTERFACESMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
@@ -423,6 +427,8 @@ EXTRA_MODULES=\
   Classes/DrayTek/Vigor.pm \
   Classes/DrayTek.pm \
   Classes/Barracuda/Component/EnvironmentalSubsystem.pm \
+  Classes/Barracuda/Component/HaSubsystem.pm \
+  Classes/Barracuda/Component/FwSubsystem.pm \
   Classes/Barracuda.pm \
   Classes/Device.pm
 
