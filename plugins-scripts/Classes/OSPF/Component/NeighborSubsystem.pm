@@ -5,22 +5,51 @@ use strict;
 sub init {
   my ($self) = @_;
   $self->get_snmp_tables('OSPF-MIB', [
-    ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', , sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+    ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
   ]);
 eval {
   $self->get_snmp_tables('OSPFV3-MIB', [
-    ['nbr3', 'ospfv3NbrTable', 'Classes::OSPF::Component::NeighborSubsystem::V3Neighbor', , sub { my ($o) = @_; return 1; $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+    ['nbr3', 'ospfv3NbrTable', 'Classes::OSPF::Component::NeighborSubsystem::V3Neighbor', sub {
+        my ($o) = @_;
+        return ($self->filter_name($o->compact_v6($o->{ospfv3NbrAddress})) && $self->filter_name2($o->{ospfv3NbrRtrId}) ||
+        $self->filter_name($o->{ospfv3NbrAddress}) && $self->filter_name2($o->{ospfv3NbrRtrId}));
+    }],
   ]);
 };
   if ($self->establish_snmp_secondary_session()) {
     $self->clear_table_cache('OSPF-MIB', 'ospfNbrTable');
     $self->clear_table_cache('OSPFV3-MIB', 'ospfv3NbrTable');
     $self->get_snmp_tables('OSPF-MIB', [
-      ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', , sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+      ['nbr', 'ospfNbrTable', 'Classes::OSPF::Component::NeighborSubsystem::Neighbor', sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
     ]);
     $self->get_snmp_tables('OSPFV3-MIB', [
-      ['nbr3', 'ospfv3NbrTable', 'Classes::OSPF::Component::NeighborSubsystem::V3Neighbor', , sub { my ($o) = @_; return 1; $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+      ['nbr3', 'ospfv3NbrTable', 'Classes::OSPF::Component::NeighborSubsystem::V3Neighbor', sub {
+          my ($o) = @_;
+          return ($self->filter_name($o->compact_v6($o->{ospfv3NbrAddress})) && $self->filter_name2($o->{ospfv3NbrRtrId}) ||
+          $self->filter_name($o->{ospfv3NbrAddress}) && $self->filter_name2($o->{ospfv3NbrRtrId}));
+      }],
     ]);
+    # doppelte Eintraege rauswerfen
+    my $nbr_found = {};
+    @{$self->{nbr}} = grep {
+        my $signature = $_->{name}.$_->{ospfNbrRtrId}.$_->{ospfNbrState};
+        if (exists $nbr_found->{$signature}) {
+	  0;
+	} else {
+	  $nbr_found->{$signature} = 1;
+	  1;
+	}
+    } @{$self->{nbr}};
+    my $nbr3_found = {};
+    @{$self->{nbr3}} = grep {
+        my $signature = $_->{name}.$_->{ospfv3NbrRtrId}.$_->{ospfv3NbrState};
+        if (exists $nbr3_found->{$signature}) {
+	  0;
+	} else {
+	  $nbr3_found->{$signature} = 1;
+	  1;
+	}
+    } @{$self->{nbr3}};
   }
   if (! @{$self->{nbr}} && ! @{$self->{nbr3}}) {
     $self->add_unknown("no neighbors found");
