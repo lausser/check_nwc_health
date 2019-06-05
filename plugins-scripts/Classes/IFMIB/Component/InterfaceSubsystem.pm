@@ -156,6 +156,14 @@ sub init {
         $self->opts->name && $self->opts->name eq '_adminup_' ? 1 : 0;
     my $only_oper_up =
         $self->opts->name && $self->opts->name eq '_operup_' ? 1 : 0;
+    # --name '(lan|wan|_adminup_)'
+    # alle mit match auf lan|wan, und davon dann die mit admin up
+    my $plus_admin_up =
+        $self->opts->name && ! $only_admin_up &&
+	$self->opts->name =~ /_adminup_/ ? 1 : 0;
+    my $plus_oper_up =
+        $self->opts->name && ! $only_oper_up &&
+	$self->opts->name =~ /_operup_/ ? 1 : 0;
     if ($only_admin_up || $only_oper_up) {
       $self->override_opt('name', undef);
       $self->override_opt('drecksptkdb', undef);
@@ -174,6 +182,8 @@ sub init {
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
+	next if $plus_admin_up && $_->{ifAdminStatus} ne 'up';
+	next if $plus_oper_up && $_->{ifOperStatus} ne 'up';
         $self->make_ifdescr_unique($_);
         $self->enrich_interface_attributes($_);
         my $interface_class = ref($self)."::Interface";
