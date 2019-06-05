@@ -31,7 +31,19 @@ sub init {
     $self->rebless('Classes::Cisco::SB');
   }
   if (ref($self) ne "Classes::Cisco") {
-    if ($self->mode =~ /device::interfaces::etherstats/) {
+    if ($self->mode =~ /device::bgp/) {
+      if ($self->implements_mib('CISCO-BGP4-MIB')) {
+        $self->analyze_and_check_interface_subsystem("Classes::Cisco::CISCOBGP4MIB::Component::PeerSubsystem");
+      } else {
+        $self->no_such_mode();
+      }
+    } elsif ($self->mode =~ /device::eigrp/) {
+      if ($self->implements_mib('CISCO-EIGRP-MIB')) {
+        $self->analyze_and_check_interface_subsystem("Classes::Cisco::EIGRPMIB::Component::PeerSubsystem");
+      } else {
+        $self->no_such_mode();
+      }
+    } elsif ($self->mode =~ /device::interfaces::etherstats/) {
       if ($self->implements_mib('OLD-CISCO-INTERFACES-MIB')) {
         $self->analyze_and_check_interface_subsystem("Classes::Cisco::OLDCISCOINTERFACESMIB::Component::InterfaceSubsystem");
       } else {
