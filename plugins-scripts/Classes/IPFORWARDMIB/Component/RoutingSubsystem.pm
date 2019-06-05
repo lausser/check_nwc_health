@@ -40,6 +40,31 @@ sub init {
             }
         ],
     ]);
+  } else {
+    $self->{routes} = [];
+    $self->get_snmp_tables('IP-FORWARD-MIB', [
+        ['routes', 'inetCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute',
+            sub {
+              my ($o) = @_;
+              if ($o->opts->name && $o->opts->name =~ /\//) {
+                my ($dest, $cidr) = split(/\//, $o->opts->name);
+                my $bits = ( 2 ** (32 - $cidr) ) - 1;
+                my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
+                my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
+                return defined $o->{inetCidrRouteDest} && (
+                    $o->filter_namex($dest, $o->{inetCidrRouteDest}) &&
+                    $o->filter_namex($cidr, $o->{inetCidrRoutePfxLen}) &&
+                    $o->filter_name2($o->{inetCidrRouteNextHop})
+                );
+              } else {
+                return defined $o->{inetCidrRouteDest} && (
+                    $o->filter_name($o->{inetCidrRouteDest}) &&
+                    $o->filter_name2($o->{inetCidrRouteNextHop})
+                );
+              }
+            }
+        ],
+    ]);
   }
   # deprecated
   #$self->get_snmp_tables('IP-FORWARD-MIB', [
@@ -78,6 +103,9 @@ sub check {
         label => 'routes',
         value => scalar(@{$self->{routes}}),
     );
+  } elsif ($self->mode =~ /device::routes::exists/) {
+    # geht auch mit count-routes. irgendwann mal....
+    $self->no_such_mode();
   }
 }
 
@@ -120,29 +148,57 @@ sub finish {
   my ($self) = @_;
   # http://www.mibdepot.com/cgi-bin/vendor_index.cgi?r=ietf_rfcs
   # INDEX { inetCidrRouteDestType, inetCidrRouteDest, inetCidrRoutePfxLen, inetCidrRoutePolicy, inetCidrRouteNextHopType, inetCidrRouteNextHop }
-  $self->{i_inetCidrRouteDestType} = $self->{indices}->[0];
-  $self->{i_inetCidrRouteDest} = $self->{indices}->[1];
-  $self->{i_inetCidrRoutePfxLen} = $self->{indices}->[2];
-  $self->{i_inetCidrRoutePolicy} = $self->{indices}->[3];
-  $self->{i_inetCidrRouteNextHopType} = $self->{indices}->[4];
-  $self->{i_inetCidrRouteNextHop} = $self->{indices}->[5];
+  my @tmp_indices = @{$self->{indices}};
+  my $last_tmp = scalar(@tmp_indices) - 1;
+  # .1.3.6.1.2.1.4.24.7.1.7.1.4.0.0.0.0.32.2.0.0.1.4.10.208.143.81 = INTEGER: 25337
+  # IP-FORWARD-MIB::inetCidrRouteIfIndex.ipv4."0.0.0.0".32.2.0.0.ipv4."10.208.143.81" = INTEGER: 25337
+  # Frag mich jetzt keiner, warum dem ipv4 ein 1.4 entspricht. Ich kann
+  # jedenfalls der IP-FORWARD-MIB bzw. RFC4001 nicht entnehmen, dass fuer
+  # InetAddressType zwei Stellen des Index vorgesehen sind. Zumal nur die
+  # erste Stelle für die Textual Convention relevant ist. Aergert mich ziemlich,
+  # daß jeder bloede /usr/bin/snmpwalk das besser hinbekommt als ich.
+  # Was dazugelernt: 1=InetAddressType, 4=gehoert zur folgenden InetAddressIPv4
+  # und gibt die Laenge an. Noch mehr gelernt: wenn eine Table mit Integer und
+  # Octet String indiziert ist, dann ist die Groeße des Octet String Bestandteil
+  # der OID. Diese _kann_ weggelassen werden für den _letzten_ Index. Der ist
+  # halt dann so lang wie der Rest der OID. 
+  # Mit einem IMPLIED-Keyword koennte die Laenge auch weggelassen werden.
+
   $self->{inetCidrRouteDestType} = $self->mibs_and_oids_definition(
-      'INET-ADDRESS-MIB', 'InetAddressType', $self->{indices}->[0]);
+      'INET-ADDRESS-MIB', 'InetAddressType', $tmp_indices[0]);
+  shift @tmp_indices;
+
+  $self->{inetCidrRouteDest} = $self->mibs_and_oids_definition(
+      'INET-ADDRESS-MIB', 'InetAddressMaker',
+      $self->{inetCidrRouteDestType}, @tmp_indices);
+
+  # laenge plus adresse weg
+  splice @tmp_indices, 0, $tmp_indices[0]+1;
+
+  $self->{inetCidrRoutePfxLen} = shift @tmp_indices;
+  $self->{inetCidrRoutePolicy} = join(".", splice @tmp_indices, 0, $tmp_indices[0]+1);
+
+  $self->{inetCidrRouteNextHopType} = $self->mibs_and_oids_definition(
+      'INET-ADDRESS-MIB', 'InetAddressType', $tmp_indices[0]);
+  shift @tmp_indices;
+
+  $self->{inetCidrRouteNextHop} = $self->mibs_and_oids_definition(
+      'INET-ADDRESS-MIB', 'InetAddressMaker',
+      $self->{inetCidrRouteNextHopType}, @tmp_indices);
+
   if ($self->{inetCidrRouteDestType} eq "ipv4") {
-    $self->{inetCidrRouteDest} = $self->mibs_and_oids_definition(
-      'INET-ADDRESS-MIB', 'InetAddress', @{$self->{indices}});
-  } elsif ($self->{inetCidrRouteDestType} eq "ipv4") {
-    $self->{inetCidrRoutePfxLen} = $self->mibs_and_oids_definition(
-      'RFC4001-MIB', 'inetAddress', $self->{indices}->[1],
-      $self->{indices}->[2], $self->{indices}->[3], $self->{indices}->[4]);
-    
+  my $bits = ( 2 ** (32 - $self->{inetCidrRoutePfxLen}) ) - 1;
+  my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
+  my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
+  $self->{inetCidrRouteMask} = $netmask;
   }
+
 }
 
 sub list {
   my ($self) = @_;
   printf "%16s %16s %16s %11s %7s\n",
-      $self->{ipCidrRouteDest}, $self->{ipCidrRouteMask},
-      $self->{ipCidrRouteNextHop}, $self->{ipCidrRouteProto},
-      $self->{ipCidrRouteType};
+      $self->{inetCidrRouteDest}, $self->{inetCidrRoutePfxLen},
+      $self->{inetCidrRouteNextHop}, $self->{inetCidrRouteProto},
+      $self->{inetCidrRouteType};
 }
