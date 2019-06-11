@@ -6,110 +6,162 @@ sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CISCO-EIGRP-MIB', [
 		  #['peers', 'cEigrpPeerTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer', , sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
+    ['vpns', 'cEigrpVpnTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Vpn'],
     ['peers', 'cEigrpPeerTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer'],
+    ['stats', 'cEigrpTraffStatsTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::TrafficStats'],
   ]);
-  if (! @{$self->{peers}}) {
-    $self->add_unknown("no neighbors found");
-  }
+  #if (! @{$self->{peers}}) {
+  #$self->add_unknown("no neighbors found");
+  #}
+  $self->merge_tables_with_code('peers', 'vpns', sub {
+      my ($peer, $vpn) = @_;
+      return ($peer->{cEigrpVpnId} == $vpn->{cEigrpVpnId}) ? 1 : 0;
+  });
+  $self->merge_tables_with_code('peers', 'stats', sub {
+      my ($peer, $stat) = @_;
+      return ($peer->{cEigrpVpnId} == $stat->{cEigrpVpnId} &&
+          $peer->{cEigrpAsNumber} == $stat->{cEigrpAsNumber}) ? 1 : 0;
+  });
 }
 
 sub check {
   my ($self) = @_;
   if ($self->mode =~ /device::eigrp::peer::list/) {
     foreach (@{$self->{peers}}) {
-      printf "%s %s %s\n", $_->{name}, $_->{ospfNbrRtrId}, $_->{ospfNbrState};
+      printf "%s (vpn %s, as %d, routerid %s) up since %s\n",
+          $_->{cEigrpPeerAddr}, $_->{cEigrpVpnName}, $_->{cEigrpAsNumber},
+	  $_->{cEigrpAsRouterId}, $_->human_timeticks($_->{cEigrpUpTime});
     }
     $self->add_ok("have fun");
-  } elsif ($self->mode =~ /neighbor::watch/) {
-    @{$self->{neighbors}} = (@{$self->{peers3}}, @{$self->{peers}});
-    # take a snapshot of the neighbor list. -> good baseline
-    # warning if there appear neighbors, mitigate to ok
+  } elsif ($self->mode =~ /peer::count/) {
+    $self->add_info(sprintf "found %d peers", scalar(@{$self->{peers}}));
+    $self->set_thresholds(warning => '1:', critical => '1:');
+    $self->add_message($self->check_thresholds(scalar(@{$self->{peers}})));
+    $self->add_perfdata(
+        label => 'peers',
+        value => scalar(@{$self->{peers}}),
+    );
+  } elsif ($self->mode =~ /peer::watch/) {
+    # take a snapshot of the peer list. -> good baseline
+    # warning if there appear peers, mitigate to ok
     # critical if warn/crit percent disappear
-    $self->{numOfNeighbors} = scalar (@{$self->{neighbors}});
-    $self->{neighborNameList} = [map { $_->{name} } @{$self->{neighbors}}];
+    $self->{numOfPeers} = scalar (@{$self->{peers}});
+    $self->{peerNameList} = [map { $_->{cEigrpPeerAddr} } @{$self->{peers}}];
     $self->opts->override_opt('lookback', 3600) if ! $self->opts->lookback;
     if ($self->opts->reset) {
-      my $statefile = $self->create_statefile(name => 'ospfneighborlist', lastarray => 1);
+      my $statefile = $self->create_statefile(name => 'eigrppeerlist', lastarray => 1);
       unlink $statefile if -f $statefile;
     }
-    $self->valdiff({name => 'ospfneighborlist', lastarray => 1},
-        qw(neighborNameList numOfNeighbors));
+    $self->valdiff({name => 'eigrppeerlist', lastarray => 1},
+        qw(peerNameList numOfPeers));
     my $problem = 0;
     if ($self->opts->warning || $self->opts->critical) {
       $self->set_thresholds(warning => $self->opts->warning,
           critical => $self->opts->critical);
-      my $before = $self->{numOfNeighbors} - scalar(@{$self->{delta_found_neighborNameList}}) + scalar(@{$self->{delta_lost_neighborNameList}});
-      # use own delta_numOfNeighbors, because the glplugin version treats
+      my $before = $self->{numOfPeers} - scalar(@{$self->{delta_found_peerNameList}}) + scalar(@{$self->{delta_lost_peerNameList}});
+      # use own delta_numOfPeers, because the glplugin version treats
       # negative deltas as overflows
-      $self->{delta_numOfNeighbors} = $self->{numOfNeighbors} - $before;
+      $self->{delta_numOfPeers} = $self->{numOfPeers} - $before;
       if ($self->opts->units && $self->opts->units eq "%") {
-        my $delta_pct = $before ? (($self->{delta_numOfNeighbors} / $before) * 100) : 0;
+        my $delta_pct = $before ? (($self->{delta_numOfPeers} / $before) * 100) : 0;
         $self->add_message($self->check_thresholds($delta_pct),
-          sprintf "%.2f%% delta, before: %d, now: %d", $delta_pct, $before, $self->{numOfNeighbors});
+          sprintf "%.2f%% delta, before: %d, now: %d", $delta_pct, $before, $self->{numOfPeers});
         $problem = $self->check_thresholds($delta_pct);
       } else {
-        $self->add_message($self->check_thresholds($self->{delta_numOfNeighbors}),
-          sprintf "%d delta, before: %d, now: %d", $self->{delta_numOfNeighbors}, $before, $self->{numOfNeighbors});
-        $problem = $self->check_thresholds($self->{delta_numOfNeighbors});
+        $self->add_message($self->check_thresholds($self->{delta_numOfPeers}),
+          sprintf "%d delta, before: %d, now: %d", $self->{delta_numOfPeers}, $before, $self->{numOfPeers});
+        $problem = $self->check_thresholds($self->{delta_numOfPeers});
       }
-      if (scalar(@{$self->{delta_found_neighborNameList}}) > 0) {
+      if (scalar(@{$self->{delta_found_peerNameList}}) > 0) {
         $self->add_ok(sprintf 'found: %s',
-            join(", ", @{$self->{delta_found_neighborNameList}}));
+            join(", ", @{$self->{delta_found_peerNameList}}));
       }
-      if (scalar(@{$self->{delta_lost_neighborNameList}}) > 0) {
+      if (scalar(@{$self->{delta_lost_peerNameList}}) > 0) {
         $self->add_ok(sprintf 'lost: %s',
-            join(", ", @{$self->{delta_lost_neighborNameList}}));
+            join(", ", @{$self->{delta_lost_peerNameList}}));
       }
     } else {
-      if (scalar(@{$self->{delta_found_neighborNameList}}) > 0) {
-        $self->add_warning_mitigation(sprintf '%d new ospf neighbors (%s)',
-            scalar(@{$self->{delta_found_neighborNameList}}),
-            join(", ", @{$self->{delta_found_neighborNameList}}));
+      if (scalar(@{$self->{delta_found_peerNameList}}) > 0) {
+        $self->add_warning(sprintf '%d new eigrp peers (%s)',
+            scalar(@{$self->{delta_found_peerNameList}}),
+            join(", ", @{$self->{delta_found_peerNameList}}));
         $problem = 1;
       }
-      if (scalar(@{$self->{delta_lost_neighborNameList}}) > 0) {
-        $self->add_critical(sprintf '%d ospf neighbors missing (%s)',
-            scalar(@{$self->{delta_lost_neighborNameList}}),
-            join(", ", @{$self->{delta_lost_neighborNameList}}));
+      if (scalar(@{$self->{delta_lost_peerNameList}}) > 0) {
+        $self->add_critical(sprintf '%d eigrp peers missing (%s)',
+            scalar(@{$self->{delta_lost_peerNameList}}),
+            join(", ", @{$self->{delta_lost_peerNameList}}));
         $problem = 2;
       }
-      $self->add_ok(sprintf 'found %d ospf neighbors', scalar (@{$self->{neighbors}}));
+      $self->add_ok(sprintf 'found %d eigrp peers', scalar (@{$self->{peers}}));
     }
     if ($problem) { # relevant only for lookback=9999 and support contract customers
-      $self->valdiff({name => 'ospfneighborlist', lastarray => 1, freeze => 1},
-          qw(neighborNameList numOfNeighbors));
+      $self->valdiff({name => 'eigrppeerlist', lastarray => 1, freeze => 1},
+          qw(peerNameList numOfPeers));
     } else {
-      $self->valdiff({name => 'ospfneighborlist', lastarray => 1, freeze => 2},
-          qw(neighborNameList numOfNeighbors));
+      $self->valdiff({name => 'eigrppeerlist', lastarray => 1, freeze => 2},
+          qw(peerNameList numOfPeers));
     }
     $self->add_perfdata(
-        label => 'num_neighbors',
-        value => scalar (@{$self->{neighbors}}),
+        label => 'num_peers',
+        value => scalar (@{$self->{peers}}),
     );
-  } else {
-    map { $_->check(); } @{$self->{peers}};
-    map { $_->check(); } @{$self->{peers3}};
   }
 }
+
+
+package Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::TrafficStats;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub finish {
+  my ($self) = @_;
+  $self->{cEigrpVpnId} = $self->{indices}->[0];
+  $self->{cEigrpAsNumber} = $self->{indices}->[1];
+}
+
+
+package Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Vpn;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub finish {
+  my ($self) = @_;
+  $self->{cEigrpVpnId} = $self->{indices}->[0];
+}
+
 
 package Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
-# Index: ospfNbrIpAddr, ospfNbrAddressLessIndex
 
 sub finish {
   my ($self) = @_;
-  $self->{cEigrpPeerAddrXXX} = $self->{cEigrpPeerAddr};
-  printf "kakakakakaka %s\n", $self->{cEigrpPeerAddrXXX};
-  $self->{cEigrpPeerAddrType} = $self->mibs_and_oids_definition(
-      'INET-ADDRESS-MIB', 'InetAddressType', $self->{cEigrpPeerAddrType});
-
-  $self->{cEigrpPeerAddr} = $self->mibs_and_oids_definition(
-      'INET-ADDRESS-MIB', 'InetAddressMaker',
-      $self->{cEigrpPeerAddrType}, unpack("C*", $self->{cEigrpPeerAddr}));
-  $self->{cEigrpPeerAddrXXX} = $self->mibs_and_oids_definition(
-      'INET-ADDRESS-MIB', 'InetAddressMaker',
-      $self->{cEigrpPeerAddrType}, map { ord } split //, $self->{cEigrpPeerAddrXXX});
+  $self->{cEigrpVpnId} = $self->{indices}->[0];
+  $self->{cEigrpAsNumber} = $self->{indices}->[1];
+  $self->{cEigrpHandle} = $self->{indices}->[2];
+  if ($self->{cEigrpUpTime} =~ /(\d+):(\d+):(\d+)/) {
+    $self->{cEigrpUpTime} = $1 * 3600 + $2 * 60 + $3;
+  } elsif ($self->{cEigrpUpTime} =~ /(\d+)d(\d+)h/) {
+    $self->{cEigrpUpTime} = $1 * 3600 * 24 + $2 * 3600;
+  } elsif ($self->{cEigrpUpTime} =~ /(\d+)w(\d+)d/) {
+    $self->{cEigrpUpTime} = $1 * 3600 * 24 * 7 + $2 * 3600 * 24;
+  }
+  if ($self->opts->name2) {
+    foreach my $as (split(",", $self->opts->name2)) {
+      if ($as =~ /(\d+)=(\w+)/) {
+        $as = $1;
+        $self->{eigrpPeerRemoteAsName} = ", ".$2;
+      } else {
+        $self->{eigrpPeerRemoteAsName} = "";
+      }
+      if ($as eq "_ALL_" || $as == $self->{eigrpPeerRemoteAs}) {
+        $self->{eigrpPeerRemoteAsImportant} = 1;
+      }
+    }
+  } else {
+    $self->{eigrpPeerRemoteAsImportant} = 1;
+  }
 }
 
 sub check {

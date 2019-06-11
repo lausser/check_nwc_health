@@ -1,3 +1,6 @@
+* 2019-06-11 7.9
+  add EIGRP
+  fix ASA user/connection/session-count
 * 2019-06-05 7.8
   GLPLugin with better ip4/ip6 handling
   fix huawei subclasses
