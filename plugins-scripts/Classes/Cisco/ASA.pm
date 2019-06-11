@@ -14,7 +14,14 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::IOS::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::hsrp/) {
     $self->analyze_and_check_hsrp_subsystem("Classes::HSRP::Component::HSRPSubsystem");
-  } elsif ($self->mode =~ /device::users/) {
+  } elsif ($self->mode =~ /device::users/ || $self->mode =~ /device::connections/) {
+    # das war frueher "users". seit 6c70c2627e53cce991181369456c03f630f90f71
+    # ist count-connections kein alias von count-users mehr, sondern ein
+    # eigenstaendiger mode. fuehrte dazu, dass count-connections hier unten
+    # in no_such_mode reinlief. daher dieses users||connections.
+    # weil es sich bei asa tatsaechlich eher um connections als users handelt,
+    # waere es sauber, das users rauszuwerfen, allerdings wuerde das dann
+    # bei denen krachen, die count-users verwenden.
     $self->analyze_and_check_connection_subsystem("Classes::Cisco::IOS::Component::ConnectionSubsystem");
   } elsif ($self->mode =~ /device::config/) {
     $self->analyze_and_check_config_subsystem("Classes::Cisco::IOS::Component::ConfigSubsystem");

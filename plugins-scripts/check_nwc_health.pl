@@ -306,11 +306,17 @@ $plugin->add_mode(
     help => 'Show OSPF neighbors',
 );
 $plugin->add_mode(
-    internal => 'device::eigrp::peer::status',
-    spec => 'eigrp-peer-status',
+    internal => 'device::eigrp::peer::count',
+    spec => 'count-eigrp-peers',
     alias => undef,
-    help => 'Check status of EIGRP peers',
+    help => 'Count the number of EIGRP peers',
 );
+#$plugin->add_mode(
+#    internal => 'device::eigrp::peer::status',
+#    spec => 'eigrp-peer-status',
+#    alias => undef,
+#    help => 'Check status of EIGRP peers',
+#);
 $plugin->add_mode(
     internal => 'device::eigrp::peer::watch',
     spec => 'watch-eigrp-peers',
