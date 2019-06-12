@@ -32,9 +32,10 @@ sub init {
   }
   if (ref($self) ne "Classes::Cisco") {
     if ($self->mode =~ /device::bgp/) {
-      if ($self->implements_mib('CISCO-BGP4-MIB')) {
+      if ($self->implements_mib('CISCO-BGP4-MIB', 'cbgpPeer2Table')) {
         $self->analyze_and_check_interface_subsystem("Classes::Cisco::CISCOBGP4MIB::Component::PeerSubsystem");
       } else {
+        $self->debug("no CISCO-BGP4-MIB and/or no cbgpPeer2Table, fallback");
         $self->no_such_mode();
       }
     } elsif ($self->mode =~ /device::eigrp/) {
