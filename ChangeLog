@@ -1,3 +1,5 @@
+* 2019-06-12 7.9.0.1
+  fallback to BGP4-MIB if CISCO-BGP4-MIB is incomplete
 * 2019-06-11 7.9
   add EIGRP
   fix ASA user/connection/session-count
