@@ -12,60 +12,47 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->{interfaces} = [];
   $self->get_snmp_tables('IP-FORWARD-MIB', [
-      ['routes', 'inetCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute' ],
+      ['routes', 'ipCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute',
+          sub {
+            my ($o) = @_;
+            if ($o->opts->name && $o->opts->name =~ /\//) {
+              my ($dest, $cidr) = split(/\//, $o->opts->name);
+              my $bits = ( 2 ** (32 - $cidr) ) - 1;
+              my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
+              my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
+              return defined $o->{ipCidrRouteDest} && (
+                  $o->filter_namex($dest, $o->{ipCidrRouteDest}) &&
+                  $o->filter_namex($netmask, $o->{ipCidrRouteMask}) &&
+                  $o->filter_name2($o->{ipCidrRouteNextHop})
+              );
+            } else {
+              return defined $o->{ipCidrRouteDest} && (
+                  $o->filter_name($o->{ipCidrRouteDest}) &&
+                  $o->filter_name2($o->{ipCidrRouteNextHop})
+              );
+            }
+          }
+      ],
+      ['routes', 'inetCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute',
+          sub {
+            my ($o) = @_;
+            if ($o->opts->name && $o->opts->name =~ /\//) {
+              my ($dest, $cidr) = split(/\//, $o->opts->name);
+              return defined $o->{inetCidrRouteDest} && (
+                  $o->filter_namex($dest, $o->{inetCidrRouteDest}) &&
+                  $o->filter_namex($cidr, $o->{inetCidrRoutePfxLen}) &&
+                  $o->filter_name2($o->{inetCidrRouteNextHop})
+              );
+            } else {
+              return defined $o->{inetCidrRouteDest} && (
+                  $o->filter_name($o->{inetCidrRouteDest}) &&
+                  $o->filter_name2($o->{inetCidrRouteNextHop})
+              );
+            }
+          }
+      ],
   ]);
-  if (! @{$self->{routes}}) {
-    $self->get_snmp_tables('IP-FORWARD-MIB', [
-        ['routes', 'ipCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute',
-            sub {
-              my ($o) = @_;
-              if ($o->opts->name && $o->opts->name =~ /\//) {
-                my ($dest, $cidr) = split(/\//, $o->opts->name);
-                my $bits = ( 2 ** (32 - $cidr) ) - 1;
-                my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
-                my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
-                return defined $o->{ipCidrRouteDest} && (
-                    $o->filter_namex($dest, $o->{ipCidrRouteDest}) &&
-                    $o->filter_namex($netmask, $o->{ipCidrRouteMask}) &&
-                    $o->filter_name2($o->{ipCidrRouteNextHop})
-                );
-              } else {
-                return defined $o->{ipCidrRouteDest} && (
-                    $o->filter_name($o->{ipCidrRouteDest}) &&
-                    $o->filter_name2($o->{ipCidrRouteNextHop})
-                );
-              }
-            }
-        ],
-    ]);
-  } else {
-    $self->{routes} = [];
-    $self->get_snmp_tables('IP-FORWARD-MIB', [
-        ['routes', 'inetCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute',
-            sub {
-              my ($o) = @_;
-              if ($o->opts->name && $o->opts->name =~ /\//) {
-                my ($dest, $cidr) = split(/\//, $o->opts->name);
-                my $bits = ( 2 ** (32 - $cidr) ) - 1;
-                my ($full_mask) = unpack("N", pack("C4", split(/\./, '255.255.255.255')));
-                my $netmask = join('.', unpack("C4", pack("N", ($full_mask ^ $bits))));
-                return defined $o->{inetCidrRouteDest} && (
-                    $o->filter_namex($dest, $o->{inetCidrRouteDest}) &&
-                    $o->filter_namex($cidr, $o->{inetCidrRoutePfxLen}) &&
-                    $o->filter_name2($o->{inetCidrRouteNextHop})
-                );
-              } else {
-                return defined $o->{inetCidrRouteDest} && (
-                    $o->filter_name($o->{inetCidrRouteDest}) &&
-                    $o->filter_name2($o->{inetCidrRouteNextHop})
-                );
-              }
-            }
-        ],
-    ]);
-  }
   # deprecated
   #$self->get_snmp_tables('IP-FORWARD-MIB', [
   #    ['routes', 'ipForwardTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route' ],
