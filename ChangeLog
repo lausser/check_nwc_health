@@ -1,3 +1,5 @@
+* 2019-06-14 7.9.0.4
+  finish barracuda ha-role mode
 * 2019-06-14 7.9.0.3
   detect f5 firmware versions 14+
 * 2019-06-12 7.9.0.2
