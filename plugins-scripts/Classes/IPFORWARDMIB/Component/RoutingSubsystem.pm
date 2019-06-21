@@ -60,6 +60,26 @@ sub init {
   #$self->get_snmp_tables('IP-MIB', [
   #    ['routes', 'ipRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route' ],
   #]);
+  #
+  # Hundsglump varreckts!!!!
+  # Es gibt so Kandidaten, bei denen stecken die v6-Routen in der neuen
+  # inetCidrRouteTable (was ja korrekt ist) und die v4-Routen in der
+  # ipCidrRouteTable. Das war der Grund, weshalb beim get_snmp_tables
+  # beide abgefragt werden und nicht wie frueher ein Fallback auf von inet
+  # auf ip stattfindet, falls die inet leer ist.
+  # Korrekt waere zumindest meiner Ansicht nach, wenn sowohl v4 als auch v6
+  # in inetCidrRouteTable stuenden. Solche gibt es tatsaechlich auch.
+  # Aber dank der Hornochsen bei Cisco mit ihrer o.g. Vorgehensweise darf ich
+  # jetzt die Doubletten rausfieseln.
+  my $found = {};
+  @{$self->{routes}} = grep {
+      if (exists $found->{$_->id()}) {
+        return 0;
+      } else {
+        $found->{$_->id()} = 1;
+	return 1;
+      }
+  } @{$self->{routes}};
 }
 
 sub check {
@@ -128,6 +148,12 @@ sub list {
       $self->{ipCidrRouteType};
 }
 
+sub id {
+  my ($self) = @_;
+  return sprintf "%s-%s", $self->{ipCidrRouteDest},
+      $self->{ipCidrRouteNextHop};
+}
+
 package Classes::IPFORWARDMIB::Component::RoutingSubsystem::inetCidrRoute;
 our @ISA = qw(Classes::IPFORWARDMIB::Component::RoutingSubsystem::Route);
 
@@ -188,4 +214,10 @@ sub list {
       $self->{inetCidrRouteDest}, $self->{inetCidrRoutePfxLen},
       $self->{inetCidrRouteNextHop}, $self->{inetCidrRouteProto},
       $self->{inetCidrRouteType};
+}
+
+sub id {
+  my ($self) = @_;
+  return sprintf "%s-%s", $self->{inetCidrRouteDest},
+      $self->{inetCidrRouteNextHop};
 }

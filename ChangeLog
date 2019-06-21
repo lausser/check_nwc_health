@@ -1,3 +1,6 @@
+* 2019-06-21 7.10
+  remove duplicate routes (ip-table + inet-table)
+  --report long+address shows ip addresses for interfaces
 * 2019-06-14 7.9.0.4
   finish barracuda ha-role mode
 * 2019-06-14 7.9.0.3
