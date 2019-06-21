@@ -11,6 +11,7 @@ sub init {
   my @ethertable_columns = qw();
   my @ethertablehc_columns = qw();
   my @rmontable_columns = qw();
+  my @ipaddress_columns = qw();
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
     push(@iftable_columns, qw(
@@ -88,20 +89,20 @@ sub init {
       @ethertable_columns = grep {
         my $ec = $_;
         grep {
-	  $ec eq $_;
-	} @reports;
+          $ec eq $_;
+        } @reports;
       } @ethertable_columns;
       @ethertablehc_columns = grep {
         my $ec = $_;
         grep {
-	  $ec eq $_;
-	} @reports;
+          $ec eq $_;
+        } @reports;
       } @ethertablehc_columns;
       @rmontable_columns = grep {
         my $ec = $_;
         grep {
-	  $ec eq $_;
-	} @reports;
+          $ec eq $_;
+        } @reports;
       } @rmontable_columns;
     }
     if (grep /dot3HCStatsFCSErrors/, @ethertablehc_columns) {
@@ -160,10 +161,10 @@ sub init {
     # alle mit match auf lan|wan, und davon dann die mit admin up
     my $plus_admin_up =
         $self->opts->name && ! $only_admin_up &&
-	$self->opts->name =~ /_adminup_/ ? 1 : 0;
+        $self->opts->name =~ /_adminup_/ ? 1 : 0;
     my $plus_oper_up =
         $self->opts->name && ! $only_oper_up &&
-	$self->opts->name =~ /_operup_/ ? 1 : 0;
+        $self->opts->name =~ /_operup_/ ? 1 : 0;
     if ($only_admin_up || $only_oper_up) {
       $self->override_opt('name', undef);
       $self->override_opt('drecksptkdb', undef);
@@ -182,8 +183,8 @@ sub init {
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
-	next if $plus_admin_up && $_->{ifAdminStatus} ne 'up';
-	next if $plus_oper_up && $_->{ifOperStatus} ne 'up';
+        next if $plus_admin_up && $_->{ifAdminStatus} ne 'up';
+        next if $plus_oper_up && $_->{ifOperStatus} ne 'up';
         $self->make_ifdescr_unique($_);
         $self->enrich_interface_attributes($_);
         my $interface_class = ref($self)."::Interface";
@@ -313,6 +314,54 @@ sub init {
         if (scalar(@{$self->{interfaces}}) == 0) {
           $self->add_unknown('device probably has no RMON-MIB or EtherLike-MIB');
         }
+      }
+    }
+  }
+  if ($self->opts->report =~ /^(\w+)\+address/) {
+    $self->override_opt('report', $1);
+    # flat_indices, weil die Schluesselelemente ipAddressAddrType+ipAddressAddr
+    # not-accessible sind und im Index stecken.
+    if (scalar(@{$self->{interfaces}}) > 0) {
+      my $interfaces_by_index = {};
+      map {
+          $interfaces_by_index->{$_->{ifIndex}} = $_;
+      } @{$self->{interfaces}};
+      my $indexpattern = join('|', map {
+          $_->{ifIndex}
+      } @{$self->{interfaces}});
+      $self->override_opt('name', '^('.$indexpattern.')$');
+      $self->override_opt('drecksptkdb', '^('.$indexpattern.')$');
+      $self->override_opt('regexp', 1);
+
+      $self->get_snmp_objects('IP-MIB', qw(ipv4InterfaceTableLastChange ipv6InterfaceTableLastChange));
+      $self->{ipv4InterfaceTableLastChange} ||= 0;
+      $self->{ipv6InterfaceTableLastChange} ||= 0;
+      $self->{ipv46InterfaceTableLastChange} =
+          $self->{ipv4InterfaceTableLastChange} > $self->{ipv6InterfaceTableLastChange} ?
+          $self->{ipv4InterfaceTableLastChange} : $self->{ipv6InterfaceTableLastChange};
+      $self->{bootTime} = time - $self->uptime();
+      $self->{ipAddressTableLastChange} = $self->{bootTime} + $self->timeticks($self->{ipv46InterfaceTableLastChange} / 100);
+
+      $self->update_entry_cache(0, 'IP-MIB', 'ipAddressTable', 'ipAddressIfIndex', $self->{ipAddressTableLastChange});
+      my @address_indices = $self->get_cache_indices('IP-MIB', 'ipAddressTable', 'ipAddressIfIndex');
+      $self->{addresses} = [];
+      if (@address_indices) {
+        # es gibt adressen zu den ausgewaehlten interfaces
+        foreach ($self->get_snmp_table_objects_with_cache(
+            'IP-MIB', 'ipAddressTable', 'ipAddressIfIndex', ['ipAddressIfIndex'], 0)) {
+          my $address = Classes::IFMIB::Component::InterfaceSubsystem::Address->new(%{$_});
+          push(@{$self->{addresses}}, $address);
+          if (exists $interfaces_by_index->{$address->{ipAddressIfIndex}}) {
+            if (exists  $interfaces_by_index->{$address->{ipAddressIfIndex}}->{ifAddresses}) {
+              push(@{$interfaces_by_index->{$address->{ipAddressIfIndex}}->{ifAddresses}}, $address->{ipAddressAddr});
+            } else {
+              $interfaces_by_index->{$address->{ipAddressIfIndex}}->{ifAddresses} = [$address->{ipAddressAddr}];
+            }
+          }
+        }
+      }
+      foreach (@{$self->{interfaces}}) {
+        $_->{ifAddresses} = exists $_->{ifAddresses} ? join(", ", @{$_->{ifAddresses}}) : "";
       }
     }
   }
@@ -831,10 +880,11 @@ sub init_etherstats {
 
 sub check {
   my ($self) = @_;
-  my $full_descr = sprintf "%s%s",
+  my $full_descr = sprintf "%s%s%s",
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
-          " (alias ".$self->{ifAlias}.")" : "";
+          " (alias ".$self->{ifAlias}.")" : "",
+      $self->{ifAddresses} ? " (addresses ".$self->{ifAddresses}.")" : "";
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -1257,10 +1307,11 @@ sub init_etherstats {
 
 sub check {
   my ($self) = @_;
-  my $full_descr = sprintf "%s%s",
+  my $full_descr = sprintf "%s%s%s",
       $self->{ifDescr},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
-          " (alias ".$self->{ifAlias}.")" : "";
+          " (alias ".$self->{ifAlias}.")" : "",
+      $self->{ifAddresses} ? " (addresses ".$self->{ifAddresses}.")" : "";
   if ($self->mode =~ /device::interfaces::operstatus/) {
     $self->SUPER::check();
   } elsif ($self->mode =~ /device::interfaces::duplex/) {
@@ -1268,5 +1319,38 @@ sub check {
   } else {
     $self->add_ok(sprintf '%s has no traffic', $full_descr);
   }
+}
+
+
+package Classes::IFMIB::Component::InterfaceSubsystem::Address;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+
+sub finish {
+  my ($self) = @_;
+  # INDEX { ipAddressAddrType, ipAddressAddr }
+  my @tmp_indices = @{$self->{indices}};
+  my $last_tmp = scalar(@tmp_indices) - 1;
+  # .1.3.6.1.2.1.4.24.7.1.7.1.4.0.0.0.0.32.2.0.0.1.4.10.208.143.81 = INTEGER: 25337
+  # IP-FORWARD-MIB::inetCidrRouteIfIndex.ipv4."0.0.0.0".32.2.0.0.ipv4."10.208.143.81" = INTEGER: 25337
+  # Frag mich jetzt keiner, warum dem ipv4 ein 1.4 entspricht. Ich kann
+  # jedenfalls der IP-FORWARD-MIB bzw. RFC4001 nicht entnehmen, dass fuer
+  # InetAddressType zwei Stellen des Index vorgesehen sind. Zumal nur die
+  # erste Stelle für die Textual Convention relevant ist. Aergert mich ziemlich,
+  # daß jeder bloede /usr/bin/snmpwalk das besser hinbekommt als ich.
+  # Was dazugelernt: 1=InetAddressType, 4=gehoert zur folgenden InetAddressIPv4
+  # und gibt die Laenge an. Noch mehr gelernt: wenn eine Table mit Integer und
+  # Octet String indiziert ist, dann ist die Groeße des Octet String Bestandteil
+  # der OID. Diese _kann_ weggelassen werden für den _letzten_ Index. Der ist
+  # halt dann so lang wie der Rest der OID.
+  # Mit einem IMPLIED-Keyword koennte die Laenge auch weggelassen werden.
+
+  $self->{ipAddressAddrType} = $self->mibs_and_oids_definition(
+      'INET-ADDRESS-MIB', 'InetAddressType', $tmp_indices[0]);
+  shift @tmp_indices;
+
+  $self->{ipAddressAddr} = $self->mibs_and_oids_definition(
+      'INET-ADDRESS-MIB', 'InetAddressMaker',
+      $self->{ipAddressAddrType}, @tmp_indices);
 }
 
