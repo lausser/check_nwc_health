@@ -1,3 +1,5 @@
+* 2019-06-25 7.10.0.1
+  fix a bug in bgp/route modes for the non-standalone version (InetAddressMaker)
 * 2019-06-21 7.10
   remove duplicate routes (ip-table + inet-table)
   --report long+address shows ip addresses for interfaces

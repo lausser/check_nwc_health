@@ -58,6 +58,7 @@ our $errorcodes = {
 sub init {
   my ($self) = @_;
   $self->{peers} = [];
+  $self->implements_mib('INET-ADDRESS-MIB');
   $self->get_snmp_tables('CISCO-BGP4-MIB', [
       ['peers', 'cbgpPeer2Table', 'Classes::Cisco::CISCOBGP4MIB::Component::PeerSubsystem::Peer2', sub {
           my $o = shift;
