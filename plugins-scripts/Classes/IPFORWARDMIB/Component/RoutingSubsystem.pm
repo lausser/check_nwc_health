@@ -12,6 +12,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  $self->implements_mib('INET-ADDRESS-MIB');
   $self->get_snmp_tables('IP-FORWARD-MIB', [
       ['routes', 'ipCidrRouteTable', 'Classes::IPFORWARDMIB::Component::RoutingSubsystem::ipCidrRoute',
           sub {

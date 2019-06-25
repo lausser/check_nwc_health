@@ -12,6 +12,7 @@ sub init {
   my @ethertablehc_columns = qw();
   my @rmontable_columns = qw();
   my @ipaddress_columns = qw();
+  $self->implements_mib('INET-ADDRESS-MIB');
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
     push(@iftable_columns, qw(
