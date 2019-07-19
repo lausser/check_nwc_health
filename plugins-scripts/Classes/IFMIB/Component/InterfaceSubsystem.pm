@@ -823,14 +823,30 @@ sub init {
     $self->{ifLastChangeRaw} = $self->{ifLastChange} / 100;
     # recalc ticks
     $self->{ifLastChange} = time - $self->uptime() + $self->{ifLastChange} / 100;
-    $self->{ifLastChangeHuman} = scalar localtime $self->{ifLastChange};
-    $self->{ifDuration} = time - $self->{ifLastChange};
-    $self->{ifDurationMinutes} = $self->{ifDuration} / 60; # minutes
-    # wenn sysUptime ueberlaeuft, dann wird's schwammig. Denn dann kann
+    # Alter Text:
+    # Wenn sysUptime ueberlaeuft, dann wird's schwammig. Denn dann kann
     # ich nicht sagen, ob ein ifLastChange ganz am Anfang passiert ist,
     # unmittelbar nach dem Booten, oder grad eben vor drei Minuten, als
     # der Ueberlauf stattfand. Ergo ist dieser Mode nach einer Uptime von
     # 497 Tagen nicht mehr brauchbar.
+    # Und tatsaechlich gibt es Typen die lassen ihre Switche in den
+    # Filialen ueber ein Jahr durchlaufen und machen dann reihenweise Tickets auf.
+    if ($self->{ifLastChange} < 0) {
+      # boot                   ifchange1  overflow  ifchange2
+      # |                      |          |         |
+      # |---------------------------------^---------------------------------^-----
+      #                                          |
+      #                                          check
+      # Zum Zeitpunkt des Checks ist ifchange1 groesser als die sysUptime
+      # Damit wird ifLastChange negativ.
+      # Eine Chance gibts dann noch, man geht davon aus, dass das der
+      # einzige Overflow war (tatsaechlich koennten ja mehrere passiert sein)
+      # Also: max(32bit) - ifchange1 + sysUptime
+      $self->{ifLastChange} = $self->ago_sysuptime($self->{ifLastChangeRaw});
+    }
+    $self->{ifLastChangeHuman} = scalar localtime $self->{ifLastChange};
+    $self->{ifDuration} = time - $self->{ifLastChange};
+    $self->{ifDurationMinutes} = $self->{ifDuration} / 60; # minutes
   }
   return $self;
 }
