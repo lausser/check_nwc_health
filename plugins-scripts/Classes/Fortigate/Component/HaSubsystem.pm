@@ -15,7 +15,7 @@ sub init {
       ['fgHaStatsTable', 'fgHaStatsTable', 'Classes::Fortigate::Component::HaSubsystem::SyncStatus'],
       ['fgVdTable', 'fgVdTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
-  if ($self->mode =~ /device::ha::role/) {
+  if (! $self->opts->role()) {
     $self->opts->override_opt('role', 'active'); 
     # fgHaSystemMode: activePassive, activeActive or standalone
   }
@@ -55,11 +55,12 @@ sub check {
   my ($self) = @_;
   if ($self->{fgHaStatsSerial} eq $self->{fnSysSerial}) {
     if ($self->mode eq "device::ha::role") {
-      $self->{iammaster} = $self->{fgHaStatsMasterSerial} eq $self->{fnSysSerial} ? 1 : 0;
-      $self->add_info(sprintf "this is a %s node in a %s setup", $self->opts->role, $self->{fgHaSystemMode});
-      if ($self->opts->role eq "active" && $self->{iammaster}) {
+      $self->{myrole} = $self->{fgHaSystemMode} eq "standalone" ? "master" :
+          $self->{fgHaStatsMasterSerial} eq $self->{fnSysSerial} ? "master" : "passive";
+      $self->add_info(sprintf "this is a %s node in a %s setup", $self->{myrole}, $self->{fgHaSystemMode});
+      if ($self->opts->role eq "active" && $self->opts->role eq $self->{myrole}) {
         $self->add_ok();
-      } elsif ($self->opts->role eq "passive" && ! $self->{iammaster}) {
+      } elsif ($self->opts->role eq "passive" && $self->opts->role eq $self->{myrole}) {
         $self->add_ok();
       } else {
         $self->add_critical();
