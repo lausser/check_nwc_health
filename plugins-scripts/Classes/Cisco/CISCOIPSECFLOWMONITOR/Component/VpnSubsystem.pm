@@ -73,7 +73,6 @@ sub finish {
   $self->{cikeFailLocalValue} = $self->unhex_ip($self->{cikeFailLocalValue});
   $self->{cikeFailRemoteAddr} = $self->unhex_ip($self->{cikeFailRemoteAddr});
   $self->{cikeFailRemoteValue} = $self->unhex_ip($self->{cikeFailRemoteValue});
-  $self->{cikeFailTime} /= 100;
   $self->{cikeFailTimeAgo} = $self->ago_sysuptime($self->{cikeFailTime});
 }
 
@@ -104,7 +103,6 @@ sub finish {
   my ($self) = @_;
   $self->{cipSecFailPktDstAddr} = $self->unhex_ip($self->{cipSecFailPktDstAddr});
   $self->{cipSecFailPktSrcAddr} = $self->unhex_ip($self->{cipSecFailPktSrcAddr});
-  $self->{cipSecFailTime} /= 100;
   $self->{cipSecFailTimeAgo} = $self->ago_sysuptime($self->{cipSecFailTime});
 }
 
