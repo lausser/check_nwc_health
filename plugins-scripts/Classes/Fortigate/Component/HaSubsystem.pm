@@ -16,8 +16,17 @@ sub init {
       ['fgVdTable', 'fgVdTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
   if (! $self->opts->role()) {
-    $self->opts->override_opt('role', 'active'); 
+    $self->opts->override_opt('role', 'master');
     # fgHaSystemMode: activePassive, activeActive or standalone
+    # https://docs.fortinet.com/document/fortigate/6.0.6/handbook/943352/fgcp-ha-glossary
+    # Primary unit
+    # Also called the primary cluster unit, this cluster unit controls how the cluster operates.
+    # The FortiGate firmware uses the term master to refer to the primary unit.
+    # Standby State
+    # A subordinate unit in an active-passive HA cluster operates in the standby state
+    # Subordinate unit
+    # Also called the subordinate cluster unit, each cluster contains one or more cluster units that are not functioning as the primary unit.
+    # The FortiGate firmware uses the terms slave and subsidiary unit to refer to a subordinate unit.
   }
   foreach (@{$self->{fgHaStatsTable}}) {
     $_->{fnSysSerial} = $self->{fnSysSerial};
@@ -56,11 +65,11 @@ sub check {
   if ($self->{fgHaStatsSerial} eq $self->{fnSysSerial}) {
     if ($self->mode eq "device::ha::role") {
       $self->{myrole} = $self->{fgHaSystemMode} eq "standalone" ? "master" :
-          $self->{fgHaStatsMasterSerial} eq $self->{fnSysSerial} ? "master" : "passive";
+          $self->{fgHaStatsMasterSerial} eq $self->{fnSysSerial} ? "master" : "slave";
       $self->add_info(sprintf "this is a %s node in a %s setup", $self->{myrole}, $self->{fgHaSystemMode});
-      if ($self->opts->role eq "active" && $self->opts->role eq $self->{myrole}) {
-        $self->add_ok();
-      } elsif ($self->opts->role eq "passive" && $self->opts->role eq $self->{myrole}) {
+      if ($self->opts->role ne "master" and $self->opts->role ne "slave") {
+        $self->add_unknown('role must be master or slave');
+      } elsif ($self->opts->role eq $self->{myrole}) {
         $self->add_ok();
       } else {
         $self->add_critical();
