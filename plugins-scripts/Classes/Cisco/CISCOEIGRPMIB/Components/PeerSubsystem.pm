@@ -5,14 +5,14 @@ use strict;
 sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CISCO-EIGRP-MIB', [
-		  #['peers', 'cEigrpPeerTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer', , sub { my ($o) = @_; return $self->filter_name($o->{ospfNbrIpAddr}) && $self->filter_name2($o->{ospfNbrRtrId}) }],
     ['vpns', 'cEigrpVpnTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Vpn'],
-    ['peers', 'cEigrpPeerTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer'],
-    ['stats', 'cEigrpTraffStatsTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::TrafficStats'],
+    ['peers', 'cEigrpPeerTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::Peer', sub { my ($o) = @_; return $self->filter_name($o->{cEigrpPeerAddr}) }],
+    ['stats', 'cEigrpTraffStatsTable', 'Classes::Cisco::EIGRPMIB::Component::PeerSubsystem::TrafficStats', sub { my ($o) = @_; return $self->filter_name2($o->{cEigrpAsRouterId}) }],
   ]);
-  #if (! @{$self->{peers}}) {
-  #$self->add_unknown("no neighbors found");
-  #}
+  if ($self->opts->name2 && scalar(@{$self->{stats}}) == 0) {
+    # all stats have been filtered out
+    $self->{peers} = [];
+  }
   $self->merge_tables_with_code('peers', 'vpns', sub {
       my ($peer, $vpn) = @_;
       return ($peer->{cEigrpVpnId} == $vpn->{cEigrpVpnId}) ? 1 : 0;
@@ -33,6 +33,12 @@ sub check {
 	  $_->{cEigrpAsRouterId}, $_->human_timeticks($_->{cEigrpUpTime});
     }
     $self->add_ok("have fun");
+  } elsif ($self->mode =~ /peer::status/) {
+    if (scalar(@{$self->{peers}}) == 0) {
+      $self->add_critical("no peer(s) found");
+    } else {
+      map { $_->check(); } @{$self->{peers}};
+    }
   } elsif ($self->mode =~ /peer::count/) {
     $self->add_info(sprintf "found %d peers", scalar(@{$self->{peers}}));
     $self->set_thresholds(warning => '1:', critical => '1:');
@@ -140,38 +146,14 @@ sub finish {
   $self->{cEigrpVpnId} = $self->{indices}->[0];
   $self->{cEigrpAsNumber} = $self->{indices}->[1];
   $self->{cEigrpHandle} = $self->{indices}->[2];
-  if ($self->{cEigrpUpTime} =~ /(\d+):(\d+):(\d+)/) {
-    $self->{cEigrpUpTime} = $1 * 3600 + $2 * 60 + $3;
-  } elsif ($self->{cEigrpUpTime} =~ /(\d+)d(\d+)h/) {
-    $self->{cEigrpUpTime} = $1 * 3600 * 24 + $2 * 3600;
-  } elsif ($self->{cEigrpUpTime} =~ /(\d+)w(\d+)d/) {
-    $self->{cEigrpUpTime} = $1 * 3600 * 24 * 7 + $2 * 3600 * 24;
-  }
-  if ($self->opts->name2) {
-    foreach my $as (split(",", $self->opts->name2)) {
-      if ($as =~ /(\d+)=(\w+)/) {
-        $as = $1;
-        $self->{eigrpPeerRemoteAsName} = ", ".$2;
-      } else {
-        $self->{eigrpPeerRemoteAsName} = "";
-      }
-      if ($as eq "_ALL_" || $as == $self->{eigrpPeerRemoteAs}) {
-        $self->{eigrpPeerRemoteAsImportant} = 1;
-      }
-    }
-  } else {
-    $self->{eigrpPeerRemoteAsImportant} = 1;
-  }
 }
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf "neighbor %s (Id %s) has status %s",
-      $self->{name}, $self->{ospfNbrRtrId}, $self->{ospfNbrState});
-  if ($self->{ospfNbrState} ne "full" && $self->{ospfNbrState} ne "twoWay") {
-    $self->add_critical();
-  } else {
-    $self->add_ok();
-  }
+  $self->add_info(sprintf "%s (vpn %s, as %d, routerid %s) up since %s\n",
+          $_->{cEigrpPeerAddr}, $_->{cEigrpVpnName}, $_->{cEigrpAsNumber},
+	  $_->{cEigrpAsRouterId}, $_->human_timeticks($_->{cEigrpUpTime}));
+  # there is no status oid
+  $self->add_ok();
 }
 

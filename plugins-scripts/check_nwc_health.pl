@@ -311,12 +311,12 @@ $plugin->add_mode(
     alias => undef,
     help => 'Count the number of EIGRP peers',
 );
-#$plugin->add_mode(
-#    internal => 'device::eigrp::peer::status',
-#    spec => 'eigrp-peer-status',
-#    alias => undef,
-#    help => 'Check status of EIGRP peers',
-#);
+$plugin->add_mode(
+    internal => 'device::eigrp::peer::status',
+    spec => 'eigrp-peer-status',
+    alias => undef,
+    help => 'Check status (existance) of EIGRP peers',
+);
 $plugin->add_mode(
     internal => 'device::eigrp::peer::watch',
     spec => 'watch-eigrp-peers',
