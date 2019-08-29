@@ -6,11 +6,11 @@ sub init {
   my ($self) = @_;
   my $sensors = {};
   $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
-    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}],
-    ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold'],
+    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}, ["entSensorType", "entSensorStatus", "entSensorValue", "entSensorMeasuredEntity"]],
+    ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold', undef, ["entSensorThresholdSeverity", "entSensorThresholdValue", "entSensorThresholdEvaluation"]],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
+    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity', undef, ["entPhysicalIndex", "entPhysicalDescr", "entPhysicalClass"]],
   ]);
   @{$self->{sensor_entities}} = grep { $_->{entPhysicalClass} eq 'sensor' } @{$self->{entities}};
   foreach my $sensor (@{$self->{sensors}}) {
@@ -76,12 +76,8 @@ sub check {
     # reparaturlauf
     foreach my $idx (0..1) {
       my $otheridx = $idx == 0 ? 1 : 0;
-      if (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   
-          @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "minor") {
-        @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "major";
-      } elsif (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   
-          @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "minor") {
-        @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "minor";
+      if (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "minor") { @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "major";
+      } elsif (! defined @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} &&   @{$self->{thresholds}}[$otheridx]->{entSensorThresholdSeverity} eq "major") { @{$self->{thresholds}}[$idx]->{entSensorThresholdSeverity} = "minor";
       }
     }
     my $warning = (map { $_->{entSensorThresholdValue} } 
@@ -166,7 +162,6 @@ sub check {
       $self->add_perfdata(
           label => $label,
           value => $self->{entSensorValue},
-          warning => $self->{ciscoEnvMonSensorThreshold},
       );
     } else {
       $self->add_perfdata(
