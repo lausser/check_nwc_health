@@ -5,6 +5,11 @@ use strict;
 sub init {
   my ($self) = @_;
   my $sensors = {};
+  # Wenn Kunden Filialen in Australien aufmachen, dann muss man zu
+  # brachialen Massnahmen greifen.
+  # Derart hohe Werte koennen zu merkwuerdigen Fehlern fuehren, aber
+  # get_entries_get_bulk wird's schon richten.
+  $self->bulk_is_baeh(128);
   $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
     ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}, ["entSensorType", "entSensorStatus", "entSensorValue", "entSensorMeasuredEntity"]],
     ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold', undef, ["entSensorThresholdSeverity", "entSensorThresholdValue", "entSensorThresholdEvaluation"]],
