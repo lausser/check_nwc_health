@@ -19,6 +19,9 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::HOSTRESOURCESMIB::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_ha_subsystem("Classes::PaloAlto::Component::HaSubsystem");
+  } elsif ($self->mode =~ /device::lb::session/) {
+    # it's not a load balancer, but session-usage is the best mode here
+    $self->analyze_and_check_session_subsystem("Classes::PaloAlto::Component::SessionSubsystem");
   } else {
     $self->no_such_mode();
   }
