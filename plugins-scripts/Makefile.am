@@ -394,6 +394,7 @@ EXTRA_MODULES=\
   Classes/RAPIDCITYMIB/Component/FanSubsystem.pm \
   Classes/RAPIDCITYMIB/Component/TemperatureSubsystem.pm \
   Classes/RAPIDCITYMIB.pm \
+  Classes/PaloAlto/Component/SessionSubsystem.pm \
   Classes/PaloAlto/Component/MemSubsystem.pm \
   Classes/PaloAlto/Component/CpuSubsystem.pm \
   Classes/PaloAlto/Component/EnvironmentalSubsystem.pm \
