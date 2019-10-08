@@ -11,8 +11,8 @@ sub init {
   } else {
     $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
     $self->get_snmp_objects('CISCO-LWAPP-HA-MIB', qw(
-        cLHaPrimaryUnit cLHaNetworkFailOver cLHaPeerIpAddress
-        cLHaRedundancyIpAddress 
+        cLHaPrimaryUnit cLHaNetworkFailOver cLHaPeerIpAddressType cLHaPeerIpAddress
+        cLHaRedundancyIpAddressType cLHaRedundancyIpAddress
     ));
     $self->mult_snmp_max_msg_size(4);
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
