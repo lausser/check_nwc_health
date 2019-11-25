@@ -16,8 +16,15 @@ use strict;
 sub finish {
   my ($self) = @_;
   if (defined $self->{cempMemPoolHCUsed}) {
-    $self->{usage} = 100 * $self->{cempMemPoolHCUsed} /
-        ($self->{cempMemPoolHCFree} + $self->{cempMemPoolHCUsed});
+    if ($self->{cempMemPoolHCFree} + $self->{cempMemPoolHCUsed} == 0) {
+      # sowas hier:
+      # cempMemPoolType: reservedMemory
+      # cempMemPoolName: reserved
+      $self->{usage} = 0;
+    } else {
+      $self->{usage} = 100 * $self->{cempMemPoolHCUsed} /
+          ($self->{cempMemPoolHCFree} + $self->{cempMemPoolHCUsed});
+    }
   } else {
     # there was a posixMemory with used=0, free=0
     # (= heap mem for posix-like processes in modular ios)
