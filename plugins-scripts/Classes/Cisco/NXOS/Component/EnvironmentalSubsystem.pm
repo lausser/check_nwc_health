@@ -4,10 +4,12 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  #$self->mult_snmp_max_msg_size(10);
-  $self->bulk_is_baeh(10);
   $self->{sensor_subsystem} =
-      Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();
+      Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new()
+      unless $self->opts->nosensors;
+      # weil irgendwie ist die Voltagetemperatur am 8912ten Sensor auch
+      # schon Wurscht, insbesondere wenn da riesige, langsame Tabellen
+      # quer über den Pazifik geschaufelt werden.
   if ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
     $self->{fru_subsystem} = Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::EnvironmentalSubsystem->new();
     $self->check_l2_l3();
@@ -33,9 +35,11 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  $self->{sensor_subsystem}->check();
+  $self->{sensor_subsystem}->check() unless $self->opts->nosensors;
   if (exists $self->{fru_subsystem}) {
     $self->{fru_subsystem}->check();
+  } elsif ($self->opts->nosensors) {
+    $self->add_unknown("please run without --nosensors, there is no other MIB available");
   }
   if (! $self->check_messages()) {
     $self->clear_ok();

@@ -564,6 +564,13 @@ $plugin->add_arg(
    The role of this device in a hsrp group (active/standby/listen)",
     required => 0,
 );
+$plugin->add_arg(
+    spec => 'nosensors',
+    help => "--nosensors
+   Skip tables with voltage/current sensors (Nexus)",
+    required => 0,
+    hidden => 1,
+);
 
 $plugin->getopts();
 $plugin->classify();
