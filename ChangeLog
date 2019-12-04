@@ -1,6 +1,7 @@
+* 2019-12-04 7.10.1.3
+  add --nosensors which skips endless entSensor[Threshold]Table for Nexuses
 * 2019-11-25 7.10.1.2
   fix a division by 0 for cisco reserved memory
-  add --nosensors which skips endless entSensor[Threshold]Table for Nexuses
 * 2019-10-07 7.10.1.1
   fix a bug in cisco wlan accesspoint-modes (InetAddrType)
 * 2019-10-04 7.10.1
