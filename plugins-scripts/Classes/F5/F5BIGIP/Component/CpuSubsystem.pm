@@ -27,6 +27,7 @@ sub overall_init {
 
 sub init {
   my ($self) = @_;
+  $self->bulk_is_baeh(5);
   $self->get_snmp_tables('F5-BIGIP-SYSTEM-MIB', [
       ['cpus', 'sysCpuTable', 'Classes::F5::F5BIGIP::Component::CpuSubsystem::Cpu'],
   ]);

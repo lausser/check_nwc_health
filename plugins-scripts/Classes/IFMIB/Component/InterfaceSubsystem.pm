@@ -469,6 +469,7 @@ sub check {
 sub update_interface_cache {
   my ($self, $force) = @_;
   my $statefile = $self->create_interface_cache_file();
+  $self->bulk_is_baeh(10);
   $self->get_snmp_objects('IFMIB', qw(ifTableLastChange));
   # "The value of sysUpTime at the time of the last creation or
   # deletion of an entry in the ifTable. If the number of
