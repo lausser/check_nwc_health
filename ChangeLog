@@ -1,3 +1,5 @@
+* 2019-12-06 7.10.1.5
+  update GLPlugin, reduce default maxrepetitions to 20
 * 2019-12-05 7.10.1.4
   reduce maxrepetitions for f5 sysCpuTable and ifTables
 * 2019-12-04 7.10.1.3
