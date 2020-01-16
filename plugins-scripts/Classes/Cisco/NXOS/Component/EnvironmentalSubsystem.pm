@@ -49,7 +49,7 @@ sub check {
 
 sub dump {
   my ($self) = @_;
-  $self->{sensor_subsystem}->dump();
+  $self->{sensor_subsystem}->dump() unless $self->opts->nosensors;
   if (exists $self->{fru_subsystem}) {
     $self->{fru_subsystem}->dump();
   }
