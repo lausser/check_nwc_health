@@ -1,3 +1,6 @@
+* 2020-01-18 7.10.1.7
+  issue #229 fix redundant argument in sprintf
+  issue #228 fix operstatus in linuxlocal
 * 2020-01-16 7.10.1.6
   fix a bug in verbose mode if --nosensors is used
 * 2019-12-06 7.10.1.5

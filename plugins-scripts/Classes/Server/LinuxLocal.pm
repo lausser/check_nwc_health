@@ -60,7 +60,7 @@ sub init {
           chomp $tmpif->{$_} if defined $tmpif->{$_};
           $tmpif->{$_} =~ s/\s*$//g if defined $tmpif->{$_};
       } keys %{$tmpif};
-      if ($tmpif->{ifOperStatus} eq 'unknown') {
+      if (! defined $tmpif->{ifOperStatus} || $tmpif->{ifOperStatus} eq 'unknown') {
         $tmpif->{ifOperStatus} = $tmpif->{ifCarrier} ? 'up' : 'down';
       }
       $tmpif->{ifAdminStatus} = $tmpif->{ifOperStatus};
