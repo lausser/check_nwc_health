@@ -18,8 +18,10 @@ sub finish {
   my ($self) = @_;
   $self->{usage} = 100 * $self->{ciscoMemoryPoolUsed} /
       ($self->{ciscoMemoryPoolFree} + $self->{ciscoMemoryPoolUsed});
-  $self->{type} = $self->{ciscoMemoryPoolType} ||= 0;
-  $self->{name} = $self->{ciscoMemoryPoolName};
+  # Bel VPN Gate has only ciscoMemoryPoolUsed and ciscoMemoryPoolFree
+  # others were found to have no ciscoMemoryPoolType
+  $self->{type} = $self->{ciscoMemoryPoolType} ||= "generic memory";
+  $self->{name} = $self->{ciscoMemoryPoolName} ||= "ram";
 }
 
 sub check {
