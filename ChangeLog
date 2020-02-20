@@ -1,3 +1,5 @@
+* 2020-02-20 7.10.1.9
+  fix a bug in interface-etherstats for OLD-CISCO-INTERFACES-MIB
 * 2020-01-21 7.10.1.8
   fix a bug in Cisco memory, for Cisco emulation mode of Bel VPN Gate
 * 2020-01-18 7.10.1.7
