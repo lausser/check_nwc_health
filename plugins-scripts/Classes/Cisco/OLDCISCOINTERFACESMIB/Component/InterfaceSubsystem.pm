@@ -308,7 +308,7 @@ sub check {
 
 
 package Classes::Cisco::OLDCISCOINTERFACESMIB::Component::InterfaceSubsystem::Interface::64bit;
-our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit Classes::Cisco::OLDCISCOINTERFACESMIB::Component::InterfaceSubsystem::Interface);
+our @ISA = qw(Classes::Cisco::OLDCISCOINTERFACESMIB::Component::InterfaceSubsystem::Interface Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit);
 use strict;
 use Digest::MD5 qw(md5_hex);
 
