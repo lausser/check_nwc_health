@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->implements_mib('HP-ICF-CHASSIS-MIB')) {
+  if ($self->implements_mib('HP-ICF-CHASSIS')) {
     $self->analyze_and_check_sensor_subsystem('Classes::HP::Procurve::Component::SensorSubsystem');
   } else {
     $self->analyze_and_check_environmental_subsystem("Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem");

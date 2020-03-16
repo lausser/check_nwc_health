@@ -133,7 +133,7 @@ sub classify {
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.2011\.2\./) {
         $self->rebless('Classes::Huawei');
       } elsif ($self->{productname} =~ /Procurve/i ||
-          ($self->implements_mib('HP-ICF-CHASSIS-MIB') &&
+          ($self->implements_mib('HP-ICF-CHASSIS') &&
           $self->implements_mib('NETSWITCH-MIB'))) {
         $self->rebless('Classes::HP::Procurve');
       } elsif ($self->{productname} =~ /((cpx86_64)|(Check\s*Point)|(IPSO)|(Linux.*\dcp) )/i || $self->implements_mib('CHECKPOINT-MIB')) {

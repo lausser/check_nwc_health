@@ -53,8 +53,14 @@ sub init {
     @{$self->{sensors}} = (@sfans, @spss, @ssensors);
   } else {
     foreach (@{$self->{sensors}}) {
+      $_->{entPhysicalIndex} = $_->{flat_indices};
       $_->{entPhySensorEntityName} =
           $entity_indices->{$_->{flat_indices}}->{entPhysicalName};
+      if ($_->{entPhySensorEntityName} =~ /^Fan/ and
+          $_->{entPhySensorType} eq "other" and  ref($_) eq
+          "Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor") {
+        bless $_, "Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::DumbFan";
+      }
     }
   }
   delete $self->{entities};
@@ -115,6 +121,7 @@ sub finish {
   }
   if ($self->{entPhySensorType} eq 'rpm') {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
+    bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
   } elsif ($self->{entPhySensorType} eq 'celsius') {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Temperature';
   } elsif ($self->{entPhySensorType} eq 'watts') {
@@ -163,6 +170,15 @@ sub check {
     label => 'temp_'.$label,
     value => $self->{entPhySensorValue},
   );
+}
+
+package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::DumbFan;
+our @ISA = qw(Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor);
+use strict;
+
+sub check {
+  my ($self) = @_;
+  $self->SUPER::check();
 }
 
 package Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan;
