@@ -1,3 +1,5 @@
+* 2020-03-10 7.10.2
+  fix HP Aruba checks, add nore from ENTITY-SENSOR-MIB
 * 2020-02-20 7.10.1.9
   fix a bug in interface-etherstats for OLD-CISCO-INTERFACES-MIB
 * 2020-01-21 7.10.1.8
