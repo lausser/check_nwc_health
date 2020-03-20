@@ -46,6 +46,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPORTCHANNELMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPORTSECURITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOPROCESSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOREMOTEACCESSMONITORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBHWENVIROMENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBRNDMNGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBSYSMNGMIB.pm \
@@ -173,6 +174,7 @@ EXTRA_MODULES=\
   Classes/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   Classes/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  Classes/Cisco/CISCOREMOTEACCESSMONITORMIB/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   Classes/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   Classes/Cisco/ASA.pm \

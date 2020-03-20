@@ -180,6 +180,12 @@ $plugin->add_mode(
     help => 'Check the status of vpns (up/down)',
 );
 $plugin->add_mode(
+    internal => 'device::vpn::sessions',
+    spec => 'vpn-sessions',
+    alias => undef,
+    help => 'Check the number of vpn sessions (users, errors)',
+);
+$plugin->add_mode(
     internal => 'device::fcinterfaces::usage',
     spec => 'fc-interface-usage',
     alias => undef,
