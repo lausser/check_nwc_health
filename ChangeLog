@@ -1,3 +1,5 @@
+* 2020-03-20 7.10.3
+  add mode vpn-sessions (IOS and ASA)
 * 2020-03-16 7.10.2.1
   blacklist nfs-mounts in hrDeviceDiskStorage
 * 2020-03-10 7.10.2
