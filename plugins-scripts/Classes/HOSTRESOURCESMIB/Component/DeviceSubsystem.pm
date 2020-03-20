@@ -54,9 +54,12 @@ sub check {
   if ($self->{hrDeviceStatus} =~ /(warning|testing)/) {
     $self->add_warning();
   } elsif ($self->{hrDeviceStatus} =~ /down/ && ! (
+      # cd, sd, ramdisk fliegen raus. neuerdings auch nfs, weil die
+      # zum umounten zu bloed sind.
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sysfs' ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sunrpc' ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /CDROM/ ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /:\// ||
       $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'sit0'
     )) {
     $self->add_critical();
