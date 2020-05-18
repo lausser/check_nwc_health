@@ -11,11 +11,8 @@ sub init {
       crasGlobalBwUsage
       crasNumDeclinedSessions crasThrMaxFailedAuths
       crasNumTotalFailures
+      crasIPSecNumSessions crasIPSecCumulateSessions
   ));
-#  $self->get_snmp_tables('CISCO-REMOTE-ACCESS-MONITOR-MIB', [
-#      ['sessions', 'crasSessionTable', 'Classes::Cisco::CISCOREMOTEACCESSMONITORMIB::Component::VpnSubsystem::Session'],
-#      [ 'failures', 'crasSessFailTable', 'Classes::Cisco::CISCOREMOTEACCESSMONITORMIB::Component::VpnSubsystem::Failure'],
-#  ]);
 }
 
 sub check {
@@ -112,6 +109,31 @@ sub check {
       value => $self->{delta_crasNumTotalFailuresRate},
       places => 2,
   );
+
+  $self->valdiff({name => "crasIPSecCumulateSessions"}, qw(crasIPSecCumulateSessions));
+  $self->set_thresholds(metric => "sessions_per_sec",
+      warning => -1, critical => -1);
+  my($sessions_per_sec_w, $sessions_per_sec_c) =
+      $self->get_thresholds(metric => "sessions_per_sec");
+  if ($sessions_per_sec_w ne "-1" || $sessions_per_sec_c ne "-1") {
+    # one customer has serious problems when vpn connections are freezing
+    # a symptom is the number of sessions is constant over some minutes
+    # where there should be always an up and down.
+    # This part of the code is only executed if
+    # there is a --criticalx sessions_per_sec=0.001:
+    $sessions_per_sec_w = "0:" if $sessions_per_sec_w eq "-1";
+    $sessions_per_sec_c = "0:" if $sessions_per_sec_c eq "-1";
+    $self->set_thresholds(metric => "sessions_per_sec",
+      warning => $sessions_per_sec_w, critical => $sessions_per_sec_c);
+    $self->add_info(sprintf "total connections incrrease rate is %.5f/s",
+        $self->{crasIPSecCumulateSessions_per_sec});
+    $self->add_message($self->check_thresholds(metric => "sessions_per_sec",
+        value => $self->{crasIPSecCumulateSessions_per_sec}));
+    $self->add_perfdata(label => "sessions_per_sec",
+        value => $self->{crasIPSecCumulateSessions_per_sec},
+        places => 4,
+    );
+  }
 }
 
 
