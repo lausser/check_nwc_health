@@ -26,8 +26,10 @@ sub init {
       $self->analyze_and_check_mem_subsystem("Classes::Cisco::IOS::Component::MemSubsystem");
     }
   } elsif ($self->mode =~ /device::wlan/) {
+    $self->select_lwapp_ha_version();
     $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::WlanSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
+    $self->select_lwapp_ha_version();
     $self->analyze_and_check_wlan_subsystem("Classes::Cisco::WLC::Component::HaSubsystem");
   } else {
     $self->no_such_mode();
@@ -39,5 +41,21 @@ sub pretty_sysdesc {
   $self->get_snmp_objects('AIRESPACE-SWITCHING-MIB', qw(agentInventorySysDescription agentInventoryMachineModel));
   if ($self->{agentInventorySysDescription} and $self->{agentInventoryMachineModel}) {
     return $self->{agentInventorySysDescription}." ".$self->{agentInventoryMachineModel};
+  }
+}
+
+sub select_lwapp_ha_version {
+  my ($self) = @_;
+  $self->require_mib('CISCO-LWAPP-HA-MIB');
+  if ($self->implements_mib('CISCO-LWAPP-HA-MIB::2017')) {
+    $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'CISCO-LWAPP-HA-MIB'} =
+        $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'CISCO-LWAPP-HA-MIB::2017'};
+    $Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'CISCO-LWAPP-HA-MIB'} =
+        $Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'CISCO-LWAPP-HA-MIB::2017'};
+  } else {
+    $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'CISCO-LWAPP-HA-MIB'} =
+        $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'CISCO-LWAPP-HA-MIB::2012'};
+    $Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'CISCO-LWAPP-HA-MIB'} =
+        $Monitoring::GLPlugin::SNMP::MibsAndOids::definitions->{'CISCO-LWAPP-HA-MIB::2012'};
   }
 }

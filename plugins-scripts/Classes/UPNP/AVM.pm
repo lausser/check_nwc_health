@@ -4,21 +4,8 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->{productname} =~ /(7390|7490)/) {
-    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
-    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
-  } elsif ($self->{productname} =~ /7490/) {
-    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
-    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
-  } elsif ($self->{productname} =~ /7590/) {
-    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
-    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
-  } elsif ($self->{productname} =~ /6490/) {
-    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
-    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
-  } elsif ($self->{productname} =~ /7412/) {
-    bless $self, 'Classes::UPNP::AVM::FritzBox7390';
-    $self->debug('using Classes::UPNP::AVM::FritzBox7390');
+  if ($self->{productname} =~ /(7390|7490|7580|7590|6490|7412)/) {
+    $self->rebless('Classes::UPNP::AVM::FritzBox7390'i);
   } else {
     $self->no_such_model();
   }
