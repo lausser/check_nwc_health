@@ -1,3 +1,5 @@
+* 2020-05-19 7.10.4.1
+  fix a typo
 * 2020-05-05 7.10.4
   check increase of sessions for Cisco
   (detect freeze with  --mode vpn-sessions --criticalx sessions_per_sec=0.001:)
