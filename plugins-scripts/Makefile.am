@@ -15,6 +15,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACEWIRELESSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALARMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALCATELIND1BASEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTABGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTAENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBATCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ASYNCOSMAILMIB.pm \
@@ -414,6 +415,7 @@ EXTRA_MODULES=\
   Classes/Netgear.pm \
   Classes/Lantronix.pm \
   Classes/Lantronix/SLS.pm \
+  Classes/Arista/ARISTABGP4V2MIB/Components/PeerSubsystem.pm \
   Classes/Arista/Component/EnvironmentalSubsystem.pm \
   Classes/Arista.pm \
   Classes/Riverbed/SteelheadEX/Component/EnvironmentalSubsystem.pm \
