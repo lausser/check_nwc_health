@@ -19,6 +19,20 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::HOSTRESOURCESMIB::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_ha_subsystem("Classes::Arista::Component::HaSubsystem");
+  } elsif ($self->mode =~ /device::bgp/) {
+    if ($self->implements_mib('ARISTA-BGP4V2-MIB')) {
+      $self->analyze_and_check_interface_subsystem("Classes::Arista::ARISTABGP4V2MIB::Component::PeerSubsystem");
+    } else {
+      $self->establish_snmp_secondary_session();
+      if ($self->implements_mib('ARISTA-BGP4V2-MIB')) {
+        $self->analyze_and_check_interface_subsystem("Classes::Arista::ARISTABGP4V2MIB::Component::PeerSubsystem");
+      } else {
+        # na laeggst me aa am ooosch
+        $self->establish_snmp_session();
+        $self->debug("no ARISTA-BGP4V2-MIB, fallback");
+        $self->no_such_mode();
+      }
+    }
   } else {
     $self->no_such_mode();
   }

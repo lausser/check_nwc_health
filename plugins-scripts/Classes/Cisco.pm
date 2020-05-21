@@ -35,8 +35,14 @@ sub init {
       if ($self->implements_mib('CISCO-BGP4-MIB', 'cbgpPeer2Table')) {
         $self->analyze_and_check_interface_subsystem("Classes::Cisco::CISCOBGP4MIB::Component::PeerSubsystem");
       } else {
-        $self->debug("no CISCO-BGP4-MIB and/or no cbgpPeer2Table, fallback");
-        $self->no_such_mode();
+        $self->establish_snmp_secondary_session();
+        if ($self->implements_mib('CISCO-BGP4-MIB', 'cbgpPeer2Table')) {
+          $self->analyze_and_check_interface_subsystem("Classes::Cisco::CISCOBGP4MIB::Component::PeerSubsystem");
+        } else {
+          $self->establish_snmp_session();
+          $self->debug("no CISCO-BGP4-MIB and/or no cbgpPeer2Table, fallback");
+          $self->no_such_mode();
+        }
       }
     } elsif ($self->mode =~ /device::eigrp/) {
       if ($self->implements_mib('CISCO-EIGRP-MIB')) {
