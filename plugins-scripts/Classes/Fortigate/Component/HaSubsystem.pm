@@ -50,8 +50,13 @@ sub check {
     foreach (@{$self->{fgHaStatsTable}}) {
       $_->check();
     }
+    $self->set_thresholds(metric => 'num_nodes',
+        warning => '2:',
+        critical => undef,
+    );
     $self->add_info(sprintf "cluster has %d nodes", scalar(@{$self->{fgHaStatsTable}}));
-    $self->add_ok();
+    $self->add_message($self->check_thresholds(metric => 'num_nodes',
+        value => scalar(@{$self->{fgHaStatsTable}})));
   }
 }
 
