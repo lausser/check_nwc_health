@@ -329,6 +329,7 @@ EXTRA_MODULES=\
   Classes/F5/F5BIGIP/Component/FanSubsystem.pm \
   Classes/F5/F5BIGIP/Component/GTM.pm \
   Classes/F5/F5BIGIP/Component/HaSubsystem.pm \
+  Classes/F5/F5BIGIP/Component/VipSubsystem.pm \
   Classes/F5/F5BIGIP/Component/LTM.pm \
   Classes/F5/F5BIGIP/Component/MemSubsystem.pm \
   Classes/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
