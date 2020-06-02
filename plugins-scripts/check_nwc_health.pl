@@ -420,6 +420,18 @@ $plugin->add_mode(
     help => 'List load balancer pools',
 );
 $plugin->add_mode(
+    internal => 'device::vip::list',
+    spec => 'list-vips',
+    alias => undef,
+    help => 'List load balancer vips',
+);
+$plugin->add_mode(
+    internal => 'device::vip::watch',
+    spec => 'watch-vips',
+    alias => undef,
+    help => 'Watch load balancer vips',
+);
+$plugin->add_mode(
     internal => 'device::licenses::validate',
     spec => 'check-licenses',
     alias => undef,

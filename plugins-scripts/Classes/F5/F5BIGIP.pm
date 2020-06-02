@@ -39,6 +39,8 @@ sub init {
     $self->analyze_and_check_config_subsystem("Classes::F5::F5BIGIP::Component::ConfigSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_ha_subsystem("Classes::F5::F5BIGIP::Component::HaSubsystem");
+  } elsif ($self->mode =~ /device::vip/) {
+    $self->analyze_and_check_vip_subsystem("Classes::F5::F5BIGIP::Component::VipSubsystem");
   } else {
     $self->no_such_mode();
   }
