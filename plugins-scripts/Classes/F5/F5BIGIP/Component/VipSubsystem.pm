@@ -1,14 +1,13 @@
 package Classes::F5::F5BIGIP::Component::VipSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use Socket;
+use Net::Ping;
 
 sub init {
   my ($self) = @_;
-  if ($self->mode =~ /vip::(list|watch)/) {
-    $self->get_snmp_tables('F5-BIGIP-LOCAL-MIB', [
-        ['vips', 'ltmVirtualServTable', 'Classes::F5::F5BIGIP::Component::VipSubsystem::VIP'],
-    ]);
-  }
+  $self->get_snmp_tables('F5-BIGIP-LOCAL-MIB', [
+      ['vips', 'ltmVirtualServTable', 'Classes::F5::F5BIGIP::Component::VipSubsystem::VIP'],
+  ]);
 }
 
 sub check {
@@ -18,6 +17,30 @@ sub check {
       printf "%s\n", $_->{ltmVirtualServName};
     }
     $self->add_ok("have fun");
+  } elsif ($self->mode =~ /vip::connect/) {
+    my $ping = Net::Ping->new("syn");
+    foreach (@{$self->{vips}}) {
+      $ping->port_number($_->{ltmVirtualServPort});
+      my $now = time;
+      $ping->ping_syn($_->{ltmVirtualServAddr},
+          inet_aton($_->{ltmVirtualServAddr}),
+          $now, $now + 2);
+    }
+    sleep 1;
+    foreach (@{$self->{vips}}) {
+      $ping->port_number($_->{ltmVirtualServPort});
+      if ($ping->ack($_->{ltmVirtualServAddr})) {
+        $self->add_info(sprintf "%s:%d reachable",
+            $_->{ltmVirtualServName}, $_->{ltmVirtualServPort});
+        $self->add_ok();
+      } else {
+        my $host = $self->reverse_resolve($_->{ltmVirtualServAddr});
+        $self->add_info(sprintf "%s:%d unreachable",
+            $host ? $host : $_->{ltmVirtualServName}, $_->{ltmVirtualServPort});
+        $self->add_critical();
+      }
+    }
+    $self->reduce_messages(sprintf "all %d vips are up", scalar(@{$self->{vips}}));
   } elsif ($self->mode =~ /vip::watch/) {
     # take a snapshot of the vip list. -> good baseline
     # warning if there appear vips, mitigate to ok
@@ -72,11 +95,7 @@ sub check {
               my $name =  undef;
               if ($vip =~ /(\d+)[\.\-_](\d+)[\.\-_](\d+)[\.\-_](\d+)/) {
                 if ($1 < 255 && $2 < 255 && $3 < 255 && $4 < 255) {
-                  eval {
-                    $ENV{RES_OPTIONS} = "timeout:2";
-                    my $iaddr = Socket::inet_aton($1.".".$2.".".$3.".".$4);
-                    $name  = gethostbyaddr($iaddr, Socket::AF_INET);
-                  };
+                  $name = $self->reverse_resolve($1.".".$2.".".$3.".".$4);
                 }
               }
               if ($name) {
@@ -101,6 +120,17 @@ sub check {
         value => scalar (@{$self->{vips}}),
     );
   }
+}
+
+sub reverse_resolve {
+  my ($self, $ip) = @_;
+  eval {
+      $ENV{RES_OPTIONS} = "timeout:2";
+      my $iaddr = Socket::inet_aton($ip);
+      my $name  = gethostbyaddr($iaddr, Socket::AF_INET);
+      return $name;
+  };
+  return undef;
 }
 
 package Classes::F5::F5BIGIP::Component::VipSubsystem::VIP;
