@@ -432,6 +432,18 @@ $plugin->add_mode(
     help => 'Watch load balancer vips',
 );
 $plugin->add_mode(
+    internal => 'device::vip::watch',
+    spec => 'watch-vips',
+    alias => undef,
+    help => 'Watch load balancer vips',
+);
+$plugin->add_mode(
+    internal => 'device::vip::connect',
+    spec => 'connect-vips',
+    alias => undef,
+    help => 'Check connectivity with load balancer vips',
+);
+$plugin->add_mode(
     internal => 'device::licenses::validate',
     spec => 'check-licenses',
     alias => undef,
