@@ -22,6 +22,22 @@ sub classify {
       $self->{productname} = 'upnp';
       $self->check_upnp_and_model();
     } else {
+      $self->{broken_snmp_agent} = [
+        sub {
+          if ($self->implements_mib("UCD-SNMP-MIB")) {
+            $self->debug("this is a very, very dumb brick with just the UCD-SNMP-MIB");
+            $self->{productname} = "generic_ucd";
+            $self->{uptime} = $self->timeticks(100 * 3600);
+            my $sysobj = $self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0);
+            if (! $sysobj) {
+              $self->add_rawdata('1.3.6.1.2.1.1.2.0', "dearmanufactureryouareasdumbasyourpieceofcrap");
+              $self->{sysobjectid} = "dearmanufactureryouareasdumbasyourpieceofcrap";
+            }
+            return 1;
+          }
+          return 0;
+        },
+      ];
       $self->check_snmp_and_model();
     }
     if ($self->opts->servertype) {

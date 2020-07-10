@@ -13,6 +13,10 @@ sub init {
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("Classes::UCDMIB::Component::MemSubsystem");
     $self->analyze_and_check_swap_subsystem("Classes::UCDMIB::Component::SwapSubsystem");
+  } elsif ($self->mode =~ /device::process::status/) {
+    $self->analyze_and_check_process_subsystem("Classes::UCDMIB::Component::ProcessSubsystem");
+  } elsif ($self->mode =~ /device::uptime/ && $self->implements_mib("HOST-RESOURCES-MIB")) {
+    $self->analyze_and_check_uptime_subsystem("Classes::HOSTRESOURCESMIB::Component::UptimeSubsystem");
   } else {
     $self->no_such_mode();
   }
