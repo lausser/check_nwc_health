@@ -27,6 +27,7 @@ sub check {
           $now, $now + 2);
     }
     sleep 1;
+    my $num_unreachable_vips = 0;
     foreach (@{$self->{vips}}) {
       $ping->port_number($_->{ltmVirtualServPort});
       if ($ping->ack($_->{ltmVirtualServAddr})) {
@@ -34,13 +35,31 @@ sub check {
             $_->{ltmVirtualServName}, $_->{ltmVirtualServPort});
         $self->add_ok();
       } else {
+        $num_unreachable_vips++;
         my $host = $self->reverse_resolve($_->{ltmVirtualServAddr});
-        $self->add_info(sprintf "%s:%d unreachable",
-            $host ? $host : $_->{ltmVirtualServName}, $_->{ltmVirtualServPort});
+        if ($host) {
+          $self->add_info(sprintf "%s:%d (%s) unreachable",
+              $_->{ltmVirtualServName}, $_->{ltmVirtualServPort}, $host);
+        } else {
+          $self->add_info(sprintf "%s:%d unreachable",
+              $_->{ltmVirtualServName}, $_->{ltmVirtualServPort});
+        }
         $self->add_critical();
       }
     }
     $self->reduce_messages(sprintf "all %d vips are up", scalar(@{$self->{vips}}));
+    $self->add_perfdata(
+        label => 'reachable_vips',
+        value => scalar(@{$self->{vips}}) - $num_unreachable_vips,
+        min => 0,
+        max => scalar(@{$self->{vips}}),
+    );
+    $self->add_perfdata(
+        label => 'unreachable_vips',
+        value => $num_unreachable_vips,
+        min => 0,
+        max => scalar(@{$self->{vips}}),
+    );
   } elsif ($self->mode =~ /vip::watch/) {
     # take a snapshot of the vip list. -> good baseline
     # warning if there appear vips, mitigate to ok
@@ -124,13 +143,13 @@ sub check {
 
 sub reverse_resolve {
   my ($self, $ip) = @_;
+  my $name = undef;
   eval {
       $ENV{RES_OPTIONS} = "timeout:2";
       my $iaddr = Socket::inet_aton($ip);
-      my $name  = gethostbyaddr($iaddr, Socket::AF_INET);
-      return $name;
+      $name  = gethostbyaddr($iaddr, Socket::AF_INET);
   };
-  return undef;
+  return $name;
 }
 
 package Classes::F5::F5BIGIP::Component::VipSubsystem::VIP;
