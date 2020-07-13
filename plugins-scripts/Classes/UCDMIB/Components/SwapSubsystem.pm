@@ -9,9 +9,11 @@ sub init {
       memSwapError memSwapErrorMsg)));
 
   # calc swap usage
-  eval {
+  if (defined $self->{memTotalSwap} && $self->{memTotalSwap}) {
     $self->{swap_usage} = 100 - ($self->{memAvailSwap} * 100 / $self->{memTotalSwap});
-  };
+  } else {
+    $self->{'swap_usage'} = undef if $@;
+  }
   # exception if memTotalSwap = 0, which means that no swap partition/device
   # was configured at all
 }
