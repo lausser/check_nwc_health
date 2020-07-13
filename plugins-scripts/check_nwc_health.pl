@@ -440,7 +440,7 @@ $plugin->add_mode(
 $plugin->add_mode(
     internal => 'device::vip::connect',
     spec => 'connect-vips',
-    alias => undef,
+    alias => ['connected-vips'],
     help => 'Check connectivity with load balancer vips',
 );
 $plugin->add_mode(
