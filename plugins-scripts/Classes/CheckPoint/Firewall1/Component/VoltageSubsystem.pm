@@ -33,9 +33,9 @@ sub check {
   } else {
     $self->add_unknown();
   }
-  $self->set_thresholds(warning => 60, critical => 70);
+  $self->set_thresholds(warning => 0, critical => 0);
   $self->add_perfdata(
-      label => 'voltage'.$self->{voltageSensorName}.'_rpm',
+      label => 'voltage_'.lc($self->{voltageSensorName}),
       value => $self->{voltageSensorValue},
   );
 }
