@@ -75,10 +75,10 @@ sub init {
   my $found = {};
   @{$self->{routes}} = grep {
       if (exists $found->{$_->id()}) {
-        return 0;
+        0;
       } else {
         $found->{$_->id()} = 1;
-	return 1;
+	1;
       }
   } @{$self->{routes}};
 }

@@ -1,3 +1,5 @@
+* 2020-09-08 7.12.1.3
+  fix a bug in mode count-routes, update glplugin
 * 2020-07-13 7.12.1.2
   improve output for connect-vips
 * 2020-07-13 7.12.1.1
