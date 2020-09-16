@@ -101,6 +101,9 @@ use strict;
 
 sub finish {
   my ($self) = @_;
+  if (defined $self->{ifSpeed} && $self->{ifSpeed} <= 0) {
+    undef $self->{ifSpeed}
+  }
   if (! defined $self->{ifSpeed} && $self->mode =~ /device::interfaces::(complete|usage)/) {
     bless $self, 'Server::LinuxLocal::Component::InterfaceSubsystem::Interface::Virt';
   }
@@ -119,7 +122,7 @@ sub check {
       # virtuelles zeug bekommt die geschw. des schnellsten verbauten interf.
       # wird schon passen.
       $self->SUPER::check();
-    } elsif ($self->mode =~ /evice::interfaces::(complete|usage)/) {
+    } elsif ($self->mode =~ /device::interfaces::(complete|usage)/) {
       $self->add_unknown(sprintf "There is no /sys/class/net/%s/speed. Use --ifspeed", $self->{ifDescr});
     } else {
       $self->SUPER::check();
