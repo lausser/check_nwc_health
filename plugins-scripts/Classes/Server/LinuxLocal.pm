@@ -34,7 +34,7 @@ sub init {
     foreach (glob "/sys/class/net/*") {
       my $name = $_;
       $name =~ s/.*\///g;
-      my $tmp_speed = (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x; } : undef);
+      my $tmp_speed = (-f "/sys/class/net/$name/speed" ? do { local (@ARGV, $/) = "/sys/class/net/$name/speed"; my $x = <>; close ARGV; $x if $x >= 0; } : undef);
       $max_speed = $tmp_speed if defined $tmp_speed && $tmp_speed > $max_speed;
       next if ! $self->filter_name($name);
       *SAVEERR = *STDERR;
