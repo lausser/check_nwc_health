@@ -4,6 +4,8 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  my $sysobjectid = $self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0);
+  $sysobjectid =~ s/^\.//g;
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     $self->rebless('Classes::Cisco::NXOS');
   } elsif ($self->{productname} =~ /Cisco Controller/i ||
@@ -23,11 +25,11 @@ sub init {
     $self->rebless('Classes::Cisco::IOS');
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
     $self->rebless('Classes::Cisco::IOS');
-  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.1348') {
+  } elsif ($sysobjectid eq '1.3.6.1.4.1.9.1.1348') {
     $self->rebless('Classes::Cisco::CCM');
-  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) eq '1.3.6.1.4.1.9.1.746') {
+  } elsif ($sysobjectid eq '1.3.6.1.4.1.9.1.746') {
     $self->rebless('Classes::Cisco::CCM');
-  } elsif ($self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) =~ /.1.3.6.1.4.1.9.6.1.83/) {
+  } elsif ($sysobjectid =~ /1.3.6.1.4.1.9.6.1.83/) {
     $self->rebless('Classes::Cisco::SB');
   }
   if (ref($self) ne "Classes::Cisco") {
