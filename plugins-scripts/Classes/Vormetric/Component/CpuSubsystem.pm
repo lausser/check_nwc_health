@@ -25,8 +25,7 @@ sub init {
 sub check {
   my ($self) = @_;
   $self->add_info('checking cpu');
-  $self->add_info(sprintf 'cpu is %.2f%% busy, (%.2f%% io wait)',
-      $self->{busy}, $self->{wa});
+  $self->add_info(sprintf 'cpu is %.2f%% busy', $self->{busy});
   $self->set_thresholds(
       metric => 'cpu_busy',
       warning => 90,
@@ -39,6 +38,7 @@ sub check {
       value => $self->{busy},
       uom => '%',
   );
+  $self->add_info(sprintf '(%.2f%% io wait)', $self->{wa});
   $self->set_thresholds(
       metric => 'cpu_iowait',
       warning => 10,
