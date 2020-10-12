@@ -1,3 +1,5 @@
+* 2020-09-18 7.12.2
+  add some exceptions to hrDeviceDiskStorage and hrDeviceNetwork
 * 2020-09-08 7.12.1.3
   fix a bug in mode count-routes, update glplugin
 * 2020-07-13 7.12.1.2

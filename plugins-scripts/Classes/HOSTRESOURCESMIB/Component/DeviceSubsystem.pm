@@ -58,9 +58,25 @@ sub check {
       # zum umounten zu bloed sind.
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sysfs' ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sunrpc' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'devtmpfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'securityfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'cgroup' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'pstore' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'configfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'selinuxfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'mqueue' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'hugetlbfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'systemd-1' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'debugfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'binfmt_misc' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'overlay' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'shm' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'rootfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sysfs' ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /CDROM/ ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /:\// ||
-      $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'sit0'
+      $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'sit0' ||
+      $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'ip_vti0'
     )) {
     $self->add_critical();
   } elsif ($self->{hrDeviceStatus} =~ /unknown/) {
