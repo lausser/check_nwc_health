@@ -195,6 +195,8 @@ sub classify {
       } elsif ($self->implements_mib('PHION-MIB') ||
           $self->{productname} =~ /Barracuda/) {
         $self->rebless('Classes::Barracuda');
+      } elsif ($self->implements_mib('VORMETRIC-MIB')) {
+        $self->rebless('Classes::Vormetric');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('Classes::Server::Linux');
       } else {

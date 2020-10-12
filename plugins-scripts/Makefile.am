@@ -133,6 +133,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDDISKIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VORMETRICMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXWLANMIB.pm \
@@ -423,6 +424,11 @@ EXTRA_MODULES=\
   Classes/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \
   Classes/Riverbed/Steelhead.pm \
   Classes/Riverbed.pm \
+  Classes/Vormetric/Component/CpuSubsystem.pm \
+  Classes/Vormetric/Component/DiskSubsystem.pm \
+  Classes/Vormetric/Component/EnvironmentalSubsystem.pm \
+  Classes/Vormetric/Component/MemSubsystem.pm \
+  Classes/Vormetric.pm \
   Classes/Lancom/Component/CpuSubsystem.pm \
   Classes/Lancom/Component/EnvironmentalSubsystem.pm \
   Classes/Lancom/Component/MemSubsystem.pm \
