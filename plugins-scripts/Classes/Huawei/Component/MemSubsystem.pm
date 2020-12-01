@@ -34,17 +34,17 @@ sub check {
         $self->{name}, $self->{hwEntityMemUsage});
   }
   $self->set_thresholds(
-      metric => 'cpu_'.$self->{name},
+      metric => 'memory_usage_'.$self->{name},
       warning => $self->{hwEntityMemUsageThreshold},
       critical => $self->{hwEntityMemUsageThreshold},
   );
   $self->add_message(
       $self->check_thresholds(
-          metric => 'cpu_'.$self->{name},
+          metric => 'memory_usage_'.$self->{name},
           value => $self->{hwEntityMemUsage}
   ));
   $self->add_perfdata(
-      label => 'cpu_'.$self->{name},
+      label => 'memory_usage_'.$self->{name},
       value => $self->{hwEntityMemUsage},
       uom => '%',
   );
