@@ -32,16 +32,16 @@ sub init {
     #));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
     push(@iftable_columns, qw(
-        ifInOctets ifOutOctets ifSpeed ifOperStatus
+        ifInOctets ifOutOctets ifSpeed ifOperStatus ifAdminStatus
         ifHCInOctets ifHCOutOctets ifHighSpeed
     ));
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     push(@iftable_columns, qw(
-        ifInErrors ifOutErrors
+        ifInErrors ifOutErrors ifOperStatus ifAdminStatus
     ));
   } elsif ($self->mode =~ /device::interfaces::discards/) {
     push(@iftable_columns, qw(
-        ifInDiscards ifOutDiscards
+        ifInDiscards ifOutDiscards ifOperStatus ifAdminStatus
     ));
   } elsif ($self->mode =~ /device::interfaces::broadcast/) {
     push(@iftable_columns, qw(
@@ -986,9 +986,10 @@ sub check {
         max => $self->{maxOutputRate},
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
+    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s %s',
         $full_descr,
-        $self->{inputErrorRate} , $self->{outputErrorRate});
+        $self->{inputErrorRate} , $self->{outputErrorRate},
+        $self->{ifOperStatus} eq 'down' ? '(down)' : '');
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_errors_in',
         warning => 1,
@@ -1018,9 +1019,10 @@ sub check {
         value => $self->{outputErrorRate},
     );
   } elsif ($self->mode =~ /device::interfaces::discards/) {
-    $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
+    $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s %s',
         $full_descr,
-        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+        $self->{inputDiscardRate} , $self->{outputDiscardRate},
+        $self->{ifOperStatus} eq 'down' ? '(down)' : '');
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_discards_in',
         warning => 1,
