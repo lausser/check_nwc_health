@@ -79,6 +79,8 @@ sub classify {
         $self->rebless('Classes::Cisco');
       } elsif ($self->{productname} =~ /fujitsu intelligent blade panel 30\/12/i) {
         $self->rebless('Classes::Cisco');
+      } elsif ($self->{productname} =~ /IronPort/i) {
+        $self->rebless('Classes::Cisco');
       } elsif ($self->{productname} =~ /UCOS /i) {
         $self->rebless('Classes::Cisco');
       } elsif ($self->{productname} =~ /Nortel/i) {

@@ -11,7 +11,7 @@ sub init {
     # die AIRESPACE-WIRELESS-MIB haben manchmal auch stinknormale Switche,
     # das hat also nichts zu sagen. SWITCHING ist entscheidend.
     $self->rebless('Classes::Cisco::WLC');
-  } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
+  } elsif ($self->{productname} =~ /(IronPort|AsyncOS)/i) {
     $self->rebless('Classes::Cisco::AsyncOS');
   } elsif ($self->{productname} =~ /Cisco.*Prime Network Control System/i) {
     $self->rebless('Classes::Cisco::PrimeNCS');
