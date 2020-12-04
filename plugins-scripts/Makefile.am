@@ -367,6 +367,8 @@ EXTRA_MODULES=\
   Classes/SGOS/Component/SecuritySubsystem.pm \
   Classes/SGOS/Component/ConnectionSubsystem.pm \
   Classes/SGOS.pm \
+  Classes/CAS/Component/CpuSubsystem.pm \
+  Classes/CAS.pm \
   Classes/AVOS/Component/KeySubsystem.pm \
   Classes/AVOS/Component/SecuritySubsystem.pm \
   Classes/AVOS/Component/ConnectionSubsystem.pm \

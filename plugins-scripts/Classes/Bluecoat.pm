@@ -14,6 +14,10 @@ sub init {
     # product Blue Coat AV510 Series, ProxyAV Version: 3.5.1.1, Release id: 111017
     bless $self, 'Classes::AVOS';
     $self->debug('using Classes::AVOS');
+  } elsif ($self->{productname} =~ /Blue.*Coat.*S\d+-/i) {
+    # product Blue Coat S400-A1, Version: 1.3.7.8, Release Id: 225795
+    bless $self, 'Classes::CAS';
+    $self->debug('using Classes::CAS');
   }
   if (ref($self) ne "Classes::Bluecoat") {
     $self->init();
