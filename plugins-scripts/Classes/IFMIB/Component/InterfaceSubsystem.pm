@@ -12,65 +12,67 @@ sub init {
   my @ethertablehc_columns = qw();
   my @rmontable_columns = qw();
   my @ipaddress_columns = qw();
+
+  my @iftable_traffic_columns = qw(ifInOctets ifOutOctets ifSpeed);
+  my @iftable_traffic_hc_columns = qw(ifHCInOctets ifHCOutOctets ifHighSpeed);
+  my @iftable_status_columns = qw(ifOperStatus ifAdminStatus);
+  my @iftable_packets_columns = qw(ifInUcastPkts ifOutUcastPkts
+      ifInMulticastPkts ifOutMulticastPkts
+      ifInBroadcastPkts ifOutBroadcastPkts);
+  my @iftable_packets_hc_columns = qw(ifHCInUcastPkts ifHCOutUcastPkts
+      ifHCInMulticastPkts ifHCOutMulticastPkts
+      ifHCInBroadcastPkts ifHCOutBroadcastPkts);
+  my @iftable_error_columns = qw(ifInErrors ifOutErrors);
+  my @iftable_discard_columns = qw(ifInDiscards ifOutDiscards);
+
   $self->implements_mib('INET-ADDRESS-MIB');
   if ($self->mode =~ /device::interfaces::list/) {
   } elsif ($self->mode =~ /device::interfaces::complete/) {
-    push(@iftable_columns, qw(
-        ifInOctets ifOutOctets ifSpeed ifOperStatus ifAdminStatus
-        ifHCInOctets ifHCOutOctets ifHighSpeed
-        ifInErrors ifOutErrors
-        ifInDiscards ifOutDiscards
-        ifInMulticastPkts ifOutMulticastPkts
-        ifInBroadcastPkts ifOutBroadcastPkts
-        ifInUcastPkts ifOutUcastPkts
-        ifHCInMulticastPkts ifHCOutMulticastPkts
-        ifHCInBroadcastPkts ifHCOutBroadcastPkts
-        ifHCInUcastPkts ifHCOutUcastPkts
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_traffic_columns);
+    push(@iftable_columns, @iftable_packets_columns);
+    push(@iftable_columns, @iftable_traffic_hc_columns);
+    push(@iftable_columns, @iftable_packets_hc_columns);
+    push(@iftable_columns, @iftable_error_columns);
+    push(@iftable_columns, @iftable_discard_columns);
     # kostenpflichtiges feature # push(@ethertable_columns, qw(
     #    dot3StatsDuplexStatus
     #));
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    push(@iftable_columns, qw(
-        ifInOctets ifOutOctets ifSpeed ifOperStatus
-        ifHCInOctets ifHCOutOctets ifHighSpeed
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_traffic_columns);
+    push(@iftable_columns, @iftable_traffic_hc_columns);
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    push(@iftable_columns, qw(
-        ifInErrors ifOutErrors
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_traffic_columns);
+    push(@iftable_columns, @iftable_packets_columns);
+    push(@iftable_columns, @iftable_traffic_hc_columns);
+    push(@iftable_columns, @iftable_packets_hc_columns);
+    push(@iftable_columns, @iftable_error_columns);
   } elsif ($self->mode =~ /device::interfaces::discards/) {
-    push(@iftable_columns, qw(
-        ifInDiscards ifOutDiscards
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_traffic_columns);
+    push(@iftable_columns, @iftable_packets_columns);
+    push(@iftable_columns, @iftable_traffic_hc_columns);
+    push(@iftable_columns, @iftable_packets_hc_columns);
+    push(@iftable_columns, @iftable_discard_columns);
   } elsif ($self->mode =~ /device::interfaces::broadcast/) {
-    push(@iftable_columns, qw(
-        ifInMulticastPkts ifOutMulticastPkts
-        ifInBroadcastPkts ifOutBroadcastPkts
-        ifInUcastPkts ifOutUcastPkts
-        ifHCInMulticastPkts ifHCOutMulticastPkts
-        ifHCInBroadcastPkts ifHCOutBroadcastPkts
-        ifHCInUcastPkts ifHCOutUcastPkts
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_traffic_columns);
+    push(@iftable_columns, @iftable_packets_columns);
+    push(@iftable_columns, @iftable_traffic_hc_columns);
+    push(@iftable_columns, @iftable_packets_hc_columns);
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
-    push(@iftable_columns, qw(
-        ifOperStatus ifAdminStatus
-    ));
+    push(@iftable_columns, @iftable_status_columns);
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     push(@iftable_columns, qw(
         ifType ifOperStatus ifAdminStatus
         ifLastChange ifHighSpeed ifSpeed
     ));
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
-    push(@iftable_columns, qw(
-        ifOperStatus ifAdminStatus
-        ifInMulticastPkts ifOutMulticastPkts
-        ifInBroadcastPkts ifOutBroadcastPkts
-        ifInUcastPkts ifOutUcastPkts
-        ifHCInMulticastPkts ifHCOutMulticastPkts
-        ifHCInBroadcastPkts ifHCOutBroadcastPkts
-        ifHCInUcastPkts ifHCOutUcastPkts
-    ));
+    push(@iftable_columns, @iftable_status_columns);
+    push(@iftable_columns, @iftable_packets_columns);
+    push(@iftable_columns, @iftable_packets_hc_columns);
     push(@ethertable_columns, qw(
         dot3StatsAlignmentErrors dot3StatsFCSErrors
         dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
@@ -178,14 +180,27 @@ sub init {
       @indices = ();
       $self->bulk_is_baeh(10);
     }
+    @iftable_columns = do { my %seen; grep { !$seen{$_}++ } @iftable_columns }; # uniq
     if ((! $self->opts->name && ! $self->opts->name3) || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
+      if ($plus_admin_up || $plus_oper_up) {
+        # mit minimalen columns schnell vorfiltern -> @indices evt. reduzieren
+        # nicht fuer only_admin/oper_up, sonst wird aus @indices = ()
+        # eine riesige liste, deren abarbeitung laenger dauert als
+        # ein get_table bei @indices = ()
+        my @up_indices = ();
+        foreach ($self->get_snmp_table_objects(
+            'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_status_columns)) {
+          next if $plus_admin_up && $_->{ifAdminStatus} ne 'up';
+          next if $plus_oper_up && $_->{ifOperStatus} ne 'up';
+          push(@up_indices, [$_->{indices}->[0]]);
+        }
+        @indices = @up_indices;
+      }
       foreach ($self->get_snmp_table_objects(
           'IFMIB', 'ifTable+ifXTable', \@indices, \@iftable_columns)) {
         next if $only_admin_up && $_->{ifAdminStatus} ne 'up';
         next if $only_oper_up && $_->{ifOperStatus} ne 'up';
-        next if $plus_admin_up && $_->{ifAdminStatus} ne 'up';
-        next if $plus_oper_up && $_->{ifOperStatus} ne 'up';
         $self->make_ifdescr_unique($_);
         $self->enrich_interface_attributes($_);
         my $interface_class = ref($self)."::Interface";
@@ -683,7 +698,26 @@ sub finish {
       $self->{ifAlias} =~ s/\|/!/g if $self->{ifAlias};
       bless $self, 'Classes::IFMIB::Component::InterfaceSubsystem::Interface::64bit';
     }
-    if ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
+    if ($self->mode =~ /device::interfaces::(broadcast|complete)/ &&
+        ! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
+        ! exists $self->{ifInDiscards} && ! exists $self->{ifOutDiscards} &&
+        $self->{ifDescr} =~ /.*Ethernet[\/\d]+\.\d+$/) {
+      # Urspruenglich wies sowas klar auf so Pseudo-bundle-channel-sonstwas hin.
+      # Aber dann tauchte im Schwaebischen ein TenGigabitEthernet auf, bei dem
+      # Errors und Discards fehlten. Erst dachte ich, die haetten sich gesagt:
+      # "Mir naehmet desch guenschtigere Modell ohne Counter", dann dachte ich,
+      # die haben billigen Chinaschrott gekauft, weil ifHighSpeed statt 10000
+      # bei den drei in Frage kommenden Interfaces nur 275, 1000 und 25 anzeigt.
+      # Aber anscheinend hat das alles seine Richtigkeit in einem Szenario wie
+      # 1 Haupt-Interface mit 3 VRFs mit jeweils eigenen VLANs
+      # also TenGigabitEthernet0/0/0.10, TenGigabitEthernet0/0/0.20 und
+      # TenGigabitEthernet0/0/0.30 unter TenGigabitEthernet0/0/0, laut
+      # ifAlias so MPLS mit Vodafone.
+      $self->{ifInErrors} = 0;
+      $self->{ifOutErrors} = 0;
+      $self->{ifInDiscards} = 0;
+      $self->{ifOutDiscards} = 0;
+    } elsif ((! exists $self->{ifInOctets} && ! exists $self->{ifOutOctets} &&
         $self->mode =~ /device::interfaces::(usage|complete)/) ||
         (! exists $self->{ifInErrors} && ! exists $self->{ifOutErrors} &&
         $self->mode =~ /device::interfaces::(errors|complete)/) ||
@@ -698,6 +732,74 @@ sub finish {
     }
   }
   $self->init();
+}
+
+sub calc_usage {
+  my ($self) = @_;
+  $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInOctets ifOutOctets));
+  $self->{delta_ifInBits} = $self->{delta_ifInOctets} * 8;
+  $self->{delta_ifOutBits} = $self->{delta_ifOutOctets} * 8;
+  if ($self->{ifSpeed} == 0) {
+    # vlan graffl
+    $self->{inputUtilization} = 0;
+    $self->{outputUtilization} = 0;
+    $self->{maxInputRate} = 0;
+    $self->{maxOutputRate} = 0;
+  } else {
+    $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+        ($self->{delta_timestamp} * $self->{ifSpeed});
+    $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+        ($self->{delta_timestamp} * $self->{ifSpeed});
+    $self->{maxInputRate} = $self->{ifSpeed};
+    $self->{maxOutputRate} = $self->{ifSpeed};
+  }
+  if (defined $self->opts->ifspeed) {
+    $self->override_opt('ifspeedin', $self->opts->ifspeed);
+    $self->override_opt('ifspeedout', $self->opts->ifspeed);
+  }
+  if (defined $self->opts->ifspeedin) {
+    $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+        ($self->{delta_timestamp} * $self->opts->ifspeedin);
+    $self->{maxInputRate} = $self->opts->ifspeedin;
+  }
+  if (defined $self->opts->ifspeedout) {
+    $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+        ($self->{delta_timestamp} * $self->opts->ifspeedout);
+    $self->{maxOutputRate} = $self->opts->ifspeedout;
+  }
+  $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
+  $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
+  $self->override_opt("units", "bit") if ! $self->opts->units;
+  $self->{inputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{outputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
+  if ($self->{ifOperStatus} eq 'down') {
+    $self->{inputUtilization} = 0;
+    $self->{outputUtilization} = 0;
+    $self->{inputRate} = 0;
+    $self->{outputRate} = 0;
+    $self->{maxInputRate} = 0;
+    $self->{maxOutputRate} = 0;
+  }
+}
+
+sub get_mub_pkts {
+  my ($self) = @_;
+  foreach my $key (qw(ifInUcastPkts
+      ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+      ifOutMulticastPkts ifOutBroadcastPkts)) {
+    $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+  }
+  $self->valdiff({name => 'mub_'.$self->{ifDescr}}, qw(ifInUcastPkts
+      ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
+      ifOutMulticastPkts ifOutBroadcastPkts));
+  $self->{delta_ifInPkts} = $self->{delta_ifInUcastPkts} +
+      $self->{delta_ifInMulticastPkts} +
+      $self->{delta_ifInBroadcastPkts};
+  $self->{delta_ifOutPkts} = $self->{delta_ifOutUcastPkts} +
+      $self->{delta_ifOutMulticastPkts} +
+      $self->{delta_ifOutBroadcastPkts};
 }
 
 sub init {
@@ -716,81 +818,42 @@ sub init {
     }
     $Monitoring::GLPlugin::mode = "device::interfaces::complete";
   } elsif ($self->mode =~ /device::interfaces::usage/) {
-    $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifInOctets ifOutOctets));
-    $self->{delta_ifInBits} = $self->{delta_ifInOctets} * 8;
-    $self->{delta_ifOutBits} = $self->{delta_ifOutOctets} * 8;
-    if ($self->{ifSpeed} == 0) {
-      # vlan graffl
-      $self->{inputUtilization} = 0;
-      $self->{outputUtilization} = 0;
-      $self->{maxInputRate} = 0;
-      $self->{maxOutputRate} = 0;
-    } else {
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->{ifSpeed});
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->{ifSpeed});
-      $self->{maxInputRate} = $self->{ifSpeed};
-      $self->{maxOutputRate} = $self->{ifSpeed};
-    }
-    if (defined $self->opts->ifspeed) {
-      $self->override_opt('ifspeedin', $self->opts->ifspeed);
-      $self->override_opt('ifspeedout', $self->opts->ifspeed);
-    }
-    if (defined $self->opts->ifspeedin) {
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedin);
-      $self->{maxInputRate} = $self->opts->ifspeedin;
-    }
-    if (defined $self->opts->ifspeedout) {
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedout);
-      $self->{maxOutputRate} = $self->opts->ifspeedout;
-    }
-    $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
-    $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    $self->override_opt("units", "bit") if ! $self->opts->units;
-    $self->{inputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{outputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
-    if ($self->{ifOperStatus} eq 'down') {
-      $self->{inputUtilization} = 0;
-      $self->{outputUtilization} = 0;
-      $self->{inputRate} = 0;
-      $self->{outputRate} = 0;
-      $self->{maxInputRate} = 0;
-      $self->{maxOutputRate} = 0;
-    }
+    $self->calc_usage();
   } elsif ($self->mode =~ /device::interfaces::errors/) {
+    $self->calc_usage() if ! defined $self->{inputUtilization};
+    $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
+    $self->{inputErrorsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
+        100 * $self->{delta_ifInErrors} / $self->{delta_ifInPkts};
+    $self->{outputErrorsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
+        100 * $self->{delta_ifOutErrors} / $self->{delta_ifOutPkts};
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
         / $self->{delta_timestamp};
     $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::discards/) {
+    $self->calc_usage() if ! defined $self->{inputUtilization};
+    $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
+    $self->{inputDiscardsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
+        100 * $self->{delta_ifInDiscards} / $self->{delta_ifInPkts};
+    $self->{outputDiscardsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
+        100 * $self->{delta_ifOutDiscards} / $self->{delta_ifOutPkts};
     $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
         / $self->{delta_timestamp};
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
-    foreach my $key (qw(ifInUcastPkts
-        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
-        ifOutMulticastPkts ifOutBroadcastPkts)) {
-      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
-    }
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInUcastPkts
-        ifInMulticastPkts ifInBroadcastPkts ifOutUcastPkts
-        ifOutMulticastPkts ifOutBroadcastPkts));
-    $self->{broadcastInPercent} = $self->{delta_ifInBroadcastPkts} == 0 ? 0 :
-        100 * $self->{delta_ifInBroadcastPkts} /
-        ($self->{delta_ifInUcastPkts} + $self->{delta_ifInMulticastPkts} +
-        $self->{delta_ifInBroadcastPkts});
-    $self->{broadcastOutPercent} = $self->{delta_ifOutBroadcastPkts} == 0 ? 0 :
-        100 * $self->{delta_ifOutBroadcastPkts} /
-        ($self->{delta_ifOutUcastPkts} + $self->{delta_ifOutMulticastPkts} +
-        $self->{delta_ifOutBroadcastPkts});
+    $self->calc_usage() if ! defined $self->{inputUtilization};
+    $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
+    $self->{inputBroadcastPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
+        100 * $self->{delta_ifInBroadcastPkts} / $self->{delta_ifInPkts};
+    $self->{outputBroadcastPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
+        100 * $self->{delta_ifOutBroadcastPkts} / $self->{delta_ifOutPkts};
+    $self->{inputBroadcastUtilizationPercent} = $self->{inputBroadcastPercent}
+        * $self->{inputUtilization} / 100;
+    $self->{outputBroadcastUtilizationPercent} = $self->{outputBroadcastPercent}
+        * $self->{outputUtilization} / 100;
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
@@ -986,103 +1049,147 @@ sub check {
         max => $self->{maxOutputRate},
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
-    $self->add_info(sprintf 'interface %s errors in:%.2f/s out:%.2f/s ',
+    $self->add_info(sprintf 'interface %s errors in:%.2f%% out:%.2f%% ',
         $full_descr,
-        $self->{inputErrorRate} , $self->{outputErrorRate});
+        $self->{inputErrorsPercent} , $self->{outputErrorsPercent});
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_errors_in',
         warning => 1,
-        critical => 10
+        critical => 10,
     );
     my $in = $self->check_thresholds(
         metric => $self->{ifDescr}.'_errors_in',
-        value => $self->{inputErrorRate}
+        value => $self->{inputErrorsPercent}
     );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_errors_out',
         warning => 1,
-        critical => 10
+        critical => 10,
     );
     my $out = $self->check_thresholds(
         metric => $self->{ifDescr}.'_errors_out',
-        value => $self->{outputErrorRate}
+        value => $self->{outputErrorsPercent}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_in',
-        value => $self->{inputErrorRate},
+        value => $self->{inputErrorsPercent},
+        uom => '%',
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_errors_out',
-        value => $self->{outputErrorRate},
+        value => $self->{outputErrorsPercent},
+        uom => '%',
     );
   } elsif ($self->mode =~ /device::interfaces::discards/) {
-    $self->add_info(sprintf 'interface %s discards in:%.2f/s out:%.2f/s ',
+    $self->add_info(sprintf 'interface %s discards in:%.2f%% out:%.2f%% ',
         $full_descr,
-        $self->{inputDiscardRate} , $self->{outputDiscardRate});
+        $self->{inputDiscardsPercent} , $self->{outputDiscardsPercent});
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_discards_in',
-        warning => 1,
-        critical => 10
+        warning => 5,
+        critical => 10,
     );
     my $in = $self->check_thresholds(
         metric => $self->{ifDescr}.'_discards_in',
-        value => $self->{inputDiscardRate}
+        value => $self->{inputDiscardsPercent}
     );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_discards_out',
-        warning => 1,
-        critical => 10
+        warning => 5,
+        critical => 10,
     );
     my $out = $self->check_thresholds(
         metric => $self->{ifDescr}.'_discards_out',
-        value => $self->{outputDiscardRate}
+        value => $self->{outputDiscardsPercent}
     );
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_in',
-        value => $self->{inputDiscardRate},
+        value => $self->{inputDiscardsPercent},
+        uom => '%',
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_discards_out',
-        value => $self->{outputDiscardRate},
+        value => $self->{outputDiscardsPercent},
+        uom => '%',
     );
   } elsif ($self->mode =~ /device::interfaces::broadcast/) {
-    $self->add_info(sprintf 'interface %s broadcast in:%.2f%% out:%.2f%% ',
+    # BroadcastPercent
+    #  -> TenGigabitEthernet0/0/0.10_broadcast_in
+    #  wieviel % der ein/ausgehenden Pakete sind Broadcasts?
+    #  das kann bei standby-Firewall-Interfaces sehr hoch sein, wenn regulaerer
+    #  Traffic nicht stattfindet, aber viel Clustergeschwaetz.
+    # BroadcastUtilizationPercent = wieviel % der verfuegbaren Bandbreite
+    #  -> TenGigabitEthernet0/0/0.10_broadcast_usage_in
+    #  nehmen die Broadcasts ein?
+    #  Der Schwellwert ist hoch eingestellt, wenn der gerissen wird, dann ist
+    #  definitiv was faul.
+    $self->add_info(sprintf 'interface %s broadcast in:%.2f%% out:%.2f%% (%% of traffic) in:%.2f%% out:%.2f%% (%% of bandwidth)',
         $full_descr,
-        $self->{broadcastInPercent} , $self->{broadcastOutPercent});
+        $self->{inputBroadcastPercent} , $self->{outputBroadcastPercent},
+        $self->{inputBroadcastUtilizationPercent} , $self->{outputBroadcastUtilizationPercent});
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_broadcast_in',
         warning => 10,
         critical => 20
     );
-    my $in = $self->check_thresholds(
+    my $uin = $self->check_thresholds(
         metric => $self->{ifDescr}.'_broadcast_in',
-        value => $self->{broadcastInPercent}
+        value => $self->{inputBroadcastPercent}
     );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_broadcast_out',
         warning => 10,
         critical => 20
     );
-    my $out = $self->check_thresholds(
+    my $uout = $self->check_thresholds(
         metric => $self->{ifDescr}.'_broadcast_out',
-        value => $self->{broadcastOutPercent}
+        value => $self->{outputBroadcastPercent}
     );
-    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
-    $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_broadcast_in',
-        value => $self->{broadcastInPercent},
+        value => $self->{inputBroadcastPercent},
         uom => '%',
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_broadcast_out',
-        value => $self->{broadcastOutPercent},
+        value => $self->{outputBroadcastPercent},
         uom => '%',
     );
+    my $ulevel = ($uin > $uout) ? $uin : ($uout > $uin) ? $uout : $uin;
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_usage_in',
+        warning => 10,
+        critical => 20
+    );
+    my $bin = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_usage_in',
+        value => $self->{inputBroadcastUtilizationPercent}
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_usage_out',
+        warning => 10,
+        critical => 20
+    );
+    my $bout = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_broadcast_usage_out',
+        value => $self->{outputBroadcastUtilizationPercent}
+    );
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_usage_in',
+        value => $self->{inputBroadcastUtilizationPercent},
+        uom => '%',
+    );
+    $self->add_perfdata(
+        label => $self->{ifDescr}.'_broadcast_usage_out',
+        value => $self->{outputBroadcastUtilizationPercent},
+        uom => '%',
+    );
+    my $blevel = ($bin > $bout) ? $bin : ($bout > $bin) ? $bout : $bin;
+    $self->add_message(($blevel > $ulevel) ? $blevel : $ulevel);
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
     #rfc2863
     #(1)   if ifAdminStatus is not down and ifOperStatus is down then a
@@ -1199,81 +1306,98 @@ our @ISA = qw(Classes::IFMIB::Component::InterfaceSubsystem::Interface);
 use strict;
 use Digest::MD5 qw(md5_hex);
 
+sub calc_usage {
+  my ($self) = @_;
+  $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifHCInOctets ifHCOutOctets));
+  $self->{delta_ifInBits} = $self->{delta_ifHCInOctets} * 8;
+  $self->{delta_ifOutBits} = $self->{delta_ifHCOutOctets} * 8;
+  # ifSpeed = Bits/sec
+  # ifHighSpeed = 1000000Bits/sec
+  if ($self->{ifSpeed} == 0) {
+    # vlan graffl
+    $self->{inputUtilization} = 0;
+    $self->{outputUtilization} = 0;
+    $self->{maxInputRate} = 0;
+    $self->{maxOutputRate} = 0;
+  } elsif ($self->{ifSpeed} == 4294967295) {
+    $self->{maxInputRate} = $self->{ifHighSpeed} * 1000000;
+    $self->{maxOutputRate} = $self->{ifHighSpeed} * 1000000;
+    $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+        ($self->{delta_timestamp} * $self->{maxInputRate});
+    $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+        ($self->{delta_timestamp} * $self->{maxOutputRate});
+  } else {
+    $self->{maxInputRate} = $self->{ifSpeed};
+    $self->{maxOutputRate} = $self->{ifSpeed};
+    $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+        ($self->{delta_timestamp} * $self->{maxInputRate});
+    $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+        ($self->{delta_timestamp} * $self->{maxOutputRate});
+  }
+  if (defined $self->opts->ifspeed) {
+    $self->override_opt('ifspeedin', $self->opts->ifspeed);
+    $self->override_opt('ifspeedout', $self->opts->ifspeed);
+  }
+  if (defined $self->opts->ifspeedin) {
+    $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
+        ($self->{delta_timestamp} * $self->opts->ifspeedin);
+    $self->{maxInputRate} = $self->opts->ifspeedin;
+  }
+  if (defined $self->opts->ifspeedout) {
+    $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
+        ($self->{delta_timestamp} * $self->opts->ifspeedout);
+    $self->{maxOutputRate} = $self->opts->ifspeedout;
+  }
+  $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
+  $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
+  $self->override_opt("units", "bit") if ! $self->opts->units;
+  $self->{inputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{outputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
+  $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
+  if ($self->{ifOperStatus} eq 'down') {
+    $self->{inputUtilization} = 0;
+    $self->{outputUtilization} = 0;
+    $self->{inputRate} = 0;
+    $self->{outputRate} = 0;
+    $self->{maxInputRate} = 0;
+    $self->{maxOutputRate} = 0;
+  }
+}
+
+sub get_mub_pkts {
+  my ($self) = @_;
+  foreach my $key (qw(
+      ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+      ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts)) {
+    $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
+  }
+  $self->valdiff({name => 'mub_'.$self->{ifDescr}}, qw(
+      ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
+      ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts));
+  $self->{delta_ifInPkts} = $self->{delta_ifHCInUcastPkts} +
+      $self->{delta_ifHCInMulticastPkts} +
+      $self->{delta_ifHCInBroadcastPkts};
+  $self->{delta_ifOutPkts} = $self->{delta_ifHCOutUcastPkts} +
+      $self->{delta_ifHCOutMulticastPkts} +
+      $self->{delta_ifHCOutBroadcastPkts};
+}
+
 sub init {
   my ($self) = @_;
   if ($self->mode =~ /device::interfaces::usage/) {
-    $self->valdiff({name => $self->{ifIndex}.'#'.$self->{ifDescr}}, qw(ifHCInOctets ifHCOutOctets));
-    $self->{delta_ifInBits} = $self->{delta_ifHCInOctets} * 8;
-    $self->{delta_ifOutBits} = $self->{delta_ifHCOutOctets} * 8;
-    # ifSpeed = Bits/sec
-    # ifHighSpeed = 1000000Bits/sec
-    if ($self->{ifSpeed} == 0) {
-      # vlan graffl
-      $self->{inputUtilization} = 0;
-      $self->{outputUtilization} = 0;
-      $self->{maxInputRate} = 0;
-      $self->{maxOutputRate} = 0;
-    } elsif ($self->{ifSpeed} == 4294967295) {
-      $self->{maxInputRate} = $self->{ifHighSpeed} * 1000000;
-      $self->{maxOutputRate} = $self->{ifHighSpeed} * 1000000;
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->{maxInputRate});
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->{maxOutputRate});
-    } else {
-      $self->{maxInputRate} = $self->{ifSpeed};
-      $self->{maxOutputRate} = $self->{ifSpeed};
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->{maxInputRate});
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->{maxOutputRate});
-    }
-    if (defined $self->opts->ifspeed) {
-      $self->override_opt('ifspeedin', $self->opts->ifspeed);
-      $self->override_opt('ifspeedout', $self->opts->ifspeed);
-    }
-    if (defined $self->opts->ifspeedin) {
-      $self->{inputUtilization} = 100 * $self->{delta_ifInBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedin);
-      $self->{maxInputRate} = $self->opts->ifspeedin;
-    }
-    if (defined $self->opts->ifspeedout) {
-      $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
-          ($self->{delta_timestamp} * $self->opts->ifspeedout);
-      $self->{maxOutputRate} = $self->opts->ifspeedout;
-    }
-    $self->{inputRate} = $self->{delta_ifInBits} / $self->{delta_timestamp};
-    $self->{outputRate} = $self->{delta_ifOutBits} / $self->{delta_timestamp};
-    $self->override_opt("units", "bit") if ! $self->opts->units;
-    $self->{inputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{outputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{maxInputRate} /= $self->number_of_bits($self->opts->units);
-    $self->{maxOutputRate} /= $self->number_of_bits($self->opts->units);
-    if ($self->{ifOperStatus} eq 'down') {
-      $self->{inputUtilization} = 0;
-      $self->{outputUtilization} = 0;
-      $self->{inputRate} = 0;
-      $self->{outputRate} = 0;
-      $self->{maxInputRate} = 0;
-      $self->{maxOutputRate} = 0;
-    }
+    $self->calc_usage();
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
-    foreach my $key (qw(
-        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
-        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts)) {
-      $self->{$key} = 0 if (! exists $self->{$key} || ! defined $self->{$key});
-    }
-    $self->valdiff({name => $self->{ifDescr}}, qw(
-        ifHCInUcastPkts ifHCInMulticastPkts ifHCInBroadcastPkts
-        ifHCOutUcastPkts ifHCOutMulticastPkts ifHCOutBroadcastPkts));
-    $self->{broadcastInPercent} = $self->{delta_ifHCInBroadcastPkts} == 0 ? 0 :
-        100 * $self->{delta_ifHCInBroadcastPkts} /
-        ($self->{delta_ifHCInUcastPkts} + $self->{delta_ifHCInMulticastPkts} +
-        $self->{delta_ifHCInBroadcastPkts});
-    $self->{broadcastOutPercent} = $self->{delta_ifHCOutBroadcastPkts} == 0 ? 0 :
-        100 * $self->{delta_ifHCOutBroadcastPkts} /
-        ($self->{delta_ifHCOutUcastPkts} + $self->{delta_ifHCOutMulticastPkts} +
-        $self->{delta_ifHCOutBroadcastPkts});
+    $self->calc_usage() if ! defined $self->{inputUtilization};
+    $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
+    $self->{inputBroadcastPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCInBroadcastPkts} / $self->{delta_ifInPkts};
+    $self->{outputBroadcastPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
+        100 * $self->{delta_ifHCOutBroadcastPkts} / $self->{delta_ifOutPkts};
+    $self->{inputBroadcastUtilizationPercent} = $self->{inputBroadcastPercent}
+        * $self->{inputUtilization} / 100;
+    $self->{outputBroadcastUtilizationPercent} = $self->{outputBroadcastPercent}
+        * $self->{inputUtilization} / 100;
   } else {
     $self->SUPER::init();
   }

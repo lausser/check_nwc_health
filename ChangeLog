@@ -1,3 +1,7 @@
+* 2020-10-22 8.0
+  broadcast traffic is now shown as percentage of the overall traffic (...broadcast_in) and percentage of the available bandwitdth (..._broadcast_usage_in).
+  errors and discards are now calculated as percentage of all received/sent packets.
+  TenGig-VRF-MPLS-Dingsbums without errors and discard metrics are no longer treated as StackSubs.
 * 2020-10-12 7.13
   add Vormetric Appliance
 * 2020-09-18 7.12.2

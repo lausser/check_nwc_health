@@ -57,6 +57,7 @@ our $errorcodes = {
 sub init {
   my ($self) = @_;
   $self->{peers} = [];
+  $self->bulk_is_baeh(10);
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }
@@ -270,6 +271,7 @@ sub check {
     # bgpPeerLastError may be undef, at least under the following circumstances
     # bgpPeerRemoteAsName is "", bgpPeerAdminStatus is "start",
     # bgpPeerState is "active"
+    # https://community.cisco.com/t5/routing/confirm-quot-active-quot-meaning-in-bgp/td-p/1391629
     $self->add_message($self->{bgpPeerRemoteAsImportant} ? CRITICAL : OK,
         sprintf "peer %s (AS%s) state is %s (last error: %s)",
         $self->{bgpPeerRemoteAddr},
