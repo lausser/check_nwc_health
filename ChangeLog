@@ -1,3 +1,8 @@
+* 2021-01-13 8.0.0.2
+  bugfix in HOST-RESOURCE-MIB memory (Arista triggered)
+  bugfix in CISCO-ENVMON-MIB, temperatures > 200
+* 2021-01-13 8.0.0.1
+  bugfix in arista bgp, mitigate admin down
 * 2020-10-22 8.0
   broadcast traffic is now shown as percentage of the overall traffic (...broadcast_in) and percentage of the available bandwitdth (..._broadcast_usage_in).
   errors and discards are now calculated as percentage of all received/sent packets.

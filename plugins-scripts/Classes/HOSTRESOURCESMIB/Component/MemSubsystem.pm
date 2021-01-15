@@ -13,7 +13,7 @@ sub check {
   my ($self) = @_;
   my $ramsignature =
       join "_", sort map { $_->{hrStorageDescr} } @{$self->{storagesram}};
-  if ($ramsignature eq "RAM_RAM (Buffers)_RAM (Cache)") {
+  if ($ramsignature =~ /RAM_.*RAM \(Buffers\)_.*RAM \(Cache\).*/) {
     # https://eos.arista.com/introduction-to-managing-eos-devices-memory-utilisation/
     my ($total, $used, $buffers, $cached) = (0, 0, 0, 0);
     foreach (@{$self->{storagesram}}) {

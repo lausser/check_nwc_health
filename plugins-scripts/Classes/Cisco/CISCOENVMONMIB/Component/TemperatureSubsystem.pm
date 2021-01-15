@@ -20,6 +20,8 @@ sub finish {
   }
   $self->ensure_index('ciscoEnvMonTemperatureStatusIndex');
   $self->{ciscoEnvMonTemperatureLastShutdown} ||= 0;
+  $self->{ciscoEnvMonTemperatureStatusValue} -= 255 if
+      $self->{ciscoEnvMonTemperatureStatusValue} > 200;
 }
 
 sub check {
