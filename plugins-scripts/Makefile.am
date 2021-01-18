@@ -11,6 +11,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ADSLLINEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ADONISDNSMIBMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACESWITCHINGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACEWIRELESSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALARMMIB.pm \
@@ -20,6 +21,10 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBATCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ASYNCOSMAILMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ATTACKMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BAMSNMPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BCNDHCPV4MIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BCNDNSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BCNSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BGP4MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BIANCABRICKMIBRESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BLUECOATAVMIB.pm \
@@ -159,6 +164,11 @@ EXTRA_MODULES=\
   Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
   Classes/Bintec/Bibo.pm \
   Classes/Bintec.pm \
+  Classes/Bluecat/Component/MgmtSubsystem.pm \
+  Classes/Bluecat/Component/ProcessSubsystem.pm \
+  Classes/Bluecat/Component/MemSubsystem.pm \
+  Classes/Bluecat/Component/HaSubsystem.pm \
+  Classes/Bluecat.pm \
   Classes/Cisco/CISCOBGP4MIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOEIGRPMIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOPORTSECURITYMIB/Component/InterfaceSubsystem.pm \

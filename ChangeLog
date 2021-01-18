@@ -1,3 +1,7 @@
+* 2021-01-18 8.1.0.1
+  bugfix in Bluecat jvm
+* 2021-01-18 8.1
+  add Bluecat Address Manager
 * 2021-01-13 8.0.0.2
   bugfix in HOST-RESOURCE-MIB memory (Arista triggered)
   bugfix in CISCO-ENVMON-MIB, temperatures > 200
