@@ -11,19 +11,22 @@ sub init {
 sub check {
   my ($self) = @_;
   $self->add_info('checking memory');
-  $self->add_info(sprintf 'memory usage is %.2f%% (%s)',
-      $self->{perCentMemoryUtilization}, $self->{memoryAvailabilityStatus});
+  $self->add_info(sprintf 'memory usage is %.2f%%',
+      $self->{perCentMemoryUtilization});
   $self->set_thresholds(warning => 80, critical => 90);
-  if ($self->check_thresholds($self->{perCentMemoryUtilization})) {
-    $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}));
-  } elsif ($self->{memoryAvailabilityStatus} eq 'memoryShortage') {
-    $self->add_warning();
-    $self->set_thresholds(warning => $self->{perCentMemoryUtilization}, critical => 90);
-  } elsif ($self->{memoryAvailabilityStatus} eq 'memoryFull') {
-    $self->add_critical();
-    $self->set_thresholds(warning => 80, critical => $self->{perCentMemoryUtilization});
-  } else {
-    $self->add_ok();
+  $self->add_message($self->check_thresholds($self->{perCentMemoryUtilization}));
+  if ($self->{memoryAvailabilityStatus}) {
+    $self->add_info(sprintf "memoryAvailabilityStatus is %s",
+        $self->{memoryAvailabilityStatus});
+    if ($self->{memoryAvailabilityStatus} eq 'memoryShortage') {
+      $self->add_warning();
+      $self->set_thresholds(warning => $self->{perCentMemoryUtilization}, critical => 90);
+    } elsif ($self->{memoryAvailabilityStatus} eq 'memoryFull') {
+      $self->add_critical();
+      $self->set_thresholds(warning => 80, critical => $self->{perCentMemoryUtilization});
+    } else {
+      $self->add_ok();
+    }
   }
   $self->add_perfdata(
       label => 'memory_usage',

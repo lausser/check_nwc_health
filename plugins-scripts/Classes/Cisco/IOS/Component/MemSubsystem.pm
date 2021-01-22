@@ -18,5 +18,17 @@ sub init {
   } else {
     $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOMEMORYPOOLMIB::Component::MemSubsystem");
   }
+  if ($self->implements_mib('CISCO-STACKWISE-MIB') and
+      $self->implements_mib('CISCO-STACKWISE-MIB')) {
+    # bei stacks, bestehend aus mehreren switches, wuenschen sich admins
+    # deren individuelle speichermetriken zu sehen. enhanced-mempool, bzw.
+    # der fallback auf memory-pool, der bei stacks vorkommt, gibt es lediglich
+    # einen globalen wert.
+    # die sind das von solarwinds so gewohnt, welches aber neuerdings nicht
+    # mehr ganz so angesagt ist.
+    $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOPROCESSMIB::Component::MemSubsystem");
+    # es gibt aber auch so uralte dreckskisten bei einem westlichen nachbarn
+    # bei denen die memory-oids in der cpmCPUTotalTable nicht existieren,
+  }
 }
 

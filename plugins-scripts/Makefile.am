@@ -175,6 +175,7 @@ EXTRA_MODULES=\
   Classes/Cisco/OLDCISCOINTERFACESMIB/Component/InterfaceSubsystem.pm \
   Classes/Cisco/CISCOIPSECFLOWMONITOR/Component/VpnSubsystem.pm \
   Classes/Cisco/CISCOENHANCEDMEMPOOLMIB/Component/MemSubsystem.pm \
+  Classes/Cisco/CISCOPROCESSMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOMEMORYPOOLMIB/Component/MemSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/CISCOENTITYFRUCONTROLMIB/Component/FanSubsystem.pm \
