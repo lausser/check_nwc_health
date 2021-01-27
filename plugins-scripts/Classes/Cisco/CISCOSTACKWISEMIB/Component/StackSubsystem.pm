@@ -10,16 +10,17 @@ sub init {
       cswRingRedundant cswStackBandWidth ciscoStackWiseMIBConform
       cswStackWiseMIBCompliances
   ));
+  $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
+      ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
+  ]);
   # cswStackType is not uniqe enough depening of IOS-XE version.
   # cswStackBandWidth exists only on distributed switches with SVL
   if ($self->{cswStackBandWidth}) {
     $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
-        ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
         ['ports', 'cswDistrStackPhyPortInfoEntry', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::PhyPort'],
     ]);
   } else {
     $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
-        ['switches', 'cswSwitchInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Switch'],
         ['ports', 'cswStackPortInfoTable', 'Classes::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Port'],
     ]);
   };
