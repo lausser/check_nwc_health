@@ -75,7 +75,7 @@ sub classify {
         $self->rebless('Server::WindowsLocal');
       } elsif ($self->{productname} =~ /solarislocal/i) {
         $self->rebless('Server::SolarisLocal');
-      } elsif ($self->{productname} =~ /Bluecat Address Manager/i) {
+      } elsif ($self->{productname} =~ /Bluecat/i) {
         $self->rebless('Classes::Bluecat');
       } elsif ($self->{productname} =~ /Cisco/i) {
         $self->rebless('Classes::Cisco');

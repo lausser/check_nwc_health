@@ -164,10 +164,13 @@ EXTRA_MODULES=\
   Classes/Bintec/Bibo/Components/CpuSubsystem.pm \
   Classes/Bintec/Bibo.pm \
   Classes/Bintec.pm \
-  Classes/Bluecat/Component/MgmtSubsystem.pm \
-  Classes/Bluecat/Component/ProcessSubsystem.pm \
-  Classes/Bluecat/Component/MemSubsystem.pm \
-  Classes/Bluecat/Component/HaSubsystem.pm \
+  Classes/Bluecat/AddressManager/Component/MgmtSubsystem.pm \
+  Classes/Bluecat/AddressManager/Component/MemSubsystem.pm \
+  Classes/Bluecat/AddressManager/Component/HaSubsystem.pm \
+  Classes/Bluecat/AddressManager.pm \
+  Classes/Bluecat/DnsDhcpServer/Component/HaSubsystem.pm \
+  Classes/Bluecat/DnsDhcpServer/Component/ProcessSubsystem.pm \
+  Classes/Bluecat/DnsDhcpServer.pm \
   Classes/Bluecat.pm \
   Classes/Cisco/CISCOBGP4MIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOEIGRPMIB/Components/PeerSubsystem.pm \
