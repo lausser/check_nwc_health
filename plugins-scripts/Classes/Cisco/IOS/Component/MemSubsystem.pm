@@ -36,6 +36,7 @@ sub init {
     if (scalar(@{$self->{switches}}) > 1) {
       $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOPROCESSMIB::Component::MemSubsystem");
     }
+    delete $self->{switches};
   }
 }
 

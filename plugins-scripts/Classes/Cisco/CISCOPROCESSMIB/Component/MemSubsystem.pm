@@ -42,8 +42,11 @@ sub finish {
   # letzter Ausweg, weil auch alle drei get_snmp_object fehlschlagen koennen
   $self->{name} ||= $self->{cpmCPUTotalIndex};
   if ($self->{cpmCPUMemoryHCUsed} and $self->{cpmCPUMemoryHCFree}) {
-    my $total = $self->{cpmCPUMemoryHCUsed} + $self->{cpmCPUMemoryHCFree};
-    $self->{usage} = 100 *  $self->{cpmCPUMemoryHCCommitted} / $total;
+    $self->{cpmCPUMemoryHCTotal} = $self->{cpmCPUMemoryHCUsed} + $self->{cpmCPUMemoryHCFree};
+    $self->{usageu} = 100 * $self->{cpmCPUMemoryHCUsed} /
+        $self->{cpmCPUMemoryHCTotal};
+    $self->{usagec} = 100 * $self->{cpmCPUMemoryHCCommitted} /
+        $self->{cpmCPUMemoryHCTotal};
   } else {
     $self->{cpmCPUMemoryLCUsed} = $self->{cpmCPUMemoryUsedOvrflw} ?
         ($self->{cpmCPUMemoryUsedOvrflw} << 32) + ($self->{cpmCPUMemoryUsed}) :
@@ -51,15 +54,23 @@ sub finish {
     $self->{cpmCPUMemoryLCFree} = $self->{cpmCPUMemoryFreeOvrflw} ?
         ($self->{cpmCPUMemoryFreeOvrflw} << 32) + ($self->{cpmCPUMemoryFree}) :
         $self->{cpmCPUMemoryFree};
-    my $total = $self->{cpmCPUMemoryLCUsed} + $self->{cpmCPUMemoryLCFree};
+    $self->{cpmCPUMemoryLCTotal} = $self->{cpmCPUMemoryLCUsed} + $self->{cpmCPUMemoryLCFree};
     if (exists $self->{cpmCPUMemoryCommitted}) {
       $self->{cpmCPUMemoryLCCommitted} = $self->{cpmCPUMemoryCommittedOvrflw} ?
           ($self->{cpmCPUMemoryCommittedOvrflw} << 32) + ($self->{cpmCPUMemoryCommitted}) :
           $self->{cpmCPUMemoryCommitted};
-      $self->{usage} = 100 *  $self->{cpmCPUMemoryLCCommitted} / $total;
-    } else {
-      $self->{usage} = 100 *  $self->{cpmCPUMemoryLCFree} / $total;
+      $self->{usagec} = 100 * $self->{cpmCPUMemoryLCCommited} /
+          $self->{cpmCPUMemoryLCTotal};
     }
+    $self->{usageu} = 100 * $self->{cpmCPUMemoryLCUsed} /
+        $self->{cpmCPUMemoryLCTotal};
+  }
+  # immer den kleineren wert. ist nicht ganz korrekt, aber so muss ich mich
+  # am wenigsten rumaergern.
+  if (exists $self->{usagec} and $self->{usagec} < $self->{usageu}) {
+    $self->{usage} = $self->{usagec};
+  } else {
+    $self->{usage} = $self->{usageu};
   }
   return $self;
 }
@@ -95,3 +106,34 @@ Slot  Status    Total     Used (Pct)     Free (Pct) Committed (Pct)
 In this output, the "Committed" output is what we recommend focusing on, as this represents what memory processes have actually requested from the kernel. The "Used" value, on the other hand, appears high because this includes the Linux kernel cache: this "extra" memory is used by the kernel to store bits of frequently used data, but that memory can be freed at any time if needed. From the perspective of committed memory, this router is not low on memory and appears to be operating normally.
 
 We frequently see cases inquiring about the misleadingly high value in the "Used" column. As a result, this is being adjusted in later code to provide a better representation of what memory is actually available for use. Additionally, two bugs have been filled to document the behavior, these are CSCuc40262 and CSCuv32343:
+
+
+https://www.cisco.com/c/de_de/support/docs/ip/simple-network-management-protocol-snmp/118901-technote-snmp-00.html
+
+ASR1K#show platform software status control-processor brief | s Memory
+Memory (kB)
+ Slot   Status    Total         Used(Pct)          Free (Pct)          Committed (Pct)
+ RP0    Healthy   3874504       2188404 (56%)      1686100 (44%)       2155996 (56%)
+ ESP0   Healthy    969088        590880 (61%)       378208 (39%)        363840 (38%)
+ SIP0   Healthy    471832        295292 (63%)       176540 (37%)        288540 (61%)
+(cpmCPUMemoryHCUsed)
+1.3.6.1.4.1.9.9.109.1.1.1.1.17.2 = Counter64: 590880  -ESP Used memory 
+1.3.6.1.4.1.9.9.109.1.1.1.1.17.3 = Counter64: 2188404 -RP used memory
+1.3.6.1.4.1.9.9.109.1.1.1.1.17.4 = Counter64: 295292  -SIP used memory
+(cpmCPUMemoryHCFree)
+1.3.6.1.4.1.9.9.109.1.1.1.1.19.2 = Counter64: 378208  -ESP free Memory 
+1.3.6.1.4.1.9.9.109.1.1.1.1.19.3 = Counter64: 1686100 -RP free Memory
+1.3.6.1.4.1.9.9.109.1.1.1.1.19.4 = Counter64: 176540  -SIP free memory
+cpmCPUMemoryHCCommitted)
+1.3.6.1.4.1.9.9.109.1.1.1.1.29.2 = Counter64: 363840  -ESP Committed Memory 
+1.3.6.1.4.1.9.9.109.1.1.1.1.29.3 = Counter64: 2155996 -RP Committed Memory
+1.3.6.1.4.1.9.9.109.1.1.1.1.29.4 = Counter64: 288540  -SIP committed memory
+
+stimmt alles wunderbar zusammen, total = used+free
+Und in der Realitaet kommt dann so eine Scheisse raus wie
+cpmCPUMemoryHCCommitted: 4469120
+cpmCPUMemoryHCFree: 171404
+cpmCPUMemoryHCKernelReserved: 0
+cpmCPUMemoryHCUsed: 3786752
+Bravo, bravoooo! Und bei auf cpmCPUMemoryHCCommitted basierender Usage gibts dann > 100%
+Und zwar ausfgerechnet bei dem, der den ganzen Stackswitchmemorydreck haben wollte.

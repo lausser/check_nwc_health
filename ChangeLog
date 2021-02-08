@@ -1,3 +1,5 @@
+* 2021-01-28 8.2.0.2
+  do not use cpmCPUMemoryHCCommitted, except if you want mem usage > 100%
 * 2021-01-27 8.2.0.1
   check the memory of all members in a cisco stack only if there are > 1 members
 * 2021-01-22 8.2
