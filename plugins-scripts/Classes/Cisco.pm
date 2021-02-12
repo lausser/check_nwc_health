@@ -64,6 +64,12 @@ sub init {
       } else {
         $self->no_such_mode();
       }
+    } elsif ($self->mode =~ /device::licenses::/) {
+      if ($self->implements_mib('CISCO-SMART-LIC-MIB')) {
+        $self->analyze_and_check_lic_subsystem("Classes::Cisco::CISCOSMARTLICMIB::Component::KeySubsystem");
+      } else {
+        $self->no_such_mode();
+      }
     } else {
       $self->init();
       if ($self->mode =~ /device::interfaces::ifstack::status/ &&

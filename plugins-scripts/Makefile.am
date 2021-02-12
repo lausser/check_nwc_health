@@ -57,6 +57,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBRNDMNGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBSYSMNGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBTUNINGMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSMARTLICMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
@@ -172,6 +173,7 @@ EXTRA_MODULES=\
   Classes/Bluecat/DnsDhcpServer/Component/ProcessSubsystem.pm \
   Classes/Bluecat/DnsDhcpServer.pm \
   Classes/Bluecat.pm \
+  Classes/Cisco/CISCOSMARTLICMIB/Component/KeySubsystem.pm \
   Classes/Cisco/CISCOBGP4MIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOEIGRPMIB/Components/PeerSubsystem.pm \
   Classes/Cisco/CISCOPORTSECURITYMIB/Component/InterfaceSubsystem.pm \

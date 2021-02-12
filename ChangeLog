@@ -1,4 +1,7 @@
-* 2021-02-08 8.3 split Bluecat in AddressManager and DnsDhcpServer
+* 2021-02-12 8.3.1
+  add mode license-status for cisco
+* 2021-02-08 8.3
+  split Bluecat in AddressManager and DnsDhcpServer
 * 2021-01-28 8.2.0.2
   do not use cpmCPUMemoryHCCommitted, except if you want mem usage > 100%
 * 2021-01-27 8.2.0.1
