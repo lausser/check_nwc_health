@@ -66,6 +66,7 @@ sub init {
       push(@rmontable_columns, qw(
         locIfDescr
         locIfHardType
+        locIfInCRC
       ));
     }
   } else {
