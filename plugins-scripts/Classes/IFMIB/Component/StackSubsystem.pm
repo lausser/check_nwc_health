@@ -14,7 +14,10 @@ sub init {
   } elsif (scalar(@selected_indices)) {
     @selected_indices = map { $_->[0] } @selected_indices;
   } else {
+    # none of the desired interfaces was found. we exit here, otherwise we
+    # might find crap resulting in "uninitialized value...." (which happened)
     @selected_indices = ();
+    return;
   }
   $self->get_snmp_tables("IFMIB", [
       ['stacks', 'ifStackTable', 'Classes::IFMIB::Component::StackSubsystem::Relationship'],
@@ -107,7 +110,13 @@ sub arista_schlamperei {
 
 sub check {
   my ($self) = @_;
- my @selected_interfaces = sort {
+  if (! $self->{interfaces}) {
+    # see beginning of init(). For example --name channel --regex
+    # finds no interface of this name
+    $self->add_unknown('no interfaces');
+    return;
+  }
+  my @selected_interfaces = sort {
       $a->{ifIndex} <=> $b->{ifIndex}
   } grep {
       exists $_->{lower_interfaces}

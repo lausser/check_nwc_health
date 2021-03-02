@@ -1,3 +1,5 @@
+* 2021-03-02 8.3.1.1
+  bugfix in interface-stack-status (triggered when --name did not match)
 * 2021-02-12 8.3.1
   add mode license-status for cisco
 * 2021-02-08 8.3
