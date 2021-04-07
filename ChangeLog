@@ -1,3 +1,5 @@
+* 2021-03-23 8.3.2
+  query LM-SENSORS-MIB only if it exists on Linux (it may hang even if not existing)
 * 2021-03-19 8.3.1.2
   bugfix in CISCO-ENTITY-SENSOR-MIB. Scale values correctly.
 * 2021-03-02 8.3.1.1

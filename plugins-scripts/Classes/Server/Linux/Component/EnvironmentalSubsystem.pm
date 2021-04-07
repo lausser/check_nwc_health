@@ -12,16 +12,23 @@ sub new {
 
 sub init {
   my ($self) = @_;
-  $self->{fan_subsystem} =
-      Classes::LMSENSORSMIB::Component::FanSubsystem->new();
-  $self->{temperature_subsystem} =
-      Classes::LMSENSORSMIB::Component::TemperatureSubsystem->new();
+  if ($self->implements_mib("LM-SENSORS-MIB")) {
+    $self->{fan_subsystem} =
+        Classes::LMSENSORSMIB::Component::FanSubsystem->new();
+    $self->{temperature_subsystem} =
+        Classes::LMSENSORSMIB::Component::TemperatureSubsystem->new();
+  }
+  $self->{env_subsystem} =
+      Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem->new();
 }
 
 sub check {
   my ($self) = @_;
-  $self->{fan_subsystem}->check();
-  $self->{temperature_subsystem}->check();
+  if ($self->implements_mib("LM-SENSORS-MIB")) {
+    $self->{fan_subsystem}->check();
+    $self->{temperature_subsystem}->check();
+  }
+  $self->{env_subsystem}->check();
   if (! $self->check_messages()) {
     $self->add_ok("environmental hardware working fine");
   }
@@ -29,8 +36,11 @@ sub check {
 
 sub dump {
   my ($self) = @_;
-  $self->{fan_subsystem}->dump();
-  $self->{temperature_subsystem}->dump();
+  if ($self->implements_mib("LM-SENSORS-MIB")) {
+    $self->{fan_subsystem}->dump();
+    $self->{temperature_subsystem}->dump();
+  }
+  $self->{env_subsystem}->dump();
 }
 
 1;
