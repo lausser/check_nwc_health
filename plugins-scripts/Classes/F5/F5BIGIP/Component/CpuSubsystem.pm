@@ -23,6 +23,7 @@ sub overall_init {
      ($self->{delta_sysStatTmIdleCycles} + $self->{delta_sysStatTmSleepCycles});
   $self->{cpu_usage} =  $self->{delta_sysStatTmTotalCycles} ?
       (($delta_used_cycles / $self->{delta_sysStatTmTotalCycles}) * 100) : 0;
+  $self->protect_value('f5_cpu_usage', 'cpu_usage', 'percent');
 }
 
 sub init {

@@ -1,3 +1,5 @@
+* 2021-04-15 8.3.2.1
+  bugfix in f5 cpu-load, correct negative values
 * 2021-03-23 8.3.2
   query LM-SENSORS-MIB only if it exists on Linux (it may hang even if not existing)
 * 2021-03-19 8.3.1.2
