@@ -159,7 +159,6 @@ $plugin->add_mode(
     spec => 'list-routes',
     alias => undef,
     help => 'Show the configured routes',
-    help => 'Check the percentage of up interfaces in a link aggregation',
 );
 $plugin->add_mode(
     internal => 'device::routes::exists',
