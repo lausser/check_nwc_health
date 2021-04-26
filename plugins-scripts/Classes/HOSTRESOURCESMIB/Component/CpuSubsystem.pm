@@ -22,8 +22,12 @@ sub check {
   $self->add_info(sprintf 'cpu %s is %.2f%%',
       $self->{hrProcessorIndex},
       $self->{hrProcessorLoad});
-  $self->set_thresholds(warning => '80', critical => '90');
-  $self->add_message($self->check_thresholds($self->{hrProcessorLoad}));
+  $self->set_thresholds(
+      metric => sprintf('cpu_%s_usage', $self->{hrProcessorIndex}),
+      warning => '80', critical => '90');
+  $self->add_message($self->check_thresholds(
+      metric => sprintf('cpu_%s_usage', $self->{hrProcessorIndex}),
+      value => $self->{hrProcessorLoad}));
   $self->add_perfdata(
       label => sprintf('cpu_%s_usage', $self->{hrProcessorIndex}),
       value => $self->{hrProcessorLoad},
