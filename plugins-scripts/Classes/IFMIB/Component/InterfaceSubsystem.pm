@@ -618,11 +618,23 @@ sub get_interface_indices {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
+    my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName};
+    my @label;
+    if (defined $self->opts->iflabel) {
+      foreach (split ",", $self->opts->iflabel) {
+	next if ($_ !~ m/^(ifName|ifAlias|ifDescr)$/);
+	push @label, ($_ eq 'ifName' ? $ifName :
+		      ($_ eq 'ifAlias' ? $ifAlias :
+		       ($_ eq 'ifDescr' ? $ifDescr : undef)));
+      }
+    }
+    my $iflabel = (scalar @label > 0) ? join("_", @label) : $ifDescr;
+
     # Check ifDescr (using --name)
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
-        if ($ifDescr =~ /$pattern/i) {
+        if ($iflabel =~ /$pattern/i) {
           push(@indices, [$ifIndex]);
         }
       } else {
@@ -631,7 +643,7 @@ sub get_interface_indices {
             push(@indices, [1 * $self->opts->name]);
           }
         } else {
-          if (lc $ifDescr eq lc $self->opts->name) {
+          if (lc $iflabel eq lc $self->opts->name) {
             push(@indices, [$ifIndex]);
           }
         }
