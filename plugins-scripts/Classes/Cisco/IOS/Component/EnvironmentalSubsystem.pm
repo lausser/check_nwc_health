@@ -33,12 +33,19 @@ sub init {
       ! scalar(@{$self->{voltage_subsystem}->{voltages}})) {
     $has_envmon = 0;
     for my $subsys (qw(fan_subsystem temperature_subsystem
-        powersupply_subsystem voltage_subsystem)) {
+        powersupply_subsystem voltage_subsystem redundancy_subsystem
+        unitstate_subsystem)) {
       delete $self->{$subsys};
     }
     $has_envmon = 0;
   }
   if ($has_envmon) {
+    if ($self->implements_mib('CISCO-RF-MIB')) {
+      $self->{redundancy_subsystem} =
+        Classes::Cisco::CISCORF::Component::RedundancySubsystem->new();
+      $self->{unitstate_subsystem} =
+        Classes::Cisco::CISCORF::Component::UnitStateSubsystem->new();
+    }
   } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
     $self->{fru_subsystem} =
         Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::EnvironmentalSubsystem->new();
@@ -61,7 +68,8 @@ sub check {
   my ($self) = @_;
   foreach my $subsys (qw(fan_subsystem temperature_subsystem
       powersupply_subsystem voltage_subsystem fru_subsystem
-      sensor_subsystem alarm_subsystem)) {
+      sensor_subsystem alarm_subsystem redundancy_subsystem
+      unitstate_subsystem)) {
     if (exists $self->{$subsys}) {
       $self->{$subsys}->check();
     }
@@ -75,7 +83,8 @@ sub dump {
   my ($self) = @_;
   foreach my $subsys (qw(fan_subsystem temperature_subsystem
       powersupply_subsystem voltage_subsystem fru_subsystem
-      sensor_subsystem alarm_subsystem)) {
+      sensor_subsystem alarm_subsystem redundancy_subsystem
+      unitstate_subsystem)) {
     if (exists $self->{$subsys}) {
       $self->{$subsys}->dump();
     }
