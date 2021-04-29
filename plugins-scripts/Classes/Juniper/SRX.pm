@@ -10,7 +10,7 @@ sub init {
     $self->{components}->{hostresource_subsystem} =
         Classes::HOSTRESOURCESMIB::Component::EnvironmentalSubsystem->new();
     foreach (@{$self->{components}->{hostresource_subsystem}->{disk_subsystem}->{storages}}) {
-      if (exists $_->{device} && $_->{device} =~ /^\/dev\/md/) {
+      if (exists $_->{device} && $_->{device} =~ /^(\/dev\/md|junosprocfs)/) {
         $_->blacklist();
       }
     }
