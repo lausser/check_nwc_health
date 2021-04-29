@@ -1,3 +1,5 @@
+* 2021-04-29 8.3.2.2
+  Blacklist storage device "junosprocfs" on JunOS (Juniper) devices PR #278
 * 2021-04-15 8.3.2.1
   bugfix in f5 cpu-load, correct negative values
 * 2021-03-23 8.3.2
