@@ -28,7 +28,8 @@ sub finish {
 sub check {
   my ($self) = @_;
   if ($self->{ciscoEnvMonTemperatureStatusValue} >
-      $self->{ciscoEnvMonTemperatureThreshold}) {
+      $self->{ciscoEnvMonTemperatureThreshold}
+      || $self->{ciscoEnvMonTemperatureState} ne 'normal') {
     $self->add_info(sprintf 'temperature %d %s is too high (%d of %d max = %s)',
         $self->{ciscoEnvMonTemperatureStatusIndex},
         $self->{ciscoEnvMonTemperatureStatusDescr},
@@ -51,8 +52,8 @@ sub check {
   $self->add_perfdata(
       label => sprintf('temp_%s', $self->{ciscoEnvMonTemperatureStatusIndex}),
       value => $self->{ciscoEnvMonTemperatureStatusValue},
-      warning => $self->{ciscoEnvMonTemperatureThreshold},
-      critical => undef,
+      warning => undef,
+      critical => $self->{ciscoEnvMonTemperatureThreshold},
   );
 }
 
