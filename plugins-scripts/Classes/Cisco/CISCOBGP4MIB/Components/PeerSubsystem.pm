@@ -242,7 +242,13 @@ sub finish {
   $self->{cbgpPeer2LocalAddr} = $self->mibs_and_oids_definition(
       'INET-ADDRESS-MIB', 'InetAddress',
       $self->{cbgpPeer2LocalAddr}, $self->{cbgpPeer2Type}) if $self->{cbgpPeer2LocalAddr};
-  $self->{cbgpPeer2LocalAddr} = "999.999.999.999" if ! $self->{cbgpPeer2LocalAddr};
+  # save a valid localaddr and reuse it if empty, works for 5 attempts
+  $self->protect_value("localaddr_".$self->{cbgpPeer2RemoteAddr},
+      "cbgpPeer2LocalAddr", sub {
+      my $value = shift;
+      return $value ? 1 : 0;
+  });
+  $self->{cbgpPeer2LocalAddr} = "=empty=" if ! $self->{cbgpPeer2LocalAddr};
 
   $self->{cbgpPeer2LastError} |= "00 00";
   my $errorcode = 0;
@@ -309,11 +315,12 @@ sub check {
     # cbgpPeer2RemoteAsName is "", cbgpPeer2AdminStatus is "start",
     # cbgpPeer2State is "active"
     $self->add_message($self->{cbgpPeer2RemoteAsImportant} ? CRITICAL : OK,
-        sprintf "peer %s (AS%s) state is %s (last error: %s)",
+        sprintf "peer %s (AS%s) state is %s (last error: %s, local address: %s)",
         $self->{cbgpPeer2RemoteAddr},
         $self->{cbgpPeer2RemoteAs}.$self->{cbgpPeer2RemoteAsName},
         $self->{cbgpPeer2State},
-        $self->{cbgpPeer2LastError}||"no error"
+        $self->{cbgpPeer2LastError}||"no error",
+        $self->{cbgpPeer2LocalAddr}
     );
     $self->{cbgpPeer2Faulty} = $self->{cbgpPeer2RemoteAsImportant} ? 1 : 0;
   }

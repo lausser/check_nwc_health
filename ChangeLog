@@ -1,3 +1,5 @@
+* 2021-05-12 8.3.2.3
+  save bgp peer local addresses and show them in the error case
 * 2021-04-29 8.3.2.2
   Blacklist storage device "junosprocfs" on JunOS (Juniper) devices PR #278
 * 2021-04-15 8.3.2.1

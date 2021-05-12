@@ -235,8 +235,13 @@ sub finish {
   ##$self->{aristaBgp4V2PeerLocalAddr} = $self->mibs_and_oids_definition(
   ##    'INET-ADDRESS-MIB', 'InetAddress',
   ##    $self->{aristaBgp4V2PeerLocalAddr}, $self->{aristaBgp4V2PeerType}) if $self->{aristaBgp4V2PeerLocalAddr};
-  $self->{aristaBgp4V2PeerLocalAddr} = "999.999.999.999" if ! $self->{aristaBgp4V2PeerLocalAddr};
-
+  # save a valid localaddr and reuse it if empty, works for 5 attempts
+  $self->protect_value("localaddr_".$self->{aristaBgp4V2PeerRemoteAddr},
+      "aristaBgp4V2PeerLocalAddr", sub {
+      my $value = shift;
+      return $value ? 1 : 0;
+  });
+  $self->{aristaBgp4V2PeerLocalAddr} = "=empty=" if ! $self->{aristaBgp4V2PeerLocalAddr};
   $self->{aristaBgp4V2PeerLastError} |= "00 00";
   my $errorcode = 0;
   my $subcode = 0;
@@ -305,11 +310,12 @@ sub check {
     # aristaBgp4V2PeerRemoteAsName is "", aristaBgp4V2PeerAdminStatus is "running",
     # aristaBgp4V2PeerState is "active"
     $self->add_message($self->{aristaBgp4V2PeerRemoteAsImportant} ? CRITICAL : OK,
-        sprintf "peer %s (AS%s) state is %s (last error: %s)",
+        sprintf "peer %s (AS%s) state is %s (last error: %s, local address: %s)",
         $self->{aristaBgp4V2PeerRemoteAddr},
         $self->{aristaBgp4V2PeerRemoteAs}.$self->{aristaBgp4V2PeerRemoteAsName},
         $self->{aristaBgp4V2PeerState},
-        $self->{aristaBgp4V2PeerLastError}||"no error"
+        $self->{aristaBgp4V2PeerLastError}||"no error",
+        $self->{aristaBgp4V2PeerLocalAddr}
     );
     $self->{aristaBgp4V2PeerFaulty} = $self->{aristaBgp4V2PeerRemoteAsImportant} ? 1 : 0;
   }
