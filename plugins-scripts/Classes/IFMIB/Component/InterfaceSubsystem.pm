@@ -253,34 +253,38 @@ sub init {
         if (@ethertable_columns) {
           # es gibt interfaces mit ifSpeed == 4294967295
           # aber nix in dot3HCStatsTable. also dann dot3StatsTable fuer alle
-          foreach my $etherstat ($self->get_snmp_table_objects(
-              'EtherLike-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
-            foreach my $interface (@{$self->{interfaces}}) {
-              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
-                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
-                  $interface->{$key} = $etherstat->{$key};
-                  push(@{$interface->{columns}}, $key);
+          if ($self->implements_mib('EtherLike-MIB', 'dot3StatsTable')) {
+            foreach my $etherstat ($self->get_snmp_table_objects(
+                'EtherLike-MIB', 'dot3StatsTable', \@etherindices, \@ethertable_columns)) {
+              foreach my $interface (@{$self->{interfaces}}) {
+                if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
+                  foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                    $interface->{$key} = $etherstat->{$key};
+                    push(@{$interface->{columns}}, $key);
+                  }
+                  last;
                 }
-                last;
               }
             }
           }
         }
         if (@ethertablehc_columns && scalar(@etherhcindices)) {
-          foreach my $etherstat ($self->get_snmp_table_objects(
-              'EtherLike-MIB', 'dot3HCStatsTable', \@etherhcindices, \@ethertablehc_columns)) {
-            foreach my $interface (@{$self->{interfaces}}) {
-              if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
-                foreach my $key (grep /^dot3/, keys %{$etherstat}) {
-                  $interface->{$key} = $etherstat->{$key};
-                  push(@{$interface->{columns}}, $key);
+          if ($self->implements_mib('EtherLike-MIB', 'dot3HCStatsTable')) {
+            foreach my $etherstat ($self->get_snmp_table_objects(
+                'EtherLike-MIB', 'dot3HCStatsTable', \@etherhcindices, \@ethertablehc_columns)) {
+              foreach my $interface (@{$self->{interfaces}}) {
+                if ($interface->{ifIndex} == $etherstat->{flat_indices}) {
+                  foreach my $key (grep /^dot3/, keys %{$etherstat}) {
+                    $interface->{$key} = $etherstat->{$key};
+                    push(@{$interface->{columns}}, $key);
+                  }
+                  if (grep /^dot3HCStatsFCSErrors/, @{$interface->{columns}}) {
+                    @{$interface->{columns}} = grep {
+                      $_ if $_ ne 'dot3StatsFCSErrors';
+                    } @{$interface->{columns}};
+                  }
+                  last;
                 }
-                if (grep /^dot3HCStatsFCSErrors/, @{$interface->{columns}}) {
-                  @{$interface->{columns}} = grep {
-                    $_ if $_ ne 'dot3StatsFCSErrors';
-                  } @{$interface->{columns}};
-                }
-                last;
               }
             }
           }
@@ -292,16 +296,18 @@ sub init {
             $self->override_opt('regexp', 1);
           }
           # Value von etherStatsDataSource entspricht ifIndex 1.3.6.1.2.1.2.2.1.1.idx
-          foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
-              'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns, $if_has_changed ? 1 : -1)) {
-              $etherstat->{etherStatsDataSource} =~ s/^\.//g;
-            foreach my $interface (@{$self->{interfaces}}) {
-              if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
-                foreach my $key (grep /^etherStats/, keys %{$etherstat}) {
-                  $interface->{$key} = $etherstat->{$key};
-                  push(@{$interface->{columns}}, $key);
+          if ($self->implements_mib('RMON-MIB', 'etherStatsTable')) {
+            foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
+                'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns, $if_has_changed ? 1 : -1)) {
+                $etherstat->{etherStatsDataSource} =~ s/^\.//g;
+              foreach my $interface (@{$self->{interfaces}}) {
+                if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {
+                  foreach my $key (grep /^etherStats/, keys %{$etherstat}) {
+                    $interface->{$key} = $etherstat->{$key};
+                    push(@{$interface->{columns}}, $key);
+                  }
+                  last;
                 }
-                last;
               }
             }
           }

@@ -1,3 +1,5 @@
+* 2021-05-18 8.3.2.4
+  optimize etherlike and rmon walks
 * 2021-05-12 8.3.2.3
   save bgp peer local addresses and show them in the error case
 * 2021-04-29 8.3.2.2
