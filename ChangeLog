@@ -1,3 +1,5 @@
+* 2021-05-20 8.3.3
+  Add vpn sessions for Fortigate PR #279
 * 2021-05-18 8.3.2.4
   optimize etherlike and rmon walks
 * 2021-05-12 8.3.2.3
