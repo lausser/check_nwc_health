@@ -12,6 +12,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("Classes::Fortigate::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_mem_subsystem("Classes::Fortigate::Component::HaSubsystem");
+  } elsif ($self->mode =~ /device::vpn::sessions/) {
+    $self->analyze_and_check_config_subsystem("Classes::Fortigate::Component::VpnSubsystem");
   } else {
     $self->no_such_mode();
   }
