@@ -23,6 +23,7 @@ sub init {
     if (defined $self->{avgBusy1}) {
       push(@{$self->{cpus}},
           Classes::Cisco::IOS::Component::CpuSubsystem::Cpu->new(
+              flat_indices => 0,
               cpmCPUTotalPhysicalIndex => 0, #fake
               cpmCPUTotalIndex => 0, #fake
               cpmCPUTotal5sec => 0, #fake
@@ -30,7 +31,7 @@ sub init {
               cpmCPUTotal1min => $self->{avgBusy1},
               cpmCPUTotal1minRev => $self->{avgBusy1},
               cpmCPUTotal5min => $self->{avgBusy5},
-              cpmCPUTotal5minRev => $self->{avgBusy51},
+              cpmCPUTotal5minRev => $self->{avgBusy5},
               cpmCPUMonInterval => 0, #fake
               cpmCPUTotalMonIntervalValue => 0, #fake
               cpmCPUInterruptMonIntervalValue => 0, #fake

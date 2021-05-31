@@ -1,3 +1,5 @@
+* 2021-05-31 8.3.3.2
+  bugfix in IOS cpu-load for very old models without CISCO-PROCESS-MIB
 * 2021-05-31 8.3.3.1
   bugfix in f5 memory-usage, correct negative values
 * 2021-05-20 8.3.3
