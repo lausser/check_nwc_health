@@ -1,3 +1,5 @@
+* 2021-05-31 8.3.3.1
+  bugfix in f5 memory-usage, correct negative values
 * 2021-05-20 8.3.3
   Add vpn sessions for Fortigate PR #279
 * 2021-05-18 8.3.2.4
