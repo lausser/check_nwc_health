@@ -624,11 +624,23 @@ sub get_interface_indices {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
+    my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName};
+    my @label;
+    if (defined $self->opts->iflabel) {
+      foreach (split ",", $self->opts->iflabel) {
+	next if ($_ !~ m/^(ifName|ifAlias|ifDescr)$/);
+	push @label, ($_ eq 'ifName' ? $ifName :
+		      ($_ eq 'ifAlias' ? $ifAlias :
+		       ($_ eq 'ifDescr' ? $ifDescr : undef)));
+      }
+    }
+    my $iflabel = (scalar @label > 0) ? join("_", @label) : $ifDescr;
+
     # Check ifDescr (using --name)
     if ($self->opts->name) {
       if ($self->opts->regexp) {
         my $pattern = $self->opts->name;
-        if ($ifDescr =~ /$pattern/i) {
+        if ($iflabel =~ /$pattern/i) {
           push(@indices, [$ifIndex]);
         }
       } else {
@@ -637,7 +649,7 @@ sub get_interface_indices {
             push(@indices, [1 * $self->opts->name]);
           }
         } else {
-          if (lc $ifDescr eq lc $self->opts->name) {
+          if (lc $iflabel eq lc $self->opts->name) {
             push(@indices, [$ifIndex]);
           }
         }
@@ -810,6 +822,16 @@ sub get_mub_pkts {
 
 sub init {
   my ($self) = @_;
+
+  my @label;
+  if (defined $self->opts->iflabel) {
+    foreach (split ",", $self->opts->iflabel) {
+      next if ($_ !~ m/^(ifName|ifAlias|ifDescr)$/);
+      push @label, $self->{$_} if defined($self->{$_});
+    }
+  }
+  $self->{iflabel} = (scalar @label > 0) ? join("_", @label) : $self->{ifDescr};
+
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -965,11 +987,13 @@ sub init_etherstats {
 
 sub check {
   my ($self) = @_;
+
   my $full_descr = sprintf "%s%s%s",
-      $self->{ifDescr},
-      $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
+      $self->{iflabel},
+      $self->{ifAlias} && $self->{ifAlias} ne $self->{iflabel} ?
           " (alias ".$self->{ifAlias}.")" : "",
       $self->{ifAddresses} ? " (addresses ".$self->{ifAddresses}.")" : "";
+
   if ($self->mode =~ /device::interfaces::complete/) {
     # uglatto, but $self->mode is an lvalue
     $Monitoring::GLPlugin::mode = "device::interfaces::operstatus";
@@ -1013,12 +1037,12 @@ sub check {
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_in',
+        label => $self->{iflabel}.'_usage_in',
         value => $self->{inputUtilization},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_usage_out',
+        label => $self->{iflabel}.'_usage_out',
         value => $self->{outputUtilization},
         uom => '%',
     );
@@ -1031,7 +1055,7 @@ sub check {
         critical => $self->{maxInputRate} / 100 * $incritical
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_in',
+        label => $self->{iflabel}.'_traffic_in',
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -1047,7 +1071,7 @@ sub check {
         critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_traffic_out',
+        label => $self->{iflabel}.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
@@ -1079,12 +1103,12 @@ sub check {
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_in',
+        label => $self->{iflabel}.'_errors_in',
         value => $self->{inputErrorsPercent},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_errors_out',
+        label => $self->{iflabel}.'_errors_out',
         value => $self->{outputErrorsPercent},
         uom => '%',
     );
@@ -1113,12 +1137,12 @@ sub check {
     my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
     $self->add_message($level);
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_in',
+        label => $self->{iflabel}.'_discards_in',
         value => $self->{inputDiscardsPercent},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_discards_out',
+        label => $self->{iflabel}.'_discards_out',
         value => $self->{outputDiscardsPercent},
         uom => '%',
     );
@@ -1156,12 +1180,12 @@ sub check {
         value => $self->{outputBroadcastPercent}
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_broadcast_in',
+        label => $self->{iflabel}.'_broadcast_in',
         value => $self->{inputBroadcastPercent},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_broadcast_out',
+        label => $self->{iflabel}.'_broadcast_out',
         value => $self->{outputBroadcastPercent},
         uom => '%',
     );
@@ -1185,12 +1209,12 @@ sub check {
         value => $self->{outputBroadcastUtilizationPercent}
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_broadcast_usage_in',
+        label => $self->{iflabel}.'_broadcast_usage_in',
         value => $self->{inputBroadcastUtilizationPercent},
         uom => '%',
     );
     $self->add_perfdata(
-        label => $self->{ifDescr}.'_broadcast_usage_out',
+        label => $self->{iflabel}.'_broadcast_usage_out',
         value => $self->{outputBroadcastUtilizationPercent},
         uom => '%',
     );
@@ -1235,7 +1259,7 @@ sub check {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});
     $self->add_info(sprintf '%s is %savailable (%s/%s, since %s)',
-        $self->{ifDescr}, ($self->{ifAvailable} eq "true" ? "" : "un"),
+        $self->{iflabel}, ($self->{ifAvailable} eq "true" ? "" : "un"),
         $self->{ifOperStatus}, $self->{ifAdminStatus},
         $self->{ifStatusDuration});
   } elsif ($self->mode =~ /device::interfaces::etherstats/) {
@@ -1244,7 +1268,7 @@ sub check {
       my $label = $stat.'Percent';
       $label =~ s/^(dot3Stats|etherStats)//g;
       $label =~ s/(?:\b|(?<=([a-z])))([A-Z][a-z]+)/(defined($1) ? "_" : "") . lc($2)/eg;
-      $label = $self->{ifDescr}.'_'.$label;
+      $label = $self->{iflabel}.'_'.$label;
       $self->add_info(sprintf 'interface %s %s is %.2f%%',
           $full_descr, $stat.'Percent', $self->{$stat.'Percent'});
       $self->set_thresholds(
@@ -1262,7 +1286,7 @@ sub check {
     }
   } elsif ($self->mode =~ /device::interfaces::duplex/) {
     $self->add_info(sprintf "%s duplex status is %s",
-        $self->{ifDescr}, $self->{dot3StatsDuplexStatus}
+        $self->{iflabel}, $self->{dot3StatsDuplexStatus}
     );
     if ($self->{ifOperStatus} ne "up") {
       $self->annotate_info(sprintf "oper %s", $self->{ifOperStatus});
@@ -1288,7 +1312,7 @@ sub check {
         metric => $self->{ifDescr}."_duration",
         value => $self->{ifDurationMinutes}));
     $self->add_perfdata(
-        label => $self->{ifDescr}."_duration",
+        label => $self->{iflabel}."_duration",
         value => $self->{ifDurationMinutes},
     );
   }
@@ -1299,10 +1323,10 @@ sub list {
   if ($self->mode =~ /device::interfaces::listdetail/) {
     my $cL2L3IfModeOper = $self->get_snmp_object('CISCO-L2L3-INTERFACE-CONFIG-MIB', 'cL2L3IfModeOper', $self->{ifIndex}) || "unknown";
     my $vlanTrunkPortDynamicStatus = $self->get_snmp_object('CISCO-VTP-MIB', 'vlanTrunkPortDynamicStatus', $self->{ifIndex}) || "unknown";
-    printf "%06d %s %s %s %s\n", $self->{ifIndex}, $self->{ifDescr}, $self->{ifAlias},
+    printf "%06d %s %s %s %s\n", $self->{ifIndex}, $self->{iflabel}, $self->{ifAlias},
         $cL2L3IfModeOper, $vlanTrunkPortDynamicStatus;
   } else {
-    printf "%06d %s\n", $self->{ifIndex}, $self->{ifDescr};
+    printf "%06d %s\n", $self->{ifIndex}, $self->{iflabel};
   }
 }
 
@@ -1391,6 +1415,16 @@ sub get_mub_pkts {
 
 sub init {
   my ($self) = @_;
+
+  my @label;
+  if (defined $self->opts->iflabel) {
+    foreach (split ",", $self->opts->iflabel) {
+      next if ($_ !~ m/^(ifName|ifAlias|ifDescr)$/);
+      push @label, $self->{$_} if defined($self->{$_});
+    }
+  }
+  $self->{iflabel} = (scalar @label > 0) ? join("_", @label) : $self->{ifDescr};
+
   if ($self->mode =~ /device::interfaces::usage/) {
     $self->calc_usage();
   } elsif ($self->mode =~ /device::interfaces::broadcasts/) {
@@ -1454,7 +1488,7 @@ sub init_etherstats {
 sub check {
   my ($self) = @_;
   my $full_descr = sprintf "%s%s%s",
-      $self->{ifDescr},
+      $self->{iflabel},
       $self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr} ?
           " (alias ".$self->{ifAlias}.")" : "",
       $self->{ifAddresses} ? " (addresses ".$self->{ifAddresses}.")" : "";
