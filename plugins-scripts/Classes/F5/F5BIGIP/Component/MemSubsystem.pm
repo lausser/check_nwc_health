@@ -8,6 +8,8 @@ sub init {
       sysStatMemoryTotal sysStatMemoryUsed sysHostMemoryTotal sysHostMemoryUsed)));
   $self->{stat_mem_usage} = ($self->{sysStatMemoryUsed} / $self->{sysStatMemoryTotal}) * 100;
   $self->{host_mem_usage} = ($self->{sysHostMemoryUsed} / $self->{sysHostMemoryTotal}) * 100;
+  $self->protect_value('f5_stat_mem_usage', 'stat_mem_usage', 'percent');
+  $self->protect_value('f5_host_mem_usage', 'host_mem_usage', 'percent');
 }
 
 sub check {
