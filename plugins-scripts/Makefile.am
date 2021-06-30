@@ -82,6 +82,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/GENUAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CENTITYEXTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIBGPVPNMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIENTITYEXTENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HOSTRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HPICFCHASSIS.pm \
@@ -285,6 +286,7 @@ EXTRA_MODULES=\
   Classes/Huawei/Component/EnvironmentalSubsystem.pm \
   Classes/Huawei/Component/CpuSubsystem.pm \
   Classes/Huawei/Component/MemSubsystem.pm \
+  Classes/Huawei/Component/PeerSubsystem.pm \
   Classes/Huawei/CloudEngine.pm \
   Classes/Huawei.pm \
   Classes/HP/Procurve/Component/MemSubsystem.pm \

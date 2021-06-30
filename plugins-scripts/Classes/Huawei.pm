@@ -18,6 +18,20 @@ sub init {
       $self->analyze_and_check_cpu_subsystem("Classes::Huawei::Component::CpuSubsystem");
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_and_check_mem_subsystem("Classes::Huawei::Component::MemSubsystem");
+    } elsif ($self->mode =~ /device::bgp/) {
+      if ($self->implements_mib('HUAWEI-BGP-VPN-MIB', 'hwBgpPeerAddrFamilyTable')) {
+        $self->analyze_and_check_interface_subsystem("Classes::Huawei::Component::PeerSubsystem");
+      } else {
+        $self->establish_snmp_secondary_session();
+        if ($self->implements_mib('HUAWEI-BGP-VPN-MIB', 'hwBgpPeerAddrFamilyTable')) {
+          $self->analyze_and_check_interface_subsystem("Classes::Huawei::Component::PeerSubsystem");
+        } else {
+          $self->establish_snmp_session();
+          $self->debug("no HUAWEI-BGP-VPN-MIB and/or no hwBgpPeerAddrFamilyTable, fallback");
+          $self->no_such_mode();
+        }
+      }
+
     } else {
       $self->no_such_mode();
     }
