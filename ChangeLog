@@ -1,3 +1,5 @@
+* 2021-06-16 8.3.3.3
+  bugfix in UCD-MIB memory
 * 2021-05-31 8.3.3.2
   bugfix in IOS cpu-load for very old models without CISCO-PROCESS-MIB
 * 2021-05-31 8.3.3.1
