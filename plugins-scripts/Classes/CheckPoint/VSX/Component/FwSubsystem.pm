@@ -44,13 +44,13 @@ sub check {
   } elsif ($self->mode =~ /device::fw::policy::connections/) {
     $self->{sumNumConn} = 0;
     map { $self->{fwNumConn} += $_->{vsxCountersConnNum} } @{$self->{vsxs}};
-    $self->set_thresholds(metric => 'fwNumConn',
+    $self->set_thresholds(metric => 'fw_policy_numconn',
         warning => 20000, critical => 23000);
+    $self->add_info(sprintf 'policy %s has %s open connections',
+        $self->{fwPolicyName}, $self->{fwNumConn});
     $self->add_message($self->check_thresholds(
-        metric => 'fwNumConn',
-        value => $self->{fwNumConn}),
-        sprintf 'policy %s has %s open connections',
-            $self->{fwPolicyName}, $self->{fwNumConn});
+        metric => 'fw_policy_numconn',
+        value => $self->{fwNumConn}));
     $self->add_perfdata(
         label => 'fw_policy_numconn',
         value => $self->{fwNumConn},
@@ -66,16 +66,15 @@ use strict;
 sub check {
   my ($self) = @_;
   my $label = sprintf 'vsx_%s_numconn', $self->{vsxStatusVsName};
+  $self->add_info(sprintf 'vsx %s has %s open connections',
+      $self->{vsxStatusVsName}, $self->{vsxCountersConnNum});
   $self->set_thresholds(metric => $label,
       warning => 20000, critical => 23000);
   $self->add_message($self->check_thresholds(
       metric => $label,
-      value => $self->{vsxCountersConnNum}),
-      sprintf 'vsx %s has %s open connections',
-          $self->{vsxStatusVsName}, $self->{vsxCountersConnNum});
+      value => $self->{vsxCountersConnNum}));
   $self->add_perfdata(
       label => $label,
       value => $self->{vsxCountersConnNum},
   );
 }
-

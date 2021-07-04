@@ -26,14 +26,13 @@ sub check {
           $self->{fwPolicyName}, $self->opts->name());
     }
   } elsif ($self->mode =~ /device::fw::policy::connections/) {
-    $self->set_thresholds(warning => 20000, critical => 23000);
-    $self->add_message($self->check_thresholds($self->{fwNumConn}),
-        sprintf 'policy %s has %s open connections',
-            $self->{fwPolicyName}, $self->{fwNumConn});
+    $self->set_thresholds(metric => 'fw_policy_numconn', warning => 20000, critical => 23000);
+    $self->add_info(sprintf 'policy %s has %s open connections',
+        $self->{fwPolicyName}, $self->{fwNumConn});
+    $self->add_message($self->check_thresholds(metric => 'fw_policy_numconn', value => $self->{fwNumConn}));
     $self->add_perfdata(
         label => 'fw_policy_numconn',
         value => $self->{fwNumConn},
     );
   }
 }
-
