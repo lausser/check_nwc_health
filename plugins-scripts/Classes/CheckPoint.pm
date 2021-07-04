@@ -19,6 +19,9 @@ sub init {
   } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'mgProdName')) {
     bless $self, 'Classes::CheckPoint::Firewall1';
     $self->debug('using Classes::CheckPoint::Firewall1');
+  } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'lsProdName')) {
+    bless $self, 'Classes::CheckPoint::Firewall1';
+    $self->debug('using Classes::CheckPoint::Firewall1');
   } elsif ($self->get_snmp_object('CHECKPOINT-MIB', 'osName') && $self->get_snmp_object('CHECKPOINT-MIB', 'osName') =~ /gaia/i) {
     bless $self, 'Classes::CheckPoint::Gaia';
     $self->debug('using Classes::CheckPoint::Gaia');
@@ -29,4 +32,3 @@ sub init {
     $self->init();
   }
 }
-
