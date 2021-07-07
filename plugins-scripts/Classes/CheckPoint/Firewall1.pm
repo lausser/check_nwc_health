@@ -21,6 +21,8 @@ sub init {
     $self->analyze_and_check_mngmt_subsystem("Classes::CheckPoint::Firewall1::Component::MngmtSubsystem");
   } elsif ($self->mode =~ /device::vpn::status/) {
     $self->analyze_and_check_config_subsystem("Classes::CheckPoint::Firewall1::Component::VpnSubsystem");
+  } elsif ($self->mode =~ /device::vpn::sessions/) {
+    $self->analyze_and_check_config_subsystem("Classes::CheckPoint::Firewall1::Component::VpnSessions");
   } else {
     $self->no_such_mode();
   }
