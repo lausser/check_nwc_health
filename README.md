@@ -42,7 +42,7 @@ Modi
 | count-routes                  | Count the routes. (--name is the dest, --name2 is the hop) |
 | vpn-status                    | Check the status of vpns (up/down) |
 | create-shinken-service        | Create a Shinken service definition |
-| hsrp-state                    | Check the state in a HSRP group) |
+| hsrp-state                    | Check the state in a HSRP group |
 | hsrp-failover                 | Check if a HSRP group's nodes have changed their roles |
 | list-hsrp-groups              | Show the HSRP groups configured on this device |
 | bgp-peer-status               | Check status of BGP peers |
