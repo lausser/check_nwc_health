@@ -27,7 +27,7 @@ sub check {
   $self->add_info(sprintf 'memory %s usage is %.2f%%',
       $self->{flat_indices},,
       $self->{s5ChasUtilMemoryUsage});
-  $self->set_thresholds(metric => $label, warning => 80, critical => 90);
+  $self->set_thresholds(metric => $label, warning => 88, critical => 90);
   $self->add_message($self->check_thresholds(
       metric => $label, value => $self->{s5ChasUtilMemoryUsage}));
   $self->add_perfdata(
