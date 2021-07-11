@@ -50,9 +50,7 @@ sub check {
     if (grep { "active" eq $_ } @roles) {
       $self->add_ok();
     } else {
-      $self->add_critical();
-      $self->add_info("this device should be ".$self->opts->role());
-      $self->add_critical();
+      $self->add_critical_mitigation("this device should be ".$self->opts->role());
     }
   } else {
     # as seen from Secondary. check the cluster status, not the role
