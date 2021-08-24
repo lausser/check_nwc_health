@@ -1,6 +1,3 @@
-![kleinerarbersee](https://user-images.githubusercontent.com/198968/128997360-bc107e1c-3a49-4d85-af53-a20d7eadf7ca.png)
-
-
 Description
 ============
 The plugin check_nwc_health was developed with the aim of having a single tool for all aspects of monitoring of network components.
