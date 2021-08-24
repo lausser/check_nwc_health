@@ -18,7 +18,12 @@ sub init {
   } else {
     # Merkwuerdigerweise gibts ohne das hier einen Timeout bei
     # IP-FORWARD-MIB::inetCidrRouteTable und den route-Modi
-    $self->mult_snmp_max_msg_size(5);
+    if ($self->mode() =~ /device::routes/) {
+      $self->mult_snmp_max_msg_size(40);
+      $self->bulk_is_baeh(5);
+    } else {
+      $self->reset_snmp_max_msg_size();
+    }
     $self->no_such_mode();
   }
 }
