@@ -8,6 +8,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/TableItem.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
+  ../MIBS/versa-mibs/VERSAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ADSLLINEMIB.pm \
@@ -19,6 +20,12 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTABGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTAENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBATCMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDCHASSISMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDFANTRAYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDFANMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDPOWERSUPPLYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDVSFMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDTEMPSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ASYNCOSMAILMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ATTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/BAMSNMPMIB.pm \
@@ -63,6 +70,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DCBGPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DEVICEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ELTEXMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ENTITYMIB.pm \
@@ -119,6 +128,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDMEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDPFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OPENBSDSENSORSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ORGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OSPFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OSPFV3MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANCOMMONMIB.pm \
@@ -134,6 +144,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STATISTICSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADEXMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STORAGEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
@@ -294,6 +305,13 @@ EXTRA_MODULES=\
   Classes/HP/Procurve/Component/EnvironmentalSubsystem.pm \
   Classes/HP/Procurve/Component/SensorSubsystem.pm \
   Classes/HP/Procurve.pm \
+  Classes/HP/Aruba/Component/MemSubsystem.pm \
+  Classes/HP/Aruba/Component/CpuSubsystem.pm \
+  Classes/HP/Aruba/Component/TemperatureSubsystem.pm \
+  Classes/HP/Aruba/Component/FanSubsystem.pm \
+  Classes/HP/Aruba/Component/PowersupplySubsystem.pm \
+  Classes/HP/Aruba/Component/EnvironmentalSubsystem.pm \
+  Classes/HP/Aruba.pm \
   Classes/HP.pm \
   Classes/MEOS.pm \
   Classes/Brocade.pm \
@@ -461,6 +479,11 @@ EXTRA_MODULES=\
   Classes/Barracuda/Component/HaSubsystem.pm \
   Classes/Barracuda/Component/FwSubsystem.pm \
   Classes/Barracuda.pm \
+  Classes/Versa/Component/CpuSubsystem.pm \
+  Classes/Versa/Component/EnvironmentalSubsystem.pm \
+  Classes/Versa/Component/MemSubsystem.pm \
+  Classes/Versa/Component/PeerSubsystem.pm \
+  Classes/Versa.pm \
   Classes/Device.pm
 
 SED=/bin/sed

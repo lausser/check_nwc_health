@@ -199,6 +199,10 @@ sub classify {
         $self->rebless('Classes::Barracuda');
       } elsif ($self->implements_mib('VORMETRIC-MIB')) {
         $self->rebless('Classes::Vormetric');
+      } elsif ($self->implements_mib('ARUBAWIRED-CHASSIS-MIB')) {
+        $self->rebless('Classes::HP::Aruba');
+      } elsif ($self->implements_mib('DEVICE-MIB') and $self->{productname} =~ /Versa Appliance/) {
+        $self->rebless('Classes::Versa');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('Classes::Server::Linux');
       } else {
