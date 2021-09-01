@@ -19,10 +19,3 @@ package Classes::OneOS::Component::EnvironmentalSubsystem::Comp;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub check {
-  my ($self) = @_;
-  my $label = sprintf 'usage', $self->{flat_indices};
-  $self->add_info(sprintf '%s %s %s',
-      $self->{flat_indices}, $self->{oacExpIMSysHwcTypeDefinition},
-      $self->{oacExpIMSysHwcDescription});
-}
