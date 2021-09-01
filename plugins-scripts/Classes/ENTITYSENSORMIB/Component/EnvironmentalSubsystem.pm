@@ -116,9 +116,6 @@ use strict;
 
 sub finish {
   my ($self) = @_;
-  if ($self->{entPhySensorPrecision} && $self->{entPhySensorValue}) {
-    $self->{entPhySensorValue} /= 10 ** $self->{entPhySensorPrecision};
-  }
   if ($self->{entPhySensorType} eq 'rpm') {
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
     bless $self, 'Classes::ENTITYSENSORMIB::Component::EnvironmentalSubsystem::Sensor::Fan';
