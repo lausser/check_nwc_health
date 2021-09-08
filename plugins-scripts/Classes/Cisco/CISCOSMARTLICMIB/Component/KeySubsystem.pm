@@ -34,7 +34,13 @@ sub check {
       $self->{ciscoSlaEntitlementFeatureName},
       $self->{ciscoSlaEntitlementEnforceMode}
   );
-  $self->add_ok();
+  if ($self->{ciscoSlaEntitlementEnforceMode} =~ /(outOfCompliance|gracePeriodExpired|disabled)/) {
+    $self->add_critical();
+  } elsif ($self->{ciscoSlaEntitlementEnforceMode} =~ /(waiting|evaluationExpired|gracePeriod)/) {
+    $self->add_warning();
+  } else {
+    $self->add_ok();
+  }
 }
 
 
@@ -54,6 +60,13 @@ sub finish {
 
 sub check {
   my ($self) = @_;
+  $self->add_info(sprintf "Registration status is %s", $self->{ciscoSlaRegistrationStatus});
+  if ($self->{ciscoSlaRegistrationStatus} =~ /(notRegistered|registrationFailed)/ ) {
+      $self->add_warning();
+  }
+  if ($self->{ciscoSlaRegisterSuccess} ne "true" ) {
+    $self->add_warning(sprintf "registration failed with %s", $self->{ciscoSlaRegisterFailureReason});
+  }
 }
 
 
@@ -86,7 +99,9 @@ sub check {
   my ($self) = @_;
   $self->add_info(sprintf "compliance status is %s",
       $self->{ciscoSlaAuthComplianceStatus});
-  if ($self->{ciscoSlaAuthComplianceStatus} eq "AUTHORIZED") {
+  if ($self->{ciscoSlaAuthComplianceStatus} =~ /AUTHORIZED/) {
+    # STRING: "AUTHORIZED"
+    # STRING: "AUTHORIZED - RESERVED"
     $self->add_ok();
   } else {
     $self->add_critical();
@@ -100,7 +115,11 @@ sub check {
   $self->set_thresholds(metric => $label,
       warning => "7:", critical => "2:");
   $self->add_info(sprintf "authorization will expire in %d days",
-      $self->{ciscoSlaAuthExpireTimeDays});
+      $self->{ciscoSlaAuthExpireTimeDays})
+      if $self->{ciscoSlaAuthExpireTimeDays};
+  $self->add_info(sprintf "authorization has expired",
+      $self->{ciscoSlaAuthExpireTimeDays})
+      if ! $self->{ciscoSlaAuthExpireTimeDays};
   $self->add_message($self->check_thresholds(metric => $label,
       value => $self->{ciscoSlaAuthExpireTimeDays}));
   $self->add_perfdata(label => $label,
