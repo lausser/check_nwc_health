@@ -64,7 +64,8 @@ sub check {
   if ($self->{ciscoSlaRegistrationStatus} =~ /(notRegistered|registrationFailed)/ ) {
       $self->add_warning();
   }
-  if ($self->{ciscoSlaRegisterSuccess} ne "true" ) {
+  if ($self->{ciscoSlaRegisterSuccess} and
+      $self->{ciscoSlaRegisterSuccess} ne "true" ) {
     $self->add_warning(sprintf "registration failed with %s", $self->{ciscoSlaRegisterFailureReason});
   }
 }
@@ -87,6 +88,11 @@ sub finish {
   $self->{ciscoSlaAuthExpireTimeDays} =
       $self->{ciscoSlaAuthExpireTimeDays} < 0 ?
       0 : $self->{ciscoSlaAuthExpireTimeDays};
+  $self->{ciscoSlaAuthEvalPeriodLeftDays} =
+      int(($self->{ciscoSlaAuthEvalPeriodLeft} - time) / (3600*24));
+  $self->{ciscoSlaAuthEvalPeriodLeftDays} =
+      $self->{ciscoSlaAuthEvalPeriodLeftDays} < 0 ?
+      0 : $self->{ciscoSlaAuthEvalPeriodLeftDays};
   if ($self->{ciscoSlaAuthOOCStartTime} > 0) {
     $self->{ciscoSlaAuthOOCStartTimeDays} =
         int((time - $self->{ciscoSlaAuthExpireTime}) / (3600*24));
@@ -101,7 +107,7 @@ sub check {
       $self->{ciscoSlaAuthComplianceStatus});
   if ($self->{ciscoSlaAuthComplianceStatus} =~ /AUTHORIZED/) {
     # STRING: "AUTHORIZED"
-    # STRING: "AUTHORIZED - RESERVED"
+    # STRING: "AUTHORIZED - RESERVED" scheint der beste Status von allen zu sein
     $self->add_ok();
   } else {
     $self->add_critical();
@@ -111,18 +117,34 @@ sub check {
         sprintf "smart agent entered out of compliance %d days ago",
         $self->{ciscoSlaAuthOOCStartTimeDays});
   }
-  my $label = "sla_remaining_days";
-  $self->set_thresholds(metric => $label,
-      warning => "7:", critical => "2:");
-  $self->add_info(sprintf "authorization will expire in %d days",
-      $self->{ciscoSlaAuthExpireTimeDays})
-      if $self->{ciscoSlaAuthExpireTimeDays};
-  $self->add_info(sprintf "authorization has expired",
-      $self->{ciscoSlaAuthExpireTimeDays})
-      if ! $self->{ciscoSlaAuthExpireTimeDays};
-  $self->add_message($self->check_thresholds(metric => $label,
-      value => $self->{ciscoSlaAuthExpireTimeDays}));
-  $self->add_perfdata(label => $label,
-      value => $self->{ciscoSlaAuthExpireTimeDays});
+  if ($self->{ciscoSlaAuthComplianceStatus} ne "AUTHORIZED - RESERVED") {
+    my $label = "sla_remaining_days";
+    $self->set_thresholds(metric => $label,
+        warning => "7:", critical => "2:");
+    $self->add_info(sprintf "authorization will expire in %d days",
+        $self->{ciscoSlaAuthExpireTimeDays})
+        if $self->{ciscoSlaAuthExpireTimeDays};
+    $self->add_info("authorization has expired")
+        if ! $self->{ciscoSlaAuthExpireTimeDays};
+    $self->add_message($self->check_thresholds(metric => $label,
+        value => $self->{ciscoSlaAuthExpireTimeDays}));
+    $self->add_perfdata(label => $label,
+        value => $self->{ciscoSlaAuthExpireTimeDays});
+  }
+  if ($self->{ciscoSlaAuthEvalPeriodInUse} and
+      $self->{ciscoSlaAuthEvalPeriodInUse} eq "true") {
+    my $label = "eval_remaining_days";
+    $self->set_thresholds(metric => $label,
+        warning => "7:", critical => "2:");
+    $self->add_info(sprintf "evaluation will expire in %d days",
+        $self->{ciscoSlaAuthEvalPeriodLeftDays})
+        if $self->{ciscoSlaAuthEvalPeriodLeftDays};
+    $self->add_info("evaluation has expired")
+        if ! $self->{ciscoSlaAuthEvalPeriodLeftDays};
+    $self->add_message($self->check_thresholds(metric => $label,
+        value => $self->{ciscoSlaAuthEvalPeriodLeftDays}));
+    $self->add_perfdata(label => $label,
+        value => $self->{ciscoSlaAuthEvalPeriodLeftDays});
+  }
 }
 

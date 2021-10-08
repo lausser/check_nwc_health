@@ -67,6 +67,8 @@ sub init {
     } elsif ($self->mode =~ /device::licenses::/) {
       if ($self->implements_mib('CISCO-SMART-LIC-MIB')) {
         $self->analyze_and_check_lic_subsystem("Classes::Cisco::CISCOSMARTLICMIB::Component::KeySubsystem");
+      } elsif ($self->implements_mib('CISCO-LICENSE-MGMT-MIB')) {
+        $self->analyze_and_check_lic_subsystem("Classes::Cisco::CISCOLICENSEMGMTMIB::Component::KeySubsystem");
       } else {
         $self->no_such_mode();
       }
