@@ -113,6 +113,9 @@ sub classify {
         $self->rebless('Classes::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         $self->rebless('Classes::Brocade');
+      } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
+        # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
+        $self->rebless('Classes::PulseSecure::Gateway');
       } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
         # Juniper Networks,Inc,MAG-4610,7.2R10
         $self->rebless('Classes::Juniper');
@@ -125,9 +128,6 @@ sub classify {
         $self->rebless('Classes::Juniper');
       } elsif ($self->{productname} =~ /JunOS/i) {
         $self->rebless('Classes::Juniper');
-      } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
-        # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
-        $self->rebless('Classes::Juniper::IVE');
       } elsif ($self->{productname} =~ /DrayTek.*Vigor/i) {
         $self->rebless('Classes::DrayTek');
       } elsif ($self->implements_mib('NETGEAR-MIB')) {

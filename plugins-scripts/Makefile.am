@@ -135,6 +135,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PANPRODUCTSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PHIONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PROXYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PULSESECUREPSGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RAPIDCITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RESOURCEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RMONMIB.pm \
@@ -485,6 +486,12 @@ EXTRA_MODULES=\
   Classes/Versa/Component/MemSubsystem.pm \
   Classes/Versa/Component/PeerSubsystem.pm \
   Classes/Versa.pm \
+  Classes/PulseSecure/Gateway/Component/UserSubsystem.pm \
+  Classes/PulseSecure/Gateway/Component/EnvironmentalSubsystem.pm \
+  Classes/PulseSecure/Gateway/Component/CpuSubsystem.pm \
+  Classes/PulseSecure/Gateway/Component/DiskSubsystem.pm \
+  Classes/PulseSecure/Gateway/Component/MemSubsystem.pm \
+  Classes/PulseSecure/Gateway.pm \
   Classes/Device.pm
 
 SED=/bin/sed
