@@ -1,3 +1,9 @@
+Auf meiner Startseite steht:
+
+I will ignore all of your mails unless you give me an ip address and a community/root account. No joke! No exception!
+
+Herrschaften, das ist durchaus ernst gemeint. Freibier ist alle! Und wenn ich eine Mail zur Kenntnis nehme, dann bedeutet das immer noch nicht, daß ich für lau eure Arbeit mache. 
+
 Description
 ============
 The plugin check_nwc_health was developed with the aim of having a single tool for all aspects of monitoring of network components.
