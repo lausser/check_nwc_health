@@ -1,6 +1,8 @@
 package Classes::UPNP::AVM::FritzBox7390::Component::SmartHomeSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item Classes::UPNP::AVM::FritzBox7390);
 use strict;
+use JSON;
+use File::Slurp qw(read_file);
 
 sub init {
   my ($self) = @_;
@@ -73,11 +75,14 @@ sub save_device_cache {
   my $statefile = $self->create_device_cache_file();
   my $tmpfile = $self->statefilesdir().'/check_nwc_health_tmp_'.$$;
   my $fh = IO::File->new();
-  $fh->open(">$tmpfile");
-  $fh->print(Data::Dumper::Dumper($self->{device_cache}));
-  $fh->flush();
-  $fh->close();
-  my $ren = rename $tmpfile, $statefile;
+  if ($fh->open($tmpfile, "w")) {
+    my $coder = JSON::XS->new->ascii->pretty->allow_nonref;
+    my $jsonscalar = $coder->encode($self->{device_cache});
+    $fh->print($jsonscalar);
+    $fh->flush();
+    $fh->close();
+  }
+  rename $tmpfile, $statefile;
   $self->debug(sprintf "saved %s to %s",
       Data::Dumper::Dumper($self->{device_cache}), $statefile);
 }
@@ -86,26 +91,23 @@ sub load_device_cache {
   my ($self) = @_;
   my $statefile = $self->create_device_cache_file();
   if ( -f $statefile) {
+    my $jsonscalar = read_file($statefile);
     our $VAR1;
     eval {
-      require $statefile;
+      my $coder = JSON::XS->new->ascii->pretty->allow_nonref;
+      $VAR1 = $coder->decode($jsonscalar);
     };
     if($@) {
-      printf "FATAL: Could not load cache!\n";
+      $self->debug(sprintf "json load from %s failed. fallback", $statefile);
+      delete $INC{$statefile} if exists $INC{$statefile}; # else unit tests fail
+      eval "$jsonscalar";
+      if($@) {
+        printf "FATAL: Could not load cache in perl format!\n";
+        $self->debug(sprintf "fallback perl load from %s failed", $statefile);
+      }
     }
     $self->debug(sprintf "load %s", Data::Dumper::Dumper($VAR1));
     $self->{device_cache} = $VAR1;
-    eval {
-      foreach (keys %{$self->{device_cache}}) {
-        /^[\d\s]+$/ || die "newrelease";
-      }
-    };
-    if($@) {
-      $self->{device_cache} = {};
-      unlink $statefile;
-      delete $INC{$statefile};
-      $self->update_device_cache(1);
-    }
   }
 }
 
