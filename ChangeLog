@@ -1,3 +1,5 @@
+* 2021-11-22 10.0.0.1
+  tweak barracuda hardware-health snmp parameters
 * 2021-11-16 10.0
   use json for temporary files
 * 2021-10-13 9.1
