@@ -169,9 +169,15 @@ sub init {
     $_->{ltmPoolMemberAddr} = $self->unhex_ip($_->{ltmPoolMemberAddr});
     foreach my $auxmbr (@auxpoolmbrstatus) {
       if ($_->{ltmPoolMemberPoolName} eq $auxmbr->{ltmPoolMbrStatusPoolName} &&
-          $_->{ltmPoolMemberPort} eq $auxmbr->{ltmPoolMbrStatusPort} &&
-          $_->{ltmPoolMemberAddrType} eq $auxmbr->{ltmPoolMbrStatusAddrType} &&
-          $_->{ltmPoolMemberAddr} eq $auxmbr->{ltmPoolMbrStatusAddr}) {
+          $_->{ltmPoolMemberPort} eq $auxmbr->{ltmPoolMbrStatusPort} && ((
+              $_->{ltmPoolMemberNodeName} && $auxmbr->{ltmPoolMbrStatusNodeName} &&
+              $_->{ltmPoolMemberNodeName} eq $auxmbr->{ltmPoolMbrStatusNodeName} 
+          ) || (
+              (! $_->{ltmPoolMemberNodeName} || ! $auxmbr->{ltmPoolMbrStatusNodeName}) &&
+              $_->{ltmPoolMemberAddrType} eq $auxmbr->{ltmPoolMbrStatusAddrType} &&
+              $_->{ltmPoolMemberAddr} eq $auxmbr->{ltmPoolMbrStatusAddr}
+          )) 
+      ) {
         foreach my $key (keys %{$auxmbr}) {
           next if $key =~ /.*indices$/;
           $_->{$key} = $auxmbr->{$key};
@@ -184,6 +190,7 @@ sub init {
               $_->{ltmPoolMemberNodeName} && $auxmember->{ltmPoolMemberStatNodeName} &&
               $_->{ltmPoolMemberNodeName} eq $auxmember->{ltmPoolMemberStatNodeName}
           ) || (
+              (! $_->{ltmPoolMemberNodeName} || ! $auxmember->{ltmPoolMemberStatNodeName}) &&
               $_->{ltmPoolMemberAddrType} eq $auxmember->{ltmPoolMemberStatAddrType}
  &&
               $_->{ltmPoolMemberAddr} eq $auxmember->{ltmPoolMemberStatAddr}
