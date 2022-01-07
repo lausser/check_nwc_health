@@ -166,7 +166,6 @@ sub init {
   }
   foreach ($self->get_snmp_table_objects_with_cache(
       'F5-BIGIP-LOCAL-MIB', 'ltmPoolMemberTable', 'ltmPoolMemberPoolName')) {
-    $_->{ltmPoolMemberAddr} = $self->unhex_ip($_->{ltmPoolMemberAddr});
     foreach my $auxmbr (@auxpoolmbrstatus) {
       if ($_->{ltmPoolMemberPoolName} eq $auxmbr->{ltmPoolMbrStatusPoolName} &&
           $_->{ltmPoolMemberPort} eq $auxmbr->{ltmPoolMbrStatusPort} && ((
@@ -175,7 +174,20 @@ sub init {
           ) || (
               (! $_->{ltmPoolMemberNodeName} || ! $auxmbr->{ltmPoolMbrStatusNodeName}) &&
               $_->{ltmPoolMemberAddrType} eq $auxmbr->{ltmPoolMbrStatusAddrType} &&
+              # allerletzter Ausweg, eigentlich kommen hier nur Zufallstreffer, weil
+              # ltmPoolMemberAddr eine Addresse aus Sicht des Pools ist,
+              # ltmPoolMbrStatusAddr eine "private" Adresse des Members sein kann.
               $_->{ltmPoolMemberAddr} eq $auxmbr->{ltmPoolMbrStatusAddr}
+              # Und sowas gibt's auch:
+              # ltmPoolMemberAddrType ipv6
+              # ltmPoolMemberAddr 0000:0000:0000:0000:0000:0000:0000:0000
+              # und der laut ltmPoolMemberNodeName == ltmPoolMbrStatusNodeName zugehoerige
+              # ltmPoolMbrStatus-Eintrag lautet:
+              # ltmPoolMbrStatusNodeName /Common/orac3-nod02.dingsbums.com
+              # ltmPoolMbrStatusAddrType ipv6
+              # ltmPoolMbrStatusAddr 48.48.48.48
+              # Da kotz ich im Strahl. Abgesehen davon, daß :: eh mehr dummymaessig aussieht,
+              # und das ganze Dings nicht ernstzunehmen ist.
           )) 
       ) {
         foreach my $key (keys %{$auxmbr}) {
@@ -218,7 +230,7 @@ sub init {
     my @auxnodeaddrstatus = ();
     foreach ($self->get_snmp_table_objects(
         'F5-BIGIP-LOCAL-MIB', 'ltmNodeAddrStatusTable')) {
-      $_->{ltmNodeAddrStatusAddr} = $self->unhex_ip($_->{ltmNodeAddrStatusAddr});
+      #$_->{ltmNodeAddrStatusAddr} = $self->unhex_ip($_->{ltmNodeAddrStatusAddr});
       push(@auxnodeaddrstatus, $_);
     }
     foreach my $poolmember (@{$self->{poolmembers}}) {
