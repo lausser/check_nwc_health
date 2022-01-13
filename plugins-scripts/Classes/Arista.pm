@@ -7,9 +7,12 @@ sub init {
   if ($self->mode =~ /device::hardware::health/) {
     $self->mult_snmp_max_msg_size(10);
     $self->analyze_and_check_environmental_subsystem("Classes::Arista::Component::EnvironmentalSubsystem");
+    $self->analyze_and_check_disk_subsystem("Classes::Arista::Component::DiskSubsystem");
     if (! $self->check_messages()) {
       $self->clear_messages(0);
       $self->add_ok("environmental hardware working fine");
+    } else {
+      $self->clear_messages(0);
     }
   } elsif ($self->mode =~ /device::hardware::load/) {
     # CPU util on management plane

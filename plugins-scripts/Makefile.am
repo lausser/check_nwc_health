@@ -458,6 +458,7 @@ EXTRA_MODULES=\
   Classes/Lantronix/SLS.pm \
   Classes/Arista/ARISTABGP4V2MIB/Components/PeerSubsystem.pm \
   Classes/Arista/Component/EnvironmentalSubsystem.pm \
+  Classes/Arista/Component/DiskSubsystem.pm \
   Classes/Arista.pm \
   Classes/Riverbed/SteelheadEX/Component/EnvironmentalSubsystem.pm \
   Classes/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \
