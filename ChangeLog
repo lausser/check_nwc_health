@@ -1,3 +1,5 @@
+* 2022-01-13 10.0.0.3
+  bugfix in arista power supply
 * 2022-01-07 10.0.0.2
   bugfix in f5 ltm detail output
 * 2021-11-22 10.0.0.1

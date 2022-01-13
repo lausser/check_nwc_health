@@ -81,6 +81,8 @@ sub check_state {
     } else {
       $self->add_unknown();
     }
+  } elsif ($self->{entStateOper} ne "enabled" and $self->{entStateStandby} eq "providingService") {
+    $self->add_critical();
   } else {
     $self->add_ok(); # admin disabled, ignore
   }
@@ -118,6 +120,14 @@ use strict;
 sub check {
   my ($self) = @_;
   $self->check_state();
+}
+
+sub check_state {
+  my ($self) = @_;
+  $self->SUPER::check_state();
+  if ($self->{entStateOper} eq "unknown" and $self->{entStateAdmin} eq "unknown" and $self->{entStateStandby} eq "providingService") {
+    $self->add_critical_mitigation("plug has been pulled");
+  }
 }
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Sensor;
@@ -168,4 +178,15 @@ sub check {
   );
 }
 
+__END__
+Stecker gezogen
+[POWERSUPPLY_100721000]
+entPhysicalClass: powerSupply
+entPhysicalDescr: PowerSupply2
+entPhysicalName:
+entStateAdmin: unknown
+entStateLastChanged:
+entStateOper: unknown
+entStateStandby: providingService <-kein failover, der das hier sichert
+entStateUsage: active
 

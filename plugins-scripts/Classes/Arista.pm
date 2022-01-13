@@ -10,6 +10,8 @@ sub init {
     if (! $self->check_messages()) {
       $self->clear_messages(0);
       $self->add_ok("environmental hardware working fine");
+    } else {
+      $self->clear_messages(0);
     }
   } elsif ($self->mode =~ /device::hardware::load/) {
     # CPU util on management plane
