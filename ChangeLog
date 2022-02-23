@@ -1,3 +1,5 @@
+* 2022-02-23 10.1.0.1
+  suppress unknown arista sensors which are not marked as faulty
 * 2022-02-18 10.1
   check filesystems in Arista (full Log/Core stops syslog and accounting)
   accept disabled sensors
