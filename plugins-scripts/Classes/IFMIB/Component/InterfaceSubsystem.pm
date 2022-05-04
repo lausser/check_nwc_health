@@ -1,7 +1,7 @@
 package Classes::IFMIB::Component::InterfaceSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
-use JSON;
+use JSON:XS;
 use File::Slurp qw(read_file);
 
 sub init {
