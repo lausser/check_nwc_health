@@ -7,6 +7,9 @@ sub init {
   $self->get_snmp_tables('ARUBAWIRED-POWERSUPPLY-MIB', [
       ['powersupplies', 'arubaWiredPowerSupplyTable', 'Classes::HP::Aruba::Component::PowersupplySubsystem::Powersupply'],
   ]);
+  $self->get_snmp_tables('ENTITY-MIBx', [
+      ['powersupplies2', 'entPhysicalTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+  ]);
 }
 
 package Classes::HP::Aruba::Component::PowersupplySubsystem::Powersupply;

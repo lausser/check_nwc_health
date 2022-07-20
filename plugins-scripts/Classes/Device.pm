@@ -150,6 +150,8 @@ sub classify {
         $self->rebless('Classes::Huawei');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.2011\.2\./) {
         $self->rebless('Classes::Huawei');
+      } elsif ($self->implements_mib('ARUBAWIRED-CHASSIS-MIB')) {
+        $self->rebless('Classes::HP::Aruba');
       } elsif ($self->{productname} =~ /Procurve/i ||
           ($self->implements_mib('HP-ICF-CHASSIS') &&
           $self->implements_mib('NETSWITCH-MIB'))) {
