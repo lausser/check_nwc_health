@@ -4,6 +4,14 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  $self->get_snmp_objects('UCD-SNMP-MIB', (qw(
+      ssCpuNumCpus)));
+  if (! $self->{ssCpuNumCpus}) {
+    $self->get_snmp_tables('HOST-RESOURCES-MIB', [
+        ['cpus', 'hrProcessorTable', 'Classes::HOSTRESOURCESMIB::Component::CpuSubsystem::Cpu'],
+    ]);
+    $self->{ssCpuNumCpus} = scalar(@{$self->{cpus}}) if scalar(@{$self->{cpus}});
+  }
   $self->get_snmp_tables('UCD-SNMP-MIB', [
       ['loads', 'laTable', 'Classes::UCDMIB::Component::LoadSubsystem::Load'],
   ]);
@@ -13,6 +21,7 @@ sub check {
   my ($self) = @_;
   $self->add_info('checking loads');
   foreach (@{$self->{loads}}) {
+    $_->{ssCpuNumCpus} = $self->{ssCpuNumCpus} if $self->{ssCpuNumCpus};
     $_->check();
   }
 }

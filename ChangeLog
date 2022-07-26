@@ -1,3 +1,5 @@
+* 2022-07-21 10.2.1
+  increase cpu thresholds for linux, separate user/system/etc from iowait
 * 2022-07-20 10.2
   update glplugin, better get_table fallback handling
 * 2022-05-05 10.1.0.3

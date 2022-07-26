@@ -63,8 +63,8 @@ sub check {
 	  $self->{$key});
       $self->set_thresholds(
           metric => $key,
-          warning => 50,
-          critical => 90);
+          warning => $_ eq "wait" ? 10 : 80,
+          critical => $_ eq "wait" ? 25 : 90);
       $self->add_message($self->check_thresholds(
           metric => $key,
           value => $self->{$key}));
