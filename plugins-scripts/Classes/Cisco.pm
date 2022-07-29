@@ -72,6 +72,12 @@ sub init {
       } else {
         $self->no_such_mode();
       }
+    } elsif ($self->mode =~ /device::rtt::check/) {
+      if ($self->implements_mib('CISCO-RTTMON-MIB')) {
+        $self->analyze_and_check_lic_subsystem("Classes::Cisco::CISCORTTMONMIB::Component::RttSubsystem");
+      } else {
+        $self->no_such_mode();
+      }
     } else {
       $self->init();
       if ($self->mode =~ /device::interfaces::ifstack::status/ &&

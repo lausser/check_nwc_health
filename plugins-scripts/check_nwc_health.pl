@@ -479,6 +479,12 @@ $plugin->add_mode(
     help => 'Check if FEXes appear and disappear (use --lookup)',
 );
 $plugin->add_mode(
+    internal => 'device::rtt::check',
+    spec => 'check-rtt',
+    alias => undef,
+    help => 'Check rtt monitors (Cisco SLA)',
+);
+$plugin->add_mode(
     internal => 'device::hardware::chassis::health',
     spec => 'chassis-hardware-health',
     alias => undef,
