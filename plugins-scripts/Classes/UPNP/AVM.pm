@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->{productname} =~ /(5530|6490|7390|7412|7490|7580|7590)/) {
+  if ($self->{productname} =~ /(5530|6490|7390|7412|7490|7560|7580|7590)/) {
     $self->rebless('Classes::UPNP::AVM::FritzBox7390');
   } else {
     $self->no_such_model();
