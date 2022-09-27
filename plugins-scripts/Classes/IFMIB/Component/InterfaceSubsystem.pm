@@ -615,7 +615,7 @@ sub load_interface_cache {
 
 sub make_ifdescr_unique {
   my ($self, $if) = @_;
-  $if->{ifDescr} = $if->{ifDescr}.' '.$if->{flat_indices} if $self->{duplicates}->{$if->{ifDescr}} > 1;
+  $if->{ifDescr} = $if->{ifDescr}.' '.$if->{flat_indices} if defined $self->{duplicates}->{$if->{ifDescr}} && $self->{duplicates}->{$if->{ifDescr}} > 1;
 }
 
 sub get_interface_indices {

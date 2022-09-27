@@ -1,3 +1,5 @@
+* 2022-09-20 10.3.0.1
+  fix issue #231, thanks log1-c
 * 2022-07-29 10.3
   add mode check-rtt (cisco-rttmon-mib slas)
 * 2022-07-21 10.2.1
