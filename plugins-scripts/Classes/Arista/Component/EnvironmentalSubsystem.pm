@@ -4,6 +4,9 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  $self->require_mib("MIB-2-MIB");
+  $self->require_mib("ENTITY-STATE-MIB");
+  $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'ENTITY-STATE-MIB'}->{entStateLastChangedDefinition} = 'MIB-2-MIB::DateAndTime';
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable',
       'Classes::Arista::Component::EnvironmentalSubsystem::Entity',
@@ -28,6 +31,35 @@ sub init {
   @{$self->{entities}} = grep {
     ! exists $_->{valid} || $_->{valid};
   } @{$self->{entities}};
+}
+
+sub check {
+  my ($self) = @_;
+  $self->{powerSupplyList} = [map {
+      $_->{entPhysicalDescr};
+  } grep {
+      $_->{entPhysicalClass} eq 'powerSupply';
+  } @{$self->{entities}}];
+  #
+  # Check if we lost a power supply. (pulling ps -> entry in snmp disappears)
+  #
+  $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
+  $self->valdiff({name => 'powersupplies', lastarray => 1},
+      qw(powerSupplyList));
+  if (scalar(@{$self->{delta_found_powerSupplyList}}) > 0) {
+    $self->add_ok(sprintf '%d new power supply (%s)',
+        scalar(@{$self->{delta_found_powerSupplyList}}),
+        join(", ", @{$self->{delta_found_powerSupplyList}}));
+  }
+  if (scalar(@{$self->{delta_lost_powerSupplyList}}) > 0) {
+    $self->add_critical(sprintf '%d power supply missing (%s)',
+        scalar(@{$self->{delta_lost_powerSupplyList}}),
+        join(", ", @{$self->{delta_lost_powerSupplyList}}));
+  }
+  delete $self->{powerSupplyList};
+  delete $self->{delta_found_powerSupplyList};
+  delete $self->{delta_lost_powerSupplyList};
+  $self->SUPER::check();
 }
 
 package Classes::Arista::Component::EnvironmentalSubsystem::Entity;
@@ -128,6 +160,11 @@ package Classes::Arista::Component::EnvironmentalSubsystem::Powersupply;
 our @ISA = qw(Classes::Arista::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
+sub finish {
+  my ($self) = @_;
+  $self->{entStateLastChangedAgo} = time - $self->{entStateLastChanged};
+}
+
 sub check {
   my ($self) = @_;
   $self->check_state();
@@ -136,8 +173,16 @@ sub check {
 sub check_state {
   my ($self) = @_;
   $self->SUPER::check_state();
-  if ($self->{entStateOper} eq "unknown" and $self->{entStateAdmin} eq "unknown" and $self->{entStateStandby} eq "providingService") {
-    $self->add_critical_mitigation("plug has been pulled");
+  if ($self->{entStateAdmin} eq "locked" &&
+      $self->{entStateOper} eq "disabled" &&
+      $self->{entStateStandby} eq "providingService" &&
+      $self->{entStateUsage} eq "active") {
+    # pull the power cable -> entStateAdmin: locked, entStateOper: disabled,
+    #     entStateStandby: providingService, entStateUsage: active
+    $self->add_warning_mitigation(sprintf "%s is down (pulled cable?)", $self->{entPhysicalDescr});
+  } elsif ($self->{entStateOper} eq "unknown" and $self->{entStateAdmin} eq "unknown" and $self->{entStateStandby} eq "providingService") {
+    # pull the power supply, put it back.
+    $self->add_critical_mitigation(sprintf "%s is in an unknown state", $self->{entPhysicalDescr});
   }
 }
 
