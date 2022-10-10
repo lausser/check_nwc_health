@@ -95,6 +95,10 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CENTITYEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIBGPVPNMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIENTITYEXTENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANAPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANAPRADIOMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANCONFIGURATIONMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANSTATIONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HOSTRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HPICFCHASSIS.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IANAIFTYPEMIB.pm \
@@ -299,6 +303,7 @@ EXTRA_MODULES=\
   Classes/HH3C/Component/MemSubsystem.pm \
   Classes/HH3C/Component/CpuSubsystem.pm \
   Classes/HH3C.pm \
+  Classes/Huawei/Component/WlanSubsystem.pm \
   Classes/Huawei/Component/EnvironmentalSubsystem.pm \
   Classes/Huawei/Component/CpuSubsystem.pm \
   Classes/Huawei/Component/MemSubsystem.pm \

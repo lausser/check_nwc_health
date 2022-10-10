@@ -18,6 +18,8 @@ sub init {
       $self->analyze_and_check_cpu_subsystem("Classes::Huawei::Component::CpuSubsystem");
     } elsif ($self->mode =~ /device::hardware::memory/) {
       $self->analyze_and_check_mem_subsystem("Classes::Huawei::Component::MemSubsystem");
+    } elsif ($self->mode =~ /device::wlan/) {
+      $self->analyze_and_check_wlan_subsystem("Classes::Huawei::Component::WlanSubsystem");
     } elsif ($self->mode =~ /device::bgp/) {
       if ($self->implements_mib('HUAWEI-BGP-VPN-MIB', 'hwBgpPeerAddrFamilyTable')) {
         $self->analyze_and_check_interface_subsystem("Classes::Huawei::Component::PeerSubsystem");
