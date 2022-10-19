@@ -1,3 +1,5 @@
+* 2022-10-09 10.5
+  add a temporary check for Cisco Viptela SDWAN
 * 2022-10-08 10.4
   add Huawei wlan controller (not finished yet)
 * 2022-10-08 10.3.0.3

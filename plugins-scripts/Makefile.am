@@ -255,6 +255,7 @@ EXTRA_MODULES=\
   Classes/Cisco/SB/Component/CpuSubsystem.pm \
   Classes/Cisco/SB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/SB.pm \
+  Classes/Cisco/Viptela/Component/SdwanSubsystem.pm \
   Classes/Cisco.pm \
   Classes/OneOS/Component/EnvironmentalSubsystem.pm \
   Classes/OneOS/Component/CpuSubsystem.pm \

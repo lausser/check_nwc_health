@@ -444,6 +444,12 @@ $plugin->add_mode(
     help => 'Check connectivity with load balancer vips',
 );
 $plugin->add_mode(
+    internal => 'device::sdwan::session::availability',
+    spec => 'sdwan-session-availability',
+    alias => undef,
+    help => 'Check active connections count (percent of configured connections)',
+);
+$plugin->add_mode(
     internal => 'device::licenses::validate',
     spec => 'check-licenses',
     alias => undef,
