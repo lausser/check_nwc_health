@@ -31,7 +31,13 @@ sub check {
   $self->add_info('checking access points');
   if ($self->mode =~ /device::wlan::aps::clients/) {
     my $ssids = {};
-    map { $ssids->{$_->{bsnMobileStationSsid}} += 1 } @{$self->{mobilestations}};
+    map {
+        $ssids->{$_->{bsnMobileStationSsid}} += 1
+    } grep {
+        # es gibt Stations onhe SSID, Mac etc. Die sind nicht konfiguriert
+        # oder ausser Betrieb.
+        $_->{bsnMobileStationSsid};
+    } @{$self->{mobilestations}};
     foreach my $ssid (sort keys %{$ssids}) {
       $self->set_thresholds(metric => $ssid.'_clients',
           warning => '0:', critical => ':0');
