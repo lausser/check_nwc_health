@@ -42,6 +42,12 @@ sub init {
   } elsif ($self->implements_mib('CISCO-ENTITY-FRU-CONTROL-MIB')) {
     $self->{fru_subsystem} =
         Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::EnvironmentalSubsystem->new();
+    # FRU MIBS doesn't show temperature sensors, only module status, etc.
+    # checking sensors is nice to show that your datacenter is too warm ...
+    if ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
+        $self->{sensor_subsystem} =
+            Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem->new();
+    }
   } elsif ($self->implements_mib('CISCO-ENTITY-SENSOR-MIB')) {
     # (IOS can have ENVMON+ENTITY. Sensors are copies, so not needed)
     $self->{sensor_subsystem} =
