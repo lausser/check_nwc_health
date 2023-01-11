@@ -1,3 +1,5 @@
+* 2023-01-10 10.6
+  add support for Viptela
 * 2022-12-16 10.5.1
   bugfix in Cisco WLC, skip unused mobile stations
 * 2022-10-09 10.5

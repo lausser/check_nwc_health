@@ -158,6 +158,9 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDDISKIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VIPTELAHARDWARE.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VIPTELAOPERSYSTEM.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VIPTELASECURITY.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VORMETRICMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
@@ -255,7 +258,12 @@ EXTRA_MODULES=\
   Classes/Cisco/SB/Component/CpuSubsystem.pm \
   Classes/Cisco/SB/Component/EnvironmentalSubsystem.pm \
   Classes/Cisco/SB.pm \
+  Classes/Cisco/Viptela/Component/EnvironmentalSubsystem.pm \
+  Classes/Cisco/Viptela/Component/DiskSubsystem.pm \
+  Classes/Cisco/Viptela/Component/MemSubsystem.pm \
+  Classes/Cisco/Viptela/Component/CpuSubsystem.pm \
   Classes/Cisco/Viptela/Component/SdwanSubsystem.pm \
+  Classes/Cisco/Viptela.pm \
   Classes/Cisco.pm \
   Classes/OneOS/Component/EnvironmentalSubsystem.pm \
   Classes/OneOS/Component/CpuSubsystem.pm \
