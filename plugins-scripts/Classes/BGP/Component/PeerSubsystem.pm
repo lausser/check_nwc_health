@@ -57,7 +57,7 @@ our $errorcodes = {
 sub init {
   my ($self) = @_;
   $self->{peers} = [];
-  $self->bulk_is_baeh(10);
+  $self->bulk_is_baeh(30);
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }
