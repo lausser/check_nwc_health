@@ -12,7 +12,7 @@ sub init {
   if (ref($self) ne "Classes::DrayTek") {
     $self->init();
   } else {
-    $self->no_such_device();
+    $self->no_such_model();
   }
 }
 
