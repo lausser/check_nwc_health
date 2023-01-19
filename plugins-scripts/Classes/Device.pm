@@ -116,26 +116,18 @@ sub classify {
       } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
         # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
         $self->rebless('Classes::PulseSecure::Gateway');
-      } elsif ($self->{productname} =~ /Juniper.*MAG\-\d+/i) {
-        # Juniper Networks,Inc,MAG-4610,7.2R10
+      } elsif ($self->{productname} =~ /(Juniper|NetScreen|JunOS)/i) {
         $self->rebless('Classes::Juniper');
-      } elsif ($self->{productname} =~ /Juniper.*MAG\-SM\d+/i) {
-        # Juniper Networks,Inc,MAG-SMx60,7.4R8
-        $self->rebless('Classes::Juniper::IVE');
-      } elsif ($self->implements_mib('JUNIPER-MIB') || $self->{productname} =~ /srx/i) {
-        $self->rebless('Classes::Juniper::SRX');
-      } elsif ($self->{productname} =~ /NetScreen/i) {
+      } elsif ($self->{productname} =~ /^(GS|FS)/i) {
         $self->rebless('Classes::Juniper');
-      } elsif ($self->{productname} =~ /JunOS/i) {
+      } elsif ($self->implements_mib('JUNIPER-MIB')) {
+        $self->rebless('Classes::Juniper');
+      } elsif ($self->implements_mib('NETSCREEN-PRODUCTS-MIB')) {
         $self->rebless('Classes::Juniper');
       } elsif ($self->{productname} =~ /DrayTek.*Vigor/i) {
         $self->rebless('Classes::DrayTek');
       } elsif ($self->implements_mib('NETGEAR-MIB')) {
         $self->rebless('Classes::Netgear');
-      } elsif ($self->{productname} =~ /^(GS|FS)/i) {
-        $self->rebless('Classes::Juniper');
-      } elsif ($self->implements_mib('NETSCREEN-PRODUCTS-MIB')) {
-        $self->rebless('Classes::Juniper::NetScreen');
       } elsif ($self->implements_mib('PAN-PRODUCTS-MIB')) {
         $self->rebless('Classes::PaloAlto');
       } elsif ($self->{productname} =~ /SecureOS/i) {
@@ -249,7 +241,7 @@ sub init {
     } else {
       $self->analyze_and_check_interface_subsystem("Classes::IPMIB::Component::RoutingSubsystem");
     }
-  } elsif ($self->mode =~ /device::bgp/ && $self->{productname} !~ /JunOS/i) {
+  } elsif ($self->mode =~ /device::bgp/) {
     $self->analyze_and_check_bgp_subsystem("Classes::BGP::Component::PeerSubsystem");
   } elsif ($self->mode =~ /device::ospf/) {
     $self->analyze_and_check_neighbor_subsystem("Classes::OSPF::Component::NeighborSubsystem");
