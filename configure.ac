@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_REVISION ($Revision: 1.150 $)
-AC_PREREQ(2.58)
-AC_INIT(check_nwc_health,10.7.1)
+AC_PREREQ([2.71])
+AC_INIT([check_nwc_health],[10.7.1])
 AM_INIT_AUTOMAKE([1.9 tar-pax])
 AM_MAINTAINER_MODE([disable])
 AC_CANONICAL_HOST
@@ -57,7 +57,8 @@ AC_ARG_ENABLE([standalone],
     AS_HELP_STRING([--disable-standalone], [Disable feature standalone]))
 AM_CONDITIONAL([DISABLE_STANDALONE], [test "$enable_standalone" = "no"])
 
-AC_OUTPUT(Makefile plugins-scripts/Makefile plugins-scripts/subst)
+AC_CONFIG_FILES([Makefile plugins-scripts/Makefile plugins-scripts/subst])
+AC_OUTPUT
 
 ACX_FEATURE([with],[perl])
 ACX_FEATURE([with],[nagios-user])
