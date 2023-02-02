@@ -95,6 +95,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CENTITYEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIBGPVPNMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIENTITYEXTENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIL2MAMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIL2VLANMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANAPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANAPRADIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIWLANCONFIGURATIONMIB.pm \
@@ -317,6 +319,8 @@ EXTRA_MODULES=\
   Classes/Huawei/Component/CpuSubsystem.pm \
   Classes/Huawei/Component/MemSubsystem.pm \
   Classes/Huawei/Component/PeerSubsystem.pm \
+  Classes/Huawei/HUAWEIL2VLANMIB/Component/VlanSubsystem.pm \
+  Classes/Huawei/HUAWEIL2MAMMIB/Component/VlanSubsystem.pm \
   Classes/Huawei/CloudEngine.pm \
   Classes/Huawei.pm \
   Classes/HP/Procurve/Component/MemSubsystem.pm \

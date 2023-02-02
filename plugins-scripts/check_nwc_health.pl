@@ -155,6 +155,12 @@ $plugin->add_mode(
     help => 'Check interfaces for security violations',
 );
 $plugin->add_mode(
+    internal => 'device::interfaces::vlan:mac::count',
+    spec => 'interface-vlan-count-macs',
+    alias => undef,
+    help => 'Count the mac address entries in a vlan',
+);
+$plugin->add_mode(
     internal => 'device::routes::list',
     spec => 'list-routes',
     alias => undef,

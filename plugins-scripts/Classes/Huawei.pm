@@ -20,6 +20,9 @@ sub init {
       $self->analyze_and_check_mem_subsystem("Classes::Huawei::Component::MemSubsystem");
     } elsif ($self->mode =~ /device::wlan/) {
       $self->analyze_and_check_wlan_subsystem("Classes::Huawei::Component::WlanSubsystem");
+    } elsif ($self->mode =~ /device::interfaces::vlan:mac::count/) {
+      $self->analyze_and_check_vlan_subsystem("Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem");
+      #$self->analyze_and_check_vlan_subsystem("Classes::Huawei::HUAWEIL2VLANMIB::Component::VlanSubsystem");
     } elsif ($self->mode =~ /device::bgp/) {
       if ($self->implements_mib('HUAWEI-BGP-VPN-MIB', 'hwBgpPeerAddrFamilyTable')) {
         $self->analyze_and_check_interface_subsystem("Classes::Huawei::Component::PeerSubsystem");
