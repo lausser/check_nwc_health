@@ -4,18 +4,12 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  foreach ($self->get_snmp_table_objects_with_cache(
-      'HUAWEI-L2MAM-MIB', 'hwMacVlanStatisticsTable', 'hwMacVlanStatisticsVlanId')) {
-    my $vlan = Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Vlan->new(%{$_});
-    $vlan->finish();
-    if ($self->filter_name($vlan->{hwMacVlanStatisticsVlanId})) {
-      push(@{$self->{vlans}}, $vlan);
-    }
-  }
-
   $self->get_snmp_tables('HUAWEI-L2MAM-MIB', [
       #['macs', 'hwDynMacAddrQueryTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Mac'],
-#      ['macs', 'hwMacVlanStatisticsTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Vlan', sub { return $self->filter_name(shift->{hwMacVlanStatisticsVlanId}) } ],
+      ['macs', 'hwMacVlanStatisticsTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Vlan', sub { return $self->filter_name(shift->{hwMacVlanStatisticsVlanId}) }, ["hwMacVlanStatistics"], "hwMacVlanStatisticsVlanId" ],
+      # reine glueckssache, dass das funktioniert. da --name eine Zahl ist,
+      # wird der Index im Cachefile genommen, nicht eine Bezeichnung
+      # (wie es der Fall waere, wenn VlanID ein String waere)
   ]);
 }
 
