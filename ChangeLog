@@ -1,3 +1,5 @@
+* 2023-02-03 10.8.0.2
+  force interface-vlan-count-macs to cache vlans
 * 2023-02-03 10.8.0.1
   fix an undef in interface-vlan-count-macs
 * 2023-02-03 10.8

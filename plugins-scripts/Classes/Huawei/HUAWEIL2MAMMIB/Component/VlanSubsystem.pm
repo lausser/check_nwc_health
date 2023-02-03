@@ -6,8 +6,8 @@ sub init {
   my ($self) = @_;
   $self->get_snmp_tables('HUAWEI-L2MAM-MIB', [
       #['macs', 'hwDynMacAddrQueryTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Mac'],
-      ['macs', 'hwMacVlanStatisticsTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Vlan', sub { return $self->filter_name(shift->{hwMacVlanStatisticsVlanId}) }, ["hwMacVlanStatistics"], "hwMacVlanStatisticsVlanId" ],
-      # reine glueckssache, dass das funktioniert. da --name eine Zahl ist,
+      ['macs', 'hwMacVlanStatisticsTable', 'Classes::Huawei::HUAWEIL2MAMMIB::Component::VlanSubsystem::Vlan', sub { return $self->filter_name(shift->{hwMacVlanStatisticsVlanId}) }, ["hwMacVlanStatistics"], "hwMacVlanStatistics" ],
+      # reine Glueckssache, dass das funktioniert. da --name eine Zahl ist,
       # wird der Index im Cachefile genommen, nicht eine Bezeichnung
       # (wie es der Fall waere, wenn VlanID ein String waere)
   ]);
