@@ -25,11 +25,11 @@ sub init {
   # snmp responses when a large amount of data was transmitted.
   $self->mult_snmp_max_msg_size(8);
   $self->bulk_is_baeh(160);
-  $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-    ['entitystates', 'hwEntityStateTable',
-    'Monitoring::GLPlugin::SNMP::TableItem'],
-  ]);
   foreach (qw(modules fans powersupplies)) {
+    $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
+      ['entitystates', 'hwEntityStateTable',
+      'Monitoring::GLPlugin::SNMP::TableItem'],
+    ]);
     $self->merge_tables($_, "entitystates");
   }
   if (@{$self->{fanstates}} && ! @{$self->{fans}}) {
@@ -123,7 +123,7 @@ sub check {
       value => $self->{hwEntityTemperature},
   );
   $self->add_info(sprintf 'module %s fault light is %s',
-      $self->{name}, $self->{hwEntityFaultLight});
+      $self->{name}, $self->{hwEntityFaultLight}) if exists $self->{hwEntityFaultLight};
 }
 
 
