@@ -241,7 +241,7 @@ sub finish {
   my @tmp_indices = @{$self->{indices}};
   my $last_tmp = scalar(@tmp_indices) - 1;
   shift @tmp_indices;
-  $self->{bgpPeerLocalAddrType} = $self->mibs_and_oids_definition(
+  $self->{appRouteStatisticsSrcIp} = $self->mibs_and_oids_definition(
       'INET-ADDRESS-MIB', 'InetAddressType', shift @tmp_indices);
 
   $self->{bgpPeerLocalAddr} = $self->mibs_and_oids_definition(
