@@ -16,6 +16,8 @@ sub check {
   if ($self->mode =~ /device::mngmt::status/) {
     if (! defined $self->{mgStatShortDescr}) {
       $self->add_unknown('management mib is not implemented');
+    } elsif ($self->{mgStatShortDescr} =~ /certificate is valid\s*$/) {
+      $self->add_ok(sprintf 'status of management is %s', $self->{mgStatLongDescr});
     } elsif ($self->{mgStatShortDescr} ne 'OK') {
       $self->add_critical(sprintf 'status of management is %s', $self->{mgStatLongDescr});
     } else {
