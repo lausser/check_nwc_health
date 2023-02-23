@@ -179,7 +179,7 @@ sub classify {
       } elsif ($self->implements_mib('SW-MIB')) {
         $self->rebless('Classes::Brocade');
       } elsif ($self->implements_mib('VIPTELA-OPER-SYSTEM')) {
-        $self->rebless('Classes::Cisco::Viptela');
+        $self->rebless('Classes::Cisco');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.9\./) {
         $self->rebless('Classes::Cisco');
       } elsif ($self->{productname} =~ /Arista.*EOS.*/) {

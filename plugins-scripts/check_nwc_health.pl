@@ -456,6 +456,12 @@ $plugin->add_mode(
     help => 'Check active connections count (percent of configured connections)',
 );
 $plugin->add_mode(
+    internal => 'device::sdwan::route::quality',
+    spec => 'sdwan-route-quality',
+    alias => undef,
+    help => 'Check loss, latency and jitter of a route',
+);
+$plugin->add_mode(
     internal => 'device::licenses::validate',
     spec => 'check-licenses',
     alias => undef,

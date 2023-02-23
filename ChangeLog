@@ -1,3 +1,6 @@
+* 2023-02-23 10.9
+  bugfix in Versa Peersubsystem
+  prepare some cisco sdwan stuff
 * 2023-02-20 10.8.0.3
   tweak huawei Entity-Table snmp parameters
 * 2023-02-03 10.8.0.2

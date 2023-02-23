@@ -21,6 +21,8 @@ sub init {
     $self->rebless('Classes::Cisco::UCOS');
   } elsif ($self->{productname} =~ /Cisco (PIX|Adaptive) Security Appliance/i) {
     $self->rebless('Classes::Cisco::ASA');
+  } elsif ($self->implements_mib('VIPTELA-OPER-SYSTEM')) {
+    $self->rebless('Classes::Cisco::Viptela');
   } elsif ($self->{productname} =~ /Cisco/i) {
     $self->rebless('Classes::Cisco::IOS');
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
@@ -75,6 +77,13 @@ sub init {
     } elsif ($self->mode =~ /device::rtt::check/) {
       if ($self->implements_mib('CISCO-RTTMON-MIB')) {
         $self->analyze_and_check_lic_subsystem("Classes::Cisco::CISCORTTMONMIB::Component::RttSubsystem");
+      } else {
+        $self->no_such_mode();
+      }
+    } elsif ($self->mode =~ /device::sdwan::/) {
+    #} elsif ($self->mode =~ /device::sdwan::session::availability/) {
+      if ($self->implements_mib("CISCO-SDWAN-OPER-SYSTEM-MIB")) {
+        $self->analyze_and_check_sdwan_subsystem("Classes::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem");
       } else {
         $self->no_such_mode();
       }
