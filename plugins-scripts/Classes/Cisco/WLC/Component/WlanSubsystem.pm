@@ -165,6 +165,9 @@ sub finish {
   } elsif ($self->{bsnAPDot3MacAddress} && unpack("H12", $self->{bsnAPDot3MacAddress}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
     $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
   }
+  if (not $self->{bsnAPName}) {
+    $self->{bsnAPName} = "UNNAMED_".$self->{flat_indices};
+  }
 }
 
 sub check {
