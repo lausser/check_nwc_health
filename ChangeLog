@@ -1,3 +1,5 @@
+* 2023-03-28 10.11
+  improve Huawei hardware-health
 * 2023-03-20 10.10
   add filters to sdwan-check (name=dstip,name2=localcolor)
 * 2023-03-10 10.9.1.3
