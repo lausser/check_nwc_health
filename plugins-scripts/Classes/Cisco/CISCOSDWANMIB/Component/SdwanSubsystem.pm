@@ -14,15 +14,8 @@ sub init {
     $self->get_snmp_tables("CISCO-SDWAN-APP-ROUTE-MIB", [
       ["statistics", "appRouteStatisticsTable", "Classes::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat", sub {
           my ($o) = @_;
-printf STDERR "%s is %s AND %s is %s\n",
-  $self->opts->name,
-  $o->{appRouteStatisticsDstIp},
-  $self->opts->name2,
-  $o->{appRouteStatisticsLocalColor};
-          my $kak =   ($self->filter_name($o->{appRouteStatisticsDstIp}) and
-              $self->filter_name2($o->{appRouteStatisticsLocalColor})) ? 1 : 0;
-    printf STDERR "kak %s\n", $kak;
-return $kak;
+          return ($self->filter_name($o->{appRouteStatisticsDstIp}) and
+              $self->filter_name2($o->{appRouteStatisticsLocalColor}));
       }],
       ["probestatistics", "appRouteStatisticsAppProbeClassTable", "Classes::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat"],
     ]);
@@ -38,15 +31,8 @@ return $kak;
     $self->get_snmp_tables("CISCO-SDWAN-APP-ROUTE-MIB", [
       ["statistics", "appRouteStatisticsTable", "Classes::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat", sub {
           my ($o) = @_;
-printf STDERR "%s is %s AND %s is %s\n",
-  $self->opts->name,
-  $o->{appRouteStatisticsDstIp},
-  $self->opts->name2,
-  $o->{appRouteStatisticsLocalColor};
-          my $kak =   ($self->filter_name($o->{appRouteStatisticsDstIp}) and
-              $self->filter_name2($o->{appRouteStatisticsLocalColor})) ? 1 : 0;
-    printf STDERR "kak %s\n", $kak;
-return $kak;
+          return ($self->filter_name($o->{appRouteStatisticsDstIp}) and
+              $self->filter_name2($o->{appRouteStatisticsLocalColor}));
       }],
       ["probestatistics", "appRouteStatisticsAppProbeClassTable", "Classes::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat"],
     ]);
@@ -84,6 +70,15 @@ sub check {
         uom => '%',
     );
   } elsif ($self->mode eq "device::sdwan::route::quality") {
+    if (! @{$self->{statistics}}) {
+      my @filter = ();
+      push(@filter, sprintf("dst ip %s", $self->opts->name))
+          if $self->opts->name;
+      push(@filter, sprintf("local color %s", $self->opts->name2))
+          if $self->opts->name2;
+      $self->add_unknown(sprintf "no routes were found%s",
+          (@filter ? " (".join(",", @filter).")" : ""));
+    }
     foreach (@{$self->{statistics}}) {
       $_->check();
     }
@@ -176,14 +171,17 @@ sub check {
   $self->set_thresholds(metric => $name."_latency", warning => 40, critical => 80);
   my $losslevel = $self->check_thresholds(metric => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
+  $self->annotate_info("loss too high") if $losslevel;
   my $latencylevel = $self->check_thresholds(metric => $name."_latency",
       value => $self->{appRouteStatisticsAppProbeClassMeanLatency});
-printf "losslevel %d latencylevel %d\n", $losslevel, $latencylevel;
+  $self->annotate_info("latency too high") if $latencylevel;
   $self->add_message($losslevel > $latencylevel ? $losslevel : $latencylevel);
   $self->add_perfdata(label => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
   $self->add_perfdata(label => $name."_latency",
       value => $self->{appRouteStatisticsAppProbeClassMeanLatency});
+  $self->add_perfdata(label => $name."_jitter",
+      value => $self->{appRouteStatisticsAppProbeClassMeanJitter});
 }
 
 1;

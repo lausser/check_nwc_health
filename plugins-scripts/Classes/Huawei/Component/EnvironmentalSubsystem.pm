@@ -18,20 +18,23 @@ sub init {
         sub { my ($o) = @_; $o->{entPhysicalClass} eq 'powerSupply' },
        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
   ]);
-  $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-    ['fanstates', 'hwFanStatusTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
-  ]);
   # heuristic tweaking. there was a device which intentionally slowed down
   # snmp responses when a large amount of data was transmitted.
-  $self->mult_snmp_max_msg_size(8);
-  $self->bulk_is_baeh(160);
-  foreach (qw(modules fans powersupplies)) {
-    $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
+  $self->mult_snmp_max_msg_size(20);
+  $self->bulk_is_baeh(30);
+  $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
       ['entitystates', 'hwEntityStateTable',
       'Monitoring::GLPlugin::SNMP::TableItem'],
-    ]);
+  ]);
+  $self->debug(sprintf "found %d %s", scalar(@{$self->{entitystates}}), "entitystates");
+  foreach (qw(modules fans powersupplies)) {
+    $self->debug(sprintf "found %d %s", scalar(@{$self->{$_}}), $_);
     $self->merge_tables($_, "entitystates");
   }
+  $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
+      ['fanstates', 'hwFanStatusTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+  ]);
+  $self->debug(sprintf "found %d %s", scalar(@{$self->{fanstates}}), "fanstates");
   if (@{$self->{fanstates}} && ! @{$self->{fans}}) {
     # gibts auch, d.h. retten, was zu retten ist
     foreach (@{$self->{fanstates}}) {
@@ -81,6 +84,11 @@ sub check {
 package Classes::Huawei::Component::EnvironmentalSubsystem::Powersupply;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
+
+sub finish {
+  my ($self) = @_;
+  $self->{hwEntityAlarmLight} = "notSupported" if ! defined $self->{hwEntityAlarmLight};
+}
 
 sub check {
   my ($self) = @_;
