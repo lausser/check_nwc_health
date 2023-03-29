@@ -88,38 +88,20 @@ sub check {
   );
 }
 
-package Classes::Huawei::Component::EnvironmentalSubsystem::Fan;
+package Classes::Huawei::Component::EnvironmentalSubsystem::Entity;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
-sub finish {
+sub finish_after_merge {
   my ($self) = @_;
+  $self->{hwEntityAlarmLight} = "notSupported" if ! defined $self->{hwEntityAlarmLight};
+  $self->{hwEntityTemperature} = undef
+      if ($self->{hwEntityTemperature} and
+      $self->{hwEntityTemperature} == 2147483647);
   # kommt auch vor, dass die nicht existieren. Im Zweifelsfall "up"
   $self->{hwEntityAdminStatus} ||= "up";
   $self->{hwEntityOperStatus} ||= "up";
 }
-
-sub check {
-  my ($self) = @_;
-  $self->add_info(sprintf 'fan %s is %s, state is %s, admin status is %s, oper status is %s',
-      $self->{entPhysicalName}, $self->{hwEntityFanPresent},
-      $self->{hwEntityFanState},
-      $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
-  if ($self->{hwEntityFanPresent} eq 'present') {
-    if ($self->{hwEntityFanState} ne 'normal') {
-      $self->add_warning();
-    }
-    $self->add_perfdata(
-        label => 'rpm_'.$self->{entPhysicalName},
-        value => $self->{hwEntityFanSpeed},
-        uom => '%',
-    );
-  }
-}
-
-package Classes::Huawei::Component::EnvironmentalSubsystem::Entity;
-our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
-use strict;
 
 sub check {
   my ($self) = @_;
@@ -185,6 +167,35 @@ sub check {
     $self->annotate_info(sprintf 'fault light is %s',
         $self->{hwEntityFaultLight});
   }
+  if ($self->{hwEntityDeviceStatus}) {
+    # seems to be a new oid, i found no sample device which has it.
+    $self->add_critical("status is abnormal")
+        if $self->{hwEntityDeviceStatus} eq "abnormal";
+  }
+}
+
+
+package Classes::Huawei::Component::EnvironmentalSubsystem::Fan;
+our @ISA = qw(Classes::Huawei::Component::EnvironmentalSubsystem::Entity);
+use strict;
+
+sub check {
+  my ($self) = @_;
+  $self->finish_after_merge();
+  $self->add_info(sprintf 'fan %s is %s, state is %s, admin status is %s, oper status is %s',
+      $self->{entPhysicalName}, $self->{hwEntityFanPresent},
+      $self->{hwEntityFanState},
+      $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
+  if ($self->{hwEntityFanPresent} eq 'present') {
+    if ($self->{hwEntityFanState} ne 'normal') {
+      $self->add_warning();
+    }
+    $self->add_perfdata(
+        label => 'rpm_'.$self->{entPhysicalName},
+        value => $self->{hwEntityFanSpeed},
+        uom => '%',
+    );
+  }
 }
 
 
@@ -192,13 +203,9 @@ package Classes::Huawei::Component::EnvironmentalSubsystem::Powersupply;
 our @ISA = qw(Classes::Huawei::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
-sub finish {
-  my ($self) = @_;
-  $self->{hwEntityAlarmLight} = "notSupported" if ! defined $self->{hwEntityAlarmLight};
-}
-
 sub check {
   my ($self) = @_;
+  $self->finish_after_merge();
   $self->add_info(sprintf 'powersupply %s admin status is %s, oper status is %s',
       $self->{entPhysicalName},
       $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
@@ -209,13 +216,9 @@ package Classes::Huawei::Component::EnvironmentalSubsystem::Module;
 our @ISA = qw(Classes::Huawei::Component::EnvironmentalSubsystem::Entity);
 use strict;
 
-sub finish {
-  my ($self) = @_;
-  $self->{hwEntityAlarmLight} = "notSupported" if ! defined $self->{hwEntityAlarmLight};
-}
-
 sub check {
   my ($self) = @_;
+  $self->finish_after_merge();
   $self->add_info(sprintf 'module %s admin status is %s, oper status is %s',
       $self->{entPhysicalName},
       $self->{hwEntityAdminStatus}, $self->{hwEntityOperStatus});
