@@ -9,27 +9,31 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  # use mode to run only necessary walks
   $self->get_snmp_objects('HUAWEI-WLAN-CONFIGURATION-MIB', qw(hwWlanClusterACRole));
-  $self->get_snmp_tables('HUAWEI-WLAN-AP-MIB', [
-    ['aps', 'hwWlanApTable', 'Classes::Huawei::Component::WlanSubsystem::AP', sub { return 1; $self->filter_name(shift->{hwWlanApName}) } ],
-  ]);
-  $self->get_snmp_tables('HUAWEI-WLAN-AP-RADIO-MIB', [
-    ['radios', 'hwWlanRadioInfoTable', 'Classes::Huawei::Component::WlanSubsystem::Radio', sub { return 1; return $self->filter_name(shift->{hwWlanRadioInfoApName}) } ],
-  ]);
-  if ($self->mode =~ /device::wlan::aps::clients/) {
-    $self->get_snmp_tables('HUAWEI-WLAN-CONFIGURATION-MIB',  [
-        ['ssids',  'hwSsidProfileTable',  'Classes::Huawei::Component::WlanSubsystem::Ssid'  ],
-        #['groupvaps',  'hwAPGroupVapTable',  'Classes::Huawei::Component::WlanSubsystem::APGroupVap'  ],
-        #['specificvaps',  'hwAPSpecificVapTable',  'Classes::Huawei::Component::WlanSubsystem::APSpecificVap'  ],
-        #['fatvaps',  'hwFatApVapTable',  'Classes::Huawei::Component::WlanSubsystem::APFatVap'  ],
-        #['vapprofiles',  'hwVapProfileTable',  'Classes::Huawei::Component::WlanSubsystem::VapProfile'  ],
+  if ($self->mode =~ /device::wlan::aps::(count|watch)/) {
+    $self->get_snmp_tables('HUAWEI-WLAN-AP-MIB', [
+      ['aps', 'hwWlanApTable', 'Classes::Huawei::Component::WlanSubsystem::AP', sub { return 1; $self->filter_name(shift->{hwWlanApName}) }, ['hwWlanApName'] ],
     ]);
-    $self->get_snmp_tables('HUAWEI-WLAN-STATION-MIB', [
-      ['stations', 'hwWlanStationTable', 'Classes::Huawei::Component::WlanSubsystem::Station' ],
+  } else {
+    $self->get_snmp_tables('HUAWEI-WLAN-AP-MIB', [
+      ['aps', 'hwWlanApTable', 'Classes::Huawei::Component::WlanSubsystem::AP', sub { return 1; $self->filter_name(shift->{hwWlanApName}) }, ['hwWlanApId', 'hwWlanApName', 'hwWlanApRunState', 'hwWlanApDataLinkState', 'hwWlanAPPowerSupplyState', 'hwWlanApOnlineUserNum']],
     ]);
   }
-  $self->assign_ifs_to_aps();
+  if ($self->mode =~ /device::wlan::aps::clients/) {
+    $self->get_snmp_tables('HUAWEI-WLAN-CONFIGURATION-MIB',  [
+        ['ssids',  'hwSsidProfileTable',  'Classes::Huawei::Component::WlanSubsystem::Ssid', undef, ['hwSsidText'] ],
+    ]);
+    $self->get_snmp_tables('HUAWEI-WLAN-STATION-MIB', [
+      ['stations', 'hwWlanStationTable', 'Classes::Huawei::Component::WlanSubsystem::Station', undef, ['hwWlanStaSsid'] ],
+    ]);
+  } elsif ($self->mode =~ /device::wlan::aps::status/) {
+    $self->get_snmp_tables('HUAWEI-WLAN-AP-RADIO-MIB', [
+      ['radios', 'hwWlanRadioInfoTable', 'Classes::Huawei::Component::WlanSubsystem::Radio', sub { return 1; return $self->filter_name(shift->{hwWlanRadioInfoApName}) }, ['hwWlanRadioInfoApId', 'hwWlanRadioRunState', 'hwWlanRadioMac', 'hwWlanRadioOnlineStaCnt'] ],
+    ]);
+    $self->assign_ifs_to_aps();
+  }
+  $self->{numOfAPs} = scalar (@{$self->{aps}});
+  $self->{apNameList} = [map { $_->{hwWlanApName} } @{$self->{aps}}];
 }
 
 sub assign_ifs_to_aps {
@@ -55,8 +59,11 @@ sub assign_ifs_to_aps {
       }
     }
     $ap->{NumOfClients} = 0;
-    map {$ap->{NumOfClients} += $_->{hwWlanRadioOnlineStaCnt} }
-        @{$ap->{interfaces}};
+    map {
+        $ap->{NumOfClients} +=
+            # undef can be possible
+            $_->{hwWlanRadioOnlineStaCnt} ? $_->{hwWlanRadioOnlineStaCnt} : 0
+    } @{$ap->{interfaces}};
     # if backup, aps in standby and powersupply invalid can be tolerated
     $ap->{hwWlanClusterACRole} = $self->{hwWlanClusterACRole};
   }
@@ -88,14 +95,9 @@ sub check {
           value => $ssids->{$ssid});
     }
   } else {
-    $self->{numOfAPs} = scalar (@{$self->{aps}});
-    $self->{apNameList} = [map { $_->{hwWlanApName} } @{$self->{aps}}];
-    if (scalar (@{$self->{aps}}) == 0) {
+    if ($self->{numOfAPs} == 0) {
       $self->add_unknown('no access points found');
       return;
-    }
-    foreach (@{$self->{aps}}) {
-      $_->check();
     }
     if ($self->mode =~ /device::wlan::aps::watch/) {
       $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
@@ -113,21 +115,25 @@ sub check {
             scalar(@{$self->{delta_lost_apNameList}}),
             join(", ", @{$self->{delta_lost_apNameList}}));
       }
-      $self->add_ok(sprintf 'found %d access points', scalar (@{$self->{aps}}));
+      $self->add_ok(sprintf 'found %d access points', $self->{numOfAPs});
       $self->add_perfdata(
           label => 'num_aps',
-          value => scalar (@{$self->{aps}}),
+          value => $self->{numOfAPs},
       );
     } elsif ($self->mode =~ /device::wlan::aps::count/) {
-      $self->set_thresholds(warning => '10:', critical => '5:');
-      $self->add_message($self->check_thresholds(
-          scalar (@{$self->{aps}})), 
-          sprintf 'found %d access points', scalar (@{$self->{aps}}));
+      $self->set_thresholds(metric => 'num_aps',
+          warning => '10:', critical => '5:');
+      $self->add_message($self->check_thresholds(metric => 'num_aps',
+          value => $self->{numOfAPs}),
+          sprintf('found %d access points', $self->{numOfAPs}));
       $self->add_perfdata(
           label => 'num_aps',
-          value => scalar (@{$self->{aps}}),
+          value => $self->{numOfAPs},
       );
     } elsif ($self->mode =~ /device::wlan::aps::status/) {
+      foreach (@{$self->{aps}}) {
+        $_->check();
+      }
       if ($self->opts->report eq "short") {
         $self->clear_ok();
         $self->add_ok('no problems') if ! $self->check_messages();
@@ -205,11 +211,11 @@ sub finish {
   $self->{hwWlanRadioInfoApMac} = join(":", map { sprintf "%x", $_ } @{$self->{indices}}[0 .. 5]);
   $self->{hwWlanRadioID} = $self->{indices}->[-1];
   if ($self->{hwWlanRadioMac} && $self->{hwWlanRadioMac} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{hwWlanRadioMac} = join(":", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+    $self->{hwWlanRadioMac} = join(":", ($1, $2, $3, $4, $5, $6));
   } elsif ($self->{hwWlanRadioMac} && unpack("H12", $self->{hwWlanRadioMac}." ") =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{hwWlanRadioMac} = join(":", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+    $self->{hwWlanRadioMac} = join(":", ($1, $2, $3, $4, $5, $6));
   } elsif ($self->{hwWlanRadioMac} && unpack("H12", $self->{hwWlanRadioMac}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{hwWlanRadioMac} = join(":", map { hex($_) } ($1, $2, $3, $4, $5, $6));
+    $self->{hwWlanRadioMac} = join(":", ($1, $2, $3, $4, $5, $6));
   }
 }
 
