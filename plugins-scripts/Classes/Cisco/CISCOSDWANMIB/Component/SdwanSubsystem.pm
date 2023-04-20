@@ -70,6 +70,28 @@ sub check {
         uom => '%',
     );
   } elsif ($self->mode eq "device::sdwan::route::quality") {
+    # es ist moeglich mit --name <regexp> --regexp mehrere routen per snmp
+    # zu holen. hinter --name steckt die appRouteStatisticsDstIp.
+    # bei einer bestimmten kundeninstallation gibt es immer zwei sdwan-strecken,
+    # eine mit localColor bizInternet (was MPLS bedeutet) und eine mit lte.
+    # ebenfalls moeglich ist active/active mit zwei localColor bizInternet zu
+    # zwei DstIp.
+    # der gesamtcheck soll ok sein, wenn eine der routen fehlerfrei ist, die
+    # andere kann dann komplett zerschossen sein oder auch gar nicht
+    # existieren (was z.b. passieren kann, wenn der Dst router rebootet wird)
+    # als markierung, daß so eine art check_multi-auswertung stttfinden soll
+    # und nicht mehrere gaenzlich unabhaengig zu bewertende routen mit --name
+    # gemeint sind, wird ein threshold eingeführt.
+    # gefundene routen (ob per filter oder nicht) zu defekte routen ins
+    # verhaeltnis gesetzt gibt broken_routes_pct
+    # eingeschaltet wird dieser "solange eine route ok ist, ist alles ok"-modus
+    # indem man --criticalx broken_routes_pct=99 setzt
+    # 4 routes, 1 kaputt - 25%
+    # 4 routes, 3 kaputt - 75%
+    # 2 routes, 1 kaputt - 50%
+    # 2 routes, 1 weg    - 0%
+    # 2 routes, 2 weg    - 0 %
+    # 2 routes, 2 kaputt - 100%
     if (! @{$self->{statistics}}) {
       my @filter = ();
       push(@filter, sprintf("dst ip %s", $self->opts->name))
@@ -78,9 +100,47 @@ sub check {
           if $self->opts->name2;
       $self->add_unknown(sprintf "no routes were found%s",
           (@filter ? " (".join(",", @filter).")" : ""));
+      return;
     }
+    my $broken = 0;
     foreach (@{$self->{statistics}}) {
+      $_->{failed} = 0;
       $_->check();
+      $broken++ if $_->{failed};
+    }
+    if (@{$self->{statistics}}) {
+      $self->{broken_routes_pct} = 100 * $broken / scalar(@{$self->{statistics}});
+    } else {
+      $self->{broken_routes_pct} = 0;
+    }
+
+    $self->set_thresholds(
+        metric => "broken_routes_pct",
+        warning => 100,
+        critical => 100
+    );
+    my @wc = $self->get_thresholds(metric => "broken_routes_pct");
+    my $redundancy_check = ($wc[0] == 100 and $wc[1] == 100) ? 0 : 1;
+    if ($redundancy_check) {
+      my $level = $self->check_thresholds(
+          metric => "broken_routes_pct",
+          value => $self->{broken_routes_pct},
+      );
+      my ($code, $message) =
+          $self->check_messages(join => ', ', join_all => ', ');
+      $self->clear_messages(0);
+      $self->clear_messages(1);
+      $self->clear_messages(2);
+      $self->clear_messages(3);
+      if ($code) {
+        $self->add_ok(sprintf "%s out of %s routes are broken",
+            $broken, scalar(@{$self->{statistics}}));
+      }
+      $self->add_message($level, $message);
+      $self->add_perfdata(label => "broken_routes_pct",
+          value => $self->{broken_routes_pct},
+          uom => "%",
+      );
     }
   }
 }
