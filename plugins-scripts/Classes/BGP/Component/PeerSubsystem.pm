@@ -61,13 +61,9 @@ sub init {
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
     $self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr');
   }
-  foreach ($self->get_snmp_table_objects_with_cache(
-      'BGP4-MIB', 'bgpPeerTable', 'bgpPeerRemoteAddr')) {
-    if ($self->filter_name($_->{bgpPeerRemoteAddr})) {
-      push(@{$self->{peers}},
-          Classes::BGP::Component::PeerSubsystem::Peer->new(%{$_}));
-    }
-  }
+  $self->get_snmp_tables('BGP4-MIB', [
+    ['peers', 'bgpPeerTable', 'Classes::BGP::Component::PeerSubsystem::Peer', sub { return $self->filter_name(shift->{bgpPeerRemoteAddr}) }, ['bgpPeerAdminStatus', 'bgpPeerFsmEstablishedTime', 'bgpPeerLastError', 'bgpPeerRemoteAddr', 'bgpPeerRemoteAs', 'bgpPeerState'], 'bgpPeerRemoteAddr'],
+  ]);
 }
 
 sub check {

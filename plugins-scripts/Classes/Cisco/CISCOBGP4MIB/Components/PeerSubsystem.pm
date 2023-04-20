@@ -68,7 +68,8 @@ sub init {
 	  } else {
 	    return 1;
 	  }
-      }],
+      },
+      ['cbgpPeer2AdminStatus', 'cbgpPeer2FsmEstablishedTime', 'cbgpPeer2LastError', 'cbgpPeer2LocalAddr', 'cbgpPeer2RemoteAddr', 'cbgpPeer2RemoteAs', 'cbgpPeer2State', 'cbgpPeer2Type' ]],
   ]);
 return;
   if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {

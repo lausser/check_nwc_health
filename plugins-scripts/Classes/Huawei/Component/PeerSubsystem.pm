@@ -68,9 +68,9 @@ sub init {
 	  } else {
 	    return 1;
 	  }
-      }],
-      ['sessions', 'hwBgpPeerSessionTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
-      ['extsessions', 'hwBgpPeerSessionExtTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+      }, ['hwBgpPeerAdminStatus', 'hwBgpPeerFsmEstablishedTime', 'hwBgpPeerLastError', 'hwBgpPeerRemoteAddr', 'hwBgpPeerRemoteAs', 'hwBgpPeerSessionLocalAddr', 'hwBgpPeerState']],
+      #['sessions', 'hwBgpPeerSessionTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+      #['extsessions', 'hwBgpPeerSessionExtTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
 }
 

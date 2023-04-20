@@ -1,3 +1,5 @@
+* 2023-04-20 10.12
+  reduced runtime and amount of transferred data for bgp-related checks
 * 2023-04-03 10.11.0.2
   reduce runtime in Huwaei accesspoint modes
 * 2023-03-29 10.11.0.1

@@ -54,35 +54,30 @@ our $errorcodes = {
   },
 };
 
+
 sub init {
   my ($self) = @_;
-  $self->{peers} = [];
+  $self->{peerstatus} = [];
   $self->bulk_is_baeh(10);
-  if ($self->mode =~ /device::bgp::peer::(list|count|watch)/) {
-    ###$self->update_entry_cache(1, 'BGP4-MIB', 'bgpPeerStatusTable', 'bgpPeerStatusSelRemoteAddr');
+  if ($self->mode =~ /device::bgp::peer::count/) {
+    $self->get_snmp_tables('DC-BGP-MIB', [
+      #['peers', 'bgpPeerTable', 'Classes::Versa::Component::PeerSubsystem::Peer', undef, ['bgpPeerIndex'] ],
+      # das war bisher peerstatus
+      ['peerstatus', 'bgpPeerStatusTable', 'Classes::Versa::Component::PeerSubsystem::PeerStatus', undef, ['bgpPeerStatusFsmEstablishedTime'] ],
+    ]);
+  } elsif ($self->mode =~ /device::bgp::peer::watch/) {
+    $self->get_snmp_tables('DC-BGP-MIB', [
+      ['peers', 'bgpPeerTable', 'Classes::Versa::Component::PeerSubsystem::Peer', undef, ['bgpPeerIndex'] ],
+      ['peerstatus', 'bgpPeerStatusTable', 'Classes::Versa::Component::PeerSubsystem::PeerStatus', undef, ['bgpPeerStatusSelRemoteAddr', 'bgpPeerStatusSelRemoteAddrType', 'bgpPeerStatusFsmEstablishedTime'] ],
+    ]);
+  } else {
+    $self->get_snmp_tables('DC-BGP-MIB', [
+      ['peers', 'bgpPeerTable', 'Classes::Versa::Component::PeerSubsystem::Peer', undef, ['bgpPeerAdminStatus'] ],
+      ['peerstatus', 'bgpPeerStatusTable', 'Classes::Versa::Component::PeerSubsystem::PeerStatus', undef, ['bgpPeerStatusSelLocalAddrType', 'bgpPeerStatusSelLocalAddr', 'bgpPeerStatusSelRemoteAddrType', 'bgpPeerStatusSelRemoteAddr', 'bgpPeerStatusLastError', 'bgpPeerStatusFsmEstablishedTime', 'bgpPeerStatusRemoteAs', 'bgpPeerStatusState']],
+    ]);
+    #$self->merge_tables("peers", (qw(peerstatus)));
+    $self->merge_tables("peerstatus", (qw(peers)));
   }
-  $self->get_snmp_tables('DC-BGP-MIB', [
-    ['peerstatus', 'bgpPeerStatusTable', 'Classes::Versa::Component::PeerSubsystem::PeerStatus' ],
-    ['peers', 'bgpPeerTable', 'Classes::Versa::Component::PeerSubsystem::Peer' ],
-  ]);
-  # keine gute Idee, weil get_snmp_table_objects_with_cache die eingelesenen
-  # Zeilen nicht zu Objekten blesst wie get_snmp_tables. D.h. es wird auch
-  # kein finish() aufgerufen und manche Attribute sind binaerer Schlonz.
-  # foreach ($self->get_snmp_table_objects_with_cache(
-  #     'DC-BGP-MIB', 'bgpPeerStatusTable', 'bgpPeerStatusSelRemoteAddr')) {
-  #   if ($self->filter_name($_->{bgpPeerStatusSelRemoteAddr})) {
-  #     push(@{$self->{peerstatus}},
-  #         Classes::Versa::Component::PeerSubsystem::PeerStatus->new(%{$_}));
-  #   }
-  # }
-  # foreach ($self->get_snmp_table_objects_with_cache(
-  #     'DC-BGP-MIB', 'bgpPeerTable', 'bgpPeerStatusSelectedRemoteAddr')) {
-  #   if ($self->filter_name($_->{bgpPeerStatusSelectedRemoteAddr})) {
-  #     push(@{$self->{peers}},
-  #         Classes::Versa::Component::PeerSubsystem::Peer->new(%{$_}));
-  #   }
-  # }
-  $self->merge_tables("peers", (qw(peerstatus)));
 }
 
 sub check {
@@ -90,25 +85,25 @@ sub check {
   my $errorfound = 0;
   $self->add_info('checking bgp peers');
   if ($self->mode =~ /peer::list/) {
-    foreach (sort {$a->{bgpPeerStatusSelRemoteAddr} cmp $b->{bgpPeerStatusSelRemoteAddr}} @{$self->{peers}}) {
+    foreach (sort {$a->{bgpPeerStatusSelRemoteAddr} cmp $b->{bgpPeerStatusSelRemoteAddr}} @{$self->{peerstatus}}) {
       printf "%s\n", $_->{bgpPeerStatusSelRemoteAddr};
       #$_->list();
     }
     $self->add_ok("have fun");
   } elsif ($self->mode =~ /peer::count/) {
-    $self->add_info(sprintf "found %d peers", scalar(@{$self->{peers}}));
+    $self->add_info(sprintf "found %d peers", scalar(@{$self->{peerstatus}}));
     $self->set_thresholds(warning => '1:', critical => '1:');
-    $self->add_message($self->check_thresholds(scalar(@{$self->{peers}})));
+    $self->add_message($self->check_thresholds(scalar(@{$self->{peerstatus}})));
     $self->add_perfdata(
         label => 'peers',
-        value => scalar(@{$self->{peers}}),
+        value => scalar(@{$self->{peerstatus}}),
     );
   } elsif ($self->mode =~ /peer::watch/) {
     # take a snapshot of the peer list. -> good baseline
     # warning if there appear peers, mitigate to ok
     # critical if warn/crit percent disappear
-    $self->{numOfPeers} = scalar (@{$self->{peers}});
-    $self->{peerNameList} = [map { $_->{bgpPeerStatusSelRemoteAddr} } @{$self->{peers}}];
+    $self->{numOfPeers} = scalar (@{$self->{peerstatus}});
+    $self->{peerNameList} = [map { $_->{bgpPeerStatusSelRemoteAddr} } @{$self->{peerstatus}}];
     $self->opts->override_opt('lookback', 3600) if ! $self->opts->lookback;
     if ($self->opts->reset) {
       my $statefile = $self->create_statefile(name => 'bgppeerlist', lastarray => 1);
@@ -155,7 +150,7 @@ sub check {
             join(", ", @{$self->{delta_lost_peerNameList}}));
         $problem = 2;
       }
-      $self->add_ok(sprintf 'found %d bgp peers', scalar (@{$self->{peers}}));
+      $self->add_ok(sprintf 'found %d bgp peers', $self->{numOfPeers});
     }
     if ($problem) { # relevant only for lookback=9999 and support contract customers
       $self->valdiff({name => 'bgppeerlist', lastarray => 1, freeze => 1},
@@ -166,10 +161,10 @@ sub check {
     }
     $self->add_perfdata(
         label => 'num_peers',
-        value => scalar (@{$self->{peers}}),
+        value => scalar (@{$self->{peerstatus}}),
     );
   } else {
-    if (scalar(@{$self->{peers}}) == 0) {
+    if (scalar(@{$self->{peerstatus}}) == 0) {
       $self->add_unknown('no peers');
       return;
     }
@@ -179,7 +174,7 @@ sub check {
     #                      n peer zu m as, mehrere provider, mehrere alternativrouten
     # 1 ausfall on 4 peers zu as ist egal
     my $as_numbers = {};
-    foreach (@{$self->{peers}}) {
+    foreach (@{$self->{peerstatus}}) {
       $_->check();
       if (! exists $as_numbers->{$_->{bgpPeerStatusRemoteAs}}->{peers}) {
         $as_numbers->{$_->{bgpPeerStatusRemoteAs}}->{peers} = [];
@@ -241,9 +236,8 @@ sub finish {
   my @tmp_indices = @{$self->{indices}};
   my $last_tmp = scalar(@tmp_indices) - 1;
   shift @tmp_indices;
-  $self->{appRouteStatisticsSrcIp} = $self->mibs_and_oids_definition(
+  $self->{bgpPeerLocalAddrType} = $self->mibs_and_oids_definition(
       'INET-ADDRESS-MIB', 'InetAddressType', shift @tmp_indices);
-
   $self->{bgpPeerLocalAddr} = $self->mibs_and_oids_definition(
       'INET-ADDRESS-MIB', 'InetAddressMaker',
       $self->{bgpPeerLocalAddrType}, @tmp_indices);
@@ -325,8 +319,13 @@ sub finish {
   $self->{bgpPeerRemotePort} = shift @tmp_indices;
 
   $self->{bgpPeerLocalAddr} = "=empty=" if ! $self->{bgpPeerLocalAddr};
-  foreach my $key (grep /^bgp/, keys %{$self}) {
-    delete $self->{$key} if ! (grep /^$key$/, (qw(bgpPeerAdminStatus bgpPeerOperStatus bgpPeerLocalAddr bgpPeerRemoteAddr)))
+  if ($self->mode =~ /device::bgp::peer::count/) {
+    # der hat lediglich bgpPeerIndex und was hier aus dem Index rausgezogen wurde
+  } else {
+    # keine Ahnung, warum hier geputzt wird. Vielleicht weil viel binaerer Schlonz dabei ist.
+    foreach my $key (grep /^bgp/, keys %{$self}) {
+      #delete $self->{$key} if ! (grep /^$key$/, (qw(bgpPeerAdminStatus bgpPeerOperStatus bgpPeerLocalAddr bgpPeerRemoteAddr)))
+    }
   }
 }
 
@@ -382,3 +381,21 @@ sub check {
     $self->{bgpPeerStatusFaulty} = $self->{bgpPeerStatusRemoteAsImportant} ? 1 : 0;
   }
 }
+
+__END__
+  bgpPeerTable OBJECT-TYPE
+  -- FAMILY-SHORT-NAME BGP_PER
+    SYNTAX      SEQUENCE OF BgpPeerEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION "BGP peer configuration table.
+
+                 This table allows a user to configure individual BGP peers.
+
+                 This table is a configuration table - all status, statistics
+                 and control fields are deprecated in favor of the BGP peer
+                 status table (bgpPeerStatusTable).
+
+                 This table does not contain entries for dynamic peers.
+
+17.4.23 die bgpPeerTable fliegt ganz raus, alles laeuft jetzt ueber die bgpPeerStatusTable
