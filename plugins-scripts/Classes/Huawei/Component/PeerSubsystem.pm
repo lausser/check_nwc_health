@@ -60,7 +60,10 @@ sub init {
   $self->{peers} = [];
   $self->implements_mib('INET-ADDRESS-MIB');
   $self->get_snmp_tables('HUAWEI-BGP-VPN-MIB', [
-      ['peers', 'hwBgpPeerAddrFamilyTable+hwBgpPeerTable', 'Classes::Huawei::Component::PeerSubsystem::Peer', sub {
+      #['peers', 'hwBgpPeerAddrFamilyTable+hwBgpPeerTable', 'Classes::Huawei::Component::PeerSubsystem::Peer', sub {
+      # von der hwBgpPeerAddrFamilyTable verwenden wir nix und tbl+augm mit
+      # einer liste von columns geht eh nicht
+      ['peers', 'hwBgpPeerTable', 'Classes::Huawei::Component::PeerSubsystem::Peer', sub {
           my $o = shift;
 	  # regexp -> arschlecken!
           if ($self->opts->name) {

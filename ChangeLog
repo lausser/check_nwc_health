@@ -1,3 +1,5 @@
+* 2023-04-21 10.12.1.1
+  bugfix in Huawei bgp modes
 * 2023-04-20 10.12.1
   add a cluster-check for cisco sdwan
 * 2023-04-20 10.12
