@@ -4,6 +4,11 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  # jetzt laden, sonst funktioniert es spaeter nicht mehr wegen der expliziten
+  # Zuweisung von maxLicensedUsers. Die Mib ist sonst bereits bekannt.
+  $self->require_mib('PULSESECURE-PSG-MIB');
+  # irgendwo ausgegraben, nicht offiziell dokumentiert
+  $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'PULSESECURE-PSG-MIB'}->{'maxLicensedUsers'} = '1.3.6.1.4.1.12532.55';
   # https://kb.pulsesecure.net/articles/Pulse_Secure_Article/KB44150
   $self->get_snmp_objects('PULSESECURE-PSG-MIB', (qw(
       iveSSLConnections iveVPNTunnels 

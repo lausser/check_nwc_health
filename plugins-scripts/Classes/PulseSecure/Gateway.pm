@@ -4,8 +4,6 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  # irgendwo ausgegraben, nicht offiziell dokumentiert
-  $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'PULSESECURE-PSG-MIB'}->{'maxLicensedUsers'} = '1.3.6.1.4.1.12532.55';
   if ($self->mode =~ /device::hardware::health/) {
     $self->analyze_and_check_environmental_subsystem("Classes::PulseSecure::Gateway::Component::EnvironmentalSubsystem");
   } elsif ($self->mode =~ /device::hardware::load/) {
