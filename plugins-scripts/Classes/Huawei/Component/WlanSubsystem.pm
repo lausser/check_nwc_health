@@ -163,7 +163,8 @@ sub check {
   $self->add_info(sprintf 'access point %s state is %s',
       $self->{hwWlanApName}, $self->{hwWlanApRunState});
   if ($self->mode =~ /device::wlan::aps::status/) {
-    if ($self->{hwWlanClusterACRole} eq "backup") {
+    if ($self->{hwWlanClusterACRole} and
+        $self->{hwWlanClusterACRole} eq "backup") {
       if ($self->{hwWlanApRunState} =~ /^(typeNotMatch|fault|configFailed|commitFailed|verMismatch|nameConflicted|invalid|countryCodeMismatch)/) {
         $self->add_warning();
       } else {

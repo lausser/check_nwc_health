@@ -1,7 +1,12 @@
+* 2023-05-04 10.12.1.3
+  bugfix in Huawei Wlan Controller (just a perl warning, not serious)
+  these recent perl warnings appeared after i heavily used the
+  embedded perl feature of mod-gearman. it is much more strict than
+  running the plugin as a standalone process)
 * 2023-05-02 10.12.1.2
-  bugfix in Pulse Secure
+  bugfix in Pulse Secure (just a perl warning, not serious)
 * 2023-04-21 10.12.1.1
-  bugfix in Huawei bgp modes
+  bugfix in Huawei bgp modes (just a perl warning, not serious)
 * 2023-04-20 10.12.1
   add a cluster-check for cisco sdwan
 * 2023-04-20 10.12
