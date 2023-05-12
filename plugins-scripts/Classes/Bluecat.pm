@@ -4,9 +4,9 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->{productname} =~ /Bluecat Address Manager/) {
+  if ($self->{productname} =~ /Bluecat Address Manager/i) {
     $self->rebless('Classes::Bluecat::AddressManager');
-  } elsif ($self->{productname} =~ /Bluecat DNS\/DHCP Server/) {
+  } elsif ($self->{productname} =~ /Bluecat DNS\/DHCP Server/i) {
     $self->rebless('Classes::Bluecat::DnsDhcpServer');
   }
   if (ref($self) ne "Classes::Bluecat") {
