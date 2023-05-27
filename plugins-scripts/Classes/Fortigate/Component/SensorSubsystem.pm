@@ -1,6 +1,7 @@
 package Classes::Fortigate::Component::SensorSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
+use Scalar::Util qw(looks_like_number);
 
 sub init {
   my ($self) = @_;
@@ -17,7 +18,7 @@ sub finish {
   my ($self) = @_;
   $self->{fgHwSensorEntAlarmStatus} ||= "false";
   $self->{fgHwSensorEntValue} = -1 if ! defined $self->{fgHwSensorEntValue};
-  if ($self->{fgHwSensorEntValue} == -1) {
+  if ( $self->{fgHwSensorEntValue} =~ /^-1$/) {
     # empty, this case is handled in the default sensor class
   } elsif ($self->{fgHwSensorEntName} =~ /Fan/) {
     bless $self, "Classes::Fortigate::Component::SensorSubsystem::Fan";
@@ -37,7 +38,7 @@ $self->{UNKNOWN} = 1;
 
 sub check {
   my ($self) = @_;
-  if ($self->{fgHwSensorEntValue} == -1) {
+  if ( $self->{fgHwSensorEntValue} =~ /^-1$/) {
     $self->add_info(sprintf '%s is not installed',
         $self->{fgHwSensorEntName});
     return;
@@ -48,7 +49,7 @@ sub check {
   if ($self->{fgHwSensorEntAlarmStatus} && $self->{fgHwSensorEntAlarmStatus} eq "true") {
     $self->add_critical();
   }
-  if ($self->{fgHwSensorEntValue}) {
+  if (looks_like_number($self->{fgHwSensorEntValue}) && $self->{fgHwSensorEntValue}) {
     $self->add_perfdata(
         label => sprintf('sensor_%s', $self->{fgHwSensorEntName}),
         value => $self->{fgHwSensorEntValue},
