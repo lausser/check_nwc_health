@@ -17,11 +17,11 @@ sub finish {
   my ($self) = @_;
   $self->{fgHwSensorEntAlarmStatus} ||= "false";
   $self->{fgHwSensorEntValue} = -1 if ! defined $self->{fgHwSensorEntValue};
-  if ($self->{fgHwSensorEntValue} == -1) {
+  if ( $self->{fgHwSensorEntValue} =~ /^-1$/) {
     # empty, this case is handled in the default sensor class
   } elsif ($self->{fgHwSensorEntName} =~ /Fan/) {
     bless $self, "Classes::Fortigate::Component::SensorSubsystem::Fan";
-  } elsif ($self->{fgHwSensorEntName} =~ /PS.*Status/) {
+  } elsif ($self->{fgHwSensorEntName} =~ /PS.*Status|PSU .*|RPS/) {
     bless $self, "Classes::Fortigate::Component::SensorSubsystem::Powersupply";
   } elsif ($self->{fgHwSensorEntName} =~ /(LM75)|(Temp)|(^(TD|TR)\d+)|(DTS\d+)/) {
     # thermal diode/resistor, dingsbums thermal sensor
@@ -37,7 +37,7 @@ $self->{UNKNOWN} = 1;
 
 sub check {
   my ($self) = @_;
-  if ($self->{fgHwSensorEntValue} == -1) {
+  if ( $self->{fgHwSensorEntValue} =~ /^-1$/) {
     $self->add_info(sprintf '%s is not installed',
         $self->{fgHwSensorEntName});
     return;
