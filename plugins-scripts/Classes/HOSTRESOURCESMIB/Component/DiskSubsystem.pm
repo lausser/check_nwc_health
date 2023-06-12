@@ -4,9 +4,17 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  # there was a linux system which timed out even after two minutes.
+  # as hrStorageTable usually has a rather small amount of lines (other than sensor tables)
+  # we don't need bulk here
+  $self->bulk_is_baeh(0);
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
       ['storages', 'hrStorageTable', 'Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage', sub { return shift->{hrStorageType} eq 'hrStorageFixedDisk' } ],
   ]);
+  $self->bulk_baeh_reset();
+  @{$self->{storages}} = grep {
+    ! $_->{bindmount};
+  } @{$self->{storages}};
 }
 
 package Classes::HOSTRESOURCESMIB::Component::DiskSubsystem::Storage;
@@ -35,6 +43,11 @@ sub finish {
     $self->{special} = 1;
   } else {
     $self->{special} = 0;
+  }
+  if ($self->{hrStorageDescr} =~ /^\/var\/lib\/kubelet\/pods\/.*\/volumes\/.*$/ ||
+      $self->{hrStorageDescr} =~ /^\/var\/lib\/kubelet\/pods\/.*\/volume-subpaths\/.*$/ ||
+      $self->{hrStorageDescr} =~ /^\/run\/k3s\/containerd\/.*\/sandboxes\/.*$/) {
+    $self->{bindmount} = 1;
   }
 }
 

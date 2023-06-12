@@ -4,9 +4,11 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  $self->bulk_is_baeh(0);
   $self->get_snmp_tables('HOST-RESOURCES-MIB', [
       ['devices', 'hrDeviceTable', 'Classes::HOSTRESOURCESMIB::Component::DeviceSubsystem::Device'],
   ]);
+  $self->bulk_baeh_reset();
 }
 
 package Classes::HOSTRESOURCESMIB::Component::DeviceSubsystem::Device;

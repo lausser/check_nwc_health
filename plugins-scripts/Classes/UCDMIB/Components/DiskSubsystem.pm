@@ -19,8 +19,11 @@ sub init {
                     split ',', $self->opts->name;
               }
             } else {
-              return $self->{dskTotal} &&
-                  $self->{dskDevice} !~ /^(sysfs|proc|udev|devpts|rpc_pipefs|nfsd|devfs)$/;
+              return $self->{dskTotal} && (
+                  $self->{dskDevice} !~ /^(sysfs|proc|udev|devpts|rpc_pipefs|nfsd|devfs)$/ and
+                  $self->{dskDevice} !~ /^(\/run\/k3s\/containerd\/.*\/sandboxes\/.*)$/ and
+                  $self->{dskDevice} !~ /^(\/var\/lib\/kubelet\/pods\/.*\/volumes\/.*)$/
+              );
             }
           }
       ],

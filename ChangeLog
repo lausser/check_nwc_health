@@ -1,3 +1,5 @@
+* 2023-06-12 10.12.1.8
+  reduce runtime for HOST-RESOURCES-MIB disk and device tables
 * 2023-06-12 10.12.1.7
   don't walk cefcFRUPowerSupplyGroupTable, it's unused anyway
 * 2023-05-28 10.12.1.6
