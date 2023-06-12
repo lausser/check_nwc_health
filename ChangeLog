@@ -1,3 +1,5 @@
+* 2023-06-12 10.12.1.7
+  don't walk cefcFRUPowerSupplyGroupTable, it's unused anyway
 * 2023-05-28 10.12.1.6
   PR 310/311 for Fortigte HW
 * 2023-05-12 10.12.1.5

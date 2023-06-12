@@ -6,7 +6,7 @@ sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
     ['powersupplies', 'cefcFRUPowerStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::Powersupply'],
-    ['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup'],
+    #['powersupplygroups', 'cefcFRUPowerSupplyGroupTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplySubsystem::PowersupplyGroup'],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
