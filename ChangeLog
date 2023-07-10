@@ -1,3 +1,5 @@
+* 2023-07-10 10.13
+  implement traffic thresholds for interface-usage, correctly calc the less-than perfdata thresholds.
 * 2023-06-12 10.12.1.8
   reduce runtime for HOST-RESOURCES-MIB disk and device tables
 * 2023-06-12 10.12.1.7

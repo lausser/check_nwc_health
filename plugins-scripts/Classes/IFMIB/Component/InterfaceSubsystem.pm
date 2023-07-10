@@ -998,20 +998,68 @@ sub check {
         warning => 80,
         critical => 90
     );
-    my $in = $self->check_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
-        value => $self->{inputUtilization}
-    );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_usage_out',
         warning => 80,
         critical => 90
     );
-    my $out = $self->check_thresholds(
+    # In addition to the usage (default) thresholds we create
+    # traffic thresholds. These are at least used in the traffic perfdata.
+    my ($inwarning, $incritical) = $self->get_thresholds(
+        metric => $self->{ifDescr}.'_usage_in',
+    );
+    my ($outwarning, $outcritical) = $self->get_thresholds(
+        metric => $self->{ifDescr}.'_usage_out',
+    );
+    # mod_threshold is used to multiply the threshold or the upper
+    # and lower limits of a range
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_traffic_in',
+        warning => $self->mod_threshold($inwarning, sub {
+            my $val = shift;
+            return $self->{maxInputRate} / 100 * $val;
+        }),
+        critical => $self->mod_threshold($incritical, sub {
+            my $val = shift;
+            return $self->{maxInputRate} / 100 * $val;
+        }),
+    );
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_traffic_out',
+        warning => $self->mod_threshold($outwarning, sub {
+            my $val = shift;
+            return $self->{maxOutputRate} / 100 * $val;
+        }),
+        critical => $self->mod_threshold($outcritical, sub {
+            my $val = shift;
+            return $self->{maxOutputRate} / 100 * $val;
+        }),
+    );
+    # Check both usage and traffic. The user could set thresholds like
+    # --warningx 'traffic_.*'=1:80 --criticalx 'traffic_.*'=1:90 --units Mbit
+    # in order to monitor a backup line. (which has some noise in standby)
+    my $u_in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_usage_in',
+        value => $self->{inputUtilization}
+    );
+    my $u_out = $self->check_thresholds(
         metric => $self->{ifDescr}.'_usage_out',
         value => $self->{outputUtilization}
     );
-    my $level = ($in > $out) ? $in : ($out > $in) ? $out : $in;
+    my $t_in = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_traffic_in',
+        value => $self->{inputRate}
+    );
+    my $t_out = $self->check_thresholds(
+        metric => $self->{ifDescr}.'_traffic_out',
+        value => $self->{outputRate}
+    );
+    my $u_level = ($u_in > $u_out) ? $u_in : ($u_out > $u_in) ? $u_out : $u_in;
+    my $t_level = ($t_in > $t_out) ? $t_in : ($t_out > $t_in) ? $t_out : $t_in;
+    my $level = ($t_level > $u_level) ? $t_level : ($u_level > $t_level) ? $u_level : $t_level;
+    if (! $u_level and $t_level) {
+      $self->annotate_info("traffic threshold exceeded");
+    }
     $self->add_message($level);
     $self->add_perfdata(
         label => $self->{ifDescr}.'_usage_in',
@@ -1023,14 +1071,6 @@ sub check {
         value => $self->{outputUtilization},
         uom => '%',
     );
-    my ($inwarning, $incritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_in',
-    );
-    $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_in',
-        warning => $self->{maxInputRate} / 100 * $inwarning,
-        critical => $self->{maxInputRate} / 100 * $incritical
-    );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_in',
         value => $self->{inputRate},
@@ -1038,14 +1078,6 @@ sub check {
         places => 2,
         min => 0,
         max => $self->{maxInputRate},
-    );
-    my ($outwarning, $outcritical) = $self->get_thresholds(
-        metric => $self->{ifDescr}.'_usage_out',
-    );
-    $self->set_thresholds(
-        metric => $self->{ifDescr}.'_traffic_out',
-        warning => $self->{maxOutputRate} / 100 * $outwarning,
-        critical => $self->{maxOutputRate} / 100 * $outcritical,
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
