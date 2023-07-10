@@ -1058,7 +1058,7 @@ sub check {
     my $t_level = ($t_in > $t_out) ? $t_in : ($t_out > $t_in) ? $t_out : $t_in;
     my $level = ($t_level > $u_level) ? $t_level : ($u_level > $t_level) ? $u_level : $t_level;
     if (! $u_level and $t_level) {
-      $self->annotate_info("traffic threshold exceeded");
+      $self->annotate_info("traffic outside thresholds");
     }
     $self->add_message($level);
     $self->add_perfdata(
