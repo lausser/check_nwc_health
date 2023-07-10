@@ -1005,6 +1005,12 @@ sub check {
     );
     # In addition to the usage (default) thresholds we create
     # traffic thresholds. These are at least used in the traffic perfdata.
+    # :-( after a rollout desaster, where --warning 80 --critical 90 was also
+    # applied to traffic metrics:
+    # !!!! --warning 80 --critical 90 should only mean usage thresholds
+    # traffic-thresholds should either be provided directly by writing
+    # .*_traffic_in/out or have a default which is calculated from the
+    # usage default.
     my ($inwarning, $incritical) = $self->get_thresholds(
         metric => $self->{ifDescr}.'_usage_in',
     );
@@ -1012,28 +1018,86 @@ sub check {
         metric => $self->{ifDescr}.'_usage_out',
     );
     # mod_threshold is used to multiply the threshold or the upper
-    # and lower limits of a range
+    # and lower limits of a range.
+    # calculate traffic thresholds from usage thresholds
+    my $cinwarning = $self->mod_threshold($inwarning, sub {
+        my $val = shift;
+        return $self->{maxInputRate} / 100 * $val;
+    });
+    my $cincritical = $self->mod_threshold($incritical, sub {
+        my $val = shift;
+        return $self->{maxInputRate} / 100 * $val;
+    });
+    my $coutwarning = $self->mod_threshold($outwarning, sub {
+        my $val = shift;
+        return $self->{maxInputRate} / 100 * $val;
+    });
+    my $coutcritical = $self->mod_threshold($outcritical, sub {
+        my $val = shift;
+        return $self->{maxInputRate} / 100 * $val;
+    });
     $self->set_thresholds(
+        # it there are --warning/critical on the command line
+        # (like 80/90, meaning the usage)
+        # then they have precedence over what we set here.
         metric => $self->{ifDescr}.'_traffic_in',
-        warning => $self->mod_threshold($inwarning, sub {
-            my $val = shift;
-            return $self->{maxInputRate} / 100 * $val;
-        }),
-        critical => $self->mod_threshold($incritical, sub {
-            my $val = shift;
-            return $self->{maxInputRate} / 100 * $val;
-        }),
+        warning => $cinwarning,
+        critical => $cincritical,
     );
     $self->set_thresholds(
         metric => $self->{ifDescr}.'_traffic_out',
-        warning => $self->mod_threshold($outwarning, sub {
-            my $val = shift;
-            return $self->{maxOutputRate} / 100 * $val;
-        }),
-        critical => $self->mod_threshold($outcritical, sub {
-            my $val = shift;
-            return $self->{maxOutputRate} / 100 * $val;
-        }),
+        warning => $coutwarning,
+        critical => $coutcritical,
+    );
+
+    # we must find out if there are warningx/criticalx for traffic.
+    # if not, we must avoid default warning/critical to be checked
+    # against traffic.
+    my ($tinwarning, $tincritical) = $self->get_thresholds(
+        metric => $self->{ifDescr}.'_traffic_in',
+    );
+    my ($toutwarning, $toutcritical) = $self->get_thresholds(
+        metric => $self->{ifDescr}.'_traffic_out',
+    );
+    # these are dummy defaults for a non existing metric. --warning/critical
+    # will overwrite the numbers
+    $self->set_thresholds(
+        metric => $self->{ifDescr}.'_des_gibts_doch_ned',
+        warning => "9999:9999",
+        critical => "9999:9999",
+    );
+    my ($defwarning, $defcritical) = $self->get_thresholds(
+        metric => $self->{ifDescr}.'_des_gibts_doch_ned',
+    );
+    if ($tinwarning eq $defwarning) {
+       # traffic_in warning is --warning, so it has not been set intentionally
+       # by --warningx ...traffic_in. in this case we use the calculated value
+       # (eq because we might use ranges.)
+       $tinwarning = $cinwarning;
+    }
+    if ($toutwarning eq $defwarning) {
+       $toutwarning = $coutwarning;
+    }
+    if ($tincritical eq $defcritical) {
+       $tincritical = $cincritical;
+    }
+    if ($toutcritical eq $defcritical) {
+       $toutcritical = $coutcritical;
+    }
+    # finally we force the traffic thresholds. it's like set_thresholds, but
+    # this time we ignore any --warning/critical
+    $self->force_thresholds(
+        # it there are --warning/critical on the command line
+        # (like 80/90, meaning the usage)
+        # then they have precedence over what we set here.
+        metric => $self->{ifDescr}.'_traffic_in',
+        warning => $tinwarning,
+        critical => $tincritical,
+    );
+    $self->force_thresholds(
+        metric => $self->{ifDescr}.'_traffic_out',
+        warning => $toutwarning,
+        critical => $toutcritical,
     );
     # Check both usage and traffic. The user could set thresholds like
     # --warningx 'traffic_.*'=1:80 --criticalx 'traffic_.*'=1:90 --units Mbit
