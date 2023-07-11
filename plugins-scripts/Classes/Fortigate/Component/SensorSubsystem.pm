@@ -1,6 +1,7 @@
 package Classes::Fortigate::Component::SensorSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
+use Scalar::Util qw(looks_like_number);
 
 sub init {
   my ($self) = @_;
@@ -48,7 +49,7 @@ sub check {
   if ($self->{fgHwSensorEntAlarmStatus} && $self->{fgHwSensorEntAlarmStatus} eq "true") {
     $self->add_critical();
   }
-  if ($self->{fgHwSensorEntValue}) {
+  if (looks_like_number($self->{fgHwSensorEntValue}) && $self->{fgHwSensorEntValue}) {
     $self->add_perfdata(
         label => sprintf('sensor_%s', $self->{fgHwSensorEntName}),
         value => $self->{fgHwSensorEntValue},
