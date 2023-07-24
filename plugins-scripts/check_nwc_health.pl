@@ -494,7 +494,7 @@ $plugin->add_mode(
     internal => 'device::cisco::fex::watch',
     spec => 'watch-fexes',
     alias => undef,
-    help => 'Check if FEXes appear and disappear (use --lookup)',
+    help => 'Check if FEXes appear and disappear (use --lookback)',
 );
 $plugin->add_mode(
     internal => 'device::rtt::check',
@@ -524,7 +524,7 @@ $plugin->add_mode(
     internal => 'device::wlan::aps::watch',
     spec => 'watch-accesspoints',
     alias => undef,
-    help => 'Check if access points appear and disappear (use --lookup)',
+    help => 'Check if access points appear and disappear (use --lookback)',
 );
 $plugin->add_mode(
     internal => 'device::wlan::aps::clients',
