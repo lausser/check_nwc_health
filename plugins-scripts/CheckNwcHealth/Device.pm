@@ -218,6 +218,7 @@ sub classify {
       }
     }
   }
+  $self->{generic_class} = "CheckNwcHealth::Generic";
   return $self;
 }
 
