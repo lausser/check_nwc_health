@@ -11,7 +11,10 @@ sub init {
   # get_entries_get_bulk wird's schon richten.
   $self->bulk_is_baeh(128);
   $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
-    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}, ["entSensorType", "entSensorScale", "entSensorStatus", "entSensorValue", "entSensorMeasuredEntity"]],
+    ['sensors', 'entSensorValueTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::Sensor', sub { my ($o) = @_; $self->filter_name($o->{entPhysicalIndex})}, ["entSensorType", "entSensorScale", "entSensorStatus", "entSensorValue"]],
+  ]);
+  $self->bulk_is_baeh(96);
+  $self->get_snmp_tables('CISCO-ENTITY-SENSOR-MIB', [
     ['thresholds', 'entSensorThresholdTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::SensorThreshold', undef, ["entSensorThresholdSeverity", "entSensorThresholdValue", "entSensorThresholdEvaluation"]],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [

@@ -5,10 +5,10 @@ use strict;
 sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
-    ['modules', 'cefcModuleTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::ModuleSubsystem::Module'],
+    ['modules', 'cefcModuleTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::ModuleSubsystem::Module', undef, ["cefcModuleAdminStatus", "cefcModuleOperStatus"]],
   ]);
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
+    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity', undef, ["entPhysicalIndex", "entPhysicalDescr", "entPhysicalClass"]],
   ]);
   @{$self->{entities}} = grep { $_->{entPhysicalClass} eq 'module' } @{$self->{entities}};
   foreach my $module (@{$self->{modules}}) {

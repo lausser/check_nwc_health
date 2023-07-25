@@ -37,6 +37,11 @@ sub init {
       $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOPROCESSMIB::Component::MemSubsystem");
     }
     delete $self->{switches};
+  } elsif (0 && $self->implements_mib('CISCO-PROCESS-MIB')) {
+    # we have the possibility to add individual (for each cpu) memory metrics
+    # to the global metrics from MEMPOOL-MIB. (as process-mib metrics are the
+    # ones which are shown in the command line.
+    $self->analyze_and_check_mem_subsystem("Classes::Cisco::CISCOPROCESSMIB::Component::MemSubsystem");
   }
 }
 

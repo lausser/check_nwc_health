@@ -5,11 +5,13 @@ use strict;
 sub init {
   my ($self) = @_;
   $self->get_snmp_tables('CISCO-ENTITY-FRU-CONTROL-MIB', [
-    ['fans', 'cefcFanTrayStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem::Fan'],
+    ['fans', 'cefcFanTrayStatusTable', 'Classes::Cisco::CISCOENTITYFRUCONTROLMIB::Component::FanSubsystem::Fan', undef, ["cefcFanTrayOperStatus"]],
   ]);
+  $self->bulk_is_baeh(40);
   $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity'],
+    ['entities', 'entPhysicalTable', 'Classes::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity', undef, ["entPhysicalIndex", "entPhysicalDescr", "entPhysicalClass"]],
   ]);
+  $self->bulk_baeh_reset();
   @{$self->{entities}} = grep { $_->{entPhysicalClass} eq 'fan' } @{$self->{entities}};
   foreach my $fan (@{$self->{fans}}) {
     foreach my $entity (@{$self->{entities}}) {
