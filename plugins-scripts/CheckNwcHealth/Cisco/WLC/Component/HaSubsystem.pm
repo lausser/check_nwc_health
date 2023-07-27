@@ -14,6 +14,7 @@ sub init {
         cLHaPrimaryUnit cLHaNetworkFailOver
         cLHaBulkSyncStatus cLHaRFStatusUnitIp
         cLHaAvgPeerReachLatency cLHaAvgGwReachLatency 
+        cLHaPeerHotStandbyEvent
     ));
   }
 }
@@ -36,6 +37,9 @@ sub check {
       if ($self->{cLHaBulkSyncStatus} ne "Complete") {
         $self->add_warning();
       }
+    } elsif ($self->{cLHaPeerHotStandbyEvent}) {
+      $self->add_info(sprintf "this is a unit in a failover setup, peer status is %s",
+          $self->{cLHaPeerHotStandbyEvent});
     } else {
       $self->add_critical_mitigation('ha failover is not configured');
     }

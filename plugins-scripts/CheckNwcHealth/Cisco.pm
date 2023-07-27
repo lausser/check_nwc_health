@@ -9,9 +9,13 @@ sub init {
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     $self->rebless('CheckNwcHealth::Cisco::NXOS');
   } elsif ($self->{productname} =~ /Cisco Controller/i ||
+      $self->{productname} =~ /C9800 / ||
       $self->implements_mib('AIRESPACE-SWITCHING-MIB')) {
     # die AIRESPACE-WIRELESS-MIB haben manchmal auch stinknormale Switche,
     # das hat also nichts zu sagen. SWITCHING ist entscheidend.
+    # juli 23, neues Modell C9800, hat kein AIRESPACE-SWITCHING-MIB, aber AIRESPACE-WIRELESS-MIB
+    # und die LWAPP-MIB. Wird hier zu WLC erklärt, cpu/mem etc wird aber in der WLC.pm
+    # dann wieder auf Cisco::IOS umgedengelt.
     $self->rebless('CheckNwcHealth::Cisco::WLC');
   } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
     $self->rebless('CheckNwcHealth::Cisco::AsyncOS');
