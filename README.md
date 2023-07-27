@@ -69,10 +69,10 @@ Modi
 | check-config                  | Check the status of configs (cisco, unsaved config changes) |
 | check-connections             | Check the quality of connections |
 | count-connections             | Check the number of connections (-client, -server is possible) |
-| watch-fexes                   | Check if FEXes appear and disappear (use --lookup) |
+| watch-fexes                   | Check if FEXes appear and disappear (use --lookback) |
 | accesspoint-status            | Check the status of access points |
 | count-accesspoints            | Check if the number of access points is within a certain range |
-| watch-accesspoints            | Check if access points appear and disappear (use --lookup) |
+| watch-accesspoints            | Check if access points appear and disappear (use --lookback) |
 | list-accesspoints             | List access points managed by this device |
 | phone-cm-status               | Check if the callmanager is up |
 | phone-status                  | Check the number of registered/unregistered/rejected phones |

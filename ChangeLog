@@ -1,3 +1,6 @@
+* 2023-07-27 11.0.1.1
+  C9800 fix
+  PR #318 from lgmu, typo in --lookup vs. --lookback
 * 2023-07-27 11.0.1
   support new C9800 wlan controller
 * 2023-07-25 11.0

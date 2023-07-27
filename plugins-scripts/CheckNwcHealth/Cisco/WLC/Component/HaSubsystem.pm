@@ -37,9 +37,14 @@ sub check {
       if ($self->{cLHaBulkSyncStatus} ne "Complete") {
         $self->add_warning();
       }
-    } elsif ($self->{cLHaPeerHotStandbyEvent}) {
+    } elsif (defined $self->{cLHaPeerHotStandbyEvent}) {
       $self->add_info(sprintf "this is a unit in a failover setup, peer status is %s",
           $self->{cLHaPeerHotStandbyEvent});
+      if ($self->{cLHaPeerHotStandbyEvent} eq "up") {
+        $self->add_ok();
+      } else {
+        $self->add_warning();
+      }
     } else {
       $self->add_critical_mitigation('ha failover is not configured');
     }
