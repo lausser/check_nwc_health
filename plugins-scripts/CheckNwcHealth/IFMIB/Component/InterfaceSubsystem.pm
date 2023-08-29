@@ -341,6 +341,13 @@ sub init {
       }
     }
   }
+  #
+  # @{$self->{interfaces}} liegt jetzt vor, komplett oder gefiltert
+  # jetzt kann man noch weitere tables dazunehmen
+  #
+  if (1) {
+    $self->add_vlans_to_ifs();
+  }
   if ($self->opts->report =~ /^(\w+)\+address/) {
     $self->override_opt('report', $1);
     # flat_indices, weil die Schluesselelemente ipAddressAddrType+ipAddressAddr
@@ -669,6 +676,70 @@ sub enrich_interface_attributes {
   # attributes
 }
 
+sub add_vlans_to_ifs {
+  my ($self, $interface) = @_;
+      # https://supportportal.juniper.net/s/article/EX-How-to-retrieve-interface-names-mapped-to-a-specific-VLAN-using-SNMP-MIB?language=en_US
+      # https://www.trisul.org/devzone/doku.php/articles:portvlanid
+      #  [TABLEITEM_40 in dot1dBasePortTable]
+      #  dot1dBasePort: 40 (-> index in dot1qPortVlanTable, augmentet eh schon)
+      #  dot1dBasePortCircuit: .0.0
+      #  dot1dBasePortIfIndex: 46  -> ifIndex in ifTable
+      #  +augment+
+      #  [TABLEITEM_40 in dot1qPortVlanTable]
+      #  dot1qPortAcceptableFrameTypes: admitAll
+      #  dot1qPortGvrpFailedRegistrations: 0
+      #  dot1qPortGvrpLastPduOrigin: binaerschlonz
+      #  dot1qPortGvrpStatus: 2
+      #  dot1qPortIngressFiltering: 1
+      #  dot1qPvid: 210 -> index in dot1qVlanStaticTable (hoffentlich)
+      #  
+      #  [TABLEITEM_210 in dot1qVlanStaticTable]
+      #  dot1qVlanForbiddenEgressPorts: binaerschlonz
+      #  dot1qVlanStaticEgressPorts: binaerschlonz
+      #  dot1qVlanStaticName: vlan210  <------ VLAN!!
+      #  dot1qVlanStaticRowStatus: 1
+      #  dot1qVlanStaticUntaggedPorts: binaerschlonz
+      #  
+      #  [64BIT_46]
+      #  ifAdminStatus: up
+      #  ifAlias: Digital Modulorsh
+      #  ifDescr: GigabitEthernet0/0/40  <-- INTERFACE!!
+      #  ifIndex: 46
+    # BRIDGE-MIB::dot1dBasePortTable im cache
+    # alle dot1dBasePortEntry durchgehen und alle rausholen,
+    # deren dot1dBasePortIfIndex in @{$self->{interfaces}} vorkommen.
+    $self->update_entry_cache(0, 'BRIDGE-MIB', 'dot1dBasePortTable', ['dot1dBasePort', "dot1dBasePortIfIndex"]);
+# kaka
+    my @interface_indices = $interface ?
+        () 
+        :
+        map {
+            $_->{ifIndex};
+        } @{$self->{interfaces}};
+    my @dot1qport_indices = $self->get_cache_indices_by_value('BRIDGE-MIB', 'dot1dBasePortTable', ['dot1dBasePort', "dot1dBasePortIfIndex"], "dot1dBasePortIfIndex", \@interface_indices);
+    if (@dot1qport_indices) {
+      # diese indices aus der dot1dBasePortTable benutzt man jetzt, um entries
+      # der dot1qPortVlanTable zu holen.
+      # nochmal dot1dBasePortTable, weil wir dot1dBasePortIfIndex in Kombination
+      # mit dot1dBasePort brauchen
+
+      my @dot1qportvlan_indices = ();
+      foreach ($self->get_snmp_table_objects("Q-BRIDGE-MIB", "dot1qPortVlanTable", \@dot1qport_indices, ["dot1qPvid"])) {
+        push(@dot1qportvlan_indices, $_->{dot1qPvid});
+printf "dadong %s\n", Data::Dumper::Dumper($_);
+      }
+    }
+
+    $self->get_snmp_tables("BRIDGE-MIB", [
+        ['baseports', 'dot1dBasePortTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ["dot1dBasePortIfIndex"], "dot1dBasePort"],
+    ]);
+    $self->get_snmp_tables("Q-BRIDGE-MIB", [
+        ['vlanports', 'dot1qPortVlanTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ["dot1qPvid"], "dot1dBasePort"],
+        ['vlans', 'dot1qVlanStaticTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ["dot1qVlanStaticName"], "flat_indices"], # index dot1qVlanIndex
+    ]);
+    # dot1qPortVlanEntry augments dot1dBasePortEntry 
+    $self->join_table("baseports", "vlanports");
+}
 
 package CheckNwcHealth::IFMIB::Component::InterfaceSubsystem::Interface;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
