@@ -4,9 +4,10 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->get_snmp_tables('ENTITY-MIB', [
+  $self->get_snmp_tables_cached('ENTITY-MIB', [
     ['entities', 'entPhysicalTable', 'CheckNwcHealth::Huawei::Component::MemSubsystem::Mem', sub { my ($o) = @_; $o->{entPhysicalClass} eq 'module' }, ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
   ]);
+  $self->mult_snmp_max_msg_size(10);
   $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
     ['entitystates', 'hwEntityStateTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['hwEntityMemUsage', 'hwEntityMemUsageThreshold', 'hwEntityMemSizeMega']],
   ]);
