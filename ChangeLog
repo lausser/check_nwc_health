@@ -1,3 +1,5 @@
+* 2023-09-15 11.2.0.1
+  suppress output of empty vlans
 * 2023-09-15 11.2
   cache huawei entities to avoid hitting the device's snmp rate limit
   cache vlan configs

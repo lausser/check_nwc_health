@@ -1100,7 +1100,7 @@ sub check {
   if ($self->{ifAddresses}) {
     push(@details, "addresses ".$self->{ifAddresses});
   }
-  if (exists $self->{vlans} && $self->{vlans}) {
+  if (exists $self->{vlans} && @{$self->{vlans}}) {
     push(@details, sprintf("vlan(s): %s", join(",", @{$self->{vlans}})));
   }
   my $full_descr = sprintf "%s%s",
