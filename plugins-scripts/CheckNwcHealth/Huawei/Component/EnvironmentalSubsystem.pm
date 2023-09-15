@@ -4,7 +4,11 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->get_snmp_tables('ENTITY-MIB', [
+  $self->get_snmp_tables_cached('ENTITY-MIB', [
+  # kann man cachen, denke ich. Es wird kaum reingesteckt und rausgezogen werden
+  # im laufenden Betrieb. Und falls doch und falls es monitoringseitig kracht,
+  # dann beschwert euch beim Huawei (s.u. SNMP-Bremse)
+  # Oder kauft kein Billigzeug
     ['modules', 'entPhysicalTable',
         'CheckNwcHealth::Huawei::Component::EnvironmentalSubsystem::Module',
         sub { my ($o) = @_; $o->{entPhysicalClass} eq 'module' },
@@ -17,17 +21,25 @@ sub init {
         'CheckNwcHealth::Huawei::Component::EnvironmentalSubsystem::Powersupply',
         sub { my ($o) = @_; $o->{entPhysicalClass} eq 'powerSupply' },
        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-  ]);
+  ], 3600);
   # heuristic tweaking. there was a device which intentionally slowed down
   # snmp responses when a large amount of data was transmitted.
-  $self->mult_snmp_max_msg_size(20);
-  $self->bulk_is_baeh(30);
+  # Tatsaechlich hat Huawei sowas wie eine Denial-of-Sonstwas-Bremse drin
+  # Daher reduktion auf die noetigsten Spalten und nicht uebertreiben bei
+  # den PDU-Groessen.
+  $self->mult_snmp_max_msg_size(10);
+  #$self->bulk_is_baeh(30);
   foreach (qw(modules fans powersupplies)) {
     # we need to get the table inside the loop, as merge_table deletes
     # entitystates. get_snmp_tables will read from the cache.
     $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
         ['entitystates', 'hwEntityStateTable',
-        'Monitoring::GLPlugin::SNMP::TableItem'],
+        'Monitoring::GLPlugin::SNMP::TableItem', undef, [
+            "hwEntityOperStatus", "hwEntityAdminStatus", "hwEntityAlarmLight",
+            "hwEntityTemperature", "hwEntityTemperatureLowThreshold",
+            "hwEntityTemperatureMinorThreshold", "hwEntityTemperatureThreshold",
+            "hwEntityFaultLight", "hwEntityDeviceStatus",
+        ]],
     ]);
     $self->debug(sprintf "found %d %s", scalar(@{$self->{entitystates}}), "entitystates");
     $self->debug(sprintf "found %d %s", scalar(@{$self->{$_}}), $_);
