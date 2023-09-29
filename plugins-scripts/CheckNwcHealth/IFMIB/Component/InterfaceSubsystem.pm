@@ -345,7 +345,7 @@ sub init {
   # @{$self->{interfaces}} liegt jetzt vor, komplett oder gefiltert
   # jetzt kann man noch weitere tables dazunehmen
   #
-  if ($self->opts->report =~ /^(\w+)\+vlan/ or $self->mode =~ /device::interfaces::(list|operstatus)/) {
+  if ($self->opts->report =~ /^(\w+)\+vlan/ or $self->mode =~ /device::interfaces::(list)/) {
     $self->override_opt('report', $1);
     $self->add_vlans_to_ifs();
   }
