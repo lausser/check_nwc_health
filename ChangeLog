@@ -1,3 +1,5 @@
+* 2023-10-06 11.2.0.4
+  PR #324, detect Ivanti devices (formerly identifying themselves as Pulse Secure). Thx c-kr
 * 2023-09-29 11.2.0.3
   show vlans only on demand, --report short+vlan
 * 2023-09-15 11.2.0.2
