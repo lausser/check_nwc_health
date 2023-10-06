@@ -113,8 +113,9 @@ sub classify {
         $self->rebless('CheckNwcHealth::Brocade');
       } elsif ($self->{productname} =~ /Fibre Channel Switch/i) {
         $self->rebless('CheckNwcHealth::Brocade');
-      } elsif ($self->{productname} =~ /Pulse Secure.*LLC/i) {
+      } elsif ($self->{productname} =~ /(Pulse Secure.*LLC|Ivanti Connect Secure)/i) {
         # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
+        # Ivanti Connect Secure,Ivanti Policy Secure,PSA-5000,9.1R18.1 (build 9527)
         $self->rebless('CheckNwcHealth::PulseSecure::Gateway');
       } elsif ($self->{productname} =~ /(Juniper|NetScreen|JunOS)/i) {
         $self->rebless('CheckNwcHealth::Juniper');
