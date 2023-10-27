@@ -26,6 +26,11 @@ sub check {
 package CheckNwcHealth::IPMIB::Component::ArpSubsystem::Entry;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 
+sub finish {
+  my ($self) = @_;
+  $self->{ipNetToMediaPhysAddress} = $self->unhex_mac($self->{ipNetToMediaPhysAddress});
+}
+
 sub list {
   my ($self) = @_;
   printf "%-20s %s\n", $self->{ipNetToMediaNetAddress}, $self->{ipNetToMediaPhysAddress};
