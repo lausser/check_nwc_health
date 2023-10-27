@@ -237,6 +237,8 @@ sub init {
     $self->analyze_and_check_interface_subsystem("CheckNwcHealth::IFMIB::Component::StackSubsystem");
   } elsif ($self->mode =~ /device::interfaces/) {
     $self->analyze_and_check_interface_subsystem("CheckNwcHealth::IFMIB::Component::InterfaceSubsystem");
+  } elsif ($self->mode =~ /device::arp/) {
+    $self->analyze_and_check_arp_subsystem("CheckNwcHealth::IPMIB::Component::ArpSubsystem");
   } elsif ($self->mode =~ /device::routes/) {
     if ($self->implements_mib('IP-FORWARD-MIB')) {
       $self->analyze_and_check_interface_subsystem("CheckNwcHealth::IPFORWARDMIB::Component::RoutingSubsystem");

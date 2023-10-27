@@ -353,6 +353,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/IPFORWARDMIB/Component/RoutingSubsystem.pm \
   CheckNwcHealth/IPFORWARDMIB.pm \
   CheckNwcHealth/IPMIB/Component/RoutingSubsystem.pm \
+  CheckNwcHealth/IPMIB/Component/ArpSubsystem.pm \
   CheckNwcHealth/IPMIB.pm \
   CheckNwcHealth/VRRPMIB/Component/VRRPSubsystem.pm \
   CheckNwcHealth/VRRPMIB.pm \

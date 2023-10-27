@@ -1,3 +1,5 @@
+* 2023-10-27 11.2.1
+  add mode list-arp-cache
 * 2023-10-06 11.2.0.4
   PR #324, detect Ivanti devices (formerly identifying themselves as Pulse Secure). Thx c-kr
 * 2023-09-29 11.2.0.3

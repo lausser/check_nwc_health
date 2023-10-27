@@ -552,6 +552,12 @@ sub run_plugin {
       help => 'Check the number of registered/unregistered/rejected phones',
   );
   $plugin->add_mode(
+      internal => 'device::arp::list',
+      spec => 'list-arp-cache',
+      alias => undef,
+      help => 'Show the ARP cache of the device',
+  );
+  $plugin->add_mode(
       internal => 'device::smarthome::device::list',
       spec => 'list-smart-home-devices',
       alias => undef,
