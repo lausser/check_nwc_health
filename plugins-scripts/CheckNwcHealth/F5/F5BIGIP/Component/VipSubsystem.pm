@@ -1,7 +1,6 @@
 package CheckNwcHealth::F5::F5BIGIP::Component::VipSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use Socket;
-use Net::Ping;
 
 sub init {
   my ($self) = @_;
@@ -18,6 +17,13 @@ sub check {
     }
     $self->add_ok("have fun");
   } elsif ($self->mode =~ /vip::connect/) {
+    eval {
+      require "Net::Ping";
+    };
+    if ($@) {
+      $self->add_unknown("perl module Net::Ping is missing");
+      return;
+    }
     my $ping = Net::Ping->new("syn");
     foreach (@{$self->{vips}}) {
       $ping->port_number($_->{ltmVirtualServPort});
