@@ -6,7 +6,7 @@ sub init {
   my ($self) = @_;
   if ($self->mode =~ /device::wlan::aps::clients/) {
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-        ['mobilestations', 'bsnMobileStationTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::MobileStation', sub { return $self->filter_name(shift->{bsnMobileStationSsid}) } ],
+        ['mobilestations', 'bsnMobileStationTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::MobileStation', sub { return $self->filter_name(shift->{bsnMobileStationSsid}) }, ['bsnMobileStationSsid', 'bsnMobileStationMacAddress'] ],
     ]);
   } else {
     $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
@@ -15,14 +15,44 @@ sub init {
         cLHaRedundancyIpAddressType cLHaRedundancyIpAddress
     ));
     $self->mult_snmp_max_msg_size(4);
+    $self->get_snmp_tables('CISCO-LWAPP-CDP-MIB', [
+        ['cacheaps', 'clcCdpApCacheTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['clcCdpApCacheApName', 'clcCdpApCacheNeighName', 'clcCdpApCacheNeighInterface'] ],
+    ]);
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-        ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) } ],
-        ['ifs', 'bsnAPIfTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP' ],
-        ['ifloads', 'bsnAPIfLoadParametersTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::IFLoad' ],
+        ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) }, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'] ],
+
+        ['ifs', 'bsnAPIfTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPIfSlotId'] ],
+        ['ifloads', 'bsnAPIfLoadParametersTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::IFLoad', undef, ['bsnAPIfLoadNumOfClients', 'bsnAPIfLoadTxUtilization', 'bsnAPIfLoadRxUtilization'] ],
     ]);
     $self->assign_loads_to_ifs();
     $self->dummy_loads_to_ifs();
     $self->assign_ifs_to_aps();
+    if ($self->opts->report eq "long" and $self->mode =~ /device::wlan::aps::watch/) {
+      $self->assign_neighbors_to_aps();
+      # we need to keep the informaton
+      # bsnAPName -> clcCdpApCacheNeighName/clcCdpApCacheNeighInterface
+      # in a file. Because when an AP disappears, then the entry in the
+      # clcCdpApCacheTable is gone as well.
+      my $saved_cache = $self->load_state(name => "bsnaptable+clccdpapcachetable") || {};
+      my $now = time;
+      foreach my $ap (@{$self->{aps}}) {
+        $ap->{refreshed} = $now;
+        $saved_cache->{$ap->{bsnAPName}} = {
+            refreshed => $now,
+            clcCdpApCacheNeighName => $ap->{clcCdpApCacheNeighName},
+            clcCdpApCacheNeighInterface => $ap->{clcCdpApCacheNeighInterface},
+        };
+      }
+      my $one_week_ago = time - 3600*24*7;
+      my $filtered_cache = { map {
+          $_ => $saved_cache->{$_}
+      } grep {
+          $saved_cache->{$_}->{refreshed} >= $one_week_ago
+      } keys %$saved_cache };
+      $self->save_state(name => "bsnaptable+clccdpapcachetable",
+          save => $filtered_cache);
+      $self->{saved_cache} = $filtered_cache;
+    }
   }
 }
 
@@ -83,6 +113,17 @@ sub check {
         $self->add_critical(sprintf '%d access points missing (%s)',
             scalar(@{$self->{delta_lost_apNameList}}),
             join(", ", @{$self->{delta_lost_apNameList}}));
+        if ($self->{saved_cache}) {
+          foreach my $ap (@{$self->{delta_lost_apNameList}}) {
+            if (exists $self->{saved_cache}->{$ap}) {
+              my $neighbor = sprintf "neighbor of %s was %s+%s",
+                  $ap,
+                  $self->{saved_cache}->{$ap}->{clcCdpApCacheNeighName},
+                  $self->{saved_cache}->{$ap}->{clcCdpApCacheNeighInterface};
+              $self->add_critical($neighbor);
+            }
+          }
+        }
       }
       $self->add_ok(sprintf 'found %d access points', scalar (@{$self->{aps}}));
       $self->add_perfdata(
@@ -123,6 +164,18 @@ sub assign_ifs_to_aps {
     $ap->{NumOfClients} = 0;
     map {$ap->{NumOfClients} += $_->{bsnAPIfLoadNumOfClients} }
         @{$ap->{interfaces}};
+  }
+}
+
+sub assign_neighbors_to_aps {
+  my ($self) = @_;
+  foreach my $ap (@{$self->{aps}}) {
+    foreach my $if (@{$self->{cacheaps}}) {
+      if ($if->{clcCdpApCacheApName} eq $ap->{bsnAPName}) {
+        $ap->{clcCdpApCacheNeighInterface} = $if->{clcCdpApCacheNeighInterface};
+        $ap->{clcCdpApCacheNeighName} = $if->{clcCdpApCacheNeighName};
+      }
+    }
   }
 }
 
