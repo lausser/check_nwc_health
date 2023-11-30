@@ -18,6 +18,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ALCATELIND1BASEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTABGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTAENTITYSENSORMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARISTAIFMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBATCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDCHASSISMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ARUBAWIREDFANTRAYMIB.pm \
@@ -46,6 +47,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYFRUCONTROLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENVMONMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOERRDISABLEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOETHERNETFABRICEXTENDERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFEATURECONTROLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREWALLMIB.pm \
@@ -227,6 +229,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/SdwanSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOERRDISABLEMIB/Component/InterfaceSubsystem.pm \
   CheckNwcHealth/Cisco/ASA.pm \
   CheckNwcHealth/Cisco/IOS/Component/HaSubsystem.pm \
   CheckNwcHealth/Cisco/IOS/Component/ConfigSubsystem.pm \
@@ -487,6 +490,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/Arista/ARISTABGP4V2MIB/Components/PeerSubsystem.pm \
   CheckNwcHealth/Arista/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Arista/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Arista/ARISTAIFMIB/Component/InterfaceSubsystem.pm \
   CheckNwcHealth/Arista.pm \
   CheckNwcHealth/Riverbed/SteelheadEX/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Riverbed/Steelhead/Component/EnvironmentalSubsystem.pm \

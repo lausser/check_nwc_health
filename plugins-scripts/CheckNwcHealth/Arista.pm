@@ -36,6 +36,12 @@ sub init {
         $self->no_such_mode();
       }
     }
+  } elsif ($self->mode =~ /device::interfacex::errdisabled/) {
+    if ($self->implements_mib('ARISTA-IF-MIB')) {
+      $self->analyze_and_check_interface_subsystem("CheckNwcHealth::Arista::ARISTAIFMIB::Component::InterfaceSubsystem");
+    } else {
+      $self->no_such_mode();
+    }
   } else {
     $self->no_such_mode();
   }

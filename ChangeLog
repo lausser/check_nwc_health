@@ -1,3 +1,5 @@
+* 2023-11-30 11.2.2
+  add mode interface-errdisabled (Cisco and Arista only)
 * 2023-11-15 11.2.1.2
   require, not use Net::Ping for F5 checks
 * 2023-10-27 11.2.1.1

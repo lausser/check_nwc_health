@@ -58,6 +58,12 @@ sub init {
       } else {
         $self->no_such_mode();
       }
+    } elsif ($self->mode =~ /device::interfacex::errdisabled/) {
+      # if ($self->implements_mib('CISCO-ERR-DISABLE-MIB')) {
+      # Ist bloed, aber wenn keine Spur dieser Mib zu finden ist,
+      # dann kann das schlichtweg bedeuten, dass kein Interface
+      # disabled wurde.
+      $self->analyze_and_check_interface_subsystem("CheckNwcHealth::Cisco::CISCOERRDISABLEMIB::Component::InterfaceSubsystem");
     } elsif ($self->mode =~ /device::interfaces::etherstats/) {
       if ($self->implements_mib('OLD-CISCO-INTERFACES-MIB')) {
         $self->analyze_and_check_interface_subsystem("CheckNwcHealth::Cisco::OLDCISCOINTERFACESMIB::Component::InterfaceSubsystem");

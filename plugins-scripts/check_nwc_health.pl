@@ -84,6 +84,13 @@ sub run_plugin {
       help => 'Check if interfaces operate in duplex mode',
   );
   $plugin->add_mode(
+      internal => 'device::interfacex::errdisabled',
+      # interfacesx because it should not be propagated to a parent class
+      spec => 'interface-errdisabled',
+      alias => undef,
+      help => 'Check for interfaces in state "error disabled"',
+  );
+  $plugin->add_mode(
       internal => 'device::interfaces::complete',
       spec => 'interface-health',
       alias => undef,
