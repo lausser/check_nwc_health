@@ -1,3 +1,5 @@
+* 2023-12-16 11.2.3
+  add perfdata for the mode interface-nat-rejects
 * 2023-12-16 11.2.2.1
   fix Makefile.am and git add the cisco and arista pm files which i had forgotten
 * 2023-11-30 11.2.2

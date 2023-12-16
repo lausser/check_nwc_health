@@ -68,5 +68,10 @@ sub check {
       $self->{rejects}, $self->{cnatProtocolStatsName});
   $self->set_thresholds(warning => 30, critical => 50);
   $self->add_message($self->check_thresholds($self->{rejects}));
+  $self->add_perfdata(
+      label => 'nat_packets_rejected_pct',
+      value => $self->{rejects},
+      uom => '%',
+  );
 }
 
