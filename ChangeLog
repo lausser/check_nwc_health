@@ -1,3 +1,5 @@
+* 2023-12-16 11.2.2.1
+  fix Makefile.am and git add the cisco and arista pm files which i had forgotten
 * 2023-11-30 11.2.2
   add mode interface-errdisabled (Cisco and Arista only)
 * 2023-11-15 11.2.1.2
