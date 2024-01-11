@@ -75,6 +75,9 @@ sub init {
     push(@iftable_columns, @iftable_status_columns);
     push(@iftable_columns, @iftable_packets_columns);
     push(@iftable_columns, @iftable_packets_hc_columns);
+    # braucht der etherstats auch, weil spaeter implizit ::broadcasts
+    # aufgerufen wird, welches calc_usage() macht und dort ifSpeed verrechnet
+    push(@iftable_columns, (qw(ifSpeed ifHighSpeed)));
     push(@ethertable_columns, qw(
         dot3StatsAlignmentErrors dot3StatsFCSErrors
         dot3StatsSingleCollisionFrames dot3StatsMultipleCollisionFrames
@@ -301,6 +304,16 @@ sub init {
           if ($self->implements_mib('RMON-MIB', 'etherStatsTable')) {
             foreach my $etherstat ($self->get_snmp_table_objects_with_cache(
                 'RMON-MIB', 'etherStatsTable', 'etherStatsDataSource', \@rmontable_columns, $if_has_changed ? 1 : -1)) {
+                # An sich ist die etherStatsTable => '1.3.6.1.2.1.16.1.1'
+                # ein Fuellhorn von Metriken, welch Pracht!
+                # Doch, ach weh, Cisco Application Deployment Engine geben nur etherStatsIndex
+                # preis.
+                # Garst'ger Gesell, Blender, elender! Prahlt mit seiner RMON-MIB und hat nur
+                # eine OID im Beutel.
+                # $ grep 1.3.6.1.2.1.16.1.1 snmpwalk_check_nwc_health_10.11.13.46
+                # .1.3.6.1.2.1.16.1.1.1.1.2 = INTEGER: 2
+                # .1.3.6.1.2.1.16.1.1.1.1.6 = INTEGER: 6
+                $etherstat->{etherStatsDataSource} ||= "-empty-";
                 $etherstat->{etherStatsDataSource} =~ s/^\.//g;
               foreach my $interface (@{$self->{interfaces}}) {
                 if ('1.3.6.1.2.1.2.2.1.1.'.$interface->{ifIndex} eq $etherstat->{etherStatsDataSource}) {

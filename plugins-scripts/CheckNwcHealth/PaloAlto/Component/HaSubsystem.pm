@@ -5,12 +5,10 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my ($self) = @_;
-  if ($self->mode =~ /device::ha::role/) {
   $self->get_snmp_objects('PAN-COMMON-MIB', (qw(
       panSysHAMode panSysHAState panSysHAPeerState)));
-    if (! $self->opts->role()) {
-      $self->opts->override_opt('role', 'active');
-    }
+  if ($self->mode =~ /device::ha::role/ && ! $self->opts->role()) {
+    $self->opts->override_opt('role', 'active');
   }
 }
 
@@ -27,7 +25,9 @@ sub check {
         defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
         'ha was not started');
   } else {
-    if ($self->{panSysHAState} ne $self->opts->role()) {
+    if ($self->{panSysHAState} eq "non-functional") {
+      $self->add_warning();
+    } elsif ($self->mode =~ /device::ha::role/ && $self->{panSysHAState} ne $self->opts->role()) {
       $self->add_message(
           defined $self->opts->mitigation() ? $self->opts->mitigation() : WARNING,
           $self->{info});
