@@ -117,8 +117,12 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPFORWARDMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/IPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERALARMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERDOMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERFRUMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERHOSTRESOURCESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERIVEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERPOWERSUPPLYUNITMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERRPSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNIPERSRX5000SPUMONITORINGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNOSBGP4V2MIB.pm \
@@ -157,6 +161,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/S5CHASSISMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPV2TCV1MIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPV2TC.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STATISTICSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/STEELHEADEXMIB.pm \
@@ -302,6 +307,10 @@ EXTRA_MODULES=\
   CheckNwcHealth/Juniper/SRX/Component/CpuSubsystem.pm \
   CheckNwcHealth/Juniper/SRX/Component/MemSubsystem.pm \
   CheckNwcHealth/Juniper/SRX.pm \
+  CheckNwcHealth/Juniper/JUNIPERMIB/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Juniper/JUNIPERMIB/Component/MemSubsystem.pm \
+  CheckNwcHealth/Juniper/JUNIPERMIB/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Juniper/JUNIPERMIB.pm \
   CheckNwcHealth/Juniper.pm \
   CheckNwcHealth/AlliedTelesyn.pm \
   CheckNwcHealth/Fortigate/Component/HaSubsystem.pm \

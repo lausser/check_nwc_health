@@ -1,3 +1,7 @@
+* 2024-01-24 11.3.0.1
+  add juniper temperature perfdata
+* 2024-01-23 11.3
+  improve Juniper-Mib, add more models
 * 2024-01-11 11.2.4
   add mode ha-status for Palo Alto
   bugfix in IFMIB and etherstats (uninizialized values)

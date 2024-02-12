@@ -27,6 +27,8 @@ sub init {
       $self->rebless('CheckNwcHealth::Juniper::SRX');
     } elsif ($self->{productname} =~ /NetScreen/i) {
       $self->rebless('CheckNwcHealth::Juniper::NetScreen');
+    } elsif ($self->implements_mib("JUNIPER-MIB")) {
+      $self->rebless('CheckNwcHealth::Juniper::JUNIPERMIB');
     } elsif ($self->{productname} =~ /JunOS/i) {
       $self->rebless('CheckNwcHealth::Juniper::JunOS');
     } elsif ($self->implements_mib('NETSCREEN-PRODUCTS-MIB')) {
