@@ -7,7 +7,9 @@ sub init {
   $self->require_mib("MIB-2-MIB");
   $self->require_mib("ENTITY-STATE-MIB");
   $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'ENTITY-STATE-MIB'}->{entStateLastChangedDefinition} = 'MIB-2-MIB::DateAndTime';
-  $self->get_snmp_tables('ENTITY-MIB', [
+  #$self->mult_snmp_max_msg_size(10);
+  $self->bulk_is_baeh(40);
+  $self->get_snmp_tables_cached('ENTITY-MIB', [
     ['entities', 'entPhysicalTable',
       'CheckNwcHealth::Arista::Component::EnvironmentalSubsystem::Entity',
       undef,
@@ -16,10 +18,12 @@ sub init {
   ]);
   $self->get_snmp_tables('ENTITY-SENSOR-MIB', [
     ['sensorvalues', 'entPhySensorTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+    #, undef, ["entPhySensorType", "entPhySensorScale", "entPhySensorPrecision", "entPhySensorValue", "entPhySensorOperStatus", "entPhySensorUnitsDisplay"]],
   ]);
   $self->get_snmp_tables('ENTITY-STATE-MIB', [
     ['sensorstates', 'entStateTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
+  $self->bulk_is_baeh(5); # without this, we have timeouts when an ocean is between omd andarista
   $self->get_snmp_tables('ARISTA-ENTITY-SENSOR-MIB', [
     ['sensorthresholds', 'aristaEntSensorThresholdTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
