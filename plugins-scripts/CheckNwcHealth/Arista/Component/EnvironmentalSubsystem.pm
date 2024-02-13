@@ -7,8 +7,6 @@ sub init {
   $self->require_mib("MIB-2-MIB");
   $self->require_mib("ENTITY-STATE-MIB");
   $Monitoring::GLPlugin::SNMP::MibsAndOids::mibs_and_oids->{'ENTITY-STATE-MIB'}->{entStateLastChangedDefinition} = 'MIB-2-MIB::DateAndTime';
-  #$self->mult_snmp_max_msg_size(10);
-  $self->bulk_is_baeh(40);
   $self->get_snmp_tables_cached('ENTITY-MIB', [
     ['entities', 'entPhysicalTable',
       'CheckNwcHealth::Arista::Component::EnvironmentalSubsystem::Entity',
