@@ -13,7 +13,6 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  $self->add_info('checking the arp cache');
   if ($self->mode =~ /device::arp::list/) {
     $self->add_ok(sprintf "found %d entries in the ARP cache", scalar(@{$self->{oentries}}));
     if ($self->opts->report eq "json") {
@@ -22,15 +21,14 @@ sub check {
         $_->list();
       } @{$self->{oentries}};
       my $jsonscalar = $coder->encode(\@struct);
-      $self->add_ok($jsonscalar);
+      $self->add_info($jsonscalar);
     } else {
       foreach (@{$self->{oentries}}) {
-        $_->list();
+        $self->add_info($_->list());
       }
       $self->add_ok("have fun");
     }
   }
-  my $x = "schars";
 }
 
 
@@ -46,11 +44,11 @@ sub list {
   my ($self) = @_;
   if ($self->opts->report eq "json") {
     return {
-        ip => $self->{ipNetToMediaNetAddress},
-        mac => $self->{ipNetToMediaPhysAddress},
+        $self->{ipNetToMediaNetAddress} =>
+            $self->{ipNetToMediaPhysAddress}
     }
   } else {
-    printf "%-20s %s\n", $self->{ipNetToMediaNetAddress}, $self->{ipNetToMediaPhysAddress};
+    return sprintf "%-20s %s", $self->{ipNetToMediaNetAddress}, $self->{ipNetToMediaPhysAddress};
   }
 }
 

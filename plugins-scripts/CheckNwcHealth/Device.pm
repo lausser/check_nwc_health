@@ -200,6 +200,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::HP::Aruba');
       } elsif ($self->implements_mib('DEVICE-MIB') and $self->{productname} =~ /Versa Appliance/) {
         $self->rebless('CheckNwcHealth::Versa');
+      } elsif ($self->implements_mib('SKYHIGHSECURITY-SWG-MIB') and $self->{productname} =~ /Skyhigh Secure Web Gateway/) {
+        $self->rebless('CheckNwcHealth::SkyHigh');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
       } else {

@@ -179,6 +179,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXWLANMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SKYHIGHSECURITYSWGMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/INTELSERVERBASEBOARD7.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/CSF.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/Item.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/TableItem.pm \
@@ -534,6 +536,9 @@ EXTRA_MODULES=\
   CheckNwcHealth/PulseSecure/Gateway/Component/DiskSubsystem.pm \
   CheckNwcHealth/PulseSecure/Gateway/Component/MemSubsystem.pm \
   CheckNwcHealth/PulseSecure/Gateway.pm \
+  CheckNwcHealth/SkyHigh/SWG.pm \
+  CheckNwcHealth/SkyHigh.pm \
+  CheckNwcHealth/INTELSERVERBASEBOARD7/Component/EnvironmntalSubsystem.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed

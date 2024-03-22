@@ -562,7 +562,7 @@ sub run_plugin {
       internal => 'device::arp::list',
       spec => 'list-arp-cache',
       alias => undef,
-      help => 'Show the ARP cache of the device',
+      help => 'Show the ARP cache of the device. (try --report json -v for Grafana)',
   );
   $plugin->add_mode(
       internal => 'device::smarthome::device::list',
