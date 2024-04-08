@@ -58,6 +58,7 @@ sub classify {
       $self->{productname} = 'ifmib' if $self->opts->servertype eq 'ifmib';
       $self->{productname} = 'generic_hostresources' if $self->opts->servertype eq 'generic_hostresources';
       $self->{productname} = 'generic_ucd' if $self->opts->servertype eq 'generic_ucd';
+      $self->{productname} = 'FritzBox7390' if $self->opts->servertype eq 'generic_fritzbox';
     }
     if ($self->opts->mode eq "uptime" && $self->opts->mode eq "short") {
       return $self;
