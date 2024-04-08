@@ -51,19 +51,19 @@ sub check {
       sprintf '%s is %.2f%s',
       lc $self->{laNames}, $self->{laLoad},
       $self->{'laErrorFlag'} eq 'error'
-          ? sprintf ' (%s)', $self->{'laErrMessage'}
+          ? sprintf ' (based on thresholds configured in the device: %s)', $self->{'laErrMessage'}
           : ''
   );
-  if ($self->{'laErrorFlag'} eq 'error') {
-    $self->add_critical();
-  } else {
-    $self->add_message($self->check_thresholds(
-        metric => lc $self->{laNames},
-        value => $self->{laLoad}));
-  }
+  $self->add_message($self->check_thresholds(
+      metric => lc $self->{laNames},
+      value => $self->{laLoad}));
   $self->add_perfdata(
       label => lc $self->{laNames},
       value => $self->{laLoad},
   );
+  if ($self->{'laErrorFlag'} eq 'error') {
+    # compared to the built-in thresholds
+    ##$self->add_critical();
+  }
 }
 

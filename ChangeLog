@@ -1,3 +1,5 @@
+* 2024-04-08 11.4.0.1
+  bugfix in UCD-MIB Load, external thresholds override the internal error status
 * 2024-03-22 11.4
   add SkyHigh Secure Web Gateway (and INTEL-SERVER-BASEBOARD7-MIB)
   fix the list-arp-cache json output
