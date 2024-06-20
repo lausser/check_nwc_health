@@ -1,3 +1,5 @@
+* 2024-06-20 11.4.0.2
+  bugfix in CheckPoint FW1 where R81.20 showed invalid cpu metrics
 * 2024-04-08 11.4.0.1
   bugfix in UCD-MIB Load, external thresholds override the internal error status
   implement --servertype generic_fritzbox

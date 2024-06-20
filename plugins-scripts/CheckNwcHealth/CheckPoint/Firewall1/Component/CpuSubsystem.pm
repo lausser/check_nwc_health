@@ -4,11 +4,28 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(procUsage procNum)));
-  $self->get_snmp_tables('CHECKPOINT-MIB', [
-      ['multiprocs', 'multiProcTable', 'CheckNwcHealth::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc'],
-  ]);
+  $self->get_snmp_objects('CHECKPOINT-MIB', (qw(procUsage procNum svnVersion)));
   $self->{procQueue} = $self->valid_response('CHECKPOINT-MIB', 'procQueue');
+  if ($self->{svnVersion} eq "R81.20") {
+    # R81.20 is pretty broken. It returns multiProcUsage which are mostly
+    # 0, 20, 25, 50, 100 etc. Rarely we get reasonable values.
+    $self->get_snmp_tables('HOST-RESOURCES-MIB', [
+        ['cpus', 'hrProcessorTable', 'CheckNwcHealth::HOSTRESOURCESMIB::Component::CpuSubsystem::Cpu'],
+    ]);
+    my $idx = 1;
+    foreach (@{$self->{cpus}}) {
+      my $cpu = CheckNwcHealth::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc->new(
+        multiProcIndex => $idx++,
+        multiProcUsage => $_->{hrProcessorLoad},
+      );
+      push(@{$self->{multiprocs}}, $cpu);
+    }
+    delete $self->{cpus};
+  } else {
+    $self->get_snmp_tables('CHECKPOINT-MIB', [
+        ['multiprocs', 'multiProcTable', 'CheckNwcHealth::CheckPoint::Firewall1::Component::CpuSubsystem::MultiProc'],
+    ]);
+  }
 }
 
 sub check {
@@ -55,3 +72,20 @@ sub check {
         uom => '%',
     );
 }
+
+__END__
+  my $num_non_random = 0;
+  if (scalar(@{$self->{multiprocs}})) {
+    my @percentages = map {
+        $_->{multiProcUsage};
+    } @{$self->{multiprocs}};
+    my %frequency;
+    $frequency{$_}++ for @percentages;
+    my $total = @percentages;
+    my $entropy = 0;
+    foreach my $count (values %frequency) {
+        my $p_x = $count / $total;
+        $entropy -= $p_x * (log($p_x) / log(2));
+    }
+    $self->debug(sprintf "entropy is %f", $entropy);
+  }
