@@ -189,9 +189,12 @@ sub check {
   my $label = $self->{entPhySensorEntityName};
   $label =~ s/ RPM$//g;
   $label =~ s/Fan #(\d+)/$1/g;
+  $self->set_thresholds(warning => '@0', critical => '@0');
   $self->add_perfdata(
     label => 'fan_'.$label,
     value => $self->{entPhySensorValue},
+    uom => 'rpm',
+    min => 0,
   );
 }
 
