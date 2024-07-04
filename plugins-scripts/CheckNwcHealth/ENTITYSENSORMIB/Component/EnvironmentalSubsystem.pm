@@ -166,6 +166,7 @@ sub check {
   $self->add_perfdata(
     label => 'temp_'.$label,
     value => $self->{entPhySensorValue},
+    uom => 'C',
   );
 }
 
