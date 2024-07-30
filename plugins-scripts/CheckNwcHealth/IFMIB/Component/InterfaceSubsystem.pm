@@ -1239,13 +1239,13 @@ sub check {
         # (like 80/90, meaning the usage)
         # then they have precedence over what we set here.
         metric => $self->{ifDescr}.'_traffic_in',
-        warning => $tinwarning,
-        critical => $tincritical,
+        warning => $tinwarning > 0 ? $tinwarning : '0:',
+        critical => $tincritical > 0 ? $tincritical : '0:',
     );
     $self->force_thresholds(
         metric => $self->{ifDescr}.'_traffic_out',
-        warning => $toutwarning,
-        critical => $toutcritical,
+        warning => $toutwarning > 0 ? $toutwarning : '0:',
+        critical => $toutcritical > 0 ? $toutcritical : '0:',
     );
     # Check both usage and traffic. The user could set thresholds like
     # --warningx 'traffic_.*'=1:80 --criticalx 'traffic_.*'=1:90 --units Mbit
