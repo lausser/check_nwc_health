@@ -1,6 +1,7 @@
 package CheckNwcHealth::CheckPoint::Firewall1::Component::VoltageSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
+use Scalar::Util qw(looks_like_number);
 
 sub init {
   my ($self) = @_;
@@ -23,20 +24,33 @@ use strict;
 
 sub check {
   my ($self) = @_;
-  $self->add_info(sprintf 'voltage %s is %s (%.2f %s)', 
-      $self->{voltageSensorName}, $self->{voltageSensorStatus},
-      $self->{voltageSensorValue}, $self->{voltageSensorUnit});
-  if ($self->{voltageSensorStatus} eq 'normal') {
-    $self->add_ok();
-  } elsif ($self->{voltageSensorStatus} eq 'abnormal') {
-    $self->add_critical();
+  if ($self->{voltageSensorValue} && looks_like_number($self->{voltageSensorValue})) {
+	  $self->add_info(sprintf 'voltage %s is %s (%.2f %s)', 
+		  $self->{voltageSensorName}, $self->{voltageSensorStatus},
+		  $self->{voltageSensorValue}, $self->{voltageSensorUnit});
+	  if ($self->{voltageSensorStatus} eq 'normal') {
+		$self->add_ok();
+	  } elsif ($self->{voltageSensorStatus} eq 'abnormal') {
+		$self->add_critical();
+	  } else {
+		$self->add_unknown();
+	  }
+	  $self->set_thresholds(warning => 60, critical => 70);
+	  $self->add_perfdata(
+		  label => 'voltage'.$self->{voltageSensorName}.'_rpm',
+		  value => $self->{voltageSensorValue},
+	  );
   } else {
-    $self->add_unknown();
+	$self->add_info(sprintf 'voltage %s is %s (%s %s)', 
+		  $self->{voltageSensorName}, $self->{voltageSensorStatus},
+		  $self->{voltageSensorValue}, $self->{voltageSensorUnit});
+	  if ($self->{voltageSensorStatus} eq 'normal') {
+		$self->add_ok();
+	  } elsif ($self->{voltageSensorStatus} eq 'abnormal') {
+		$self->add_critical();
+	  } else {
+		$self->add_unknown();
+	  }
   }
-  $self->set_thresholds(warning => 60, critical => 70);
-  $self->add_perfdata(
-      label => 'voltage'.$self->{voltageSensorName}.'_rpm',
-      value => $self->{voltageSensorValue},
-  );
 }
 
