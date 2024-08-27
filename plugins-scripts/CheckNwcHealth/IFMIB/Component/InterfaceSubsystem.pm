@@ -1018,7 +1018,7 @@ sub init {
     my $gb = 1000 * 1000 * 1000;
     my $mb = 1000 * 1000;
     my $kb = 1000;
-    my $speed = $self->{ifHighSpeed} ? 
+    my $speed = $self->{ifHighSpeed} ?
         ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
     if ($speed >= $gb) {
       $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
@@ -1577,6 +1577,21 @@ sub calc_usage {
         ($self->{delta_timestamp} * $self->{maxInputRate});
     $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
         ($self->{delta_timestamp} * $self->{maxOutputRate});
+    my $gb = 1000 * 1000 * 1000;
+    my $mb = 1000 * 1000;
+    my $kb = 1000;
+    my $speed = $self->{ifHighSpeed} ?
+        ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
+    if ($speed >= $gb) {
+      $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
+    } elsif ($speed >= $mb) {
+      $self->{ifSpeedText} = sprintf "%.2fMB", $speed / $mb;
+    } elsif ($speed >= $kb) {
+      $self->{ifSpeedText} = sprintf "%.2fKB", $speed / $kb;
+    } else {
+      $self->{ifSpeedText} = sprintf "%.2fB", $speed;
+    }
+    $self->{ifSpeedText} =~ s/\.00//g;
   } else {
     $self->{maxInputRate} = $self->{ifSpeed};
     $self->{maxOutputRate} = $self->{ifSpeed};

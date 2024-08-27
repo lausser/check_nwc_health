@@ -234,6 +234,11 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/CISCOREMOTEACCESSMONITORMIB/Component/VpnSubsystem.pm \
   CheckNwcHealth/Cisco/CISCORTTMONMIB/Component/RttSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/SdwanSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/MemSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB.pm \
   CheckNwcHealth/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOERRDISABLEMIB/Component/InterfaceSubsystem.pm \
@@ -485,6 +490,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/PaloAlto/Component/CpuSubsystem.pm \
   CheckNwcHealth/PaloAlto/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/PaloAlto/Component/HaSubsystem.pm \
+  CheckNwcHealth/PaloAlto/Component/SecuritySubsystem.pm \
   CheckNwcHealth/PaloAlto.pm \
   CheckNwcHealth/Bluecoat.pm \
   CheckNwcHealth/Cumulus.pm \

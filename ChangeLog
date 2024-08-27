@@ -1,3 +1,8 @@
+* 2024-08-27 11.5.0.1
+  update changelog, add files for a proper commit, fix cisco sdwan load unit
+* 2024-08-26 11.5
+  add mode security-status for Palo Alto (checks age of the last sw update)
+  fix mem/cpu/hw modes for Cisco SDWAN (IOS) which do hot have the Viptela-Mib
 * 2024-06-20 11.4.0.2
   bugfix in CheckPoint FW1 where R81.20 showed invalid cpu metrics
 * 2024-04-08 11.4.0.1
