@@ -470,6 +470,12 @@ sub run_plugin {
       help => 'Check loss, latency and jitter of a route',
   );
   $plugin->add_mode(
+      internal => 'device::sdwan::control::vedgecount',
+      spec => 'sdwan-control-vedge-count',
+      alias => undef,
+      help => 'Check number of connections in relation to "lookback" average',
+  );
+  $plugin->add_mode(
       internal => 'device::licenses::validate',
       spec => 'check-licenses',
       alias => undef,

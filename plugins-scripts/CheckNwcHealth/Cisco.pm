@@ -96,9 +96,10 @@ sub init {
         $self->no_such_mode();
       }
     } elsif ($self->mode =~ /device::sdwan::/) {
-    #} elsif ($self->mode =~ /device::sdwan::session::availability/) {
       if ($self->implements_mib("CISCO-SDWAN-OPER-SYSTEM-MIB")) {
         $self->analyze_and_check_sdwan_subsystem("CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem");
+      } elsif ($self->implements_mib("VIPTELA-SECURITY")) {
+        $self->analyze_and_check_sdwan_subsystem("CheckNwcHealth::Cisco::Viptela::Component::SdwanSubsystem");
       } else {
         $self->no_such_mode();
       }

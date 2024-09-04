@@ -1,3 +1,5 @@
+* 2024-09-03 11.5.1
+  add mode sdwan-control-vedge-count for Cisco Viptela devices
 * 2024-08-27 11.5.0.1
   update changelog, add files for a proper commit, fix cisco sdwan load unit
 * 2024-08-26 11.5

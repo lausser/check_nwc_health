@@ -48,6 +48,8 @@ sub init {
         }
         return $matching;
     });
+  } else {
+    $self->no_such_mode();
   }
 }
 

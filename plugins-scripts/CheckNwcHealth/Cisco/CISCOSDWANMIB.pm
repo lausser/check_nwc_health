@@ -11,6 +11,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::sdwan::control::vedgecount/) {
+    $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::Viptela::Component::SecuritySubsystem");
   } else {
     $self->no_such_mode();
   }
