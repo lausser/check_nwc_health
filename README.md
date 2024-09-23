@@ -31,9 +31,10 @@ Modi
 | hardware-health               | Check the status of environmental equipment (fans, temperatures, power) |
 | cpu-load                      | Check the CPU load of the device |
 | memory-usage                  | Check the memory usage of the device |
-| interface-usage               | Check the utilization of interfaces |
+| interface-usage               | Check the utilization of interfaces (--name matches ifDescr, --name2 matches ifName, for all interface modes) |
 | interface-errors              | Check the error-rate of interfaces  |
 | interface-discards            | Check the discard-rate of interfaces |
+| interface-health              | Check the general health of interfaces |
 | interface-status              | Check the status of interfaces (oper/admin) |
 | interface-nat-count-sessions  | Count the number of nat sessions |
 | interface-nat-rejects         | Count the number of nat sessions rejected due to lack of resources) |
