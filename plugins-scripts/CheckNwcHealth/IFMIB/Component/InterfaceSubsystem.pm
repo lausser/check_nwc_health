@@ -180,13 +180,13 @@ sub init {
     my @indices = $self->get_interface_indices();
     my @all_indices = @indices;
     my @selected_indices = ();
-    if (! $self->opts->name && ! $self->opts->name3) {
+    if (! $self->opts->name && ! $self->opts->name2 && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
       $self->bulk_is_baeh(10);
     }
     @iftable_columns = do { my %seen; grep { !$seen{$_}++ } @iftable_columns }; # uniq
-    if ((! $self->opts->name && ! $self->opts->name3) || scalar(@indices) > 0) {
+    if ((! $self->opts->name && ! $self->opts->name2 && ! $self->opts->name3) || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       if ($plus_admin_up || $plus_oper_up) {
         # mit minimalen columns schnell vorfiltern -> @indices evt. reduzieren
@@ -646,6 +646,7 @@ sub get_interface_indices {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
+    my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName};
     # Check ifDescr (using --name)
     if ($self->opts->name) {
       if ($self->opts->regexp) {
@@ -663,6 +664,11 @@ sub get_interface_indices {
             push(@indices, [$ifIndex]);
           }
         }
+      }
+    # Check ifName (using --name2)
+    } elsif ($self->opts->name2) {
+      if (lc $ifName eq lc $self->opts->name2) {
+        push(@indices, [$ifIndex]);
       }
     # Check ifAlias (using --name3)
     } elsif ($self->opts->name3) {
