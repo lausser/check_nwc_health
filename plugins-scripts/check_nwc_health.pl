@@ -645,6 +645,13 @@ sub run_plugin {
       required => 0,
       hidden => 1,
   );
+  $plugin->add_arg(
+      spec => 'subsystem=s',
+      help => "--subsystem
+   Select a specific hardware subsystem (Cisco UCS only)",
+      required => 0,
+      default => undef,
+  );  
   
   $plugin->getopts();
   $plugin->classify();

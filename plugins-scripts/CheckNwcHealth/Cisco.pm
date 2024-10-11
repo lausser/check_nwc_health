@@ -32,6 +32,8 @@ sub init {
     # z.b. bei cpu/mem hat CISCO-SDWAN-OPER-SYSTEM die gleichen oids wie
     # VIPTELA-OPER-SYSTEM, also wieder zugekaufter und umnumerierter Dreck.
     $self->rebless('CheckNwcHealth::Cisco::CISCOSDWANMIB');
+  } elsif ($self->implements_mib('CISCO-UNIFIED-COMPUTING-COMPUTE-MIB')) {
+    $self->rebless('CheckNwcHealth::Cisco::UCS');
   } elsif ($self->{productname} =~ /Cisco/i) {
     $self->rebless('CheckNwcHealth::Cisco::IOS');
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {

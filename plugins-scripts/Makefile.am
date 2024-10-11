@@ -76,6 +76,12 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGEQUIPMENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGTCMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGMEMORYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGPROCESSORMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGSTORAGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGCOMPUTEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DCBGPMIB.pm \
@@ -287,6 +293,13 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/Viptela/Component/CpuSubsystem.pm \
   CheckNwcHealth/Cisco/Viptela/Component/SdwanSubsystem.pm \
   CheckNwcHealth/Cisco/Viptela.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalCpuSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalMemSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalRackUnitSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalEquipmentSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalStorageSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS.pm \
   CheckNwcHealth/Cisco.pm \
   CheckNwcHealth/OneOS/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/OneOS/Component/CpuSubsystem.pm \
