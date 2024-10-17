@@ -138,6 +138,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::F5');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
         $self->rebless('CheckNwcHealth::F5');
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.12276\.1\.3\.1\./) {
+        $self->rebless('CheckNwcHealth::F5');
       } elsif ($self->{productname} =~ /(H?H3C|HP Comware|HPE Comware)/i) {
         $self->rebless('CheckNwcHealth::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {

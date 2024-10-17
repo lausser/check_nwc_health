@@ -96,6 +96,9 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPGLOBALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPLOCALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPSYSTEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5COMMONSMIMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5OSSYSTEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5PLATFORMSTATSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCMGMTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
@@ -435,6 +438,12 @@ EXTRA_MODULES=\
   CheckNwcHealth/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   CheckNwcHealth/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
   CheckNwcHealth/F5/F5BIGIP.pm \
+  CheckNwcHealth/F5/Velos/Component/TemperatureSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/DiskSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/CpuSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/MemSubsystem.pm \
+  CheckNwcHealth/F5/Velos.pm \
   CheckNwcHealth/F5.pm \
   CheckNwcHealth/CheckPoint/Firewall1/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/CheckPoint/Firewall1/Component/TemperatureSubsystem.pm \
