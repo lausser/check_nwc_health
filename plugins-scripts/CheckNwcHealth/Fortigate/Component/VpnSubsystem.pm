@@ -28,7 +28,11 @@ sub check {
         value => $self->{fgSysSesCount},
     );
   } elsif ($self->mode eq "device::vpn::status") {
-    $self->SUPER::check();
+    if (! @{$self->{tunnels}}) {
+      $self->add_unknown("no tunnels found");
+    } else {
+      $self->SUPER::check();
+    }
   }
 }
 
