@@ -36,21 +36,9 @@ sub check {
   }
 }
 
-#fgVpnTunEntPhase1Name.3.2 = S2S_Copeland
-#fgVpnTunEntPhase2Name.3.2 = S2S_Copeland
 package CheckNwcHealth::Fortigate::Component::VpnSubsystem::Tunnel;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
-
-sub ifinish {
-  my ($self) = @_;
-  $self->{flat_indices} =~ /^(\d+\.\d+\.\d+\.\d+)/;
-  $self->{tunnelPeerIpAddr} ||= $1;
-  $self->{tunnelPeerObjName} ||= $self->{tunnelPeerIpAddr};
-  if (! defined $self->{tunnelState}) {
-    $self->{tunnelState} = $self->get_snmp_object('CHECKPOINT-MIB', 'tunnelState', $self->{tunnelPeerIpAddr});
-  }
-}
 
 sub check {
   my ($self) = @_;
