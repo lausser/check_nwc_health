@@ -231,13 +231,20 @@ sub check {
       $self->{appRouteStatisticsRemoteColor});
   $self->set_thresholds(metric => $name."_loss", warning => 1, critical => 4);
   $self->set_thresholds(metric => $name."_latency", warning => 40, critical => 80);
+  $self->set_thresholds(metric => $name."_jitter", warning => 50, critical => 100);
   my $losslevel = $self->check_thresholds(metric => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
   $self->annotate_info("loss too high") if $losslevel;
   my $latencylevel = $self->check_thresholds(metric => $name."_latency",
       value => $self->{appRouteStatisticsAppProbeClassMeanLatency});
   $self->annotate_info("latency too high") if $latencylevel;
-  $self->add_message($losslevel > $latencylevel ? $losslevel : $latencylevel);
+  my $jitterlevel = $self->check_thresholds(metric => $name."_jitter",
+      value => $self->{appRouteStatisticsAppProbeClassMeanJitter});
+  $self->annotate_info("jitter too high") if $jitterlevel;
+  my $highest_value = $losslevel > $latencylevel
+      ? ($losslevel > $jitterlevel ? $losslevel : $jitterlevel)
+      : ($latencylevel > $jitterlevel ? $latencylevel : $jitterlevel);
+  $self->add_message($highest_value);
   $self->add_perfdata(label => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
   $self->add_perfdata(label => $name."_latency",
