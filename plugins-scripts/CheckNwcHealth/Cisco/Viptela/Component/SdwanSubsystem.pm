@@ -94,7 +94,11 @@ sub calc {
     my $bucket = int($delta / $bucket_size) * $bucket_size;
     $bucket_count{$bucket}++;
   }
-  $self->{check_interval} = (sort { $bucket_count{$b} <=> $bucket_count{$a} } keys %bucket_count)[0];
+  if (%bucket_count) {
+    $self->{check_interval} = (sort { $bucket_count{$b} <=> $bucket_count{$a} } keys %bucket_count)[0];
+  } else {
+    $self->{check_interval} = 0;
+  }
 }
 
 sub check {
