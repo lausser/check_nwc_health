@@ -45,6 +45,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENHANCEDMEMPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYALARMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYFRUCONTROLMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYQFPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENVMONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOERRDISABLEMIB.pm \
@@ -240,6 +241,8 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOENTITYQFPMIB/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOENTITYQFPMIB/Component/MemSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOREMOTEACCESSMONITORMIB/Component/VpnSubsystem.pm \
   CheckNwcHealth/Cisco/CISCORTTMONMIB/Component/RttSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/SdwanSubsystem.pm \

@@ -51,6 +51,9 @@ sub init {
       }
     }
   }
+  if ($self->implements_mib("CISCO-ENTITY-QFP-MIB")) {
+    $self->analyze_and_check_qfpcpu_subsystem("CheckNwcHealth::Cisco::CISCOENTITYQFPMIB::Component::CpuSubsystem");
+  }
 }
 
 package CheckNwcHealth::Cisco::IOS::Component::CpuSubsystem::Cpu;

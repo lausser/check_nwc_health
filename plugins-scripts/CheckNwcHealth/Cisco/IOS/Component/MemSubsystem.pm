@@ -43,5 +43,8 @@ sub init {
     # ones which are shown in the command line.
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::CISCOPROCESSMIB::Component::MemSubsystem");
   }
+  if ($self->implements_mib('CISCO-ENTITY-QFP-MIB')) {
+    $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::CISCOENTITYQFPMIB::Component::MemSubsystem");
+  }
 }
 
