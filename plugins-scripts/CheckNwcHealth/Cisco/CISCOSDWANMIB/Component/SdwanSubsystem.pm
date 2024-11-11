@@ -36,6 +36,13 @@ sub init {
       }],
       ["probestatistics", "appRouteStatisticsAppProbeClassTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat"],
     ]);
+    if (! @{$self->{probestatistics}}) {
+      # maybe a bug on the cisco side or missing access right, but sometimes
+      # this table does not exist
+      # SNMPv2-SMI::enterprises.9.9.1001.1.5 = No Such Object available on this agent at this OID
+      # exit with a notice for the admin.
+      $self->{appRouteStatisticsAppProbeClassTable_missing} = 1;
+    }
     $self->merge_tables_with_code("statistics", "probestatistics", sub {
         my ($stat, $pstat) = @_;
         my $matching = 1;
@@ -72,6 +79,10 @@ sub check {
         uom => '%',
     );
   } elsif ($self->mode eq "device::sdwan::route::quality") {
+    if ($self->{appRouteStatisticsAppProbeClassTable_missing}) {
+      $self->add_unknown("appRouteStatisticsAppProbeClassTable is not available/readable");
+      return;
+    }
     # es ist moeglich mit --name <regexp> --regexp mehrere routen per snmp
     # zu holen. hinter --name steckt die appRouteStatisticsDstIp.
     # bei einer bestimmten kundeninstallation gibt es immer zwei sdwan-strecken,
