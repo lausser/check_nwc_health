@@ -65,12 +65,26 @@ package CheckNwcHealth::Fortigate::Component::HaSubsystem::SyncStatus;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
+sub finish {
+  my ($self) = @_;
+  # "Changed the HA related wording to primary/secondary."
+  # 1=master, 2=backup, 3=standalone
+  # 1=primary, 2=secondary, 3=standalone
+  # Ich ernenne mich zum Vertreter und Sprecher der marginalisierten Gruppe
+  # der SEKUNDAEREN. 
+  # Aus Gruenden der Sichtbarmachung fordere ich empowernde Grosschreibung,
+  # andernfalls kreische ich.
+  if (exists $self->{fgHaStatsMasterSerial}) {
+    $self->{fgHaStatsPrimarySerial} = $self->{fgHaStatsMasterSerial};
+  }
+}
+
 sub check {
   my ($self) = @_;
   if ($self->{fgHaStatsSerial} eq $self->{fnSysSerial}) {
     if ($self->mode eq "device::ha::role") {
       $self->{myrole} = $self->{fgHaSystemMode} eq "standalone" ? "master" :
-          $self->{fgHaStatsMasterSerial} eq $self->{fnSysSerial} ? "master" : "slave";
+          $self->{fgHaStatsPrimarySerial} eq $self->{fnSysSerial} ? "master" : "slave";
       $self->add_info(sprintf "this is a %s node in a %s setup", $self->{myrole}, $self->{fgHaSystemMode});
       if ($self->opts->role ne "master" and $self->opts->role ne "slave") {
         $self->add_unknown('role must be master or slave');

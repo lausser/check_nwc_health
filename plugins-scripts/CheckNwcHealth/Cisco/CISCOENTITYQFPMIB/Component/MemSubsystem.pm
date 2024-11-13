@@ -7,17 +7,19 @@ sub init {
   $self->get_snmp_tables('CISCO-ENTITY-QFP-MIB', [
       ['qmems', 'ceqfpMemoryResourceTable', 'CheckNwcHealth::Cisco::CISCOENTITYQFPMIB::Component::MemSubsystem::QfpMem'],
   ]);
-  $self->get_snmp_tables('ENTITY-MIB', [
-    ['entities', 'entPhysicalTable', 'CheckNwcHealth::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity', sub { my $o = shift; $o->{entPhysicalClass} eq "cpu"; }, ["entPhysicalIndex", "entPhysicalName", "entPhysicalClass"]],
-  ]);
-  $self->merge_tables_with_code("qmems", "entities", sub {
-    my ($qmem, $entity) = @_;
-    my $truncated_indices = $qmem->{flat_indices} =~ s/\.\d+$//r;
-    return $truncated_indices eq $entity->{flat_indices} ? 1 : 0;
-  });
-  @{$self->{qmems}} = grep {
-    $_->{ceqfpMemoryResType};
-  } @{$self->{qmems}};
+  if (@{$self->{qmems}}) {
+    $self->get_snmp_tables('ENTITY-MIB', [
+      ['entities', 'entPhysicalTable', 'CheckNwcHealth::Cisco::CISCOENTITYSENSORMIB::Component::SensorSubsystem::PhysicalEntity', sub { my $o = shift; $o->{entPhysicalClass} eq "cpu"; }, ["entPhysicalIndex", "entPhysicalName", "entPhysicalClass"]],
+    ]);
+    $self->merge_tables_with_code("qmems", "entities", sub {
+      my ($qmem, $entity) = @_;
+      my $truncated_indices = $qmem->{flat_indices} =~ s/\.\d+$//r;
+      return $truncated_indices eq $entity->{flat_indices} ? 1 : 0;
+    });
+    @{$self->{qmems}} = grep {
+      $_->{ceqfpMemoryResType};
+    } @{$self->{qmems}};
+  }
 }
 
 package CheckNwcHealth::Cisco::CISCOENTITYQFPMIB::Component::MemSubsystem::QfpMem;

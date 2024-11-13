@@ -1,3 +1,7 @@
+* 2024-11-13 12.0.3.2
+  bugfix in memory-usage, avoid uninitialized errors for cisco with
+  empty ceqfpMemoryResourceTable and broken entPhysicalTable
+  bugfix in fortigate ha-status, they changed the cluster state from m-word to primary.
 * 2024-11-11 12.0.3.1
   bugfix in sdwan-route-quality, missing appRouteStatisticsAppProbeClassTable
 * 2024-11-11 12.0.3
