@@ -1176,19 +1176,19 @@ sub check {
     # calculate traffic thresholds from usage thresholds
     my $cinwarning = $self->mod_threshold($inwarning, sub {
         my $val = shift;
-        return $self->{maxInputRate} / 100 * $val;
+        return $self->{maxInputRate} ? $self->{maxInputRate} / 100 * $val : "";
     });
     my $cincritical = $self->mod_threshold($incritical, sub {
         my $val = shift;
-        return $self->{maxInputRate} / 100 * $val;
+        return $self->{maxInputRate} ? $self->{maxInputRate} / 100 * $val : "";
     });
     my $coutwarning = $self->mod_threshold($outwarning, sub {
         my $val = shift;
-        return $self->{maxInputRate} / 100 * $val;
+        return $self->{maxOutputRate} ? $self->{maxOutputRate} / 100 * $val : "";
     });
     my $coutcritical = $self->mod_threshold($outcritical, sub {
         my $val = shift;
-        return $self->{maxInputRate} / 100 * $val;
+        return $self->{maxOutputRate} ? $self->{maxOutputRate} / 100 * $val : "";
     });
     $self->set_thresholds(
         # it there are --warning/critical on the command line
@@ -1294,16 +1294,16 @@ sub check {
         value => $self->{inputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
-        min => 0,
-        max => $self->{maxInputRate},
+        min => $self->{maxInputRate} ? 0 : "",
+        max => $self->{maxInputRate} ? $self->{maxInputRate} : "",
     );
     $self->add_perfdata(
         label => $self->{ifDescr}.'_traffic_out',
         value => $self->{outputRate},
         uom => $self->opts->units =~ /^(B|KB|MB|GB|TB)$/ ? $self->opts->units : undef,
         places => 2,
-        min => 0,
-        max => $self->{maxOutputRate},
+        min => $self->{maxOutputRate} ? 0 : "",
+        max => $self->{maxOutputRate} ? $self->{maxOutputRate} : "",
     );
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->add_info(sprintf 'interface %s errors in:%.2f%% out:%.2f%% ',
