@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  my $sysdescr = $self->get_snmp_objects('CISCO-SDWAN-OPER-SYSTEM-MIB', (qw(
+  $self->get_snmp_objects('CISCO-SDWAN-OPER-SYSTEM-MIB', (qw(
       systemStatusMin1Avg systemStatusMin5Avg systemStatusMin15Avg
       systemStatusCpuIdle systemStatusLinuxCpuCount
   )));

@@ -476,6 +476,18 @@ sub run_plugin {
       help => 'Check number of connections in relation to "lookback" average',
   );
   $plugin->add_mode(
+      internal => 'device::sdwan::control::vsmartcount',
+      spec => 'sdwan-control-vsmart-count',
+      alias => ["sdwan-control-vsmart-counts"],
+      help => 'Check number of Vsmarts in relation to "lookback" average',
+  );
+  $plugin->add_mode(
+      internal => 'device::sdwan::control::vmanagecount',
+      spec => 'sdwan-control-vmanage-count',
+      alias => ["sdwan-control-vmanage-counts"],
+      help => 'Check number of Vmanages in relation to "lookback" average',
+  );
+  $plugin->add_mode(
       internal => 'device::licenses::validate',
       spec => 'check-licenses',
       alias => undef,
