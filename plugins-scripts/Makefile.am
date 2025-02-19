@@ -180,6 +180,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/TPLINKSYSINFOMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/TPLINKSYSMONITORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDDISKIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
@@ -570,6 +572,9 @@ EXTRA_MODULES=\
   CheckNwcHealth/PulseSecure/Gateway.pm \
   CheckNwcHealth/SkyHigh/SWG.pm \
   CheckNwcHealth/SkyHigh.pm \
+  CheckNwcHealth/TPLink/Component/MemSubsystem.pm \
+  CheckNwcHealth/TPLink/Component/CpuSubsystem.pm \
+  CheckNwcHealth/TPLink.pm \
   CheckNwcHealth/INTELSERVERBASEBOARD7/Component/EnvironmntalSubsystem.pm \
   CheckNwcHealth/Device.pm
 
