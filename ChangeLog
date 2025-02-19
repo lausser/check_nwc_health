@@ -1,3 +1,5 @@
+* 2024-02-19 12.2
+  pull request #341 from Napsty/tplink-sys, add TP-LINK (JetStream)
 * 2024-02-18 12.1
   improve caching for cisco sdwan
   add mode sdwan-control-vsmart-count
