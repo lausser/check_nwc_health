@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->get_snmp_tables('TPLINK-MIB', [
+  $self->get_snmp_tables('TPLINK-SYSMONITOR-MIB', [
     ['tpSysMonitorMemory', 'tpSysMonitorMemoryTable', 'CheckNwcHealth::TPLink::Component::MemSubsystem::Device' ],
   ]);
 }

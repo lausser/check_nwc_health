@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->get_snmp_object('TPLINK-MIB', 'tpSysInfoDescription') && $self->get_snmp_object('TPLINK-MIB', 'tpSysInfoDescription') =~ /JetStream/i) {
+  if ($self->get_snmp_object('TPLINK-SYSINFO-MIB', 'tpSysInfoDescription') && $self->get_snmp_object('TPLINK-SYSINFO-MIB', 'tpSysInfoDescription') =~ /JetStream/i) {
     bless $self, 'CheckNwcHealth::TPLink';
     $self->debug('using CheckNwcHealth::TPLink');
   }

@@ -205,7 +205,7 @@ sub classify {
         $self->rebless('CheckNwcHealth::Versa');
       } elsif ($self->implements_mib('SKYHIGHSECURITY-SWG-MIB') and $self->{productname} =~ /Skyhigh Secure Web Gateway/) {
         $self->rebless('CheckNwcHealth::SkyHigh');
-      } elsif ($self->{productname} =~ /JetStream/i || $self->implements_mib('TPLINK-MIB')) {
+      } elsif ($self->{productname} =~ /JetStream/i || $self->implements_mib('TPLINK-SYSINFO-MIB')) {
         $self->rebless('CheckNwcHealth::TPLink');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
