@@ -19,10 +19,37 @@ sub init {
                     split ',', $self->opts->name;
               }
             } else {
+              my $irrelevant_paths = qr/
+                  ^(
+                      \/host\/reboot-cause|
+                      \/etc\/hosts|
+                      \/etc\/hostname|
+                      \/etc\/resolv.conf|
+                      \/host\/reboot-cause|
+                      \/dev\/.*|
+                      \/run\/.*|
+                      \/proc\/.*|
+                      \/sys\/.*|
+                  )$
+              /x;
+              my $irrelevant_devices = qr/
+                  ^(
+                      tmpfs|
+                      sysfs|
+                      proc|
+                      udev|
+                      devpts|
+                      rpc_pipefs|
+                      nfsd|
+                      devfs|
+                      \/run\/k3s\/containerd\/.*\/sandboxes\/.*|
+                      \/var\/lib\/kubelet\/pods\/.*\/volumes\/.*|
+                  )$
+              /x;
               return $self->{dskTotal} && (
-                  $self->{dskDevice} !~ /^(sysfs|proc|udev|devpts|rpc_pipefs|nfsd|devfs)$/ and
-                  $self->{dskDevice} !~ /^(\/run\/k3s\/containerd\/.*\/sandboxes\/.*)$/ and
-                  $self->{dskDevice} !~ /^(\/var\/lib\/kubelet\/pods\/.*\/volumes\/.*)$/
+                ($self->{dskDevice} !~ $irrelevant_devices and
+                $self->{dskPath} !~ $irrelevant_paths) or
+                ($self->{dskPath} eq "/var/tmp")
               );
             }
           }

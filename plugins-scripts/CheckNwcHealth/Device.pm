@@ -207,6 +207,10 @@ sub classify {
         $self->rebless('CheckNwcHealth::SkyHigh');
       } elsif ($self->{productname} =~ /JetStream/i || $self->implements_mib('TPLINK-SYSINFO-MIB')) {
         $self->rebless('CheckNwcHealth::TPLink');
+      } elsif ($self->{productname} =~ /SONiC/ and $self->implements_mib('Dell-Vendor-MIB')) {
+        # .1.3.6.1.2.1.1.1.0 = STRING: SONiC Software Version: SONiC.4.4.0-Enter blabla
+        # .1.3.6.1.4.1.674.10895.3000.1.2.100.3 = STRING: "Edgecore"
+        $self->rebless('CheckNwcHealth::Edgecore::Sonic');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
       } else {

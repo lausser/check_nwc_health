@@ -87,6 +87,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DCBGPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLVENDORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DEVICEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ELTEXMIB.pm \
@@ -576,6 +577,8 @@ EXTRA_MODULES=\
   CheckNwcHealth/TPLink/Component/CpuSubsystem.pm \
   CheckNwcHealth/TPLink.pm \
   CheckNwcHealth/INTELSERVERBASEBOARD7/Component/EnvironmntalSubsystem.pm \
+  CheckNwcHealth/Edgecore/Sonic.pm \
+  CheckNwcHealth/Edgecore/Sonic/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed
