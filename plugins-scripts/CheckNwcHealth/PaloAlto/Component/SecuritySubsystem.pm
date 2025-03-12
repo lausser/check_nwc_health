@@ -18,12 +18,12 @@ sub init {
       },
       panSysThreatVersion => {
           version => $self->{panSysThreatVersion} ?
-              $self->{panSysAvVersion} : "unknown",
+              $self->{panSysThreatVersion} : "unknown",
           changed => $now,
       },
       panSysWildfireVersion => {
           version => $self->{panSysWildfireVersion} ?
-              $self->{panSysAvVersion} : "unknown",
+              $self->{panSysWildfireVersion} : "unknown",
           changed => $now,
       },
   };
