@@ -1,5 +1,7 @@
 * 2024-04-14 12.4
   add Dell OS10
+* 2024-03-12 12.3.0.1
+  bugfix in PaloAlto security-status
 * 2024-02-26 12.3
   add Edgecore Sonic
 * 2024-02-19 12.2
