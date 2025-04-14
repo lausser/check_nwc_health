@@ -148,6 +148,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::Huawei');
       } elsif ($self->implements_mib('ARUBAWIRED-CHASSIS-MIB')) {
         $self->rebless('CheckNwcHealth::HP::Aruba');
+      } elsif ($self->implements_mib('DELLEMC-OS10-CHASSIS-MIB')) {
+        $self->rebless('CheckNwcHealth::Dell::OS10');
       } elsif ($self->{productname} =~ /Procurve/i ||
           ($self->implements_mib('HP-ICF-CHASSIS') &&
           $self->implements_mib('NETSWITCH-MIB'))) {

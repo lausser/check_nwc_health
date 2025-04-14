@@ -87,6 +87,10 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DCBGPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10BGP4V2MIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10CHASSISMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10PORTSECURITYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10TCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLVENDORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DEVICEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
@@ -579,6 +583,9 @@ EXTRA_MODULES=\
   CheckNwcHealth/INTELSERVERBASEBOARD7/Component/EnvironmntalSubsystem.pm \
   CheckNwcHealth/Edgecore/Sonic.pm \
   CheckNwcHealth/Edgecore/Sonic/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Dell/OS10/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Dell/OS10/Component/BgpSubsystem.pm \
+  CheckNwcHealth/Dell/OS10.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed
