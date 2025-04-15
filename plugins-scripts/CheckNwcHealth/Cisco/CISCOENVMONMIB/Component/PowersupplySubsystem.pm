@@ -36,6 +36,9 @@ sub check {
     $self->add_critical();
   } elsif ($self->{ciscoEnvMonSupplyState} ne 'normal') {
     $self->add_critical();
+  } elsif ($self->{ciscoEnvMonSupplyStatusDescr} =~
+      /Sw\d+, PS\d+ Normal, RPS Critical/) {
+    $self->add_warning();
   }
 }
 
