@@ -23,75 +23,6 @@ sub init {
     ['fans', 'os10FanTable',
         'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::Fan'],
   ]);
-  return;
-  $self->get_snmp_tables_cached('ENTITY-MIB', [
-  # kann man cachen, denke ich. Es wird kaum reingesteckt und rausgezogen werden
-  # im laufenden Betrieb. Und falls doch und falls es monitoringseitig kracht,
-  # dann beschwert euch beim Dell::OS10 (s.u. SNMP-Bremse)
-  # Oder kauft kein Billigzeug
-    ['modules', 'entPhysicalTable',
-        'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::Module',
-        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'module' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['fans', 'entPhysicalTable',
-        'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::Fan', 
-        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'fan' },
-        ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-    ['powersupplies', 'entPhysicalTable',
-        'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::Powersupply',
-        sub { my ($o) = @_; $o->{entPhysicalClass} eq 'powerSupply' },
-       ['entPhysicalClass', 'entPhysicalDescr', 'entPhysicalName']],
-  ], 3600);
-  # heuristic tweaking. there was a device which intentionally slowed down
-  # snmp responses when a large amount of data was transmitted.
-  # Tatsaechlich hat Dell::OS10 sowas wie eine Denial-of-Sonstwas-Bremse drin
-  # Daher reduktion auf die noetigsten Spalten und nicht uebertreiben bei
-  # den PDU-Groessen.
-  $self->mult_snmp_max_msg_size(10);
-  #$self->bulk_is_baeh(30);
-  foreach (qw(modules fans powersupplies)) {
-    # we need to get the table inside the loop, as merge_table deletes
-    # entitystates. get_snmp_tables will read from the cache.
-    $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-        ['entitystates', 'hwEntityStateTable',
-        'Monitoring::GLPlugin::SNMP::TableItem', undef, [
-            "hwEntityOperStatus", "hwEntityAdminStatus", "hwEntityAlarmLight",
-            "hwEntityTemperature", "hwEntityTemperatureLowThreshold",
-            "hwEntityTemperatureMinorThreshold", "hwEntityTemperatureThreshold",
-            "hwEntityFaultLight", "hwEntityDeviceStatus",
-        ]],
-    ]);
-    $self->debug(sprintf "found %d %s", scalar(@{$self->{entitystates}}), "entitystates");
-    $self->debug(sprintf "found %d %s", scalar(@{$self->{$_}}), $_);
-    $self->merge_tables($_, "entitystates");
-  }
-  $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-      ['fanstates', 'hwFanStatusTable', 'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::FanStatus']
-  ]);
-  $self->debug(sprintf "found %d %s", scalar(@{$self->{fanstates}}), "fanstates");
-  if (@{$self->{fanstates}} && ! @{$self->{fans}}) {
-    # gibts auch, d.h. retten, was zu retten ist
-    @{$self->{fanstates}} = grep {
-      $_->{hwEntityFanPresent} eq "present";
-    } @{$self->{fanstates}};
-  } else {
-    $self->merge_tables_with_code("fans", "fanstates", sub {
-      my ($fan, $fanstate) = @_;
-      return ($fan->{entPhysicalName} eq sprintf("FAN %d/%d",
-          $fanstate->{hwEntityFanSlot}, $fanstate->{hwEntityFanSn})) ? 1 : 0;
-    });
-    if (grep { exists $_->{hwEntityFanState} } @{$self->{fans}}) {
-      # fans and fanstates matched, check fans
-    } else {
-      # $fan->{entPhysicalName} and $fanstate->{Slot/Sn} were different
-      # there was also a device with 4 fans and 8 fanstates. Dreck!
-      # better check fanstates
-      $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-          ['fanstates', 'hwFanStatusTable', 'CheckNwcHealth::Dell::OS10::Component::EnvironmentalSubsystem::FanStatus']
-      ]);
-      delete $self->{fans};
-    }
-  }
 }
 
 
@@ -188,7 +119,12 @@ sub check {
   my ($self) = @_;
   $self->add_info(sprintf '%s fan %s status is %s',
       $self->{os10FanEntity}, $self->{flat_indices}, $self->{os10FanOperStatus});
-  if ($self->{os10FanOperStatus} ne "up") {
+  if ($self->{os10FanOperStatus} eq "unknown" and
+      $self->{os10FanPosition} =~ /^psu/) {
+    # Steckt im fest eingeschweissten Billignetzteil ohne eigenen Luefter
+    # bzw. steckt nicht, weil nicht existent, taucht im SNMP aber auf.
+    return;
+  } elsif ($self->{os10FanOperStatus} ne "up") {
     $self->annotate_info(sprintf("fan %s is at %s",
         $self->{flat_indices}, $self->{os10FanPositionTxt}));
     $self->add_critical();

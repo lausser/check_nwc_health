@@ -1,3 +1,5 @@
+* 2025-05-28 12.4.0.3
+  bugfix in Dell OS10 with non-replacable power supplies
 * 2025-05-28 12.4.0.2
   bugfix in Cisco Sensors, truthvalue should not produce perfdata
 * 2024-04-16 12.4.0.1
