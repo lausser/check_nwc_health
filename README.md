@@ -1,3 +1,6 @@
+[![16. Workshop der deutschsprachigen Open-Source-Monitoring-Community](https://github.com/user-attachments/assets/d9841be8-c0e7-4ffc-9b1a-506471866399)](https://eveeno.com/osmw2025)
+
+
 Auf meiner Startseite steht:
 
 I will ignore all of your mails unless you give me an ip address and a community/root account. No joke! No exception!
