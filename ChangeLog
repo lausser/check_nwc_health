@@ -1,3 +1,7 @@
+* 2025-05-28 12.4.0.2
+  bugfix in Cisco Sensors, truthvalue should not produce perfdata
+* 2024-04-16 12.4.0.1
+  Cisco power monitoring fixes (thanks rlaager)
 * 2024-04-14 12.4
   add Dell OS10
 * 2024-03-12 12.3.0.1

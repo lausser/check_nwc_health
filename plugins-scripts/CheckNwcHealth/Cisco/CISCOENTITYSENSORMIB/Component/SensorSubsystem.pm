@@ -67,6 +67,13 @@ sub check {
     return;
   } elsif ($self->{entSensorStatus} eq "unavailable") {
     return;
+  } elsif ($self->{entSensorType} eq "truthvalue") {
+    if ($self->{entSensorStatus} ne "ok") {
+      # nicht weiterlaufen lassen, sonst vergleicht der entSensorValue: true
+      # bei den Thresholdgeschichten numerisch.
+      $self->add_critical();
+    }
+    return;
   }
   my $label = sprintf('sens_%s_%s', $self->{entSensorType}, $self->{entPhysicalIndex});
   my $warningx = ($self->get_thresholds(metric => $label))[0];
