@@ -977,9 +977,9 @@ sub init {
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
     $self->{inputErrorsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
-        100 * $self->{delta_ifInErrors} / $self->{delta_ifInPkts};
+        100 * $self->{delta_ifInErrors} / ($self->{delta_ifInPkts} + $self->{delta_ifInErrors});
     $self->{outputErrorsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
-        100 * $self->{delta_ifOutErrors} / $self->{delta_ifOutPkts};
+        100 * $self->{delta_ifOutErrors} / ($self->{delta_ifOutPkts} + $self->{delta_ifOutErrors});
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
         / $self->{delta_timestamp};
     $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
@@ -989,9 +989,9 @@ sub init {
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
     $self->{inputDiscardsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
-        100 * $self->{delta_ifInDiscards} / $self->{delta_ifInPkts};
+        100 * $self->{delta_ifInDiscards} / ($self->{delta_ifInPkts} + $self->{delta_ifInDiscards});
     $self->{outputDiscardsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
-        100 * $self->{delta_ifOutDiscards} / $self->{delta_ifOutPkts};
+        100 * $self->{delta_ifOutDiscards} / ($self->{delta_ifOutPkts} + $self->{delta_ifOutDiscards});
     $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
