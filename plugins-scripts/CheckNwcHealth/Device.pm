@@ -138,6 +138,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::F5');
       } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.3375\./) {
         $self->rebless('CheckNwcHealth::F5');
+      } elsif ($self->{sysobjectid} =~ /1\.3\.6\.1\.4\.1\.12276\.1\.3\.1\./) {
+        $self->rebless('CheckNwcHealth::F5');
       } elsif ($self->{productname} =~ /(H?H3C|HP Comware|HPE Comware)/i) {
         $self->rebless('CheckNwcHealth::HH3C');
       } elsif ($self->{productname} =~ /(Huawei)/i) {
@@ -146,6 +148,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::Huawei');
       } elsif ($self->implements_mib('ARUBAWIRED-CHASSIS-MIB')) {
         $self->rebless('CheckNwcHealth::HP::Aruba');
+      } elsif ($self->implements_mib('DELLEMC-OS10-CHASSIS-MIB')) {
+        $self->rebless('CheckNwcHealth::Dell::OS10');
       } elsif ($self->{productname} =~ /Procurve/i ||
           ($self->implements_mib('HP-ICF-CHASSIS') &&
           $self->implements_mib('NETSWITCH-MIB'))) {
@@ -203,6 +207,12 @@ sub classify {
         $self->rebless('CheckNwcHealth::Versa');
       } elsif ($self->implements_mib('SKYHIGHSECURITY-SWG-MIB') and $self->{productname} =~ /Skyhigh Secure Web Gateway/) {
         $self->rebless('CheckNwcHealth::SkyHigh');
+      } elsif ($self->{productname} =~ /JetStream/i || $self->implements_mib('TPLINK-SYSINFO-MIB')) {
+        $self->rebless('CheckNwcHealth::TPLink');
+      } elsif ($self->{productname} =~ /SONiC/ and $self->implements_mib('Dell-Vendor-MIB')) {
+        # .1.3.6.1.2.1.1.1.0 = STRING: SONiC Software Version: SONiC.4.4.0-Enter blabla
+        # .1.3.6.1.4.1.674.10895.3000.1.2.100.3 = STRING: "Edgecore"
+        $self->rebless('CheckNwcHealth::Edgecore::Sonic');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
       } else {

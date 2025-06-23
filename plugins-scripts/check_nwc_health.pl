@@ -470,6 +470,24 @@ sub run_plugin {
       help => 'Check loss, latency and jitter of a route',
   );
   $plugin->add_mode(
+      internal => 'device::sdwan::control::vedgecount',
+      spec => 'sdwan-control-vedge-count',
+      alias => undef,
+      help => 'Check number of connections in relation to "lookback" average',
+  );
+  $plugin->add_mode(
+      internal => 'device::sdwan::control::vsmartcount',
+      spec => 'sdwan-control-vsmart-count',
+      alias => ["sdwan-control-vsmart-counts"],
+      help => 'Check number of Vsmarts in relation to "lookback" average',
+  );
+  $plugin->add_mode(
+      internal => 'device::sdwan::control::vmanagecount',
+      spec => 'sdwan-control-vmanage-count',
+      alias => ["sdwan-control-vmanage-counts"],
+      help => 'Check number of Vmanages in relation to "lookback" average',
+  );
+  $plugin->add_mode(
       internal => 'device::licenses::validate',
       spec => 'check-licenses',
       alias => undef,
@@ -639,6 +657,13 @@ sub run_plugin {
       required => 0,
       hidden => 1,
   );
+  $plugin->add_arg(
+      spec => 'subsystem=s',
+      help => "--subsystem
+   Select a specific hardware subsystem (Cisco UCS only)",
+      required => 0,
+      default => undef,
+  );  
   
   $plugin->getopts();
   $plugin->classify();

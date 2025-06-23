@@ -33,7 +33,6 @@ sub check {
   } else {
     $self->add_unknown();
   }
-  $self->set_thresholds(warning => 60, critical => 70);
   $self->add_perfdata(
       label => 'fan'.$self->{fanSpeedSensorName}.'_rpm',
       value => $self->{fanSpeedSensorValue},

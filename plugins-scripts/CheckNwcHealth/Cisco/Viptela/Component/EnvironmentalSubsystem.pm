@@ -6,9 +6,6 @@ sub init {
   my ($self) = @_;
   $self->{disk_subsystem} =
       CheckNwcHealth::Cisco::Viptela::Component::DiskSubsystem->new();
-  $self->get_snmp_table_objects('VIPTELA-HARDWARE', [
-      ['hwenvs', 'CheckNwcHealth::Cisco::Viptela::Component::EnvironmentalSubsystem::HWEnv'],
-  ]);
   $self->get_snmp_objects('VIPTELA-OPER-SYSTEM', (qw(
       systemStatusState systemStatusSystemStateDescription
   )));

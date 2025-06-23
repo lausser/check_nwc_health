@@ -11,31 +11,35 @@ sub init {
         $self->{bfdSummaryBfdSessionsTotal}
     ) * 100;
   } elsif ($self->mode eq "device::sdwan::route::quality") {
-    $self->get_snmp_tables("CISCO-SDWAN-APP-ROUTE-MIB", [
-      ["statistics", "appRouteStatisticsTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat", sub {
-          my ($o) = @_;
-          return ($self->filter_name($o->{appRouteStatisticsDstIp}) and
-              $self->filter_name2($o->{appRouteStatisticsLocalColor}));
-      }],
-      ["probestatistics", "appRouteStatisticsAppProbeClassTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat"],
-    ]);
-    # Tut mir leid, aber dem ersten Ergebnis traue ich nicht. Habe vorhin
-    # ein snmpbulkwalk ... 1.3.6.1.4.1.9.9.1001.1.2 (appRouteStatisticsTable)
-    # aufgerufen und es kam nur eine Zeile mit appRouteStatisticsRemoteSystemIp
-    # aber je 20 Zeilen mit appRouteStatisticsLocal/RemoteColor
-    # Beim naechsten Aufruf dann korrekt, also je 20x SystemIp und Color
-    $self->clear_table_cache("CISCO-SDWAN-APP-ROUTE-MIB", "appRouteStatisticsTable");
-    delete $self->{statistics};
-    $self->clear_table_cache("CISCO-SDWAN-APP-ROUTE-MIB", "appRouteStatisticsAppProbeClassTable");
-    delete $self->{probestatistics};
-    $self->get_snmp_tables("CISCO-SDWAN-APP-ROUTE-MIB", [
-      ["statistics", "appRouteStatisticsTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat", sub {
-          my ($o) = @_;
-          return ($self->filter_name($o->{appRouteStatisticsDstIp}) and
-              $self->filter_name2($o->{appRouteStatisticsLocalColor}));
-      }],
-      ["probestatistics", "appRouteStatisticsAppProbeClassTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat"],
-    ]);
+    $self->{statistics} = [];
+    foreach ($self->get_snmp_table_objects_with_cache(
+        "CISCO-SDWAN-APP-ROUTE-MIB", "appRouteStatisticsTable",
+        ["appRouteStatisticsDstIp", "appRouteStatisticsLocalColor"],
+        undef, 0, undef,
+        "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat")) {
+      push(@{$self->{statistics}}, CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ARStat->new(%{$_}));
+    }
+    $self->{probestatistics} = [];
+    foreach ($self->get_snmp_table_objects_with_cache(
+        "CISCO-SDWAN-APP-ROUTE-MIB", "appRouteStatisticsAppProbeClassTable",
+        # Achtung, hier muss mindestens eine"echte" OID dabei sein.
+        # Lauter so index-basierte Luft-OIDs werden sonst nicht gewalkt.
+        # Und die appRouteStatisticsAppProbeClassTable hat in den MibsAndOids sowieso
+        # keinen Key appRouteStatisticsDstIp, das gibt -columns leer
+        ["appRouteStatisticsDstIp", "appRouteStatisticsAppProbeClassName"],
+        undef, 0, undef,
+        "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat")) {
+      push(@{$self->{probestatistics}}, CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::PRStat->new(%{$_}));
+    }
+    if (! @{$self->{probestatistics}} and @{$self->{statistics}}) {
+      # maybe a bug on the cisco side or missing access right, but sometimes
+      # this table does not exist
+      # SNMPv2-SMI::enterprises.9.9.1001.1.5 = No Such Object available on this agent at this OID
+      # exit with a notice for the admin.
+      $self->{appRouteStatisticsAppProbeClassTable_missing} = 1;
+      $self->delete_cache("CISCO-SDWAN-APP-ROUTE-MIB", "appRouteStatisticsAppProbeClassTable",
+          ["appRouteStatisticsDstIp", "appRouteStatisticsAppProbeClassName"]);
+    }
     $self->merge_tables_with_code("statistics", "probestatistics", sub {
         my ($stat, $pstat) = @_;
         my $matching = 1;
@@ -48,6 +52,12 @@ sub init {
         }
         return $matching;
     });
+  } elsif ($self->mode eq "device::sdwan::control::vsmartcount") {
+    $self->get_snmp_objects("CISCO-SDWAN-SECURITY-MIB", qw(controlSummaryVsmartCounts));
+  } elsif ($self->mode eq "device::sdwan::control::vmanagecount") {
+    $self->get_snmp_objects("CISCO-SDWAN-SECURITY-MIB", qw(controlSummaryVmanageCounts));
+  } else {
+    $self->no_such_mode();
   }
 }
 
@@ -70,6 +80,10 @@ sub check {
         uom => '%',
     );
   } elsif ($self->mode eq "device::sdwan::route::quality") {
+    if ($self->{appRouteStatisticsAppProbeClassTable_missing}) {
+      $self->add_unknown("appRouteStatisticsAppProbeClassTable is not available/readable");
+      return;
+    }
     # es ist moeglich mit --name <regexp> --regexp mehrere routen per snmp
     # zu holen. hinter --name steckt die appRouteStatisticsDstIp.
     # bei einer bestimmten kundeninstallation gibt es immer zwei sdwan-strecken,
@@ -142,7 +156,74 @@ sub check {
           uom => "%",
       );
     }
+  } elsif ($self->mode eq "device::sdwan::control::vsmartcount") {
+    if (defined $self->{controlSummaryVsmartCounts}) {
+      $self->add_info(sprintf "%d VsmartCounts",
+          $self->{controlSummaryVsmartCounts});
+      $self->set_thresholds(
+          metric => "vsmart_counts",
+          warning => ":0",
+          critical => ":0",
+      );
+      $self->add_message($self->check_thresholds(
+          value => $self->{controlSummaryVsmartCounts}));
+      $self->add_perfdata(
+          metric => "vsmart_counts",
+          value => $self->{controlSummaryVsmartCounts},
+      );
+    } else {
+      $self->add_unknown("controlSummaryVsmartCounts not found");
+    }
+  } elsif ($self->mode eq "device::sdwan::control::vmanagecount") {
+    if (defined $self->{controlSummaryVmanageCounts}) {
+      $self->add_info(sprintf "%d VmanageCounts",
+          $self->{controlSummaryVmanageCounts});
+      $self->set_thresholds(
+          metric => "vmanage_counts",
+          warning => ":0",
+          critical => ":0",
+      );
+      $self->add_message($self->check_thresholds(
+          value => $self->{controlSummaryVmanageCounts}));
+      $self->add_perfdata(
+          metric => "vmanage_counts",
+          value => $self->{controlSummaryVmanageCounts},
+      );
+    } else {
+      $self->add_unknown("controlSummaryVmanageCounts not found");
+    }
   }
+}
+
+sub get_cache_indices {
+  my ($self, $mib, $table, $key_attr) = @_;
+  # get_cache_indices is only used by get_snmp_table_objects_with_cache
+  # so if we dont use --name returning all the indices would result
+  # in a step-by-step get_table_objecs(index 1...n) which could take long time
+  # returning () forces get_snmp_table_objects to use get_tables
+  return () if ! $self->opts->name;
+  if (ref($key_attr) ne "ARRAY") {
+    $key_attr = [$key_attr];
+  }
+  my $cache = sprintf "%s_%s_%s_cache",
+      $mib, $table, join('#', @{$key_attr});
+  my @indices = ();
+  foreach my $key (keys %{$self->{$cache}}) {
+    my ($content, $index) = split('-//-', $key, 2);
+    if ($table eq "appRouteStatisticsTable") {
+      my ($appRouteStatisticsDstIp, $appRouteStatisticsLocalColor) = split('#', $content, 2);
+      if ($self->filter_name($appRouteStatisticsDstIp) and
+          $self->filter_name2($appRouteStatisticsLocalColor)) {
+        push(@indices, $self->{$cache}->{$key});
+      }
+    } elsif ($table eq "appRouteStatisticsAppProbeClassTable") {
+      my ($appRouteStatisticsDstIp) = split('#', $content, 2);
+      if ($self->filter_name($appRouteStatisticsDstIp)) {
+        push(@indices, $self->{$cache}->{$key});
+      }
+    }
+  }
+  return @indices;
 }
 
 
@@ -229,13 +310,20 @@ sub check {
       $self->{appRouteStatisticsRemoteColor});
   $self->set_thresholds(metric => $name."_loss", warning => 1, critical => 4);
   $self->set_thresholds(metric => $name."_latency", warning => 40, critical => 80);
+  $self->set_thresholds(metric => $name."_jitter", warning => 50, critical => 100);
   my $losslevel = $self->check_thresholds(metric => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
   $self->annotate_info("loss too high") if $losslevel;
   my $latencylevel = $self->check_thresholds(metric => $name."_latency",
       value => $self->{appRouteStatisticsAppProbeClassMeanLatency});
   $self->annotate_info("latency too high") if $latencylevel;
-  $self->add_message($losslevel > $latencylevel ? $losslevel : $latencylevel);
+  my $jitterlevel = $self->check_thresholds(metric => $name."_jitter",
+      value => $self->{appRouteStatisticsAppProbeClassMeanJitter});
+  $self->annotate_info("jitter too high") if $jitterlevel;
+  my $highest_value = $losslevel > $latencylevel
+      ? ($losslevel > $jitterlevel ? $losslevel : $jitterlevel)
+      : ($latencylevel > $jitterlevel ? $latencylevel : $jitterlevel);
+  $self->add_message($highest_value);
   $self->add_perfdata(label => $name."_loss",
       value => $self->{appRouteStatisticsAppProbeClassMeanLoss});
   $self->add_perfdata(label => $name."_latency",

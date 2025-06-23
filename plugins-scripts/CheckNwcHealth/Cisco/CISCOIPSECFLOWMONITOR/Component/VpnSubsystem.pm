@@ -6,11 +6,49 @@ sub init {
   my ($self) = @_;
   my $now = time;
   $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
-  $self->get_snmp_tables('CISCO-IPSEC-FLOW-MONITOR-MIB', [
-      ['ciketunnels', 'cikeTunnelTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cikeTunnel',  sub { my ($o) = @_; $o->filter_name($o->{cikeTunRemoteAddr}); }],
-      [ 'cikefails', 'cikeFailTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cikeFail', sub { my ($o) = @_; $o->filter_name($o->{cikeFailRemoteAddr}) && $o->{cikeFailTimeAgo} < $self->opts->lookback; }],
-      [ 'cipsecfails', 'cipSecFailTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cipSecFail', sub { my ($o) = @_; $o->filter_name($o->{cipSecFailPktDstAddr}) && $o->{cipSecFailTimeAgo} < $self->opts->lookback; }],
-  ]);
+  $self->get_snmp_objects('CISCO-IPSEC-FLOW-MONITOR-MIB', (qw(
+      # reload cikeTunnelTable if this value changes
+      cikeGlobalActiveTunnels cikeGlobalPreviousTunnels
+      cipSecGlobalActiveTunnels cipSecGlobalPreviousTunnels
+  )));
+#cikeTunnelTable
+#        "The IPsec Phase-1 Internet Key Exchange Tunnel Table.
+#        There is one entry in this table for each active IPsec
+#        Phase-1 IKE Tunnel."
+#cipSecTunnelTable
+#        "The IPsec Phase-2 Tunnel Table.
+#        There is one entry in this table for 
+#        each active IPsec Phase-2 Tunnel."
+#cipSecEndPtTable
+#        "The IPsec Phase-2 Tunnel Endpoint Table.
+#        This table contains an entry for each 
+#        active endpoint associated with an IPsec
+#         Phase-2 Tunnel."
+#cipSecSpiTable
+#        "The IPsec Phase-2 Security Protection Index Table.
+#        This table contains an entry for each active
+#        and expiring security
+#         association."
+#cikeFailTable
+#        "The IPsec Phase-1 Failure Table.
+#        This table is implemented as a sliding
+#        window in which only the last n entries are
+#        maintained.  The maximum number of entries
+#        is specified by the cipSecFailTableSize object."
+#cipSecFailTable
+#        "The IPsec Phase-2 Failure Table.
+#        This table is implemented as a sliding window
+#        in which only the last n entries are maintained.
+#        The maximum number of entries
+#        is specified by the cipSecFailTableSize object."
+
+  if (1) {
+    $self->get_snmp_tables('CISCO-IPSEC-FLOW-MONITOR-MIB', [
+        ['ciketunnels', 'cikeTunnelTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cikeTunnel',  sub { my ($o) = @_; $o->filter_name($o->{cikeTunRemoteAddr}); }, undef, "cikeTunRemoteAddr"],
+        [ 'cikefails', 'cikeFailTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cikeFail', sub { my ($o) = @_; $o->filter_name($o->{cikeFailRemoteAddr}) && $o->{cikeFailTimeAgo} < $self->opts->lookback; }],
+        [ 'cipsecfails', 'cipSecFailTable', 'CheckNwcHealth::Cisco::CISCOIPSECFLOWMONITOR::Component::VpnSubsystem::cipSecFail', sub { my ($o) = @_; $o->filter_name($o->{cipSecFailPktDstAddr}) && $o->{cipSecFailTimeAgo} < $self->opts->lookback; }],
+    ]);
+  }
 }
 
 sub check {

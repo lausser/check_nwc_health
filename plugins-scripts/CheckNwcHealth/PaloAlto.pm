@@ -22,6 +22,8 @@ sub init {
   } elsif ($self->mode =~ /device::lb::session/) {
     # it's not a load balancer, but session-usage is the best mode here
     $self->analyze_and_check_session_subsystem("CheckNwcHealth::PaloAlto::Component::SessionSubsystem");
+  } elsif ($self->mode =~ /device::security/) {
+    $self->analyze_and_check_security_subsystem("CheckNwcHealth::PaloAlto::Component::SecuritySubsystem");
   } else {
     $self->no_such_mode();
   }

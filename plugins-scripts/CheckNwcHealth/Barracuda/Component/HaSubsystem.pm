@@ -5,26 +5,36 @@ use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };
 
 sub init {
   my ($self) = @_;
+  $self->get_snmp_tables('PHION-MIB', [
+    ['services', 'serverServicesTable', 'CheckNwcHealth::Barracuda::Component::HaSubsystem::Service'],
+  ]);
   if ($self->mode =~ /device::ha::role/) {
-    $self->get_snmp_tables('PHION-MIB', [
-      ['services', 'serverServicesTable', 'CheckNwcHealth::Barracuda::Component::HaSubsystem::Service'],
-    ]);
     if (! $self->opts->role()) {
       $self->opts->override_opt('role', 'active');
     }
+  } elsif ($self->mode =~ /device::ha::status/) {
   }
 }
 
 sub check {
   my ($self) = @_;
-  $self->SUPER::check();
-  #printf "info %s\n", $self->get_info();
-  $self->add_ok(sprintf "%s node", $self->opts->role());
-  my $num_services = scalar(@{$self->{services}});
-  my $num_up_services = scalar(grep { $_->{serverServiceState} eq "started" } @{$self->{services}});
-  if (! $num_services) {
-    $self->add_unknown(sprintf "no failover service found. (only %s)",
-        join(", ", map { $_->{serverServiceName} } @{$self->{services}}));
+  if ($self->mode =~ /device::ha::role/) {
+    $self->SUPER::check();
+    $self->add_ok(sprintf "%s node", $self->opts->role());
+    my $num_services = scalar(@{$self->{services}});
+    my $num_up_services = scalar(grep { $_->{serverServiceState} eq "started" } @{$self->{services}});
+    if (! $num_services) {
+      $self->add_unknown(sprintf "no failover service found. (only %s)",
+          join(", ", map { $_->{serverServiceName} } @{$self->{services}}));
+    }
+  } elsif ($self->mode =~ /device::ha::status/) {
+    my $num_services = scalar(@{$self->{services}});
+    my $num_blocked_services = scalar(grep { $_->{serverServiceState} eq "blocked" or $_->{serverServiceState} eq "wild" or $_->{serverServiceState} eq "unknown_3" } @{$self->{services}});
+    if (! $num_services or $num_blocked_services) {
+      $self->add_warning("no failover service found or blovked services found");
+    } else {
+      $self->add_ok("failover services are running, no blocked services found");
+    }
   }
 }
 

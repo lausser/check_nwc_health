@@ -1,3 +1,50 @@
+* 2024-04-14 12.4
+  add Dell OS10
+* 2024-03-12 12.3.0.1
+  bugfix in PaloAlto security-status
+* 2024-02-26 12.3
+  add Edgecore Sonic
+* 2024-02-19 12.2
+  pull request #341 from Napsty/tplink-sys, add TP-LINK (JetStream)
+* 2024-02-18 12.1
+  improve caching for cisco sdwan
+  add mode sdwan-control-vsmart-count
+  add mode sdwan-control-vmanage-count
+  add debug output for cisco cpus
+* 2024-11-13 12.0.3.2
+  bugfix in memory-usage, avoid uninitialized errors for cisco with
+  empty ceqfpMemoryResourceTable and broken entPhysicalTable
+  bugfix in fortigate ha-status, they changed the cluster state from m-word to primary.
+* 2024-11-11 12.0.3.1
+  bugfix in sdwan-route-quality, missing appRouteStatisticsAppProbeClassTable
+* 2024-11-11 12.0.3
+  add cisco qfp to mem/cpu checks
+* 2024-11-04 12.0.2.1
+  bugfix in vedgecount, initial run showed undef values.
+* 2024-10-30 12.0.2
+  add mode vpn-status for Fortigate
+* 2024-10-29 12.0.1.1
+  evaluate thresholds for SDWAN jitter.
+* 2024-10-21 12.0.1
+  add mode ha-status for Barracuda (better use ha-role)
+* 2024-10-21 12.0
+  DAS IST JETZT DIE VERSION, AB DER KEINE PULL-REQUESTS UND KEINE
+  KANNST-DU-MAL-MAILS MEHR ZUR KENNTNIS GENOMMEN WERDEN.
+  ICH HABE ES SO SATT, DASS MIR BEI _ZAHLENDEN KUNDEN_ DIE SCHEISSE UM DIE
+  OHREN FLIEGT, WEIL ICH WIEDER MAL ZU GUTGLAEUBIG WAR. HERZLICHEN DANK AUCH
+  FUER DIE TAUSEND UNKNOWNS UND DIE SPANNUNGSWERTE MIT DREI UMDREHUNGEN.
+  'voltageVCC 3.3V_rpm'=3.26;60;70;;
+* 2024-10-17 11.7
+  add F5 Velos
+* 2024-10-11 11.6
+  add hardware check for Cisco UCS
+* 2024-09-03 11.5.1
+  add mode sdwan-control-vedge-count for Cisco Viptela devices
+* 2024-08-27 11.5.0.1
+  update changelog, add files for a proper commit, fix cisco sdwan load unit
+* 2024-08-26 11.5
+  add mode security-status for Palo Alto (checks age of the last sw update)
+  fix mem/cpu/hw modes for Cisco SDWAN (IOS) which do hot have the Viptela-Mib
 * 2024-06-20 11.4.0.2
   bugfix in CheckPoint FW1 where R81.20 showed invalid cpu metrics
 * 2024-04-08 11.4.0.1

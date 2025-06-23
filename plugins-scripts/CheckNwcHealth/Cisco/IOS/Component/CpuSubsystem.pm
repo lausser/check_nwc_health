@@ -39,6 +39,7 @@ sub init {
     }
   }
   # same cpmCPUTotalPhysicalIndex found in multiple table rows
+  $self->debug(sprintf "found %d cpu(s)", scalar(@{$self->{cpus}}));
   if (scalar(@{$self->{cpus}}) > 1) {
     my %names = ();
     foreach my $cpu (@{$self->{cpus}}) {
@@ -48,8 +49,12 @@ sub init {
       if ($names{$cpu->{name}} > 1) {
         # more than one cpu points to the same physical entity
         $cpu->{name} .= '.'.$cpu->{flat_indices};
+        $self->debug(sprintf "cpu %s has %d entries", $cpu->{name}, $names{$cpu->{name}});
       }
     }
+  }
+  if ($self->implements_mib("CISCO-ENTITY-QFP-MIB")) {
+    $self->analyze_and_check_qfpcpu_subsystem("CheckNwcHealth::Cisco::CISCOENTITYQFPMIB::Component::CpuSubsystem");
   }
 }
 

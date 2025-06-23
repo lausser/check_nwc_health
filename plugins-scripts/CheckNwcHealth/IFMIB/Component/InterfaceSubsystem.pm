@@ -180,13 +180,13 @@ sub init {
     my @indices = $self->get_interface_indices();
     my @all_indices = @indices;
     my @selected_indices = ();
-    if (! $self->opts->name && ! $self->opts->name3) {
+    if (! $self->opts->name && ! $self->opts->name2 && ! $self->opts->name3) {
       # get_table erzwingen
       @indices = ();
       $self->bulk_is_baeh(10);
     }
     @iftable_columns = do { my %seen; grep { !$seen{$_}++ } @iftable_columns }; # uniq
-    if ((! $self->opts->name && ! $self->opts->name3) || scalar(@indices) > 0) {
+    if ((! $self->opts->name && ! $self->opts->name2 && ! $self->opts->name3) || scalar(@indices) > 0) {
       my @save_indices = @indices; # die werden in get_snmp_table_objects geshiftet
       if ($plus_admin_up || $plus_oper_up) {
         # mit minimalen columns schnell vorfiltern -> @indices evt. reduzieren
@@ -646,6 +646,7 @@ sub get_interface_indices {
     my $ifDescr = $self->{interface_cache}->{$ifIndex}->{ifDescr};
     my $ifUniqDescr = $self->{interface_cache}->{$ifIndex}->{ifUniqDescr};
     my $ifAlias = $self->{interface_cache}->{$ifIndex}->{ifAlias} || '________';
+    my $ifName = $self->{interface_cache}->{$ifIndex}->{ifName};
     # Check ifDescr (using --name)
     if ($self->opts->name) {
       if ($self->opts->regexp) {
@@ -663,6 +664,11 @@ sub get_interface_indices {
             push(@indices, [$ifIndex]);
           }
         }
+      }
+    # Check ifName (using --name2)
+    } elsif ($self->opts->name2) {
+      if (lc $ifName eq lc $self->opts->name2) {
+        push(@indices, [$ifIndex]);
       }
     # Check ifAlias (using --name3)
     } elsif ($self->opts->name3) {
@@ -1018,7 +1024,7 @@ sub init {
     my $gb = 1000 * 1000 * 1000;
     my $mb = 1000 * 1000;
     my $kb = 1000;
-    my $speed = $self->{ifHighSpeed} ? 
+    my $speed = $self->{ifHighSpeed} ?
         ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
     if ($speed >= $gb) {
       $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
@@ -1239,13 +1245,13 @@ sub check {
         # (like 80/90, meaning the usage)
         # then they have precedence over what we set here.
         metric => $self->{ifDescr}.'_traffic_in',
-        warning => $tinwarning,
-        critical => $tincritical,
+        warning => $tinwarning > 0 ? $tinwarning : '0:',
+        critical => $tincritical > 0 ? $tincritical : '0:',
     );
     $self->force_thresholds(
         metric => $self->{ifDescr}.'_traffic_out',
-        warning => $toutwarning,
-        critical => $toutcritical,
+        warning => $toutwarning > 0 ? $toutwarning : '0:',
+        critical => $toutcritical > 0 ? $toutcritical : '0:',
     );
     # Check both usage and traffic. The user could set thresholds like
     # --warningx 'traffic_.*'=1:80 --criticalx 'traffic_.*'=1:90 --units Mbit
@@ -1577,6 +1583,21 @@ sub calc_usage {
         ($self->{delta_timestamp} * $self->{maxInputRate});
     $self->{outputUtilization} = 100 * $self->{delta_ifOutBits} /
         ($self->{delta_timestamp} * $self->{maxOutputRate});
+    my $gb = 1000 * 1000 * 1000;
+    my $mb = 1000 * 1000;
+    my $kb = 1000;
+    my $speed = $self->{ifHighSpeed} ?
+        ($self->{ifHighSpeed} * $mb) : $self->{ifSpeed};
+    if ($speed >= $gb) {
+      $self->{ifSpeedText} = sprintf "%.2fGB", $speed / $gb;
+    } elsif ($speed >= $mb) {
+      $self->{ifSpeedText} = sprintf "%.2fMB", $speed / $mb;
+    } elsif ($speed >= $kb) {
+      $self->{ifSpeedText} = sprintf "%.2fKB", $speed / $kb;
+    } else {
+      $self->{ifSpeedText} = sprintf "%.2fB", $speed;
+    }
+    $self->{ifSpeedText} =~ s/\.00//g;
   } else {
     $self->{maxInputRate} = $self->{ifSpeed};
     $self->{maxOutputRate} = $self->{ifSpeed};

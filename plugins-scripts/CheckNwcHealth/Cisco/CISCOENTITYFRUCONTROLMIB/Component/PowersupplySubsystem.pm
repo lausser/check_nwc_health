@@ -26,6 +26,18 @@ package CheckNwcHealth::Cisco::CISCOENTITYFRUCONTROLMIB::Component::PowersupplyS
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
+sub finish {
+  my ($self) = @_;
+  if (! $self->{cefcFRUPowerAdminStatus}) {
+    # Dreckig zusammengenageltes Glump von Edgecore implementiert die
+    # cefcFRUPowerStatusTable, allerdings nur mit cefcFRUPowerOperStatus.
+    # Ansonsten taucht in dem Schrott noch eine Dell-Mib auf, tausend
+    # Fans und Wattmeter mit Status unavailable und, weils nur ein
+    # Dreckslinux ist, LM-SENSORS. Softwaredefined, ha!
+    $self->{cefcFRUPowerAdminStatus} = "on";
+  }
+}
+
 sub check {
   my ($self) = @_;
   $self->add_info(sprintf 'power supply %s%s admin status is %s, oper status is %s',

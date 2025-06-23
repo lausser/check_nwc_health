@@ -45,6 +45,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENHANCEDMEMPOOLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYALARMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYFRUCONTROLMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYQFPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENTITYSENSORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOENVMONMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOERRDISABLEMIB.pm \
@@ -70,15 +71,27 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBRNDMNGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBSYSMNGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSBTUNINGMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSDWANSECURITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSDWANOPERSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSDWANAPPROUTEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSMARTLICMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGEQUIPMENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGTCMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGMEMORYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGPROCESSORMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGSTORAGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGCOMPUTEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOVTPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CLAVISTERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DCBGPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10BGP4V2MIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10CHASSISMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10PORTSECURITYMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLEMCOS10TCMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DELLVENDORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DEVICEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/DISKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ELTEXMIB.pm \
@@ -90,6 +103,9 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPGLOBALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPLOCALMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5BIGIPSYSTEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5COMMONSMIMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5OSSYSTEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/F5PLATFORMSTATSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCEOSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FCMGMTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
@@ -169,6 +185,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SWMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYNOPTICSROOTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SYSTEMRESOURCESMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/TPLINKSYSINFOMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/TPLINKSYSMONITORMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDDISKIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/UCDSNMPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/USAGEMIB.pm \
@@ -231,9 +249,16 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/PowersupplySubsystem.pm \
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/VoltageSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOENVMONMIB/Component/FanSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOENTITYQFPMIB/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOENTITYQFPMIB/Component/MemSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOREMOTEACCESSMONITORMIB/Component/VpnSubsystem.pm \
   CheckNwcHealth/Cisco/CISCORTTMONMIB/Component/RttSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/SdwanSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/MemSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Cisco/CISCOSDWANMIB.pm \
   CheckNwcHealth/Cisco/CISCOSTACKMIB/Component/StackSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOSTACKWISEMIB/Component/StackSubsystem.pm \
   CheckNwcHealth/Cisco/CISCOERRDISABLEMIB/Component/InterfaceSubsystem.pm \
@@ -282,6 +307,13 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/Viptela/Component/CpuSubsystem.pm \
   CheckNwcHealth/Cisco/Viptela/Component/SdwanSubsystem.pm \
   CheckNwcHealth/Cisco/Viptela.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalCpuSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalMemSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalRackUnitSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalEquipmentSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS/Component/EnvironmentalStorageSubsystem.pm \
+  CheckNwcHealth/Cisco/UCS.pm \
   CheckNwcHealth/Cisco.pm \
   CheckNwcHealth/OneOS/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/OneOS/Component/CpuSubsystem.pm \
@@ -417,6 +449,12 @@ EXTRA_MODULES=\
   CheckNwcHealth/F5/F5BIGIP/Component/PowersupplySubsystem.pm \
   CheckNwcHealth/F5/F5BIGIP/Component/TemperatureSubsystem.pm \
   CheckNwcHealth/F5/F5BIGIP.pm \
+  CheckNwcHealth/F5/Velos/Component/TemperatureSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/DiskSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/CpuSubsystem.pm \
+  CheckNwcHealth/F5/Velos/Component/MemSubsystem.pm \
+  CheckNwcHealth/F5/Velos.pm \
   CheckNwcHealth/F5.pm \
   CheckNwcHealth/CheckPoint/Firewall1/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/CheckPoint/Firewall1/Component/TemperatureSubsystem.pm \
@@ -485,6 +523,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/PaloAlto/Component/CpuSubsystem.pm \
   CheckNwcHealth/PaloAlto/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/PaloAlto/Component/HaSubsystem.pm \
+  CheckNwcHealth/PaloAlto/Component/SecuritySubsystem.pm \
   CheckNwcHealth/PaloAlto.pm \
   CheckNwcHealth/Bluecoat.pm \
   CheckNwcHealth/Cumulus.pm \
@@ -538,7 +577,15 @@ EXTRA_MODULES=\
   CheckNwcHealth/PulseSecure/Gateway.pm \
   CheckNwcHealth/SkyHigh/SWG.pm \
   CheckNwcHealth/SkyHigh.pm \
+  CheckNwcHealth/TPLink/Component/MemSubsystem.pm \
+  CheckNwcHealth/TPLink/Component/CpuSubsystem.pm \
+  CheckNwcHealth/TPLink.pm \
   CheckNwcHealth/INTELSERVERBASEBOARD7/Component/EnvironmntalSubsystem.pm \
+  CheckNwcHealth/Edgecore/Sonic.pm \
+  CheckNwcHealth/Edgecore/Sonic/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Dell/OS10/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Dell/OS10/Component/BgpSubsystem.pm \
+  CheckNwcHealth/Dell/OS10.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed

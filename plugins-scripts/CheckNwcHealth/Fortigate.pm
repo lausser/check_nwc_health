@@ -12,7 +12,7 @@ sub init {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Fortigate::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::ha::/) {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Fortigate::Component::HaSubsystem");
-  } elsif ($self->mode =~ /device::vpn::sessions/) {
+  } elsif ($self->mode =~ /device::vpn::/) {
     $self->analyze_and_check_config_subsystem("CheckNwcHealth::Fortigate::Component::VpnSubsystem");
   } else {
     $self->no_such_mode();

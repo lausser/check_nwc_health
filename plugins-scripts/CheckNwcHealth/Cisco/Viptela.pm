@@ -10,6 +10,8 @@ sub init {
     $self->analyze_and_check_cpu_subsystem("CheckNwcHealth::Cisco::Viptela::Component::CpuSubsystem");
   } elsif ($self->mode =~ /device::hardware::memory/) {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::Viptela::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::sdwan/) {
+    $self->analyze_and_check_sdwan_subsystem("CheckNwcHealth::Cisco::Viptela::Component::SdwanSubsystem");
   } else {
     $self->no_such_mode();
   }

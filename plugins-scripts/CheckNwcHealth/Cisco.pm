@@ -27,6 +27,13 @@ sub init {
     $self->rebless('CheckNwcHealth::Cisco::ASA');
   } elsif ($self->implements_mib('VIPTELA-OPER-SYSTEM')) {
     $self->rebless('CheckNwcHealth::Cisco::Viptela');
+    # Viptela Management Information Base (MIBs) are not supported on Cisco IOS XE Catalyst SD-WAN devices.
+  } elsif ($self->implements_mib('CISCO-SDWAN-OPER-SYSTEM-MIB')) {
+    # z.b. bei cpu/mem hat CISCO-SDWAN-OPER-SYSTEM die gleichen oids wie
+    # VIPTELA-OPER-SYSTEM, also wieder zugekaufter und umnumerierter Dreck.
+    $self->rebless('CheckNwcHealth::Cisco::CISCOSDWANMIB');
+  } elsif ($self->implements_mib('CISCO-UNIFIED-COMPUTING-COMPUTE-MIB')) {
+    $self->rebless('CheckNwcHealth::Cisco::UCS');
   } elsif ($self->{productname} =~ /Cisco/i) {
     $self->rebless('CheckNwcHealth::Cisco::IOS');
   } elsif ($self->{productname} =~ /Fujitsu Intelligent Blade Panel 30\/12/i) {
@@ -91,9 +98,10 @@ sub init {
         $self->no_such_mode();
       }
     } elsif ($self->mode =~ /device::sdwan::/) {
-    #} elsif ($self->mode =~ /device::sdwan::session::availability/) {
       if ($self->implements_mib("CISCO-SDWAN-OPER-SYSTEM-MIB")) {
         $self->analyze_and_check_sdwan_subsystem("CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem");
+      } elsif ($self->implements_mib("VIPTELA-SECURITY")) {
+        $self->analyze_and_check_sdwan_subsystem("CheckNwcHealth::Cisco::Viptela::Component::SdwanSubsystem");
       } else {
         $self->no_such_mode();
       }
