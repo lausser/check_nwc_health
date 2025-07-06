@@ -976,10 +976,12 @@ sub init {
     $self->calc_usage() if ! defined $self->{inputUtilization};
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
-    $self->{inputErrorsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
-        100 * $self->{delta_ifInErrors} / ($self->{delta_ifInPkts} + $self->{delta_ifInErrors});
-    $self->{outputErrorsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
-        100 * $self->{delta_ifOutErrors} / ($self->{delta_ifOutPkts} + $self->{delta_ifOutErrors});
+    my $totalInPkts = $self->{delta_ifInPkts} + $self->{delta_ifInErrors} + $self->{delta_ifInDiscards};
+    $self->{inputErrorsPercent} = $totalInPkts == 0 ? 0 :
+        100 * $self->{delta_ifInErrors} / $totalInPkts;
+    my $totalOutPkts = $self->{delta_ifOutPkts} + $self->{delta_ifOutErrors} + $self->{delta_ifOutDiscards};
+    $self->{outputErrorsPercent} = $totalOutPkts == 0 ? 0 :
+        100 * $self->{delta_ifOutErrors} / $totalOutPkts;
     $self->{inputErrorRate} = $self->{delta_ifInErrors} 
         / $self->{delta_timestamp};
     $self->{outputErrorRate} = $self->{delta_ifOutErrors} 
@@ -988,10 +990,12 @@ sub init {
     $self->calc_usage() if ! defined $self->{inputUtilization};
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
     $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
-    $self->{inputDiscardsPercent} = $self->{delta_ifInPkts} == 0 ? 0 :
-        100 * $self->{delta_ifInDiscards} / ($self->{delta_ifInPkts} + $self->{delta_ifInDiscards});
-    $self->{outputDiscardsPercent} = $self->{delta_ifOutPkts} == 0 ? 0 :
-        100 * $self->{delta_ifOutDiscards} / ($self->{delta_ifOutPkts} + $self->{delta_ifOutDiscards});
+    my $totalInPkts = $self->{delta_ifInPkts} + $self->{delta_ifInErrors} + $self->{delta_ifInDiscards};
+    $self->{inputDiscardsPercent} = $totalInPkts == 0 ? 0 :
+        100 * $self->{delta_ifInDiscards} / $totalInPkts;
+    my $totalOutPkts = $self->{delta_ifOutPkts} + $self->{delta_ifOutErrors} + $self->{delta_ifOutDiscards};
+    $self->{outputDiscardsPercent} = $totalOutPkts == 0 ? 0 :
+        100 * $self->{delta_ifOutDiscards} / $totalOutPkts;
     $self->{inputDiscardRate} = $self->{delta_ifInDiscards} 
         / $self->{delta_timestamp};
     $self->{outputDiscardRate} = $self->{delta_ifOutDiscards} 
