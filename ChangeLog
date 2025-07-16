@@ -1,3 +1,12 @@
+* 2025-07-16 12.5
+  update GLPlugin (CISCO-SMART-LIC)
+  improve check-licenses for Cisco
+  bugfix in Checkpoint powersupply presence
+  add Cisco Firepower devices
+  bugfix in Cisco stacks
+  update blacklist for HOST-RESOURCES-MIB (more pseudo-filesystems)
+  bugfix in interface-errors and interface-discards (PR#346, thx c-kr)
+  bugfix/improve vpn-status for Cisco (use more caching)
 * 2025-05-28 12.4.0.3
   bugfix in Dell OS10 with non-replacable power supplies
 * 2025-05-28 12.4.0.2
