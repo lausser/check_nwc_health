@@ -51,6 +51,9 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOERRDISABLEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOETHERNETFABRICEXTENDERMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFEATURECONTROLMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREPOWERAPEQUIPMENTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREPOWERAPMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREPOWERAPTCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOFIREWALLMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOHSRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOIETFNATMIB.pm \
@@ -78,6 +81,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSTACKWISEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMEXTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGEQUIPMENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGTCMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/CISCOUNIFIEDCOMPUTINGMEMORYMIB.pm \
@@ -314,6 +318,8 @@ EXTRA_MODULES=\
   CheckNwcHealth/Cisco/UCS/Component/EnvironmentalEquipmentSubsystem.pm \
   CheckNwcHealth/Cisco/UCS/Component/EnvironmentalStorageSubsystem.pm \
   CheckNwcHealth/Cisco/UCS.pm \
+  CheckNwcHealth/Cisco/Firepower/AP/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Cisco/Firepower/AP.pm \
   CheckNwcHealth/Cisco.pm \
   CheckNwcHealth/OneOS/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/OneOS/Component/CpuSubsystem.pm \

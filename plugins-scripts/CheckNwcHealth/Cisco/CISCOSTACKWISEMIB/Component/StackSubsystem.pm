@@ -17,8 +17,21 @@ sub init {
   # cswStackBandWidth exists only on distributed switches with SVL
   if ($self->{cswStackBandWidth}) {
     $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
-        ['ports', 'cswDistrStackPhyPortInfoEntry', 'CheckNwcHealth::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::PhyPort'],
+        ['ports', 'cswDistrStackPhyPortInfoTable', 'CheckNwcHealth::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::PhyPort'],
     ]);
+    if (! @{$self->{ports}}) {
+      # In a specific case there was cswStackBandWidth with a plausible value,
+      # but cswDistrStackPhyPortInfoTable did not exist at all.
+      # The result was CRITICAL 4 ports were lost (because before that
+      # 4 ports were discovered, either because there was no cswStackBandWidth
+      # or the cswDistrStackPhyPortInfoTable was there with 4 rows.
+      # This may have been a firmware update or a bug or somebody restricted
+      # cswDistrStackPhyPortInfoTable, i don't know, but as always it's up to
+      # me to explain the plugin's check result. So i add a fallback here.
+      $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
+          ['ports', 'cswStackPortInfoTable', 'CheckNwcHealth::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Port'],
+      ]);
+    }
   } else {
     $self->get_snmp_tables("CISCO-STACKWISE-MIB", [
         ['ports', 'cswStackPortInfoTable', 'CheckNwcHealth::Cisco::CISCOSTACKWISEMIB::Component::StackSubsystem::Port'],
