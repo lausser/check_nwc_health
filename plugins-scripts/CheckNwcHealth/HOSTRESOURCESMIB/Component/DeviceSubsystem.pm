@@ -78,6 +78,9 @@ sub check {
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'sysfs' ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /CDROM/ ||
       $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} =~ /:\// ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'bpf' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'logtmpfs' ||
+      $self->{hrDeviceType} eq 'hrDeviceDiskStorage' && $self->{hrDeviceDescr} eq 'tracefs' ||
       $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'sit0' ||
       $self->{hrDeviceType} eq 'hrDeviceNetwork' && $self->{hrDeviceDescr} eq 'ip_vti0'
     )) {
