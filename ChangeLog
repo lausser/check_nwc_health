@@ -1,7 +1,3 @@
-* 2025-07-16 12.5
-  update GLPlugin (CISCO-SMART-LIC)
-  improve check-licenses for Cisco
-  
 * 2025-05-28 12.4.0.3
   bugfix in Dell OS10 with non-replacable power supplies
 * 2025-05-28 12.4.0.2

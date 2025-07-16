@@ -23,8 +23,6 @@ sub init {
     $self->rebless('CheckNwcHealth::Cisco::PrimeNCS');
   } elsif ($self->{productname} =~ /UCOS /i) {
     $self->rebless('CheckNwcHealth::Cisco::UCOS');
-  } elsif ($self->implements_mib("CISCO-FIREPOWER-AP-MIB")) {
-    $self->rebless('CheckNwcHealth::Cisco::Firepower::AP');
   } elsif ($self->{productname} =~ /Cisco (PIX|Adaptive) Security Appliance/i) {
     $self->rebless('CheckNwcHealth::Cisco::ASA');
   } elsif ($self->implements_mib('VIPTELA-OPER-SYSTEM')) {
