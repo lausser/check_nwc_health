@@ -22,6 +22,13 @@ sub check {
         $self->{powerSupplyStatus});
     if ($self->{powerSupplyStatus} eq 'Up') {
       $self->add_ok();
+    } elsif ($self->{powerSupplyStatus} eq 'Present') {
+      # this is not enum, but a random string. there aer at least two
+      # customer devices, where "Present" is shown as OK in the web ui.
+      # maybe this type of poer supply is dumber than one which can
+      # say up. hopefully this does not mean that even a boken ps
+      # is reported as present just because the slot is filled.
+      $self->add_ok();
     } elsif ($self->{powerSupplyStatus} eq 'Down') {
       $self->add_critical();
     } else {
