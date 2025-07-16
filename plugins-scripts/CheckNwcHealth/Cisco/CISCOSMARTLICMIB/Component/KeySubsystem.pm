@@ -34,9 +34,10 @@ sub check {
       $self->{ciscoSlaEntitlementFeatureName},
       $self->{ciscoSlaEntitlementEnforceMode}
   );
-  if ($self->{ciscoSlaEntitlementEnforceMode} =~ /(outOfCompliance|gracePeriodExpired|disabled)/) {
+  if ($self->{ciscoSlaEntitlementEnforceMode} =~ /(outOfCompliance|gracePeriodExpired|disabled|notAuthorized)/) {
     $self->add_critical();
-  } elsif ($self->{ciscoSlaEntitlementEnforceMode} =~ /(waiting|evaluationExpired|gracePeriod)/) {
+  } elsif ($self->{ciscoSlaEntitlementEnforceMode} =~ /(waiting|evaluationExpired|gracePeriod|authorizationExpired|invalidTag)/) {
+    # 8 war mal gracePeriod, hat sich geaendert in authorizationExpired
     $self->add_warning();
   } else {
     $self->add_ok();
