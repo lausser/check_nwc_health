@@ -51,6 +51,7 @@ sub init {
     push(@iftable_columns, @iftable_traffic_hc_columns);
     push(@iftable_columns, @iftable_packets_hc_columns);
     push(@iftable_columns, @iftable_error_columns);
+    push(@iftable_columns, @iftable_discard_columns);
   } elsif ($self->mode =~ /device::interfaces::discards/) {
     push(@iftable_columns, @iftable_status_columns);
     push(@iftable_columns, @iftable_traffic_columns);
@@ -58,6 +59,7 @@ sub init {
     push(@iftable_columns, @iftable_traffic_hc_columns);
     push(@iftable_columns, @iftable_packets_hc_columns);
     push(@iftable_columns, @iftable_discard_columns);
+    push(@iftable_columns, @iftable_error_columns);
   } elsif ($self->mode =~ /device::interfaces::broadcast/) {
     push(@iftable_columns, @iftable_status_columns);
     push(@iftable_columns, @iftable_traffic_columns);
@@ -975,7 +977,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->calc_usage() if ! defined $self->{inputUtilization};
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors));
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInErrors ifOutErrors ifInDiscards ifOutDiscards));
     my $totalInPkts = $self->{delta_ifInPkts} + $self->{delta_ifInErrors} + $self->{delta_ifInDiscards};
     $self->{inputErrorsPercent} = $totalInPkts == 0 ? 0 :
         100 * $self->{delta_ifInErrors} / $totalInPkts;
@@ -989,7 +991,7 @@ sub init {
   } elsif ($self->mode =~ /device::interfaces::discards/) {
     $self->calc_usage() if ! defined $self->{inputUtilization};
     $self->get_mub_pkts() if ! defined $self->{delta_ifOutPkts};
-    $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards));
+    $self->valdiff({name => $self->{ifDescr}}, qw(ifInDiscards ifOutDiscards ifInErrors ifOutErrors));
     my $totalInPkts = $self->{delta_ifInPkts} + $self->{delta_ifInErrors} + $self->{delta_ifInDiscards};
     $self->{inputDiscardsPercent} = $totalInPkts == 0 ? 0 :
         100 * $self->{delta_ifInDiscards} / $totalInPkts;

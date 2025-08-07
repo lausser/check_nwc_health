@@ -1,3 +1,5 @@
+* 2025-08-25 12.5.1
+  bugfix in interface-health/errors/discards (uninitialized warnings)
 * 2025-07-16 12.5
   update GLPlugin (CISCO-SMART-LIC)
   improve check-licenses for Cisco
