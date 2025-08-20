@@ -1,4 +1,4 @@
-package CheckNwcHealth::Lancom::Component::CpuSubsystem;
+package CheckNwcHealth::Lancom::LCOS::Component::CpuSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 

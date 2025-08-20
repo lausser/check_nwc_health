@@ -1,4 +1,4 @@
-package CheckNwcHealth::Lancom::Component::MemSubsystem;
+package CheckNwcHealth::Lancom::LCOS::Component::MemSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 

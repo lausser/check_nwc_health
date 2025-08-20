@@ -119,6 +119,10 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/GENUAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CENTITYEXTMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CINFOCENTERMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CISSUMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CLSWDEVADMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HH3CSYSMANMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIBGPVPNMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIENTITYEXTENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/HUAWEIL2MAMMIB.pm \
@@ -148,6 +152,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/JUNOSBGP4V2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LARAMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LCOSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LCOSSXMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LMSENSORSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/LOADBALSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MINIIFMIB.pm \
@@ -557,9 +562,12 @@ EXTRA_MODULES=\
   CheckNwcHealth/Vormetric/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Vormetric/Component/MemSubsystem.pm \
   CheckNwcHealth/Vormetric.pm \
-  CheckNwcHealth/Lancom/Component/CpuSubsystem.pm \
-  CheckNwcHealth/Lancom/Component/EnvironmentalSubsystem.pm \
-  CheckNwcHealth/Lancom/Component/MemSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOS/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOS/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOS/Component/MemSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOSSX/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOSSX/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Lancom/LCOSSX/Component/MemSubsystem.pm \
   CheckNwcHealth/Lancom.pm \
   CheckNwcHealth/DrayTek/Vigor/Component/CpuSubsystem.pm \
   CheckNwcHealth/DrayTek/Vigor/Component/EnvironmentalSubsystem.pm \

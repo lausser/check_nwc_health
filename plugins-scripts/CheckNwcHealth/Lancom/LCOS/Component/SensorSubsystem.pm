@@ -1,4 +1,4 @@
-package CheckNwcHealth::Lancom::Component::SensorSubsystem;
+package CheckNwcHealth::Lancom::LCOS::Component::SensorSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -6,11 +6,11 @@ sub init {
   my ($self) = @_;
   $self->bulk_is_baeh();
   $self->get_snmp_tables('SW-MIB', [
-      ['sensors', 'swSensorTable', 'CheckNwcHealth::Lancom::Component::SensorSubsystem::Sensor'],
+      ['sensors', 'swSensorTable', 'CheckNwcHealth::Lancom::LCOS::Component::SensorSubsystem::Sensor'],
   ]);
 }
 
-package CheckNwcHealth::Lancom::Component::SensorSubsystem::Sensor;
+package CheckNwcHealth::Lancom::LCOS::Component::SensorSubsystem::Sensor;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 use constant { OK => 0, WARNING => 1, CRITICAL => 2, UNKNOWN => 3 };

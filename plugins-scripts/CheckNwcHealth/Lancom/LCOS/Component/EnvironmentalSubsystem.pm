@@ -1,4 +1,4 @@
-package CheckNwcHealth::Lancom::Component::EnvironmentalSubsystem;
+package CheckNwcHealth::Lancom::LCOS::Component::EnvironmentalSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -11,7 +11,7 @@ sub init {
 sub check {
   my ($self) = @_;
   $self->add_info('checking temperature');
-  $self->add_info(sprintf 'temperature is is %.2f',
+  $self->add_info(sprintf 'temperature is %.2f',
       $self->{lcsStatusHardwareInfoTemperatureDegrees});
   $self->set_thresholds(
       metric => 'temperature',

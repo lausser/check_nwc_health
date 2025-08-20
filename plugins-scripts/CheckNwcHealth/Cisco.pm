@@ -17,7 +17,8 @@ sub init {
     # und die LWAPP-MIB. Wird hier zu WLC erklärt, cpu/mem etc wird aber in der WLC.pm
     # dann wieder auf Cisco::IOS umgedengelt.
     $self->rebless('CheckNwcHealth::Cisco::WLC');
-  } elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
+    #} elsif ($self->{productname} =~ /Cisco.*(IronPort|AsyncOS)/i) {
+  } elsif ($self->{productname} =~ /.*(IronPort|AsyncOS)/i) {
     $self->rebless('CheckNwcHealth::Cisco::AsyncOS');
   } elsif ($self->{productname} =~ /Cisco.*Prime Network Control System/i) {
     $self->rebless('CheckNwcHealth::Cisco::PrimeNCS');

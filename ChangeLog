@@ -1,4 +1,7 @@
-* 2025-08-25 12.5.1
+* 2025-08-20 12.6
+  add Lancom SX
+  bugfix in detection od Cisco Ironport
+* 2025-08-07 12.5.1
   bugfix in interface-health/errors/discards (uninitialized warnings)
 * 2025-07-16 12.5
   update GLPlugin (CISCO-SMART-LIC)

@@ -82,7 +82,11 @@ sub classify {
         $self->rebless('CheckNwcHealth::Cisco');
       } elsif ($self->{productname} =~ /fujitsu intelligent blade panel 30\/12/i) {
         $self->rebless('CheckNwcHealth::Cisco');
+      } elsif ($self->{productname} =~ /IronPort.*AsyncOS/i) {
+        $self->rebless('CheckNwcHealth::Cisco');
       } elsif ($self->{productname} =~ /UCOS /i) {
+        $self->rebless('CheckNwcHealth::Cisco');
+      } elsif ($self->implements_mib('ASYNCOS-MAIL-MIB')) {
         $self->rebless('CheckNwcHealth::Cisco');
       } elsif ($self->{productname} =~ /Nortel/i) {
         $self->rebless('CheckNwcHealth::Nortel');
@@ -118,6 +122,8 @@ sub classify {
         # Pulse Secure,LLC,Pulse Policy Secure,IC-6500,5.2R7.1 (build 37645)
         # Ivanti Connect Secure,Ivanti Policy Secure,PSA-5000,9.1R18.1 (build 9527)
         $self->rebless('CheckNwcHealth::PulseSecure::Gateway');
+      } elsif ($self->implements_mib('LCOS-SX-MIB')) {
+        $self->rebless('CheckNwcHealth::Lancom');
       } elsif ($self->{productname} =~ /(Juniper|NetScreen|JunOS)/i) {
         $self->rebless('CheckNwcHealth::Juniper');
       } elsif ($self->{productname} =~ /^(GS|FS)/i) {
