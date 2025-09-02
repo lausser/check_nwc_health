@@ -52,6 +52,11 @@ sub init {
         }
         return $matching;
     });
+  } elsif ($self->mode eq "device::sdwan::control::connections" or
+      $self->mode eq "device::sdwan::management::connections") {
+    $self->get_snmp_tables("CISCO-SDWAN-SECURITY-MIB", [
+      ["ctlconns", "controlConnectionsTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ControlConnection", undef, ["controlConnectionsPeerType", "controlConnectionsSystemIp", "controlConnectionsLocalColor", "controlConnectionsState"]],
+    ]);
   } elsif ($self->mode eq "device::sdwan::control::vsmartcount") {
     $self->get_snmp_objects("CISCO-SDWAN-SECURITY-MIB", qw(controlSummaryVsmartCounts));
   } elsif ($self->mode eq "device::sdwan::control::vmanagecount") {
@@ -166,9 +171,10 @@ sub check {
           critical => ":0",
       );
       $self->add_message($self->check_thresholds(
+          metric => "vsmart_counts",
           value => $self->{controlSummaryVsmartCounts}));
       $self->add_perfdata(
-          metric => "vsmart_counts",
+          label => "vsmart_counts",
           value => $self->{controlSummaryVsmartCounts},
       );
     } else {
@@ -184,13 +190,79 @@ sub check {
           critical => ":0",
       );
       $self->add_message($self->check_thresholds(
+          metric => "vmanage_counts",
           value => $self->{controlSummaryVmanageCounts}));
       $self->add_perfdata(
-          metric => "vmanage_counts",
+          label => "vmanage_counts",
           value => $self->{controlSummaryVmanageCounts},
       );
     } else {
       $self->add_unknown("controlSummaryVmanageCounts not found");
+    }
+  } elsif ($self->mode =~ /device::sdwan::(control|management)::connections/) {
+    if (! @{$self->{ctlconns}}) {
+      $self->add_unknown("did not find any control connections");
+    } else {
+      my $num_connections = 0;
+      my $num_up_connections = 0;
+      my $num_connections_vmanage = 0;
+      my $num_up_connections_vmanage = 0;
+      my $num_connections_vsmart = {};
+      my $num_up_connections_vsmart = {};
+      foreach my $connection (@{$self->{ctlconns}}) {
+        my $state = $connection->{controlConnectionsState};
+        my $color = $connection->{controlConnectionsLocalColor};
+        my $type = $connection->{controlConnectionsPeerType};
+        $num_connections++;
+        if ($state eq "up") {
+          $num_up_connections++;
+        }
+        if ($type eq "vmanage") {
+          $num_connections_vmanage++;
+          $num_up_connections_vmanage++ if $state eq "up";
+        }
+        if ($type eq "vsmart") {
+          $num_connections_vsmart->{$color} = 1 if not
+              exists $num_connections_vsmart->{$color};
+          if (not exists $num_up_connections_vsmart->{$color}) {
+            $num_up_connections_vsmart->{$color} = 1 if $state eq "up";
+            $num_up_connections_vsmart->{$color} = 0 if $state ne "up";
+          } else {
+            $num_up_connections_vsmart->{$color}++ if $state eq "up";
+          }
+        }
+      }
+      if ($self->mode eq "device::sdwan::control::connections") {
+        # SDWAN Controller-Connect Status:
+        # Mindestens eine controlConnectionsState ist down => Warning
+        # Zwei controlConnectionsState desselben
+        # controlConnectionsLocalColor (MPLS, PUBLIC-INTERNET oder
+        #   BIZ-INTERNET) und vom controlConnectionsPeerType = VSMART
+        #   sind down => Critical
+        if ($num_connections > $num_up_connections) {
+          $self->add_warning(sprintf "only %d of %d control connections are up", $num_up_connections, $num_connections);
+        } else {
+          $self->add_ok(sprintf "%d of %d control connections are up", $num_up_connections, $num_connections);
+        }
+        foreach my $color (keys %{$num_connections_vsmart}) {
+          if ($num_connections_vsmart->{$color} - $num_up_connections_vsmart->{$color} >= 2) {
+            $self->add_critical(sprintf "only %d of %d %s/vsmart control connections are up", $num_up_connections_vsmart->{$color}, $num_connections_vsmart->{$color}, $color);
+          }
+        }
+      } elsif ($self->mode eq "device::sdwan::management::connections") {
+        # SDWAN MGMT-Connect status:
+        # Alle controlConnectionsState vom
+        #   controlConnectionsPeerType = VMANAGE sind down => Critical
+        if ($num_connections_vmanage) {
+          if ($num_up_connections_vmanage) {
+            $self->add_ok(sprintf "%d of %d vmanage control connections are up", $num_up_connections_vmanage, $num_connections_vmanage);
+          } else {
+            $self->add_critical("none of the vmanage control connections is up");
+          }
+        } else {
+          $self->add_unknown("no control connections of type vmanage were found");
+        }
+      }
     }
   }
 }
@@ -332,4 +404,34 @@ sub check {
       value => $self->{appRouteStatisticsAppProbeClassMeanJitter});
 }
 
+package CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ControlConnection;
+our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
+use strict;
+use Socket qw(inet_ntop AF_INET AF_INET6);
+
+sub finish {
+  my ($self) = @_;
+  #   INDEX { controlConnectionsInstance,
+  #           controlConnectionsPeerType,
+  $self->{controlConnectionsPeerType} = $self->mibs_and_oids_definition("CISCO-SDWAN-SECURITY-MIB", "PersonalityEnumOper", $self->{indices}->[1]);
+  if ($self->{controlConnectionsSystemIp} =~ /^[01]*$/) {
+    my $bin_str =~ $self->{controlConnectionsSystemIp};
+    my $len = length($bin_str);
+    if ($len == 32) {
+      my $bytes = pack('B32', $bin_str);
+      $self->{controlConnectionsSystemIp} = inet_ntop(AF_INET, $bytes);
+    } elsif ($len == 128) {
+      my $bytes = pack('B128', $bin_str);
+      $self->{controlConnectionsSystemIp} = inet_ntop(AF_INET6, $bytes);
+    }
+  } else {
+    my $octets = $self->{controlConnectionsSystemIp};
+    my $len = length($octets);
+    if ($len == 4) {
+      $self->{controlConnectionsSystemIp} = join('.', unpack('C4', $octets));
+    } elsif ($len == 16) {
+      $self->{controlConnectionsSystemIp} = join(':', unpack('H4' x 8, $octets));
+    }
+  }
+}
 1;

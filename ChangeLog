@@ -1,3 +1,7 @@
+* 2025-08-25 12.7
+  add mode sdwan-control-connections
+  add mode sdwan-management-connections
+  add forgotten Lancom files
 * 2025-08-20 12.6
   add Lancom SX
   bugfix in detection od Cisco Ironport

@@ -470,6 +470,18 @@ sub run_plugin {
       help => 'Check loss, latency and jitter of a route',
   );
   $plugin->add_mode(
+      internal => 'device::sdwan::control::connections',
+      spec => 'sdwan-control-connections',
+      alias => undef,
+      help => 'Check the control connections',
+  );
+  $plugin->add_mode(
+      internal => 'device::sdwan::management::connections',
+      spec => 'sdwan-management-connections',
+      alias => undef,
+      help => 'Check the management connections',
+  );
+  $plugin->add_mode(
       internal => 'device::sdwan::control::vedgecount',
       spec => 'sdwan-control-vedge-count',
       alias => undef,

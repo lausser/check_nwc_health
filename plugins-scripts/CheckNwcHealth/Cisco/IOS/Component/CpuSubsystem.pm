@@ -48,8 +48,8 @@ sub init {
     foreach my $cpu (@{$self->{cpus}}) {
       if ($names{$cpu->{name}} > 1) {
         # more than one cpu points to the same physical entity
-        $cpu->{name} .= '.'.$cpu->{flat_indices};
         $self->debug(sprintf "cpu %s has %d entries", $cpu->{name}, $names{$cpu->{name}});
+        $cpu->{name} .= '.'.$cpu->{flat_indices};
       }
     }
   }
