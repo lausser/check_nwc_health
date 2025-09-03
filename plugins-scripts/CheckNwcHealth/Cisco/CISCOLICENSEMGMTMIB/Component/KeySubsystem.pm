@@ -4,7 +4,6 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  $self->get_snmp_objects("CISCO-LICENSE-MGMT-MIB", qw(clmgmtLicenseDeviceInformation clmgmtLicenseInformation clmgmtLicenseConfiguration));
   $self->get_snmp_tables('CISCO-LICENSE-MGMT-MIB', [
       ['licenses', 'clmgmtLicenseInfoTable', 'CheckNwcHealth::Cisco::CISCOLICENSEMGMTMIB::Component::KeySubsystem::License'],
   ]);
@@ -12,8 +11,8 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  if (! $self->{licenses} eq "false") {
-    $self->add_ok("licensing is not enabled");
+  if (! @{$self->{licenses}}) {
+    $self->add_ok("licensing is not enabled or no licenses were installed");
   } else {
     $self->SUPER::check();
   }
