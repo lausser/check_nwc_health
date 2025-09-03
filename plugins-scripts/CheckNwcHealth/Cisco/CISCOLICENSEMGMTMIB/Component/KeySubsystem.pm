@@ -12,7 +12,7 @@ sub init {
 
 sub check {
   my ($self) = @_;
-  if (! $self->{licenses} eq "false") {
+  if (! ($self->{licenses} eq "false")) {
     $self->add_ok("licensing is not enabled");
   } else {
     $self->SUPER::check();
