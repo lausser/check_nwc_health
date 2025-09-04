@@ -436,18 +436,19 @@ sub check {
         scalar(grep { $_->{ifAdminStatus} eq "up" } @{$self->{interfaces}});
     my $available_interfaces =
         scalar(grep { $_->{ifAvailable} eq "true" } @{$self->{interfaces}});
-    $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are available",
-        $available_interfaces, $num_interfaces, $up_interfaces);
-    $self->set_thresholds(warning => "3:", critical => "2:");
-    $self->add_message($self->check_thresholds($available_interfaces));
+    my $unavailable_interfaces = $num_interfaces - $available_interfaces;
+    $self->add_info(sprintf "%d of %d (%d adm. up) interfaces are unavailable",
+        $unavailable_interfaces, $num_interfaces, $up_interfaces);
+    $self->set_thresholds(warning => "", critical => "0");
+    $self->add_message($self->check_thresholds($unavailable_interfaces));
     $self->add_perfdata(
         label => 'num_interfaces',
         value => $num_interfaces,
         thresholds => 0,
     );
     $self->add_perfdata(
-        label => 'available_interfaces',
-        value => $available_interfaces,
+        label => 'unavailable_interfaces',
+        value => $unavailable_interfaces,
     );
 
     printf "%s\n", $self->{info};
@@ -1020,9 +1021,8 @@ sub init {
     $self->opts->override_opt('lookback', 1800) if ! $self->opts->lookback;
     if ($self->{ifAdminStatus} eq "down") {
       $self->{ifAvailable} = "true";
-    } elsif ($self->{ifAdminStatus} eq "up" && $self->{ifOperStatus} ne "up" &&
-        $self->{ifStatusDuration} > $self->opts->lookback) {
-      # and ifLastChange schon ein wenig laenger her
+    } elsif ($self->{ifAdminStatus} eq "up" && ( $self->{ifOperStatus} eq "up" || $self->{ifStatusDuration} > $self->opts->lookback )) {
+      # or ifLastChange schon ein wenig laenger her
       $self->{ifAvailable} = "true";
     } else {
       $self->{ifAvailable} = "false";
