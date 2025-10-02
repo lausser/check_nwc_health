@@ -1,3 +1,5 @@
+* 2025-10-02 12.8
+  update GLPlugin, supports now --mode snmpget
 * 2025-09-03 12.7.0.1
   bugfix in cisco licenses
 * 2025-08-25 12.7
