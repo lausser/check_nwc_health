@@ -115,6 +115,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FIBRECHANNELFEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETCOREMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETFORTIGATEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FORTINETFORTIMAILMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNAGENTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/FOUNDRYSNSWL4SWITCHGROUPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/GENUAMIB.pm \
@@ -354,14 +355,22 @@ EXTRA_MODULES=\
   CheckNwcHealth/Juniper/JUNIPERMIB.pm \
   CheckNwcHealth/Juniper.pm \
   CheckNwcHealth/AlliedTelesyn.pm \
-  CheckNwcHealth/Fortigate/Component/HaSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/DiskSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/MemSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/CpuSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/VpnSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/EnvironmentalSubsystem.pm \
-  CheckNwcHealth/Fortigate/Component/SensorSubsystem.pm \
-  CheckNwcHealth/Fortigate.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/HaSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/MemSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/VpnSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/SensorSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/HaSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/MemSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail/Component/SensorSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortimail.pm \
+  CheckNwcHealth/Fortinet.pm \
   CheckNwcHealth/FabOS/Component/MemSubsystem.pm \
   CheckNwcHealth/FabOS/Component/CpuSubsystem.pm \
   CheckNwcHealth/FabOS/Component/EnvironmentalSubsystem.pm \

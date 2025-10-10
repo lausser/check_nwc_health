@@ -1,15 +1,15 @@
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
   my ($self) = @_;
   $self->get_snmp_tables('FORTINET-FORTIGATE-MIB', [
-      ['sensors', 'fgHwSensorTable', 'CheckNwcHealth::Fortigate::Component::SensorSubsystem::Sensor'],
+      ['sensors', 'fgHwSensorTable', 'CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Sensor'],
   ]);
 }
 
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem::Sensor;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Sensor;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -20,16 +20,16 @@ sub finish {
   if ( $self->{fgHwSensorEntValue} =~ /^-1$/) {
     # empty, this case is handled in the default sensor class
   } elsif ($self->{fgHwSensorEntName} =~ /Fan/) {
-    bless $self, "CheckNwcHealth::Fortigate::Component::SensorSubsystem::Fan";
+    bless $self, "CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Fan";
   } elsif ($self->{fgHwSensorEntName} =~ /PS.*Status|PSU .*|RPS/) {
-    bless $self, "CheckNwcHealth::Fortigate::Component::SensorSubsystem::Powersupply";
+    bless $self, "CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Powersupply";
   } elsif ($self->{fgHwSensorEntName} =~ /(LM75)|(Temp)|(^(TD|TR)\d+)|(DTS\d+)/) {
     # thermal diode/resistor, dingsbums thermal sensor
-    bless $self, "CheckNwcHealth::Fortigate::Component::SensorSubsystem::Temperature";
+    bless $self, "CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Temperature";
   } elsif ($self->{fgHwSensorEntName} =~ /(VOUT)|(VIN)|(VCC)|(P\d+V\d+)|(_\d+V\d+_)|(DDR)|(VCORE)|(DVDD)/) {
     # VPP_DDR, VTT_DDR sind irgendwelche voltage regulatory devices
     # DVDD irgendein Realtec digital voltage drecksdeil
-    bless $self, "CheckNwcHealth::Fortigate::Component::SensorSubsystem::Voltage";
+    bless $self, "CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Voltage";
   } else {
 $self->{UNKNOWN} = 1;
   }
@@ -56,7 +56,7 @@ sub check {
   }
 }
 
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem::Fan;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Fan;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -77,7 +77,7 @@ sub check {
   }
 }
 
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem::Temperature;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Temperature;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -98,7 +98,7 @@ sub check {
   }
 }
 
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem::Voltage;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Voltage;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 
@@ -118,7 +118,7 @@ sub check {
   }
 }
 
-package CheckNwcHealth::Fortigate::Component::SensorSubsystem::Powersupply;
+package CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem::Powersupply;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 

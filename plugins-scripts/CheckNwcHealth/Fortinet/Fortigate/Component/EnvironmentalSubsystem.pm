@@ -1,13 +1,13 @@
-package CheckNwcHealth::Fortigate::Component::EnvironmentalSubsystem;
+package CheckNwcHealth::Fortinet::Fortigate::Component::EnvironmentalSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
 sub init {
   my ($self) = @_;
   $self->{sensor_subsystem} =
-      CheckNwcHealth::Fortigate::Component::SensorSubsystem->new();
+      CheckNwcHealth::Fortinet::Fortigate::Component::SensorSubsystem->new();
   $self->{disk_subsystem} =
-      CheckNwcHealth::Fortigate::Component::DiskSubsystem->new();
+      CheckNwcHealth::Fortinet::Fortigate::Component::DiskSubsystem->new();
 }
 
 sub check {

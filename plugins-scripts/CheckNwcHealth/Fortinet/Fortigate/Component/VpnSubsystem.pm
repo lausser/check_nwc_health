@@ -1,4 +1,4 @@
-package CheckNwcHealth::Fortigate::Component::VpnSubsystem;
+package CheckNwcHealth::Fortinet::Fortigate::Component::VpnSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -11,7 +11,7 @@ sub init {
     $self->get_snmp_objects('FORTINET-FORTIGATE-MIB', (qw(
         fgVpnTunnelUpCount)));
     $self->get_snmp_tables('FORTINET-FORTIGATE-MIB', [
-        ['tunnels', 'fgVpnTunTable', 'CheckNwcHealth::Fortigate::Component::VpnSubsystem::Tunnel', sub { my ($o) = @_; $o->filter_name($o->{fgVpnTunEntRemGwyIp}) } ],
+        ['tunnels', 'fgVpnTunTable', 'CheckNwcHealth::Fortinet::Fortigate::Component::VpnSubsystem::Tunnel', sub { my ($o) = @_; $o->filter_name($o->{fgVpnTunEntRemGwyIp}) } ],
     ]);
   }
 }
@@ -36,7 +36,7 @@ sub check {
   }
 }
 
-package CheckNwcHealth::Fortigate::Component::VpnSubsystem::Tunnel;
+package CheckNwcHealth::Fortinet::Fortigate::Component::VpnSubsystem::Tunnel;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 

@@ -1,4 +1,4 @@
-package CheckNwcHealth::Fortigate::Component::DiskSubsystem;
+package CheckNwcHealth::Fortinet::Fortigate::Component::DiskSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 

@@ -1,4 +1,4 @@
-package CheckNwcHealth::Fortigate::Component::HaSubsystem;
+package CheckNwcHealth::Fortinet::Fortigate::Component::HaSubsystem;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::Item);
 use strict;
 
@@ -12,7 +12,7 @@ sub init {
       fgHaGroupName fgFcSwSerial fgFcSwName
   )));
   $self->get_snmp_tables('FORTINET-FORTIGATE-MIB', [
-      ['fgHaStatsTable', 'fgHaStatsTable', 'CheckNwcHealth::Fortigate::Component::HaSubsystem::SyncStatus'],
+      ['fgHaStatsTable', 'fgHaStatsTable', 'CheckNwcHealth::Fortinet::Fortigate::Component::HaSubsystem::SyncStatus'],
       ['fgVdTable', 'fgVdTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
   ]);
   if (! $self->opts->role()) {
@@ -61,7 +61,7 @@ sub check {
 }
 
 
-package CheckNwcHealth::Fortigate::Component::HaSubsystem::SyncStatus;
+package CheckNwcHealth::Fortinet::Fortigate::Component::HaSubsystem::SyncStatus;
 our @ISA = qw(Monitoring::GLPlugin::SNMP::TableItem);
 use strict;
 

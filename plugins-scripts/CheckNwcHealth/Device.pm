@@ -178,10 +178,12 @@ sub classify {
         $self->rebless('CheckNwcHealth::UCDMIB');
       } elsif ($self->{productname} =~ /Linux Stingray/i) {
         $self->rebless('CheckNwcHealth::HOSTRESOURCESMIB');
-      } elsif ($self->{productname} =~ /Fortinet|Fortigate/i) {
-        $self->rebless('CheckNwcHealth::Fortigate');
+      } elsif ($self->{productname} =~ /Fortinet|Fortimail|Fortigate/i) {
+        $self->rebless('CheckNwcHealth::Fortinet');
       } elsif ($self->implements_mib('FORTINET-FORTIGATE-MIB')) {
-        $self->rebless('CheckNwcHealth::Fortigate');
+        $self->rebless('CheckNwcHealth::Fortinet');
+      } elsif ($self->implements_mib('FORTINET-FORTIMAIL-MIB')) {
+        $self->rebless('CheckNwcHealth::Fortinet');
       } elsif ($self->implements_mib('ALCATEL-IND1-BASE-MIB')) {
         $self->rebless('CheckNwcHealth::Alcatel');
       } elsif ($self->implements_mib('ONEACCESS-SYS-MIB')) {
