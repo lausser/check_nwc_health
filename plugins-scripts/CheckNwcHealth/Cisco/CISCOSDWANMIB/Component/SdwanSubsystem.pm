@@ -222,16 +222,21 @@ sub check {
           $num_up_connections_vmanage++ if $state eq "up";
         }
         if ($type eq "vsmart") {
-          $num_connections_vsmart->{$color} = 1 if not
+          $num_connections_vsmart->{$color} = 0 if not
               exists $num_connections_vsmart->{$color};
-          if (not exists $num_up_connections_vsmart->{$color}) {
-            $num_up_connections_vsmart->{$color} = 1 if $state eq "up";
-            $num_up_connections_vsmart->{$color} = 0 if $state ne "up";
-          } else {
-            $num_up_connections_vsmart->{$color}++ if $state eq "up";
-          }
+          $num_up_connections_vsmart->{$color} = 0 if not
+              exists $num_up_connections_vsmart->{$color};
+          $num_connections_vsmart->{$color}++;
+          $num_up_connections_vsmart->{$color}++ if $state eq "up";
         }
       }
+      # VMANAGE steht 1x in der Zentrale, macht Softwareupdates, seltene Sachen
+      #  kann schon mal weg sein, sollte aber nicht.
+      # VSMART steht 2x in der Zentrale. Von hier aus werden die Router im SDWAN
+      #  konfigmaessig aktualisiert, d.h. alle Netzweraenderungen, Rerouting, Failover..
+      #  werden von hier aus gesteuert. Ohne Verbindung von VSMART zu einem Router sind
+      #  keine Aenderungen im Netzwerk (Software-Defined) mehr moeglich. Der Router
+      #  routet dann wie ein bloeder Router.
       if ($self->mode eq "device::sdwan::control::connections") {
         # SDWAN Controller-Connect Status:
         # Mindestens eine controlConnectionsState ist down => Warning
