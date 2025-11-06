@@ -209,6 +209,8 @@ sub classify {
         $self->rebless('CheckNwcHealth::Barracuda');
       } elsif ($self->implements_mib('VORMETRIC-MIB')) {
         $self->rebless('CheckNwcHealth::Vormetric');
+      } elsif ($self->implements_mib('AC-SYSTEM-MIB')) {
+        $self->rebless('CheckNwcHealth::Audiocodes');
       } elsif ($self->implements_mib('ARUBAWIRED-CHASSIS-MIB')) {
         $self->rebless('CheckNwcHealth::HP::Aruba');
       } elsif ($self->implements_mib('DEVICE-MIB') and $self->{productname} =~ /Versa Appliance/) {

@@ -10,6 +10,11 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACALARMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACFAULTTC.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACKPIMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACSYSTEMMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACTYPESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ADSLLINEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ADONISDNSMIBMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/AIRESPACESWITCHINGMIB.pm \
@@ -605,6 +610,17 @@ EXTRA_MODULES=\
   CheckNwcHealth/Dell/OS10/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Dell/OS10/Component/BgpSubsystem.pm \
   CheckNwcHealth/Dell/OS10.pm \
+  CheckNwcHealth/Audiocodes/Component/DiskSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/MemSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/CpuSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/TemperatureSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/AlarmSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/PowersupplySubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/FanSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/FruSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/HaSubsystem.pm \
+  CheckNwcHealth/Audiocodes.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed
