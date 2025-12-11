@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  if ($self->{productname} =~ /(5530|6490|7390|7412|7490|7530|7560|7580|7590)/) {
+  if ($self->{productname} =~ /^fritz.*[4-7]+/i) {
     $self->rebless('CheckNwcHealth::UPNP::AVM::FritzBox7390');
   } else {
     $self->no_such_model();
