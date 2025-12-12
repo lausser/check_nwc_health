@@ -1122,6 +1122,9 @@ sub check {
   if ($self->{ifAlias} && $self->{ifAlias} ne $self->{ifDescr}) {
     push(@details, "alias ".$self->{ifAlias});
   }
+  if ($self->{ifName} && $self->{ifName} ne $self->{ifDescr}) {
+    push(@details, "name ".$self->{ifName});
+  }
   if ($self->{ifAddresses}) {
     push(@details, "addresses ".$self->{ifAddresses});
   }
