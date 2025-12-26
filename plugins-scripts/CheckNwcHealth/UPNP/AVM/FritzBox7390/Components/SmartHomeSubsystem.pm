@@ -152,6 +152,7 @@ sub finish {
   $self->{temperature} = ($self->{functionbitmask} & 0b000100000000) ? 1 : 0;
   $self->{schaltsteck} = ($self->{functionbitmask} & 0b001000000000) ? 1 : 0;
   $self->{dectrepeater} = ($self->{functionbitmask} & 0b010000000000) ? 1 : 0;
+  $self->{humidity} = ($self->{functionbitmask} & 0b100000000000000000000) ? 1 : 0;
   if ($self->mode =~ /smarthome::device::status/) {
     $self->{connected} = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=getswitchpresent&ain='.$self->{ain});
     $self->{switched} = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=getswitchstate&ain='.$self->{ain});
@@ -171,6 +172,13 @@ sub finish {
     eval {
       $self->{celsius} = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=gettemperature&ain='.$self->{ain});
       $self->{celsius} /= 10;
+    };
+  } elsif ($self->mode =~ /smarthome::device::humidity/ && $self->{humidity}) {
+    eval {
+      $self->{humidity_percent} = $self->http_get('/webservices/homeautoswitch.lua?switchcmd=getdeviceinfos&ain='.$self->{ain});
+      if ($self->{humidity_percent} =~ /rel_humidity>(\d+)</) {
+        $self->{humidity_percent} = $1;
+      }
     };
   }
 }
@@ -218,6 +226,18 @@ sub check {
     $self->add_perfdata(
         label => $label."_temperature",
         value => $self->{celsius},
+    );
+  } elsif ($self->mode =~ /smarthome::device::humidity/ && $self->{humidity}) {
+    $self->add_info(sprintf "device %s humidity is %.1f %%",
+        $self->{name}, $self->{humidity_percent});
+    $self->set_thresholds(metric => $label."_humidity",
+        warning => 60, critical => 70);
+    $self->add_message($self->check_thresholds(
+        metric => $label."_humidity", value => $self->{humidity_percent}));
+    $self->add_perfdata(
+        label => $label."_humidity",
+        value => $self->{humidity_percent},
+        uom => '%',
     );
   }
 }
