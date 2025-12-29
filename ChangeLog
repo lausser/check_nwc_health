@@ -1,3 +1,7 @@
+* 2025-12-29 12.10.1
+  PR #363/sni add mode smart-home-device-humidity for humidity sensors over fritzbox
+  PR #360/arnotron Improved Return Information of interface check - include ifName
+  PR #361/c-kr Broaden regex to match more Ivanti product names
 * 2025-11-04 12.10
   add Audiocodes
 * 2025-10-24 12.9.1
