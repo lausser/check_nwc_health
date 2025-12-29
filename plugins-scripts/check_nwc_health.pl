@@ -624,6 +624,12 @@ sub run_plugin {
       alias => undef,
       help => 'Show the temperature measured by a Fritz! compatible device',
   );
+  $plugin->add_mode(
+      internal => 'device::smarthome::device::humidity',
+      spec => 'smart-home-device-humidity',
+      alias => undef,
+      help => 'Show the humidity measured by a Fritz! compatible device',
+  );
   $plugin->add_default_modes();
   $plugin->add_snmp_modes();
   $plugin->add_snmp_args();
