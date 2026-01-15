@@ -1,3 +1,6 @@
+* 2026-01-15 12.10.2
+  fix issue #351 "Mode count-connections is not working anymore for firepower-devices since 12.5"
+  fix issue #356 "Mode "vpn-status" does not work anymore after latest cisco bugfix"
 * 2025-12-29 12.10.1
   PR #363/sni add mode smart-home-device-humidity for humidity sensors over fritzbox
   PR #360/arnotron Improved Return Information of interface check - include ifName
