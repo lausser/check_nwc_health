@@ -26,7 +26,12 @@ sub init {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::IOS::Component::MemSubsystem");
   } elsif ($self->mode =~ /device::hsrp/) {
     $self->analyze_and_check_hsrp_subsystem("CheckNwcHealth::HSRP::Component::HSRPSubsystem");
+  } elsif ($self->mode =~ /device::connections/) {
+    # neu fuer --count-connections, das ist korrekt
+    $self->analyze_and_check_connection_subsystem("CheckNwcHealth::Cisco::IOS::Component::ConnectionSubsystem");
   } elsif ($self->mode =~ /device::users/) {
+    # alt, stammt wohl noch aus einer Zeit, als count-users und count-connections aliase waren
+    # hier sollte eigentlich eine fette Warning kommen, aber dann bricht wieder Panik aus
     $self->analyze_and_check_connection_subsystem("CheckNwcHealth::Cisco::IOS::Component::ConnectionSubsystem");
   } elsif ($self->mode =~ /device::config/) {
     $self->analyze_and_check_config_subsystem("CheckNwcHealth::Cisco::IOS::Component::ConfigSubsystem");

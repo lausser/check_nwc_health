@@ -22,6 +22,8 @@ sub init {
     # aussagekraeftiger, auch wenn kuenftig so Heap-Zeug gewhitelistet
     # werden muss.
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Cisco::IOS::Component::MemSubsystem");
+  } elsif ($self->mode =~ /device::connections/) {
+    $self->analyze_and_check_connection_subsystem("CheckNwcHealth::Cisco::IOS::Component::ConnectionSubsystem");
   } else {
     $self->no_such_mode();
   }
