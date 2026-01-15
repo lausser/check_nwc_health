@@ -6,6 +6,7 @@ use strict;
 # die Tests mit Ihrer angepassten Version waren 100% erfolgreich.
 #
 # -> read-only. Ich lange hier nichts mehr an, garantiert nicht.
+# schoen waer's gewesen....
 #
 sub init {
   my ($self) = @_;
@@ -182,6 +183,8 @@ use strict;
 sub finish {
   my ($self) = @_;
 #printf "finish cikeTunnel\n";
+  $self->{cikeTunLocalAddrOriginal} = $self->{cikeTunLocalAddr};
+  $self->{cikeTunRemoteAddrOriginal} = $self->{cikeTunRemoteAddr};
   $self->{cikeTunLocalAddr} = $self->unhex_ip($self->{cikeTunLocalAddr});
   $self->{cikeTunRemoteAddr} = $self->unhex_ip($self->{cikeTunRemoteAddr});
 }
@@ -239,13 +242,19 @@ sub finish {
     # Verschieben wir den Fehlerzeitpunkt weit in die Vergangenheit.
     $self->{cikeFailTimeAgo} = $self->ago_sysuptime(0);
   }
+  $self->{cikeFailLocalAddrOriginal} = $self->{cikeFailLocalAddr};
   if ($self->{cikeFailLocalAddr}) {
-    $self->unhex_ip($self->{cikeFailLocalAddr});
+    $self->{cikeFailLocalAddr} = $self->unhex_ip($self->{cikeFailLocalAddr});
+  } elsif ($self->{cikeFailLocalValue} and $self->{cikeFailLocalValue} =~ /^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*$/) {
+    $self->{cikeFailLocalAddr} = $self->{cikeFailLocalValue};
   } else {
     $self->{cikeFailLocalAddr} = "unknown";
   }
+  $self->{cikeFailRemoteAddrOriginal} = $self->{cikeFailRemoteAddr};
   if ($self->{cikeFailRemoteAddr}) {
-    $self->unhex_ip($self->{cikeFailRemoteAddr});
+    $self->{cikeFailRemoteAddr} = $self->unhex_ip($self->{cikeFailRemoteAddr});
+  } elsif ($self->{cikeFailRemoteValue} and $self->{cikeFailRemoteValue} =~ /^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*$/) {
+    $self->{cikeFailRemoteAddr} = $self->{cikeFailRemoteValue};
   } else {
     $self->{cikeFailRemoteAddr} = "unknown";
   }
