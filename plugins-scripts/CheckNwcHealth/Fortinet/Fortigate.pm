@@ -14,6 +14,8 @@ sub init {
     $self->analyze_and_check_mem_subsystem("CheckNwcHealth::Fortinet::Fortigate::Component::HaSubsystem");
   } elsif ($self->mode =~ /device::vpn::/) {
     $self->analyze_and_check_config_subsystem("CheckNwcHealth::Fortinet::Fortigate::Component::VpnSubsystem");
+  } elsif ($self->mode =~ /device::vrrp/) {
+    $self->analyze_and_check_vrrp_subsystem("CheckNwcHealth::Fortinet::Fortigate::Component::VrrpSubsystem");
   } else {
     $self->no_such_mode();
   }

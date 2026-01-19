@@ -365,6 +365,7 @@ EXTRA_MODULES=\
   CheckNwcHealth/Fortinet/Fortigate/Component/MemSubsystem.pm \
   CheckNwcHealth/Fortinet/Fortigate/Component/CpuSubsystem.pm \
   CheckNwcHealth/Fortinet/Fortigate/Component/VpnSubsystem.pm \
+  CheckNwcHealth/Fortinet/Fortigate/Component/VrrpSubsystem.pm \
   CheckNwcHealth/Fortinet/Fortigate/Component/EnvironmentalSubsystem.pm \
   CheckNwcHealth/Fortinet/Fortigate/Component/SensorSubsystem.pm \
   CheckNwcHealth/Fortinet/Fortigate.pm \

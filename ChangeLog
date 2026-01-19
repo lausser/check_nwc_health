@@ -1,3 +1,5 @@
+* 2026-01-19 12.11
+  add vrrp modes (list and state) for Fortigate
 * 2026-01-15 12.10.2
   fix issue #351 "Mode count-connections is not working anymore for firepower-devices since 12.5"
   fix issue #356 "Mode "vpn-status" does not work anymore after latest cisco bugfix"
