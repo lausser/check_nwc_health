@@ -589,6 +589,36 @@ sub run_plugin {
       help => 'Check the number of registered/unregistered/rejected phones',
   );
   $plugin->add_mode(
+      internal => 'device::sbc::license',
+      spec => 'sbc-license-usage',
+      alias => undef,
+      help => 'Check SBC license utilization (signaling, media, transcoding, WebRTC, SIP recording)',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::media',
+      spec => 'sbc-media-quality',
+      alias => undef,
+      help => 'Check SBC media quality (MOS score, packet loss, jitter, delay)',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::dsp',
+      spec => 'sbc-dsp-resources',
+      alias => undef,
+      help => 'Check SBC DSP resource utilization and transcoding failures',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::call',
+      spec => 'sbc-call-failures',
+      alias => undef,
+      help => 'Check SBC call failures (no resources, admission failed, media broken, etc.)',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::cluster',
+      spec => 'sbc-cluster-resources',
+      alias => undef,
+      help => 'Check SBC cluster resource utilization (clustered deployments only)',
+  );
+  $plugin->add_mode(
       internal => 'device::arp::list',
       spec => 'list-arp-cache',
       alias => undef,

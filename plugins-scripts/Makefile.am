@@ -621,6 +621,11 @@ EXTRA_MODULES=\
   CheckNwcHealth/Audiocodes/Component/FanSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/FruSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/HaSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/SbcLicenseSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/SbcMediaSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/SbcDspSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/SbcCallSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/SbcClusterSubsystem.pm \
   CheckNwcHealth/Audiocodes.pm \
   CheckNwcHealth/Device.pm
 
