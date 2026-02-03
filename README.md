@@ -399,9 +399,72 @@ Examples
     interface bond1 usage is in:0.02% (1953.00Bits/s) out:0.01% (816.03Bits/s)
     interface sit0 usage is in:0.00% (0.00Bits/s) out:0.00% (0.00Bits/s) (down) | 'lo_usage_in'=0.25%;80;90;0;100 'lo_usage_out'=0.25%;80;90;0;100 'lo_traffic_in'=24796.45;8000000;9000000;0;10000000 'lo_traffic_out'=24796.45;8000000;9000000;0;10000000 'eth0_usage_in'=0.00%;80;90;0;100 'eth0_usage_out'=0.00%;80;90;0;100 'eth0_traffic_in'=849.78;800000000;900000000;0;1000000000 'eth0_traffic_out'=349.95;800000000;900000000;0;1000000000 'eth1_usage_in'=0.00%;80;90;0;100 'eth1_usage_out'=0.00%;80;90;0;100 'eth1_traffic_in'=1103.22;800000000;900000000;0;1000000000 'eth1_traffic_out'=466.08;800000000;900000000;0;1000000000 'eth2_usage_in'=0%;80;90;0;100 'eth2_usage_out'=0%;80;90;0;100 'eth2_traffic_in'=0;;;0;0 'eth2_traffic_out'=0;;;0;0 'eth3_usage_in'=0%;80;90;0;100 'eth3_usage_out'=0%;80;90;0;100 'eth3_traffic_in'=0;;;0;0 'eth3_traffic_out'=0;;;0;0 'bond1_usage_in'=0.02%;80;90;0;100 'bond1_usage_out'=0.01%;80;90;0;100 'bond1_traffic_in'=1953.00;8000000;9000000;0;10000000 'bond1_traffic_out'=816.03;8000000;9000000;0;10000000 'sit0_usage_in'=0%;80;90;0;100 'sit0_usage_out'=0%;80;90;0;100 'sit0_traffic_in'=0;;;0;0 'sit0_traffic_out'=0;;;0;0
     
+### SNMPv3 Community String Format
+
+For SNMPv3, the `--community` parameter supports a shorthand format that combines all authentication parameters in a single string:
+
+```
+snmpv3<sep>authproto<sep>authpass<sep>privproto<sep>privpass<sep>username[<sep>contextengineid][<sep>contextname]
+```
+
+Where `<sep>` is any separator character (typically comma `,`).
+
+**Field Order:**
+1. `authproto` - Authentication protocol: `sha`, `md5`, `sha224`, `sha256`, `sha384`, or `sha512`
+2. `authpass` - Authentication password
+3. `privproto` - Privacy protocol: `aes`, `aes128`, `aes192`, `aes256`, `des`, or `3des`
+4. `privpass` - Privacy password
+5. `username` - SNMPv3 username
+6. `contextengineid` - Context engine ID (optional, hex string)
+7. `contextname` - Context name (optional, string)
+
+**Examples:**
+
+```bash
+# Basic SNMPv3 (no context)
+--community 'snmpv3,sha,mypassword,aes,mypassword,admin'
+
+# With contextname only (use double comma to skip contextengineid)
+--community 'snmpv3,sha,mypassword,aes,mypassword,admin,,production'
+
+# With both contextengineid and contextname
+--community 'snmpv3,sha,mypassword,aes,mypassword,admin,0x8000000001020304,production'
+
+# Using different separator (useful if passwords contain commas)
+--community 'snmpv3|sha|my,password|aes|my,password|admin'
+```
+
+**Important Notes:**
+- Fields 6 and 7 are optional but must maintain their order
+- To skip `contextengineid` and provide only `contextname`, use a double separator (`,,`)
+- Alternatively, use individual parameters: `--username`, `--authprotocol`, `--authpassword`, `--privprotocol`, `--privpassword`, `--contextengineid`, `--contextname`
+
+### Environment Variables (you are not supposed to read this, no!)
+
+The following environment variables control plugin behavior:
+
+* **SNMP_XS_DISABLE** - Skip SNMP module backend, use Net::SNMP even if SNMP is installed
+  Set to any truthy value (e.g., `1`, `true`) to force the use of Net::SNMP backend.
+  Useful for:
+  - Testing and backend comparison
+  - Validation during migration from Net::SNMP to SNMP module
+  - Fallback if SNMP module has issues
+  - Performance benchmarking between backends
+
+  Example:
+  ```bash
+  export SNMP_XS_DISABLE=1
+  ./check_nwc_health --hostname switch.example.com --community public --mode uptime
+  ```
+
+* **SNMP_XS_DEBUG** - Enable detailed debug output from SNMP backend
+  Shows SNMP module operations when using the XS backend (requires verbose mode).
+
+* **VERBOSE** - Enable verbose output
+  Set to `1` to see detailed plugin operation information.
 
 Homepage
 ========
 
 The full documentation can be found here:
-[check_nwc_health @ ConSol Labs](http://labs.consol.de/nagios/check_nwc_health)
+[check_nwc_health @ ConSol Labs](http://omd.consol.de/docs/plugins/check_nwc_health)
