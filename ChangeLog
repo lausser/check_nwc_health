@@ -1,3 +1,5 @@
+* 2026-02-23 12.12.1
+output interface speed with mode interface-status
 * 2026-02-23 12.12
 add mode interface-savi-trust-status
 * 2026-02-03 12.11.1

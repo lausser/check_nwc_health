@@ -25,7 +25,7 @@ sub init {
 
   my @iftable_traffic_columns = qw(ifInOctets ifOutOctets ifSpeed);
   my @iftable_traffic_hc_columns = qw(ifHCInOctets ifHCOutOctets ifHighSpeed);
-  my @iftable_status_columns = qw(ifOperStatus ifAdminStatus);
+  my @iftable_status_columns = qw(ifOperStatus ifAdminStatus ifHighSpeed);
   my @iftable_packets_columns = qw(ifInUcastPkts ifOutUcastPkts
       ifInMulticastPkts ifOutMulticastPkts
       ifInBroadcastPkts ifOutBroadcastPkts);
@@ -1363,10 +1363,6 @@ sub check {
         min => 0,
         max => $self->{maxOutputRate},
     );
-    $self->add_perfdata(
-        label => 'ifspeed_mbps',
-        value => $self->{ifHighSpeed},
-    ) if defined $self->{ifHighSpeed};
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->add_info(sprintf 'interface %s errors in:%.2f%% out:%.2f%% ',
         $full_descr,
@@ -1530,9 +1526,10 @@ sub check {
 #    if ($self->{ifOperStatus} ne 'up') {
 #      }
 #    } 
-    $self->add_info(sprintf '%s is %s/%s',
+    my $speed_info = defined $self->{ifHighSpeed} ? sprintf(' (%.0f Mbps)', $self->{ifHighSpeed}) : '';
+    $self->add_info(sprintf '%s is %s/%s%s',
         $full_descr,
-        $self->{ifOperStatus}, $self->{ifAdminStatus});
+        $self->{ifOperStatus}, $self->{ifAdminStatus}, $speed_info);
     $self->add_ok();
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
       $self->add_critical(
@@ -1544,6 +1541,10 @@ sub check {
           defined $self->opts->mitigation() ? $self->opts->mitigation() : 2,
           sprintf '%s is admin down', $full_descr);
     }
+    $self->add_perfdata(
+        label => 'ifspeed_mbps',
+        value => $self->{ifHighSpeed},
+    ) if defined $self->{ifHighSpeed};
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});
