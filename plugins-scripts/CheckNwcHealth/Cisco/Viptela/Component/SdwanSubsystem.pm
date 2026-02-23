@@ -10,6 +10,11 @@ sub init {
     $self->get_snmp_tables('VIPTELA-SECURITY', [
         ["ctrlsummaries", "controlSummaryTable", "CheckNwcHealth::Cisco::Viptela::Component::SdwanSubsystem::ControlSummary", sub { my ($o) = @_;; return $self->filter_name($o->{controlSummaryInstance}); }],
     ]);
+  } elsif ($self->mode eq "device::sdwan::control::connections" or
+      $self->mode eq "device::sdwan::management::connections") {
+    $self->get_snmp_tables("VIPTELA-SECURITY", [
+      ["ctlconns", "controlConnectionsTable", "CheckNwcHealth::Cisco::CISCOSDWANMIB::Component::SdwanSubsystem::ControlConnection", undef, ["controlConnectionsPeerType", "controlConnectionsSystemIp", "controlConnectionsLocalColor", "controlConnectionsState"]],
+    ]);
   } else {
     $self->no_such_mode();
   }
@@ -22,6 +27,76 @@ sub check {
       $self->add_unknown_mitigation("this device does not have controlSummary entries");
     } else {
       $self->SUPER::check();
+    }
+  } elsif ($self->mode =~ /device::sdwan::(control|management)::connections/) {
+    if (! @{$self->{ctlconns}}) {
+      $self->add_unknown("did not find any control connections");
+    } else {
+      my $num_connections = 0;
+      my $num_up_connections = 0;
+      my $num_connections_vmanage = 0;
+      my $num_up_connections_vmanage = 0;
+      my $num_connections_vsmart = {};
+      my $num_up_connections_vsmart = {};
+      foreach my $connection (@{$self->{ctlconns}}) {
+        my $state = $connection->{controlConnectionsState};
+        my $color = $connection->{controlConnectionsLocalColor};
+        my $type = $connection->{controlConnectionsPeerType};
+        $num_connections++;
+        if ($state eq "up") {
+          $num_up_connections++;
+        }
+        if ($type eq "vmanage") {
+          $num_connections_vmanage++;
+          $num_up_connections_vmanage++ if $state eq "up";
+        }
+        if ($type eq "vsmart") {
+          $num_connections_vsmart->{$color} = 0 if not
+              exists $num_connections_vsmart->{$color};
+          $num_up_connections_vsmart->{$color} = 0 if not
+              exists $num_up_connections_vsmart->{$color};
+          $num_connections_vsmart->{$color}++;
+          $num_up_connections_vsmart->{$color}++ if $state eq "up";
+        }
+      }
+      # VMANAGE steht 1x in der Zentrale, macht Softwareupdates, seltene Sachen
+      #  kann schon mal weg sein, sollte aber nicht.
+      # VSMART steht 2x in der Zentrale. Von hier aus werden die Router im SDWAN
+      #  konfigmaessig aktualisiert, d.h. alle Netzweraenderungen, Rerouting, Failover..
+      #  werden von hier aus gesteuert. Ohne Verbindung von VSMART zu einem Router sind
+      #  keine Aenderungen im Netzwerk (Software-Defined) mehr moeglich. Der Router
+      #  routet dann wie ein bloeder Router.
+      if ($self->mode eq "device::sdwan::control::connections") {
+        # SDWAN Controller-Connect Status:
+        # Mindestens eine controlConnectionsState ist down => Warning
+        # Zwei controlConnectionsState desselben
+        # controlConnectionsLocalColor (MPLS, PUBLIC-INTERNET oder
+        #   BIZ-INTERNET) und vom controlConnectionsPeerType = VSMART
+        #   sind down => Critical
+        if ($num_connections > $num_up_connections) {
+          $self->add_warning(sprintf "only %d of %d control connections are up", $num_up_connections, $num_connections);
+        } else {
+          $self->add_ok(sprintf "%d of %d control connections are up", $num_up_connections, $num_connections);
+        }
+        foreach my $color (keys %{$num_connections_vsmart}) {
+          if ($num_connections_vsmart->{$color} - $num_up_connections_vsmart->{$color} >= 2) {
+            $self->add_critical(sprintf "only %d of %d %s/vsmart control connections are up", $num_up_connections_vsmart->{$color}, $num_connections_vsmart->{$color}, $color);
+          }
+        }
+      } elsif ($self->mode eq "device::sdwan::management::connections") {
+        # SDWAN MGMT-Connect status:
+        # Alle controlConnectionsState vom
+        #   controlConnectionsPeerType = VMANAGE sind down => Critical
+        if ($num_connections_vmanage) {
+          if ($num_up_connections_vmanage) {
+            $self->add_ok(sprintf "%d of %d vmanage control connections are up", $num_up_connections_vmanage, $num_connections_vmanage);
+          } else {
+            $self->add_critical("none of the vmanage control connections is up");
+          }
+        } else {
+          $self->add_unknown("no control connections of type vmanage were found");
+        }
+      }
     }
   } else {
     $self->SUPER::check();
