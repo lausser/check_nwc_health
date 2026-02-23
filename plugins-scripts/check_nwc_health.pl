@@ -84,6 +84,12 @@ sub run_plugin {
       help => 'Check if interfaces operate in duplex mode',
   );
   $plugin->add_mode(
+      internal => 'device::interfaces::savi::trust-status',
+      spec => 'interface-savi-trust-status',
+      alias => undef,
+      help => 'Check SAVI trust status of interfaces',
+  );
+  $plugin->add_mode(
       internal => 'device::interfacex::errdisabled',
       # interfacesx because it should not be propagated to a parent class
       spec => 'interface-errdisabled',
@@ -695,7 +701,9 @@ sub run_plugin {
   $plugin->add_arg(
       spec => 'role=s',
       help => "--role
-     The role of this device in a hsrp group (active/standby/listen)",
+     The role of this device in a hsrp group (active/standby/listen)
+     For interface-savi-trust-status: expected trust status list
+     (no-trust, dhcp-trust, ra-trust, dhcp-ra-trust)",
       required => 0,
   );
   $plugin->add_arg(

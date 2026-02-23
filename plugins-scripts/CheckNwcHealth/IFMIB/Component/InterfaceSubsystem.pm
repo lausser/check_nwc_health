@@ -4,6 +4,13 @@ use strict;
 use JSON::XS;
 use File::Slurp qw(read_file);
 
+my %savi_trust_map = (
+    '1' => 'no-trust',
+    '2' => 'dhcp-trust',
+    '3' => 'ra-trust',
+    '4' => 'dhcp-ra-trust',
+);
+
 sub init {
   my ($self) = @_;
   $self->{interfaces} = [];
@@ -14,6 +21,7 @@ sub init {
   my @ethertablehc_columns = qw();
   my @rmontable_columns = qw();
   my @ipaddress_columns = qw();
+  my @savitable_columns = qw();
 
   my @iftable_traffic_columns = qw(ifInOctets ifOutOctets ifSpeed);
   my @iftable_traffic_hc_columns = qw(ifHCInOctets ifHCOutOctets ifHighSpeed);
@@ -138,6 +146,8 @@ sub init {
     push(@iftable_columns, qw(
         ifLastChange
     ));
+  } elsif ($self->mode =~ /device::interfaces::savi::trust-status/) {
+    push(@savitable_columns, qw(saviObjectsIfTrustStatus));
   } else {
     @iftable_columns = ();
   }
@@ -214,6 +224,38 @@ sub init {
         my $interface = $interface_class->new(%{$_});
         $interface->{columns} = [@iftable_columns];
         push(@{$self->{interfaces}}, $interface);
+      }
+      if ($self->mode =~ /device::interfaces::savi::trust-status/) {
+        # Purpose: Load SAVI trust status per interface and store expectations.
+        my %allowed = map { $_ => 1 } values %savi_trust_map;
+        $allowed{missing} = 1;
+        my @expected = ();
+        if (defined $self->opts->role && $self->opts->role ne '') {
+          @expected = map { lc $_ } split(/\s*,\s*/, $self->opts->role);
+          my @invalid = grep { $_ ne '' && ! exists $allowed{$_} } @expected;
+          if (@invalid) {
+            $self->add_unknown(sprintf 'invalid trust status in --role: %s', join(', ', @invalid));
+            return;
+          }
+          @expected = grep { $_ ne '' } @expected;
+        }
+        my %selected = map { $_ => 1 } grep { defined $_ } map { $_->[0] } (@indices ? @indices : @all_indices);
+        $self->{saviifs} = [];
+        if ($self->implements_mib('SAVI-MIB')) {
+          foreach ($self->get_snmp_table_objects(
+              'SAVI-MIB', 'saviObjectsIfTable', [], \@savitable_columns)) {
+            # SAVI index is (ipVersion, ifIndex); use ifIndex to match.
+            my $if_index = $_->{saviObjectsIfIfIndex};
+            $if_index = $_->{indices}->[-1] if ! defined $if_index && $_->{indices};
+            next if ! defined $if_index || ! exists $selected{$if_index};
+            $_->{flat_indices} = $if_index;
+            push(@{$self->{saviifs}}, $_);
+          }
+          $self->merge_tables('interfaces', 'saviifs');
+        }
+        foreach my $interface (@{$self->{interfaces}}) {
+          $interface->{savi_expected_trust} = \@expected;
+        }
       }
       # kostenpflichtiges feature # if ($self->mode =~ /device::interfaces::(duplex|etherstats|complete)/) {
       if ($self->mode =~ /device::interfaces::(duplex|etherstats)/) {
@@ -825,6 +867,13 @@ use Digest::MD5 qw(md5_hex);
 
 sub finish {
   my ($self) = @_;
+  # Purpose: Expose SAVI table index as a symbolic attribute.
+  if ($self->mode =~ /device::interfaces::savi::trust-status/ &&
+      exists $self->{indices} && ref($self->{indices}) eq 'ARRAY' &&
+      scalar(@{$self->{indices}}) >= 2) {
+    $self->{saviObjectsIfIfIndex} = $self->{indices}->[-1]
+        if ! exists $self->{saviObjectsIfIfIndex};
+  }
   foreach my $key (keys %{$self}) {
     next if $key !~ /^if/;
     $self->{$key} = 0 if ! defined $self->{$key};
@@ -1314,6 +1363,10 @@ sub check {
         min => 0,
         max => $self->{maxOutputRate},
     );
+    $self->add_perfdata(
+        label => 'ifspeed_mbps',
+        value => $self->{ifHighSpeed},
+    ) if defined $self->{ifHighSpeed};
   } elsif ($self->mode =~ /device::interfaces::errors/) {
     $self->add_info(sprintf 'interface %s errors in:%.2f%% out:%.2f%% ',
         $full_descr,
@@ -1551,6 +1604,42 @@ sub check {
         label => $self->{ifDescr}."_duration",
         value => $self->{ifDurationMinutes},
     );
+  } elsif ($self->mode =~ /device::interfaces::savi::trust-status/) {
+    # Purpose: Evaluate SAVI trust status per interface.
+    my $trust = 'missing';
+    if (exists $self->{saviObjectsIfTrustStatus}) {
+      my $raw = $self->{saviObjectsIfTrustStatus};
+      if (defined $raw && $raw ne '' && $raw !~ /noSuch/) {
+        if ($raw =~ /^\d+$/) {
+          $raw = $raw + 0;
+          $trust = $savi_trust_map{$raw} ? $savi_trust_map{$raw} : 'missing';
+        } else {
+          my $symbol = lc $raw;
+          $trust = (grep { $_ eq $symbol } values %savi_trust_map) ? $symbol : 'missing';
+        }
+      }
+    }
+    my $expected = $self->{savi_expected_trust} || [];
+    if (@{$expected}) {
+      if (grep { $_ eq $trust } @{$expected}) {
+        $self->add_ok(sprintf '%s savi trust status is %s', $full_descr, $trust);
+      } else {
+        $self->add_critical(sprintf '%s expected %s but found %s',
+            $full_descr, join(',', @{$expected}), $trust);
+      }
+    } else {
+      if ($trust eq 'missing') {
+        $self->add_info(sprintf 'interface %s savi trust status is missing', $full_descr);
+        $self->add_unknown();
+        return;
+      }
+      $self->add_info(sprintf 'interface %s savi trust status is %s', $full_descr, $trust);
+      if ($trust eq 'no-trust') {
+        $self->add_ok();
+      } else {
+        $self->add_critical(sprintf '%s trust status is %s', $full_descr, $trust);
+      }
+    }
   }
 }
 
@@ -1774,4 +1863,3 @@ sub finish {
       'INET-ADDRESS-MIB', 'InetAddressMaker',
       $self->{ipAddressAddrType}, @tmp_indices);
 }
-
