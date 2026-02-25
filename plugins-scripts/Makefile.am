@@ -7,11 +7,13 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/Item.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/TableItem.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/Backend/XS.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/MIB2MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SNMPFRAMEWORKMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACALARMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACFAULTTC.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACGATEWAY.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACKPIMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACSYSTEMMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ACTYPESMIB.pm \
@@ -625,8 +627,9 @@ EXTRA_MODULES=\
   CheckNwcHealth/Audiocodes/Component/SbcLicenseSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/SbcMediaSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/SbcDspSubsystem.pm \
-  CheckNwcHealth/Audiocodes/Component/SbcCallSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/SbcClusterSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/IpGroupSubsystem.pm \
+  CheckNwcHealth/Audiocodes/Component/ConfigSubsystem.pm \
   CheckNwcHealth/Audiocodes.pm \
   CheckNwcHealth/Device.pm
 

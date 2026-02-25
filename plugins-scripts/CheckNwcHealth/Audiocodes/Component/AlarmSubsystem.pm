@@ -7,6 +7,11 @@ sub init {
   $self->get_snmp_tables('AC-ALARM-MIB', [
     ['alarms', 'acActiveAlarmTable', 'CheckNwcHealth::Audiocodes::Component::AlarmSubsystem::Alarm'],
   ]);
+  # filter out DNS/NTP alarms, those are handled by check-config mode
+  @{$self->{alarms}} = grep {
+    $_->{acActiveAlarmTextualDescription} !~ /DNS/i &&
+    $_->{acActiveAlarmTextualDescription} !~ /NTP/i
+  } @{$self->{alarms}};
 }
 
  sub check {

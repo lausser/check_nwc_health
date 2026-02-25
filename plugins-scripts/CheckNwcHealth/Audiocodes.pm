@@ -22,10 +22,12 @@ sub init {
     $self->analyze_and_check_sbc_subsystem("CheckNwcHealth::Audiocodes::Component::SbcMediaSubsystem");
   } elsif ($self->mode =~ /device::sbc::dsp/) {
     $self->analyze_and_check_sbc_subsystem("CheckNwcHealth::Audiocodes::Component::SbcDspSubsystem");
-  } elsif ($self->mode =~ /device::sbc::call/) {
-    $self->analyze_and_check_sbc_subsystem("CheckNwcHealth::Audiocodes::Component::SbcCallSubsystem");
   } elsif ($self->mode =~ /device::sbc::cluster/) {
     $self->analyze_and_check_sbc_subsystem("CheckNwcHealth::Audiocodes::Component::SbcClusterSubsystem");
+  } elsif ($self->mode =~ /device::sbc::ipgroup-/) {
+    $self->analyze_and_check_ipgroup_subsystem("CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem");
+  } elsif ($self->mode =~ /device::config/) {
+    $self->analyze_and_check_config_subsystem("CheckNwcHealth::Audiocodes::Component::ConfigSubsystem");
   } else {
     $self->no_such_mode();
   }

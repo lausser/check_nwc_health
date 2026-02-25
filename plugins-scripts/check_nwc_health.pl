@@ -613,16 +613,28 @@ sub run_plugin {
       help => 'Check SBC DSP resource utilization and transcoding failures',
   );
   $plugin->add_mode(
-      internal => 'device::sbc::call',
-      spec => 'sbc-call-failures',
+      internal => 'device::sbc::ipgroup-failures',
+      spec => 'sbc-ipgroup-failures',
       alias => undef,
-      help => 'Check SBC call failures (no resources, admission failed, media broken, etc.)',
+      help => 'Check SBC call failure rates per IP Group (no resources, admission failed, media broken, media mismatch, abnormal)',
   );
   $plugin->add_mode(
       internal => 'device::sbc::cluster',
       spec => 'sbc-cluster-resources',
       alias => undef,
       help => 'Check SBC cluster resource utilization (clustered deployments only)',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::ipgroup-status',
+      spec => 'sbc-ipgroup-status',
+      alias => undef,
+      help => 'Check SBC IP Group status and active calls',
+  );
+  $plugin->add_mode(
+      internal => 'device::sbc::ipgroup-registrations',
+      spec => 'sbc-ipgroup-registrations',
+      alias => undef,
+      help => 'Check SBC IP Group SIP registration status per group',
   );
   $plugin->add_mode(
       internal => 'device::arp::list',
