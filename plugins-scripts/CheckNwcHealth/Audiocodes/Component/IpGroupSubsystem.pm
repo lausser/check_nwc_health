@@ -20,7 +20,7 @@ sub init {
   if ($self->mode =~ /device::sbc::ipgroup-status/) {
     # Get IP Group call stats (active calls)
     $self->get_snmp_tables('AC-KPI-MIB', [
-      ['ipgroup_call_stats', 'acKpiSbcCallStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupCallStats'],
+      ['ipgroup_call_stats', 'acKpiSbcCallStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupCallStats', sub { my ($o) = @_; $self->filter_name($self->ipgroup_label($o->{flat_indices}))}],
     ]);
     # Get active alarms for IP Group blocking detection
     $self->get_snmp_tables('AC-ALARM-MIB', [
@@ -29,12 +29,12 @@ sub init {
   } elsif ($self->mode =~ /device::sbc::ipgroup-failures/) {
     # Get IP Group call stats (failure counters)
     $self->get_snmp_tables('AC-KPI-MIB', [
-      ['ipgroup_call_stats', 'acKpiSbcCallStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupCallStats'],
+      ['ipgroup_call_stats', 'acKpiSbcCallStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupCallStats', sub { my ($o) = @_; $self->filter_name($self->ipgroup_label($o->{flat_indices}))}],
     ]);
   } elsif ($self->mode =~ /device::sbc::ipgroup-registrations/) {
     # Get IP Group registration stats
     $self->get_snmp_tables('AC-KPI-MIB', [
-      ['ipgroup_registration_stats', 'acKpiOtherStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupRegistrationStats'],
+      ['ipgroup_registration_stats', 'acKpiOtherStatsCurrentIpGroupTable', 'CheckNwcHealth::Audiocodes::Component::IpGroupSubsystem::IpGroupRegistrationStats', sub { my ($o) = @_; $self->filter_name($self->ipgroup_label($o->{flat_indices}))}],
     ]);
   }
 }
@@ -120,7 +120,20 @@ sub check_ipgroup_status {
   foreach my $desc (keys %alarm_descriptions) {
     if ($desc =~ /blocked/i || $desc =~ /no working proxy/i) {
       my $alarm = $alarm_descriptions{$desc};
-      $self->add_critical(sprintf 'IP Group blocked: %s', $alarm->{acActiveAlarmTextualDescription});
+      # When --name is set, only report alarms for matched IP Groups
+      my $alarm_text = $alarm->{acActiveAlarmTextualDescription} || '';
+      my $matched_group = undef;
+      foreach my $name (values %{$self->{ipgroup_names}}) {
+        if ($alarm_text =~ /\Q$name\E/i) {
+          $matched_group = $name;
+          last;
+        }
+      }
+      # If we identified the IP Group and it doesn't pass the filter, skip
+      if (defined $matched_group && !$self->filter_name($matched_group)) {
+        next;
+      }
+      $self->add_critical(sprintf 'IP Group blocked: %s', $alarm_text);
       $has_blocked = 1;
     }
   }
@@ -587,6 +600,32 @@ SBC is intact.  On the SBC side, check the IP Group's proxy set
 status and the SIP interface logs.
 
 =head2 Design Decisions
+
+=head3 Filtering IP Groups with --name
+
+All three C<sbc-ipgroup-*> modes support the standard C<--name> option
+to restrict output to specific IP Groups.  The filter is applied
+against the resolved IP Group name (e.g. I<IP-GP_TEAMS>), not the
+numeric SNMP index.
+
+  # Exact match (case-insensitive)
+  check_nwc_health --mode sbc-ipgroup-status --name IP-GP_TEAMS
+
+  # Regex match
+  check_nwc_health --mode sbc-ipgroup-status --name 'IP-GP_(TEAMS|WEBEX)' --regexp
+
+When C<--name> is not specified, all IP Groups are returned (unchanged
+default behaviour).
+
+The C<ipGroupTable> (name resolution table) is never filtered -- it is
+always fetched in full so that index-to-name resolution works for the
+filter itself.
+
+In B<sbc-ipgroup-status>, blocked-IP-Group alarms from the active alarm
+table are also filtered: if the alarm description contains a known
+IP Group name that does not match the C<--name> filter, the alarm is
+suppressed.  Alarms that cannot be attributed to a specific IP Group
+are always reported (conservative approach).
 
 =head3 Why are status and failures separate modes?
 
