@@ -14,7 +14,11 @@ sub init {
         cLHaPrimaryUnit cLHaNetworkFailOver cLHaPeerIpAddressType cLHaPeerIpAddress
         cLHaRedundancyIpAddressType cLHaRedundancyIpAddress
     ));
-    $self->mult_snmp_max_msg_size(4);
+    # keine Ahnung, wann und warum das eingeführt wurde. Im konkreten Fall führt es (Stand März '26) sogar
+    # zu Timeouts, während es mit Standardeinstellungen nur so durchpfeift.
+    # Also raus. Neuerdings nutzen wir eh das SNMP-Modul, das sollte automatisch die besten Einstellungen
+    # finden und so schnell sein wie snmpwalk.
+    # $self->mult_snmp_max_msg_size(4);
     $self->get_snmp_tables('CISCO-LWAPP-CDP-MIB', [
         ['cacheaps', 'clcCdpApCacheTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['clcCdpApCacheApName', 'clcCdpApCacheNeighName', 'clcCdpApCacheNeighInterface'] ],
     ]);

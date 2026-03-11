@@ -1506,31 +1506,32 @@ sub check {
     my $blevel = ($bin > $bout) ? $bin : ($bout > $bin) ? $bout : $bin;
     $self->add_message(($blevel > $ulevel) ? $blevel : $ulevel);
   } elsif ($self->mode =~ /device::interfaces::operstatus/) {
+    # eigentlich sollte hier "defined $self->{ifHighSpeed}" stehen, dann würde man diejenigen
+    # Interfaces sehen, die einen Wert von 0 haben.
+    # Das wäre durchaus interessant, denn 0 könnte eine Fehlkonfiguration bedeuten.
+    # Andererseits wäre denkbar, daß irgendwelche Bundles und virtuelle Interfaces und was
+    # es da alles an Zeugs gibt, gar nichts anderes als 0 anzeigen können.
+    # Beobachtungen aus dem echten Leben zeigen: es gibt z.b. Portchannels, die zeigen
+    # Werte von 100000, 40000, 25000 Mbps an, wunderbar! Aber das der Nachbarportchannel und
+    # die von einem Switch, der zwei Meter weiter steht, zeigen wiederum 0 Mbps.
+    # Also unvorhersehbar und man kann nicht genau sagen, was 0 jetzt wirklich bedeutet.
+    # Kann übrigens auch sein, wie in einem Fall beobachtet, daß in der ifXTable der ifAlias
+    # drinsteht und weiter *nix*. (Was das bedeutet, sage ich mal lieber nicht)
+    # Jetzt ist die Entscheidung: 0 anzeigen oder nicht.
+    # -> 0 kann interessant sein, um irgendwelche Fehlkonfigurationen aufzudecken.
+    # -> 0 kann dazu führen, daß Hinz und Kunz mir die Mailbox vollplärrt, weil da 0 steht.
+    # Das war einfach, es bleibt beim ''.
+    my $speed_info = $self->{ifHighSpeed} ? sprintf(' (%.0f Mbps)', $self->{ifHighSpeed}) : '';
+    $self->add_info(sprintf '%s is %s/%s%s',
+        $full_descr,
+        $self->{ifOperStatus}, $self->{ifAdminStatus}, $speed_info);
+    $self->add_ok();
     #rfc2863
     #(1)   if ifAdminStatus is not down and ifOperStatus is down then a
     #     fault condition is presumed to exist on the interface.
     #(2)   if ifAdminStatus is down, then ifOperStatus will normally also
     #     be down (or notPresent) i.e., there is not (necessarily) a
     #     fault condition on the interface.
-    # --warning onu,anu
-    # Admin: admindown,admin
-    # Admin: --warning 
-    #        --critical admindown
-    # !ad+od  ad+!(od*on)
-    # warn & warnbitfield
-#    if ($self->opts->critical) {
-#      if ($self->opts->critical =~ /^u/) {
-#      } elsif ($self->opts->critical =~ /^u/) {
-#      }
-#    }
-#    if ($self->{ifOperStatus} ne 'up') {
-#      }
-#    } 
-    my $speed_info = defined $self->{ifHighSpeed} ? sprintf(' (%.0f Mbps)', $self->{ifHighSpeed}) : '';
-    $self->add_info(sprintf '%s is %s/%s%s',
-        $full_descr,
-        $self->{ifOperStatus}, $self->{ifAdminStatus}, $speed_info);
-    $self->add_ok();
     if ($self->{ifOperStatus} eq 'down' && $self->{ifAdminStatus} ne 'down') {
       $self->add_critical(
           sprintf 'fault condition is presumed to exist on %s',
@@ -1542,9 +1543,9 @@ sub check {
           sprintf '%s is admin down', $full_descr);
     }
     $self->add_perfdata(
-        label => 'ifspeed_mbps',
+        label => $self->{ifDescr}.'_ifspeed_mbps',
         value => $self->{ifHighSpeed},
-    ) if defined $self->{ifHighSpeed};
+    ) if $self->{ifHighSpeed};
   } elsif ($self->mode =~ /device::interfaces::availability/) {
     $self->{ifStatusDuration} = 
         $self->human_timeticks($self->{ifStatusDuration});
