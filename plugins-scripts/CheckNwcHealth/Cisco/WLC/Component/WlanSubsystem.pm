@@ -34,6 +34,18 @@ sub init {
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
         ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'], 'bsnAPName' ],
     ]);
+    # If the search did not find the desired AP, this could mean that it is new and was not
+    # discovered yet. In this case we enforce a walk over the bsnAPTable and refresh the cache.
+    if ($self->opts->name && scalar(@{$self->{aps}}) == 0) {
+      $self->debug(sprintf "%s was not found (either in the cache or in the walk), rediscovering...",
+          $self->opts->name);
+      $self->clear_table_cache('AIRESPACE-WIRELESS-MIB', 'bsnAPTable');
+      $self->update_entry_cache(1, 'AIRESPACE-WIRELESS-MIB', 'bsnAPTable', 'bsnAPName');
+      $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
+          ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'], 'bsnAPName' ],
+      ]);
+      $self->debug("rewalked AIRESPACE-WIRELESS-MIB::bsnAPTable#bsnAPName");
+    }
     # Sub-tables bsnAPIfTable and bsnAPIfLoadParametersTable are indexed by
     # (bsnAPDot3MacAddress, bsnAPIfSlotId). When --name is used, derive
     # composite indices from filtered APs' MACs for targeted row fetching

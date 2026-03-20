@@ -1,3 +1,5 @@
+* 2026-03-20 12.12.2.4
+  rescan the accesspoints if a name was not immediately found
 * 2026-03-20 12.12.2.3
   improve queries to cisco wlc accesspoint-status use index cacheing
 * 2026-03-11 12.12.2.2
