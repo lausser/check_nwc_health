@@ -8,6 +8,11 @@ sub init {
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
         ['mobilestations', 'bsnMobileStationTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::MobileStation', sub { return $self->filter_name(shift->{bsnMobileStationSsid}) }, ['bsnMobileStationSsid', 'bsnMobileStationMacAddress'] ],
     ]);
+  } elsif ($self->mode =~ /device::wlan::aps::list/) {
+    # list mode only needs AP names, skip HA/CDP/sub-tables entirely
+    $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
+        ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPName'], 'bsnAPName' ],
+    ]);
   } else {
     $self->{name} = $self->get_snmp_object('MIB-2-MIB', 'sysName', 0);
     $self->get_snmp_objects('CISCO-LWAPP-HA-MIB', qw(
@@ -19,15 +24,44 @@ sub init {
     # Also raus. Neuerdings nutzen wir eh das SNMP-Modul, das sollte automatisch die besten Einstellungen
     # finden und so schnell sein wie snmpwalk.
     # $self->mult_snmp_max_msg_size(4);
+    # CDP neighbor table: cached by AP name for --name filtering benefit.
     $self->get_snmp_tables('CISCO-LWAPP-CDP-MIB', [
-        ['cacheaps', 'clcCdpApCacheTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['clcCdpApCacheApName', 'clcCdpApCacheNeighName', 'clcCdpApCacheNeighInterface'] ],
+        ['cacheaps', 'clcCdpApCacheTable', 'Monitoring::GLPlugin::SNMP::TableItem', undef, ['clcCdpApCacheApName', 'clcCdpApCacheNeighName', 'clcCdpApCacheNeighInterface'], 'clcCdpApCacheApName' ],
     ]);
+    # Fetch AP entries with entry cache for efficient --name filtering.
+    # bsnAPName is the cache key because users filter by AP name.
+    # Without --name, get_cache_indices() returns empty -> full table walk.
     $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
-        ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', sub { return $self->filter_name(shift->{bsnAPName}) }, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'] ],
-
-        ['ifs', 'bsnAPIfTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPIfSlotId'] ],
-        ['ifloads', 'bsnAPIfLoadParametersTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::IFLoad', undef, ['bsnAPIfLoadNumOfClients', 'bsnAPIfLoadTxUtilization', 'bsnAPIfLoadRxUtilization'] ],
+        ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'], 'bsnAPName' ],
     ]);
+    # Sub-tables bsnAPIfTable and bsnAPIfLoadParametersTable are indexed by
+    # (bsnAPDot3MacAddress, bsnAPIfSlotId). When --name is used, derive
+    # composite indices from filtered APs' MACs for targeted row fetching
+    # instead of walking the full tables.
+    my @if_indices = ();
+    if ($self->opts->name && scalar(@{$self->{aps}})) {
+      foreach my $ap (@{$self->{aps}}) {
+        my @mac = @{$ap->{indices}};
+        # slots: 0=2.4GHz, 1=5GHz, 2=6GHz (Wi-Fi 6E)
+        push(@if_indices, [@mac, 0], [@mac, 1], [@mac, 2]);
+      }
+    }
+    # get_snmp_table_objects destructively shifts from the indices arrayref,
+    # so pass a fresh copy to each call.
+    $self->{ifs} = [];
+    foreach ($self->get_snmp_table_objects('AIRESPACE-WIRELESS-MIB',
+        'bsnAPIfTable', scalar(@if_indices) ? [@if_indices] : undef,
+        ['bsnAPIfSlotId'])) {
+      push(@{$self->{ifs}},
+          CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::IF->new(%{$_}));
+    }
+    $self->{ifloads} = [];
+    foreach ($self->get_snmp_table_objects('AIRESPACE-WIRELESS-MIB',
+        'bsnAPIfLoadParametersTable', scalar(@if_indices) ? [@if_indices] : undef,
+        ['bsnAPIfLoadNumOfClients', 'bsnAPIfLoadTxUtilization', 'bsnAPIfLoadRxUtilization'])) {
+      push(@{$self->{ifloads}},
+          CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::IFLoad->new(%{$_}));
+    }
     $self->assign_loads_to_ifs();
     $self->dummy_loads_to_ifs();
     $self->assign_ifs_to_aps();
@@ -99,6 +133,12 @@ sub check {
       }
       return;
     }
+    if ($self->mode =~ /device::wlan::aps::list/) {
+      foreach (@{$self->{aps}}) {
+        printf "%s\n", $_->{bsnAPName};
+      }
+      return;
+    }
     foreach (@{$self->{aps}}) {
       $_->check();
     }
@@ -148,10 +188,6 @@ sub check {
         $self->clear_ok();
         $self->add_ok('no problems') if ! $self->check_messages();
       }
-    } elsif ($self->mode =~ /device::wlan::aps::list/) {
-      foreach (@{$self->{aps}}) {
-        printf "%s\n", $_->{bsnAPName};
-      }
     }
   }
 }
@@ -161,7 +197,8 @@ sub assign_ifs_to_aps {
   foreach my $ap (@{$self->{aps}}) {
     $ap->{interfaces} = [];
     foreach my $if (@{$self->{ifs}}) {
-      if ($if->{flat_indices} eq $ap->{bsnAPDot3MacAddress}.".".$if->{bsnAPIfSlotId}) {
+	    #if ($if->{flat_indices} eq $ap->{bsnAPDot3MacAddress}.".".$if->{bsnAPIfSlotId}) {
+      if ($if->{flat_indices} eq $ap->{flat_indices}.".".$if->{bsnAPIfSlotId}) {
         push(@{$ap->{interfaces}}, $if);
       }
     }
@@ -191,7 +228,7 @@ sub assign_loads_to_ifs {
         map { $if->{$_} = $load->{$_} } grep { $_ !~ /indices/ } keys %{$load};
       }
     }
-    if (! exists $if->{bsnAPIfLoadNumOfClients}) {
+    if (not exists $if->{bsnAPIfLoadNumOfClients} or not defined $if->{bsnAPIfLoadNumOfClients}) {
       # sometimes there is no corresponding load entry for an interface
       $if->{bsnAPIfLoadNumOfClients} = 0;
       $if->{bsnAPIfLoadTxUtilization} = 0;
@@ -217,11 +254,7 @@ use strict;
 
 sub finish {
   my ($self) = @_;
-  if ($self->{bsnAPDot3MacAddress} && $self->{bsnAPDot3MacAddress} =~ /0x(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
-  } elsif ($self->{bsnAPDot3MacAddress} && unpack("H12", $self->{bsnAPDot3MacAddress}) =~ /(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})/) {
-    $self->{bsnAPDot3MacAddress} = join(".", map { hex($_) } ($1, $2, $3, $4, $5, $6));
-  }
+  $self->{bsnAPDot3MacAddress} = join(':', map({ sprintf "%02X", $_ } @{$self->{indices}}));
   if (not $self->{bsnAPName}) {
     $self->{bsnAPName} = "UNNAMED_".$self->{flat_indices};
   }
