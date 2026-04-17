@@ -1,3 +1,6 @@
+* 2026-04-17 12.12.2.5
+  bugfix in Cisco WLC caching
+  no more parameter tweaking for Huawei hwEntity (since GLPlugin uses SNMP-XS)
 * 2026-03-20 12.12.2.4
   rescan the accesspoints if a name was not immediately found
 * 2026-03-20 12.12.2.3

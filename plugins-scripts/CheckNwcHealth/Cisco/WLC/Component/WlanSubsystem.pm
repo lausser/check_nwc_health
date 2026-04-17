@@ -40,7 +40,7 @@ sub init {
       $self->debug(sprintf "%s was not found (either in the cache or in the walk), rediscovering...",
           $self->opts->name);
       $self->clear_table_cache('AIRESPACE-WIRELESS-MIB', 'bsnAPTable');
-      $self->update_entry_cache(1, 'AIRESPACE-WIRELESS-MIB', 'bsnAPTable', 'bsnAPName');
+      $self->update_entry_cache(1, 'AIRESPACE-WIRELESS-MIB', 'bsnAPTable', 'bsnAPName', time);
       $self->get_snmp_tables('AIRESPACE-WIRELESS-MIB', [
           ['aps', 'bsnAPTable', 'CheckNwcHealth::Cisco::WLC::Component::WlanSubsystem::AP', undef, ['bsnAPName', 'bsnAPDot3MacAddress', 'bsnAPAdminStatus', 'bsnAPOperationStatus'], 'bsnAPName' ],
       ]);

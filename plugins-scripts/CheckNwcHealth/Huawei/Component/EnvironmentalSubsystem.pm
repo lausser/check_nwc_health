@@ -27,19 +27,18 @@ sub init {
   # Tatsaechlich hat Huawei sowas wie eine Denial-of-Sonstwas-Bremse drin
   # Daher reduktion auf die noetigsten Spalten und nicht uebertreiben bei
   # den PDU-Groessen.
-  $self->mult_snmp_max_msg_size(10);
-  #$self->bulk_is_baeh(30);
+  # update april 2026: mit dem neuen SNMP-XS-Unterbau läuft 10x in Timeout.
+  # Daher nicht mehr rumfummeln an den Parametern und die "nötigsten" Spalten fliegen auch raus.
+  #$self->mult_snmp_max_msg_size(10);
   foreach (qw(modules fans powersupplies)) {
     # we need to get the table inside the loop, as merge_table deletes
     # entitystates. get_snmp_tables will read from the cache.
     $self->get_snmp_tables('HUAWEI-ENTITY-EXTENT-MIB', [
-        ['entitystates', 'hwEntityStateTable',
-        'Monitoring::GLPlugin::SNMP::TableItem', undef, [
-            "hwEntityOperStatus", "hwEntityAdminStatus", "hwEntityAlarmLight",
-            "hwEntityTemperature", "hwEntityTemperatureLowThreshold",
-            "hwEntityTemperatureMinorThreshold", "hwEntityTemperatureThreshold",
-            "hwEntityFaultLight", "hwEntityDeviceStatus",
-        ]],
+        ['entitystates', 'hwEntityStateTable', 'Monitoring::GLPlugin::SNMP::TableItem'],
+	#   "hwEntityOperStatus", "hwEntityAdminStatus", "hwEntityAlarmLight",
+	#    "hwEntityTemperature", "hwEntityTemperatureLowThreshold",
+	#    "hwEntityTemperatureMinorThreshold", "hwEntityTemperatureThreshold",
+	#    "hwEntityFaultLight", "hwEntityDeviceStatus",
     ]);
     $self->debug(sprintf "found %d %s", scalar(@{$self->{entitystates}}), "entitystates");
     $self->debug(sprintf "found %d %s", scalar(@{$self->{$_}}), $_);
