@@ -4,7 +4,7 @@ use strict;
 
 sub init {
   my ($self) = @_;
-  my $sysobjectid = $self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0);
+  my $sysobjectid = $self->get_snmp_object('MIB-2-MIB', 'sysObjectID', 0) // '';
   $sysobjectid =~ s/^\.//g;
   if ($self->{productname} =~ /Cisco NX-OS/i) {
     $self->rebless('CheckNwcHealth::Cisco::NXOS');
