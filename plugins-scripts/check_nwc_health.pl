@@ -731,10 +731,19 @@ sub run_plugin {
    Select a specific hardware subsystem (Cisco UCS only)",
       required => 0,
       default => undef,
-  );  
-  
+  );
+  $plugin->add_arg(
+      spec => 'deviceclass=s',
+      help => "--deviceclass
+   Use this package as the device class override (e.g. CheckNwcHealth::Cisco::NXOS).
+   Skips autodetection. For local modes use e.g. Server::LinuxLocal.",
+      required => 0,
+      default => undef,
+  );
+
   $plugin->getopts();
   $plugin->classify();
+  $plugin->apply_device_class_override();
   $plugin->validate_args();
   
   if (! $plugin->check_messages()) {
