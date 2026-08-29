@@ -48,9 +48,9 @@ sub check {
   my ($self) = @_;
   my $used = 100;
   eval {
-     $used = 100 * $self->{hrStorageUsed} / $self->{hrStorageSize};
+     $used = int (100 * $self->{hrStorageUsed} / $self->{hrStorageSize});
   };
-  $self->add_info(sprintf 'memory %s (%s) usage is %.2f%%',
+  $self->add_info(sprintf 'memory %s (%s) usage is %.0f%%',
       $self->{hrStorageIndex},
       $self->{hrStorageDescr},
       $used);
