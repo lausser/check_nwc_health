@@ -1,3 +1,5 @@
+* 2026-09-11 12.14
+  add QSC-AUDIO
 * 2026-08-10 12.13.2.2
   add perfdata to CheckPoint ha-status (for Grafana dashboards)
 * 2026-07-30 12.13.2.1

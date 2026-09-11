@@ -185,6 +185,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PROXYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/PULSESECUREPSGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/QBRIDGEMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/QSCAUDIOMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RAPIDCITYMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RESOURCEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/RMONMIB.pm \
@@ -632,6 +633,8 @@ EXTRA_MODULES=\
   CheckNwcHealth/Audiocodes/Component/IpGroupSubsystem.pm \
   CheckNwcHealth/Audiocodes/Component/ConfigSubsystem.pm \
   CheckNwcHealth/Audiocodes.pm \
+  CheckNwcHealth/QSCAudio/Component/InventorySubsystem.pm \
+  CheckNwcHealth/QSCAudio.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed

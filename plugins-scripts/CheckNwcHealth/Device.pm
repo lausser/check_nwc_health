@@ -226,6 +226,12 @@ sub classify {
         # .1.3.6.1.2.1.1.1.0 = STRING: SONiC Software Version: SONiC.4.4.0-Enter blabla
         # .1.3.6.1.4.1.674.10895.3000.1.2.100.3 = STRING: "Edgecore"
         $self->rebless('CheckNwcHealth::Edgecore::Sonic');
+      } elsif ($self->implements_mib('QSCAUDIO-MIB')) {
+        # Q-SYS Audio (QSC) DSP processors report a Linux kernel
+        # sysDescr, so this must be checked before the generic-Linux
+        # fallback below or the device would be misclassified as
+        # CheckNwcHealth::Server::Linux.
+        $self->rebless('CheckNwcHealth::QSCAudio');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
       } else {
