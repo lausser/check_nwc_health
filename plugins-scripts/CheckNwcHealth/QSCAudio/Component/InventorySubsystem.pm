@@ -10,16 +10,30 @@ use strict;
 
 sub init {
   my ($self) = @_;
+  # --name (and --regexp) selects the inventory devices whose
+  # invDeviceName or invDeviceType matches the selection. The standard
+  # filter_name() carries the family-wide selection semantics (case-
+  # insensitive exact match in plain mode, case-insensitive regex with
+  # --regexp) and is applied to both attributes; without --name it
+  # selects every row, leaving the unfiltered path untouched.
   $self->get_snmp_tables('QSCAUDIO-MIB', [
     ['inventory_devices', 'inventoryTable',
-      'CheckNwcHealth::QSCAudio::Component::InventorySubsystem::InventoryDevice'],
+      'CheckNwcHealth::QSCAudio::Component::InventorySubsystem::InventoryDevice',
+      sub { my ($o) = @_;
+            $self->filter_name($o->{invDeviceName} // '')
+            || $self->filter_name($o->{invDeviceType} // '') }],
   ]);
 }
 
 sub check {
   my ($self) = @_;
+  my $name = $self->opts->name;
   if (!@{$self->{inventory_devices}}) {
-    $self->add_unknown('no Q-SYS inventory devices found');
+    if (defined $name && length $name) {
+      $self->add_unknown('no inventory device matched the selection');
+    } else {
+      $self->add_unknown('no Q-SYS inventory devices found');
+    }
     return;
   }
   $self->add_info('checking Q-SYS inventory devices');

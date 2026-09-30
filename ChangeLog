@@ -1,3 +1,5 @@
+* 2026-09-30 12.14.1
+  add --name device selection for Q-SYS Audio hardware-health (by invDeviceName or invDeviceType)
 * 2026-09-11 12.14
   add QSC-AUDIO
 * 2026-08-10 12.13.2.2
