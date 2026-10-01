@@ -1,3 +1,5 @@
+* 2026-10-01 12.15
+  add a 5-minute cache for the device class detection (classify). It is only used if the environment variable USE_CLASSIFICATION_CACHE is set, IGNORE_CLASSIFICATION_CACHE disables it again
 * 2026-09-30 12.14.1
   add --name device selection for Q-SYS Audio hardware-health (by invDeviceName or invDeviceType)
 * 2026-09-11 12.14

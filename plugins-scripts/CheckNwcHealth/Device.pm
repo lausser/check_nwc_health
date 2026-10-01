@@ -64,6 +64,9 @@ sub classify {
       $self->debug("I am a ".$self->{productname}."\n");
       if ($self->opts->mode =~ /^my-/) {
         $self->load_my_extension();
+      } elsif ($self->rebless_from_classification_cache()) {
+        # the vendor class was found less than 5 minutes ago by a previous
+        # run and has been restored, so the probing below is skipped
       } elsif ($self->{productname} =~ /upnp/i) {
         $self->rebless('CheckNwcHealth::UPNP');
       } elsif ($self->{productname} =~ /FRITZ/i) {
@@ -252,6 +255,8 @@ sub classify {
     }
   }
   $self->{generic_class} = "CheckNwcHealth::Generic";
+  # remember the vendor class found above, so that the next runs can skip the probing
+  $self->save_classification_cache();
   return $self;
 }
 
