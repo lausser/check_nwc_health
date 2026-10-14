@@ -235,6 +235,12 @@ sub classify {
         # fallback below or the device would be misclassified as
         # CheckNwcHealth::Server::Linux.
         $self->rebless('CheckNwcHealth::QSCAudio');
+      } elsif ($self->{productname} =~ /^Nodegrid/i ||
+          $self->{sysobjectid} =~ /^\.?1\.3\.6\.1\.4\.1\.42518\./) {
+        # ZPE Systems: sysDescr "Nodegrid - <part number> - <version>",
+        # sysObjectID from ZPE-PRODUCTS-MIB. Both are already known here,
+        # so this costs no extra SNMP request for other devices.
+        $self->rebless('CheckNwcHealth::Zpesystems');
       } elsif ($self->{productname} =~ /^Linux/i) {
         $self->rebless('CheckNwcHealth::Server::Linux');
       } else {

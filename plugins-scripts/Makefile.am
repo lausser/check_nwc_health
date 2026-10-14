@@ -167,6 +167,7 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENPRODUCTSMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSCREENRESOURCEMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NETSWITCHMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/NODEGRIDMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDCISCOCPUMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDCISCOINTERFACESMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/OLDNETSWITCHMIB.pm \
@@ -213,6 +214,8 @@ GL_MODULES=\
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/VRRPMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXSYSTEMEXTMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/WLSXWLANMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ZPEPRODUCTSMIB.pm \
+  ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/ZSW228MIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/SKYHIGHSECURITYSWGMIB.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/MibsAndOids/INTELSERVERBASEBOARD7.pm \
   ../GLPlugin/lib/Monitoring/GLPlugin/SNMP/CSF.pm \
@@ -635,6 +638,11 @@ EXTRA_MODULES=\
   CheckNwcHealth/Audiocodes.pm \
   CheckNwcHealth/QSCAudio/Component/InventorySubsystem.pm \
   CheckNwcHealth/QSCAudio.pm \
+  CheckNwcHealth/Zpesystems/NodeGrid/Components/EnvironmentalSubsystem.pm \
+  CheckNwcHealth/Zpesystems/NodeGrid/Components/CpuSubsystem.pm \
+  CheckNwcHealth/Zpesystems/NodeGrid/Components/MemSubsystem.pm \
+  CheckNwcHealth/Zpesystems/NodeGrid.pm \
+  CheckNwcHealth/Zpesystems.pm \
   CheckNwcHealth/Device.pm
 
 SED=/bin/sed
