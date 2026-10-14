@@ -2,6 +2,36 @@ package CheckNwcHealth::Device;
 our @ISA = qw(Monitoring::GLPlugin::SNMP Monitoring::GLPlugin::UPNP);
 use strict;
 
+sub apply_device_class_override {
+  my ($self) = @_;
+  my $raw = $self->opts->deviceclass;
+  return if ! defined $raw || $raw eq '';
+  $raw =~ s/^\s+|\s+\z//g;
+  return if $raw eq '';
+  my $pkg = $raw;
+  unless ($pkg =~ /^(CheckNwcHealth|Server)(::[A-Za-z_][A-Za-z0-9_]*)+$/) {
+    $self->add_unknown("invalid deviceclass. Must start with CheckNwcHealth:: or Server::");
+    return;
+  }
+  (my $file = $pkg) =~ s{::}{/}g;
+  $file .= '.pm';
+  {
+    no strict 'refs';
+    my $stash = \%{$pkg . '::'};
+    if (! keys %{$stash}) {
+      eval { require $file; 1 } or do {
+        $self->add_unknown(sprintf "failed to load %s: %s", $pkg, $@ || 'unknown error');
+        return;
+      };
+    }
+  }
+  unless ($pkg->isa('CheckNwcHealth::Device')) {
+    $self->add_unknown(sprintf "%s is not a CheckNwcHealth::Device subclass", $pkg);
+    return;
+  }
+  $self->rebless($pkg);
+}
+
 sub classify {
   my ($self) = @_;
   if (! ($self->opts->hostname || $self->opts->snmpwalk)) {
