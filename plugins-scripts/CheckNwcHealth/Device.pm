@@ -192,7 +192,18 @@ sub classify {
         $self->rebless('CheckNwcHealth::HP::ArubaOS');
         # a genuine Alcatel OmniSwitch (ALCATEL-IND1-BASE-MIB, no WLSX) now
         # falls through to the generic discovery/Generic fallback below
-      } elsif ($self->implements_mib('ONEACCESS-SYS-MIB')) {
+      } elsif ($self->{sysobjectid} =~ /^\.?1\.3\.6\.1\.4\.1\.13191\.1\.1\./
+          || $self->implements_mib('ONEACCESS-SYS-MIB')
+          || $self->{productname} =~ /^OneOS/i) {
+        # OneOS (Versatel/1&1) pCPEs, three recognition anchors:
+        # 1. sysObjectID under the OneOS device registry (oacOneOsDevices,
+        #    1.3.6.1.4.1.13191.1.1) - primary; sysobjectid is already fetched
+        #    by check_snmp_and_model(), so this costs no extra SNMP request
+        # 2. ONEACCESS-SYS-MIB implemented - the probe is anchored at the
+        #    oacExpIMSys data subtree (1.3.6.1.4.1.13191.10.3.3), where the
+        #    MIB's data actually lives on the devices (see ONEACCESSSYSMIB.pm)
+        # 3. product name starting with "OneOS" - anchored at the start so
+        #    firmware suffixes (e.g. OneOS-pCPE-ARM_pi1-6.13.6m1) never matter
         $self->rebless('CheckNwcHealth::OneOS');
       } elsif ($self->{productname} eq "ifmib") {
         $self->rebless('CheckNwcHealth::Generic');

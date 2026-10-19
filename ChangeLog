@@ -1,3 +1,5 @@
+* 2026-10-19 12.17
+  add OneOS (Versatel/1&1) devices: cpu-load, memory-usage. hardware-health adds mainboard identification, windowed reboot-cause and crashlog checks, and the component list
 * 2026-10-14 12.16
   add ZPE Systems Nodegrid (hardware-health, cpu-load, memory-usage)
 * 2026-10-01 12.15
