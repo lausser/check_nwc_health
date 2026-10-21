@@ -7,11 +7,24 @@ sub init {
   $self->get_snmp_tables('AC-ALARM-MIB', [
     ['alarms', 'acActiveAlarmTable', 'CheckNwcHealth::Audiocodes::Component::AlarmSubsystem::Alarm'],
   ]);
-  # filter out DNS/NTP alarms, those are handled by check-config mode
+  # filter out DNS/NTP service alarms, those are handled by check-config mode
+  # the check is on the alarm category (the leading title), not the whole text,
+  # so an unrelated alarm that merely names a DNS/NTP host in its detail (e.g.
+  # a certificate expiry citing a FQDN) is not misclassified and hidden.
   @{$self->{alarms}} = grep {
-    $_->{acActiveAlarmTextualDescription} !~ /DNS/i &&
-    $_->{acActiveAlarmTextualDescription} !~ /NTP/i
+    _alarm_title($_->{acActiveAlarmTextualDescription}) !~ /^(?:DNS|NTP)\b/i
   } @{$self->{alarms}};
+}
+
+# leading alarm category/title, with the "[hostname] " and "Alarm cleared: "
+# prefixes and everything after the first ": " or ". " removed
+sub _alarm_title {
+  my ($desc) = @_;
+  return '' unless defined $desc;
+  (my $title = $desc) =~ s/^\[[^\]]*\]\s*//;
+  $title =~ s/^Alarm cleared:\s*//i;
+  $title =~ s/^(.*?)[:.]\s.*$/$1/s;
+  return $title;
 }
 
  sub check {
@@ -43,9 +56,9 @@ sub check {
   my $severity = $self->{acActiveAlarmSeverity};
   my $description = $self->{acActiveAlarmTextualDescription} || 'unknown alarm';
   $self->add_info(sprintf 'active alarm: %s (severity %s)', $description, $severity);
-  if ($severity eq 'minor' || $severity eq 'major' || $severity eq 'critical') { # minor and above
+  if ($severity eq 'major' || $severity eq 'critical') { # major and above
     $self->add_critical(sprintf 'active alarm: %s', $description);
-  } elsif ($severity eq 'warning') { # warning
+  } elsif ($severity eq 'minor' || $severity eq 'warning') { # minor and warning
     $self->add_warning(sprintf 'active alarm: %s', $description);
   } else {
     $self->add_ok();

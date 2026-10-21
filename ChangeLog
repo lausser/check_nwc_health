@@ -1,3 +1,8 @@
+* 2026-10-20 12.17.1
+  fix Audiocodes hardware-health/check-config: the active alarm table (acActiveAlarmTable) was never read because ACALARMMIB.pm aliased AC-ALARM-MIB into mib_and_oids (typo, missing s) instead of mibs_and_oids, so "no active alarms" was always reported even though acSysStateGWSeverity showed the highest alarm severity. hardware-health now surfaces the actual active alarm text (e.g. certificate expiry) as the reason for the gateway severity.
+  narrow the DNS/NTP alarm filter to the alarm category (leading title) so that an unrelated alarm which only names a DNS/NTP host in its detail (e.g. a certificate expiry citing a FQDN) is no longer misclassified and hidden
+  Audiocodes alarms with severity minor now report as WARNING instead of CRITICAL (hardware-health and check-config). check-config's DNS/NTP alarms can additionally be reduced with --mitigation (e.g. --mitigation ok), since a transient DNS/NTP problem does not stop the SBC from serving calls
+  make the check-config mode help text generic, since it is no longer cisco-only (cisco unsaved config changes, f5 config sync, audiocodes dns/ntp alarms)
 * 2026-10-19 12.17
   add OneOS (Versatel/1&1) devices: cpu-load, memory-usage. hardware-health adds mainboard identification, windowed reboot-cause and crashlog checks, and the component list
 * 2026-10-14 12.16

@@ -520,7 +520,7 @@ sub run_plugin {
       internal => 'device::config::status',
       spec => 'check-config',
       alias => undef,
-      help => 'Check the status of configs (cisco, unsaved config changes)',
+      help => 'Check the status of configs (e.g. unsaved config changes on cisco, config sync state on f5, dns/ntp alarms on audiocodes)',
   );
   $plugin->add_mode(
       internal => 'device::connections::check',

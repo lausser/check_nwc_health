@@ -7,13 +7,27 @@ sub init {
   $self->get_snmp_tables('AC-ALARM-MIB', [
     ['alarms', 'acActiveAlarmTable', 'CheckNwcHealth::Audiocodes::Component::ConfigSubsystem::Alarm'],
   ]);
-  # filter for DNS and NTP related alarms only
+  # filter for DNS and NTP service alarms only. The check is on the alarm
+  # category (the leading title), not the whole text, so an unrelated alarm
+  # that merely names a DNS/NTP host in its detail (e.g. a certificate expiry
+  # citing a FQDN) is not picked up here.
   @{$self->{dns_alarms}} = grep {
-    $_->{acActiveAlarmTextualDescription} =~ /DNS/i
+    _alarm_title($_->{acActiveAlarmTextualDescription}) =~ /^DNS\b/i
   } @{$self->{alarms}};
   @{$self->{ntp_alarms}} = grep {
-    $_->{acActiveAlarmTextualDescription} =~ /NTP/i
+    _alarm_title($_->{acActiveAlarmTextualDescription}) =~ /^NTP\b/i
   } @{$self->{alarms}};
+}
+
+# leading alarm category/title, with the "[hostname] " and "Alarm cleared: "
+# prefixes and everything after the first ": " or ". " removed
+sub _alarm_title {
+  my ($desc) = @_;
+  return '' unless defined $desc;
+  (my $title = $desc) =~ s/^\[[^\]]*\]\s*//;
+  $title =~ s/^Alarm cleared:\s*//i;
+  $title =~ s/^(.*?)[:.]\s.*$/$1/s;
+  return $title;
 }
 
 sub check {
@@ -44,10 +58,14 @@ sub check {
   my $severity = $self->{acActiveAlarmSeverity};
   my $description = $self->{acActiveAlarmTextualDescription} || 'unknown alarm';
   $self->add_info(sprintf 'active alarm: %s (severity %s)', $description, $severity);
-  if ($severity eq 'minor' || $severity eq 'major' || $severity eq 'critical') {
+  if ($severity eq 'major' || $severity eq 'critical') {
     $self->add_critical(sprintf 'active alarm: %s', $description);
-  } elsif ($severity eq 'warning') {
-    $self->add_warning(sprintf 'active alarm: %s', $description);
+  } elsif ($severity eq 'minor' || $severity eq 'warning') {
+    # DNS/NTP alarms are advisory upstream-dependency problems: the SBC keeps
+    # working for a while without them. Use add_warning_mitigation so the user
+    # can reduce the level with --mitigation (e.g. --mitigation ok) if they
+    # consider a DNS/NTP blip acceptable.
+    $self->add_warning_mitigation(sprintf 'active alarm: %s', $description);
   } else {
     $self->add_ok();
   }
