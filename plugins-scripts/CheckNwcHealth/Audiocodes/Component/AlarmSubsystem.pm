@@ -67,6 +67,6 @@ sub check {
 
 sub dump {
   my ($self) = @_;
-  printf "alarm %d: %s (severity %d)\n",
+  printf "alarm %d: %s (severity %s)\n",
       $self->{acActiveAlarmSequenceNumber}, $self->{acActiveAlarmTextualDescription}, $self->{acActiveAlarmSeverity};
 }
