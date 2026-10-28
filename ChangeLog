@@ -1,3 +1,5 @@
+* 2026-10-28 12.17.2
+  use Check Point CPU core metrics from JHF Take 115
 * 2026-10-20 12.17.1
   fix Audiocodes hardware-health/check-config: the active alarm table (acActiveAlarmTable) was never read because ACALARMMIB.pm aliased AC-ALARM-MIB into mib_and_oids (typo, missing s) instead of mibs_and_oids, so "no active alarms" was always reported even though acSysStateGWSeverity showed the highest alarm severity. hardware-health now surfaces the actual active alarm text (e.g. certificate expiry) as the reason for the gateway severity.
   narrow the DNS/NTP alarm filter to the alarm category (leading title) so that an unrelated alarm which only names a DNS/NTP host in its detail (e.g. a certificate expiry citing a FQDN) is no longer misclassified and hidden
